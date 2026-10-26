@@ -6267,9 +6267,11 @@ var _TU = {
   kpi:                 null,
   history:             [],
   _paguBase:           null,   // Pagu terkunci saat form dibuka ("Ubah Pagu" → "Batalkan")
-  activeTab:           'anggaran', // 'anggaran' | 'pegawai' | 'bmn'
+  activeTab:           'anggaran', // 'anggaran' | 'paket' | 'pegawai' | 'bmn' | 'penghapusan'
   pegawaiData:         null,
-  pendingPegawaiRowId: null
+  pendingPegawaiRowId: null,
+  paketData:           null,
+  pendingPaketRowId:   null
 };
 
 // ── RENDER ────────────────────────────────────────────────
@@ -6779,7 +6781,7 @@ function _tuSwitchTab(tabName) {
   });
 
   // Toggle visible pane
-  var panes = ['anggaran', 'pegawai', 'bmn'];
+  var panes = ['anggaran', 'paket', 'pegawai', 'bmn', 'penghapusan'];
   panes.forEach(function (p) {
     var paneEl = document.getElementById('tu-pane-' + p);
     if (!paneEl) return;
@@ -6793,6 +6795,8 @@ function _tuSwitchTab(tabName) {
   // Load data for selected tab
   if (_TU.activeTab === 'anggaran') {
     if (!_TU.kpi) _tuLoadKPI();
+  } else if (_TU.activeTab === 'paket') {
+    _tuLoadPaket();
   } else if (_TU.activeTab === 'pegawai') {
     _tuLoadPegawai();
   } else if (_TU.activeTab === 'bmn') {
@@ -6802,6 +6806,8 @@ function _tuSwitchTab(tabName) {
         try { _BMN_MAP.map.invalidateSize(); } catch (e) {}
       }
     }, 150);
+  } else if (_TU.activeTab === 'penghapusan') {
+    _bmnLoadPenghapusanList();
   }
 }
 
@@ -7086,6 +7092,307 @@ function _tuConfirmAnulirPegawai() {
       rowId: _TU.pendingPegawaiRowId,
       alasan: reason
     });
+}
+
+// ============================================================
+// SUB-MODUL PAKET PENGADAAN & PROGRES PEKERJAAN (TU-B)
+// ============================================================
+
+function _formatRupiah(n) {
+  return typeof _rupiah === 'function' ? _rupiah(n) : 'Rp ' + (n || 0);
+}
+
+function openModal(id) {
+  var el = document.getElementById(id);
+  if (el) el.classList.remove('n-hidden');
+}
+
+function _tuLoadPaket(force) {
+  var msg = document.getElementById('tu-paket-msg');
+  if (msg) msg.innerHTML = '';
+  var wrap = document.getElementById('tu-paket-table-wrap');
+  if (wrap && (force || !_TU.paketData)) {
+    wrap.innerHTML = '<div style="padding:32px; text-align:center; color:var(--n-text-muted); font-size:.875rem;">' +
+      'Memuat data paket pekerjaan Dit. POA...</div>';
+  }
+
+  google.script.run
+    .withSuccessHandler(function (res) {
+      if (!res || !res.success) {
+        if (wrap) wrap.innerHTML = '<div style="padding:24px; color:var(--n-crit); font-size:.875rem;">' +
+          _esc((res && res.error) || 'Gagal memuat data paket pekerjaan.') + '</div>';
+        return;
+      }
+      _TU.paketData = res.data;
+      _tuRenderPaketKPI(res.data);
+      _tuFilterPaket();
+    })
+    .withFailureHandler(function (err) {
+      if (wrap) wrap.innerHTML = '<div style="padding:24px; color:var(--n-crit); font-size:.875rem;">' +
+        'Koneksi gagal saat memuat data paket pekerjaan.</div>';
+    })
+    .tataUsaha_getPaket(APP.token, APP.filter);
+}
+
+function _tuRenderPaketKPI(d) {
+  d = d || {};
+  var elTotal = document.getElementById('tu-paket-kpi-total');
+  var elKontrak = document.getElementById('tu-paket-kpi-kontrak');
+  var elProgres = document.getElementById('tu-paket-kpi-progres');
+  var elRealisasi = document.getElementById('tu-paket-kpi-realisasi');
+  var elBadge = document.getElementById('tu-paket-badge-total');
+
+  if (elTotal) elTotal.textContent = (d.totalPaket || 0) + ' paket';
+  if (elKontrak) elKontrak.textContent = _formatRupiah(d.totalNilaiKontrak || 0);
+  if (elProgres) elProgres.textContent = (d.avgProgresFisik || 0) + '%';
+  if (elRealisasi) elRealisasi.textContent = _formatRupiah(d.totalRealisasiKeu || 0);
+  if (elBadge) elBadge.textContent = (d.totalPaket || 0) + ' paket';
+}
+
+function _tuFilterPaket() {
+  if (!_TU.paketData || !_TU.paketData.items) return;
+  var selTahap = document.getElementById('tu-paket-filter-tahap');
+  var searchInput = document.getElementById('tu-paket-search');
+  var tahap = selTahap ? selTahap.value : 'ALL';
+  var q = searchInput ? searchInput.value.toLowerCase().trim() : '';
+
+  var items = _TU.paketData.items.filter(function (it) {
+    if (tahap !== 'ALL' && it.tahap !== tahap) return false;
+    if (q) {
+      var match = (it.namaPaket && it.namaPaket.toLowerCase().indexOf(q) !== -1) ||
+                  (it.rekanan && it.rekanan.toLowerCase().indexOf(q) !== -1) ||
+                  (it.noKontrak && it.noKontrak.toLowerCase().indexOf(q) !== -1) ||
+                  (it.divisiId && it.divisiId.toLowerCase().indexOf(q) !== -1);
+      if (!match) return false;
+    }
+    return true;
+  });
+
+  _tuRenderPaketTable(items);
+}
+
+function _tuRenderPaketTable(items) {
+  var wrap = document.getElementById('tu-paket-table-wrap');
+  if (!wrap) return;
+
+  if (!items || items.length === 0) {
+    wrap.innerHTML = '<div style="padding:32px; text-align:center; color:var(--n-text-muted); font-size:.875rem;">' +
+      'Tidak ada data paket pekerjaan yang sesuai filter.</div>';
+    return;
+  }
+
+  var stageBadges = {
+    'PERSIAPAN':    '<span class="badge" style="background:rgba(100,116,139,0.12); color:#475569;">1. Persiapan</span>',
+    'PEMILIHAN':    '<span class="badge" style="background:rgba(245,158,11,0.12); color:#d97706;">2. Pemilihan</span>',
+    'KONTRAK':      '<span class="badge" style="background:rgba(37,99,235,0.12); color:#2563eb;">3. Kontrak</span>',
+    'PELAKSANAAN':  '<span class="badge" style="background:rgba(99,102,241,0.12); color:#4f46e5;">4. Pelaksanaan</span>',
+    'BAST':         '<span class="badge" style="background:rgba(13,148,136,0.12); color:#0d9488;">5. BAST</span>',
+    'SELESAI':      '<span class="badge" style="background:rgba(16,185,129,0.12); color:#059669;">6. Selesai</span>'
+  };
+
+  var divisiLabels = {
+    'DIV-TU': 'Subbag TU',
+    'DIV-OPS': 'Operasi',
+    'DIV-RAWAT': 'Perawatan',
+    'DIV-LOG': 'Logistik',
+    'DIV-PANTAU': 'Pemantauan',
+    'DIV-INTEL': 'Intelijen',
+    'DIV-AWAK': 'Pengawakan'
+  };
+
+  var canVoid = APP.user && (APP.user.role === 'ADMIN_POA' || (APP.user.role === 'PENGINPUT' && APP.user.divisiId === 'DIV-TU'));
+
+  var h = '<table class="n-table" style="width:100%;">' +
+    '<thead>' +
+      '<tr>' +
+        '<th>Paket &amp; Divisi</th>' +
+        '<th>Tahap</th>' +
+        '<th>Rekanan &amp; No. Kontrak</th>' +
+        '<th style="text-align:right;">Nilai Kontrak</th>' +
+        '<th style="width:130px;">Progres Fisik</th>' +
+        '<th style="text-align:right;">Realisasi Keu</th>' +
+        '<th>Evidence</th>' +
+        '<th style="text-align:center;">Aksi</th>' +
+      '</tr>' +
+    '</thead>' +
+    '<tbody>';
+
+  items.forEach(function (it) {
+    var isVoid = it.status === 'VOID';
+    var badgeTahap = stageBadges[it.tahap] || ('<span class="badge">' + _esc(it.tahap) + '</span>');
+    var divLabel = divisiLabels[it.divisiId] || it.divisiId;
+    var pct = Math.min(Math.max(Number(it.progresFisik) || 0, 0), 100);
+
+    var evBtn = it.evidenceUrl
+      ? '<a href="' + _esc(it.evidenceUrl) + '" target="_blank" rel="noopener noreferrer" class="btn-ghost" style="padding:4px 8px; font-size:.75rem;" title="Buka Dokumen">' +
+          '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+            '<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>' +
+            '<polyline points="15 3 21 3 21 9"></polyline>' +
+            '<line x1="10" y1="14" x2="21" y2="3"></line>' +
+          '</svg> Link' +
+        '</a>'
+      : '<span style="color:var(--n-text-muted); font-size:.75rem;">—</span>';
+
+    var rowStyle = isVoid ? 'opacity:0.5; text-decoration:line-through;' : '';
+
+    h += '<tr style="' + rowStyle + '">' +
+      '<td>' +
+        '<div style="font-weight:600; color:var(--n-text-primary);">' + _esc(it.namaPaket) + '</div>' +
+        '<div style="font-size:.75rem; color:var(--n-text-muted);">' + _esc(divLabel) + (it.periode ? ' &bull; ' + _esc(it.periode) : '') + '</div>' +
+      '</td>' +
+      '<td>' + badgeTahap + (isVoid ? ' <span class="badge" style="background:#fee2e2; color:#b91c1c;">VOID</span>' : '') + '</td>' +
+      '<td>' +
+        '<div style="font-size:.8125rem; font-weight:500;">' + _esc(it.rekanan || '—') + '</div>' +
+        '<div style="font-size:.75rem; color:var(--n-text-muted); font-family:monospace;">' + _esc(it.noKontrak || '—') + '</div>' +
+      '</td>' +
+      '<td style="text-align:right;" class="tnum font-medium">' + _formatRupiah(it.nilaiKontrak) + '</td>' +
+      '<td>' +
+        '<div style="display:flex; justify-content:space-between; font-size:.75rem; margin-bottom:2px;" class="tnum">' +
+          '<span>' + pct + '%</span>' +
+        '</div>' +
+        '<div style="width:100%; height:6px; background:rgba(0,0,0,0.06); border-radius:3px; overflow:hidden;">' +
+          '<div style="width:' + pct + '%; height:100%; background:var(--n-primary); border-radius:3px; transition:width 0.3s ease;"></div>' +
+        '</div>' +
+      '</td>' +
+      '<td style="text-align:right;" class="tnum font-medium">' + _formatRupiah(it.realisasiKeuangan) + '</td>' +
+      '<td>' + evBtn + '</td>' +
+      '<td style="text-align:center;">' +
+        (!isVoid && canVoid
+          ? '<button type="button" class="btn-ghost" style="padding:4px 8px; color:var(--n-crit); font-size:.75rem;" onclick="_tuAnulirPaket(\'' + _esc(it.rowId) + '\')">Anulir</button>'
+          : '<span style="color:var(--n-text-muted); font-size:.75rem;">—</span>') +
+      '</td>' +
+    '</tr>';
+  });
+
+  h += '</tbody></table>';
+  wrap.innerHTML = h;
+}
+
+function _tuOpenPaketModal() {
+  var form = document.getElementById('tu-paket-form');
+  if (form) form.reset();
+  var msg = document.getElementById('tu-paket-form-msg');
+  if (msg) msg.innerHTML = '';
+  _tuOnPaketTahapChange();
+  openModal('modal-tu-paket-form');
+}
+
+function _tuOnPaketTahapChange() {
+  var elTahap = document.getElementById('tu-pkt-tahap');
+  if (!elTahap) return;
+  var tahap = elTahap.value;
+  var reqKontrak = document.getElementById('tu-pkt-kontrak-req');
+  var reqRekanan = document.getElementById('tu-pkt-rekanan-req');
+  var inputKontrak = document.getElementById('tu-pkt-no-kontrak');
+  var inputRekanan = document.getElementById('tu-pkt-rekanan');
+
+  var isContracted = ['KONTRAK', 'PELAKSANAAN', 'BAST', 'SELESAI'].indexOf(tahap) !== -1;
+  if (isContracted) {
+    if (reqKontrak) reqKontrak.classList.remove('n-hidden');
+    if (reqRekanan) reqRekanan.classList.remove('n-hidden');
+    if (inputKontrak) inputKontrak.required = true;
+    if (inputRekanan) inputRekanan.required = true;
+  } else {
+    if (reqKontrak) reqKontrak.classList.add('n-hidden');
+    if (reqRekanan) reqRekanan.classList.add('n-hidden');
+    if (inputKontrak) inputKontrak.required = false;
+    if (inputRekanan) inputRekanan.required = false;
+  }
+}
+
+function _tuSubmitPaket() {
+  var btn = document.getElementById('tu-pkt-btn-save');
+  var msg = document.getElementById('tu-paket-form-msg');
+  if (msg) msg.innerHTML = '';
+
+  var elNama = document.getElementById('tu-pkt-nama');
+  var elTahap = document.getElementById('tu-pkt-tahap');
+  var elDivisi = document.getElementById('tu-pkt-divisi');
+  var elKontrak = document.getElementById('tu-pkt-no-kontrak');
+  var elRekanan = document.getElementById('tu-pkt-rekanan');
+  var elNilai = document.getElementById('tu-pkt-nilai');
+  var elProgres = document.getElementById('tu-pkt-progres-fisik');
+  var elRealisasi = document.getElementById('tu-pkt-realisasi-keu');
+  var elEvidence = document.getElementById('tu-pkt-evidence');
+  var elKendala = document.getElementById('tu-pkt-kendala');
+
+  var nama = elNama ? elNama.value.trim() : '';
+  var tahap = elTahap ? elTahap.value : 'PERSIAPAN';
+  var divisi = elDivisi ? elDivisi.value : 'DIV-TU';
+  var noKontrak = elKontrak ? elKontrak.value.trim() : '';
+  var rekanan = elRekanan ? elRekanan.value.trim() : '';
+  var nilai = elNilai ? Number(elNilai.value) || 0 : 0;
+  var progres = elProgres ? Number(elProgres.value) || 0 : 0;
+  var realisasi = elRealisasi ? Number(elRealisasi.value) || 0 : 0;
+  var evidence = elEvidence ? elEvidence.value.trim() : '';
+  var kendala = elKendala ? elKendala.value.trim() : '';
+  var periode = (typeof _composePeriode === 'function' ? _composePeriode('tu-') : '') || '2026-M01';
+
+  if (!nama) {
+    _msg('tu-paket-form-msg', 'error', 'Nama paket pekerjaan wajib diisi.');
+    return;
+  }
+
+  var isContracted = ['KONTRAK', 'PELAKSANAAN', 'BAST', 'SELESAI'].indexOf(tahap) !== -1;
+  if (isContracted && (!noKontrak || !rekanan)) {
+    _msg('tu-paket-form-msg', 'error', 'Nomor kontrak dan nama rekanan wajib diisi untuk tahap ' + tahap + '.');
+    return;
+  }
+
+  _setLoading(btn, true);
+
+  var payload = {
+    periode: periode,
+    divisiId: divisi,
+    namaPaket: nama,
+    paketId: nama,
+    tahap: tahap,
+    noKontrak: noKontrak,
+    rekanan: rekanan,
+    nilaiKontrak: nilai,
+    progresFisik: progres,
+    realisasiKeuangan: realisasi,
+    evidenceUrl: evidence,
+    kendala: kendala
+  };
+
+  google.script.run
+    .withSuccessHandler(function (res) {
+      _setLoading(btn, false);
+      if (!res || !res.success) {
+        _msg('tu-paket-form-msg', 'error', (res && res.error) || 'Gagal menyimpan progres paket.');
+        return;
+      }
+      closeModal('modal-tu-paket-form');
+      _msg('tu-paket-msg', 'success', 'Progres paket pekerjaan berhasil dicatat.');
+      _tuLoadPaket(true);
+    })
+    .withFailureHandler(function (err) {
+      _setLoading(btn, false);
+      _msg('tu-paket-form-msg', 'error', 'Koneksi gagal saat menyimpan progres paket: ' + (err && err.message ? err.message : ''));
+    })
+    .tataUsaha_submitPaket(APP.token, payload);
+}
+
+function _tuAnulirPaket(rowId) {
+  var reason = prompt('Masukkan alasan resmi pembatalan/anulir progres paket ini:');
+  if (!reason || !reason.trim()) return;
+
+  _msg('tu-paket-msg', 'info', 'Memproses anulir entri paket...');
+
+  google.script.run
+    .withSuccessHandler(function (res) {
+      if (!res || !res.success) {
+        _msg('tu-paket-msg', 'error', (res && res.error) || 'Gagal menganulir entri paket.');
+        return;
+      }
+      _msg('tu-paket-msg', 'success', 'Entri paket berhasil dianulir.');
+      _tuLoadPaket(true);
+    })
+    .withFailureHandler(function (err) {
+      _msg('tu-paket-msg', 'error', 'Koneksi gagal saat menganulir entri paket.');
+    })
+    .tataUsaha_anulirPaket(APP.token, { targetRowId: rowId, voidReason: reason.trim() });
 }
 
 // ============================================================
@@ -8920,26 +9227,10 @@ var _BMN_HPS = {
 };
 
 function _bmnSwitchMainTab(tab) {
-  _BMN_HPS.activeTab = tab;
-  var btnReg = document.getElementById('btn-bmn-mode-register');
-  var btnHps = document.getElementById('btn-bmn-mode-hapus');
-  var viewReg = document.getElementById('bmn-view-register');
-  var viewHps = document.getElementById('bmn-view-penghapusan');
-
-  if (tab === 'hapus') {
-    if (btnReg) btnReg.classList.remove('active');
-    if (btnHps) btnHps.classList.add('active');
-    if (viewReg) viewReg.classList.add('n-hidden');
-    if (viewHps) viewHps.classList.remove('n-hidden');
-    _bmnLoadPenghapusanList();
+  if (tab === 'hapus' || tab === 'penghapusan') {
+    _tuSwitchTab('penghapusan');
   } else {
-    if (btnReg) btnReg.classList.add('active');
-    if (btnHps) btnHps.classList.remove('active');
-    if (viewReg) viewReg.classList.remove('n-hidden');
-    if (viewHps) viewHps.classList.add('n-hidden');
-    if (_BMN_MAP.map) {
-      setTimeout(function () { _BMN_MAP.map.invalidateSize(); }, 150);
-    }
+    _tuSwitchTab('bmn');
   }
 }
 

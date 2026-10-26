@@ -1,105 +1,121 @@
 <style>
 /* ============================================================
-   DESIGN TOKENS — DESIGN.md §2-4
+   SIKAP DESIGN SYSTEM — Apple HIG & 3-Tier Geometry Scale
+   Sistem Informasi Keuangan, Anggaran, dan Kepegawaian
+   Subbag Tata Usaha — Dit. POA (Ditjen PSDKP - KKP)
    ============================================================ */
+
 :root {
-  /* Netral & Kanvas Dasar — DESIGN.md §3 */
-  --n-bg-base:               #F4F7FE;
-  --n-canvas-subtle:         #EDF2F9;
-  --n-surface-1:             rgba(255, 255, 255, 0.88);
-  --n-surface-2:             rgba(248, 250, 252, 0.80);
-  --n-surface-hover:         rgba(241, 245, 249, 0.90);
-  --n-text-primary:          #2B3674;   /* Deep Maritime Navy */
-  --n-text-secondary:        #4A5568;   /* Slate Neutral */
-  --n-text-muted:            #A3AED0;   /* Muted Hint & Placeholder */
-  --n-border:                rgba(0, 0, 0, 0.12);
-  --n-border-subtle:         rgba(0, 0, 0, 0.07);
-  --n-border-hairline:       rgba(0, 0, 0, 0.07);
-  --n-border-strong:         rgba(0, 0, 0, 0.22);
-  --n-border-highlight:      rgba(255, 255, 255, 0.75); /* Inner Glass Edge */
-  --n-border-focused:        rgba(43, 54, 116, 0.35);
-  --n-border-focus-ring:     rgba(43, 54, 116, 0.35);
+  /* ── 1. PALET WARNA (Slate & Maritime Navy) ──────────────── */
+  --n-bg-base:               #F8FAFC;   /* Slate Ultra-Light Canvas */
+  --n-canvas-subtle:         #F1F5F9;   /* Slate 100 */
+  --n-surface-1:             rgba(255, 255, 255, 0.85); /* Apple Frosted Glass */
+  --n-surface-2:             rgba(248, 250, 252, 0.75); /* Secondary Surface */
+  --n-surface-hover:         rgba(241, 245, 249, 0.88);
+  --n-surface-solid:         #FFFFFF;
+  --n-surface-elevated:      #FFFFFF;
 
-  /* Aksen Brand & Status Semantik — DESIGN.md §3 */
-  --n-primary:               #2B3674;   /* Solid Navy = rel sidebar */
-  --n-primary-hover:         #1F2756;
-  --n-primary-active:        #151C3F;
-  --n-primary-light:         #E4E7F2;   /* Tint Navy Muda */
-  --n-primary-tint:          rgba(43, 54, 116, 0.08);
+  /* Tipografi & Kontras */
+  --n-text-primary:          #0F172A;   /* Slate 900 (Deep, high contrast) */
+  --n-text-secondary:        #475569;   /* Slate 600 (Informative neutral) */
+  --n-text-muted:            #94A3B8;   /* Slate 400 (Subtle hint & placeholder) */
 
-  --n-ok:                    #10B981;
-  --n-status-success:        #10B981;
-  --n-status-success-bg:     rgba(16, 185, 129, 0.12);
-  --n-status-success-border: rgba(16, 185, 129, 0.25);
+  /* Hairlines & Borders */
+  --n-border:                rgba(15, 23, 42, 0.10);
+  --n-border-hairline:       rgba(15, 23, 42, 0.07);
+  --n-border-subtle:         rgba(15, 23, 42, 0.05);
+  --n-border-strong:         rgba(15, 23, 42, 0.18);
+  --n-border-highlight:      rgba(255, 255, 255, 0.85); /* Inner Glass Light Bevel */
+  --n-border-focused:        #2563EB;
 
-  --n-warn:                  #F59E0B;
-  --n-status-warning:        #F59E0B;
-  --n-status-warning-bg:     rgba(245, 158, 11, 0.12);
-  --n-status-warning-border: rgba(245, 158, 11, 0.25);
+  /* Aksen Brand & Primer */
+  --n-primary:               #1E3A8A;   /* Deep Maritime Navy (Navy 900) */
+  --n-primary-hover:         #172554;
+  --n-primary-active:        #0F172A;
+  --n-primary-accent:        #2563EB;   /* Electric Blue Accent (Blue 600) */
+  --n-primary-light:         #EFF6FF;   /* Blue 50 */
+  --n-primary-tint:          rgba(37, 99, 235, 0.08);
 
-  --n-crit:                  #EF4444;
-  --n-status-critical:       #EF4444;
-  --n-status-critical-bg:    rgba(239, 68, 68, 0.12);
-  --n-status-critical-border:rgba(239, 68, 68, 0.25);
+  /* Status Semantik (Official Gov Palette) */
+  --n-ok:                    #059669;   /* Emerald 600 */
+  --n-status-success:        #059669;
+  --n-status-success-bg:     rgba(16, 185, 129, 0.10);
+  --n-status-success-border: rgba(16, 185, 129, 0.22);
 
-  /* Apple Translucent Materials (Vibrancy) — DESIGN.md §3 */
-  --n-material-surface:      rgba(255, 255, 255, 0.84);
-  --n-material-glass:        rgba(255, 255, 255, 0.65);
-  --n-material-glass-subtle: rgba(255, 255, 255, 0.65);
+  --n-warn:                  #D97706;   /* Amber 600 */
+  --n-status-warning:        #D97706;
+  --n-status-warning-bg:     rgba(245, 158, 11, 0.10);
+  --n-status-warning-border: rgba(245, 158, 11, 0.22);
+
+  --n-crit:                  #E11D48;   /* Rose 600 */
+  --n-status-critical:       #E11D48;
+  --n-status-critical-bg:    rgba(225, 29, 72, 0.10);
+  --n-status-critical-border:rgba(225, 29, 72, 0.22);
+
+  --n-purple:                #7C3AED;   /* Violet 600 — Legal/Penghapusan */
+  --n-status-purple-bg:      rgba(124, 58, 237, 0.10);
+  --n-status-purple-border:  rgba(124, 58, 237, 0.22);
+
+  /* ── 2. TRANSLUSENSI & MATERIALS (Apple Vibrancy) ────────── */
+  --n-material-surface:      rgba(255, 255, 255, 0.85);
+  --n-material-glass:        rgba(255, 255, 255, 0.70);
   --n-material-floating:     rgba(255, 255, 255, 0.94);
-  --n-material-header:       rgba(244, 247, 254, 0.88);
+  --n-material-header:       rgba(248, 250, 252, 0.86);
   --n-backdrop-blur:         blur(20px) saturate(180%);
   --n-backdrop-blur-deep:    blur(32px) saturate(190%);
-  --n-backdrop-modal:        blur(12px) saturate(140%);
+  --n-backdrop-modal:        blur(24px) saturate(160%);
 
-  /* Geometri Konsentris & Radius — DESIGN.md §4 */
+  /* ── 3. GEOMETRI & RADIUS KONSENTRIS ────────────────────── */
   --n-radius-outer-lg:       18px;
-  --n-radius-lg:             18px;
-  --n-r-lg:                  18px;
-  --n-radius-outer-md:       14px;
-  --n-radius-md:             14px;
-  --n-r-md:                  14px;
+  --n-radius-lg:             16px;
+  --n-r-lg:                  16px;
+  --n-radius-md:             12px;
+  --n-r-md:                  12px;
   --n-radius-inner:          10px;
-  --n-radius-sm:             10px;
-  --n-r-sm:                  10px;
+  --n-radius-sm:             8px;
+  --n-r-sm:                  8px;
+  --n-radius-xs:             6px;
   --n-radius-pill:           9999px;
   --n-r-pill:                9999px;
 
-  /* Layered Ambient Shadows — DESIGN.md §4 */
-  --n-shadow-1:              0 1px 2px rgba(0, 0, 0, 0.03), 0 6px 16px -2px rgba(43, 54, 116, 0.05);
-  --n-shadow-2:              0 3px 6px -1px rgba(0, 0, 0, 0.04), 0 12px 28px -4px rgba(43, 54, 116, 0.10);
-  --n-shadow-3:              0 16px 36px -4px rgba(0, 0, 0, 0.12), 0 32px 72px -12px rgba(43, 54, 116, 0.22);
+  /* ── 4. LAYERED AMBIENT SHADOWS (Apple Optical Depth) ───── */
+  --n-shadow-1:              0 1px 2px rgba(15, 23, 42, 0.03), 0 4px 12px -2px rgba(15, 23, 42, 0.05);
+  --n-shadow-2:              0 4px 6px -1px rgba(15, 23, 42, 0.04), 0 12px 24px -4px rgba(15, 23, 42, 0.08);
+  --n-shadow-3:              0 20px 40px -8px rgba(15, 23, 42, 0.14), 0 1px 3px rgba(15, 23, 42, 0.06);
   --n-shadow-card:           var(--n-shadow-1);
-  --n-shadow-inset-bevel:    inset 0 1px 0 rgba(255, 255, 255, 0.75);
+  --n-shadow-inset-bevel:    inset 0 1px 0 rgba(255, 255, 255, 0.9);
 
-  /* Kurva & Waktu Pegas (Emil Kowalski & Apple) — DESIGN.md §5 */
+  /* ── 5. PEGAS & KURVA GERAK (WWDC Designing Fluid Interfaces) */
+  --ease-spring:             cubic-bezier(0.16, 1, 0.3, 1);
   --ease-out:                cubic-bezier(0.23, 1, 0.32, 1);
-  --ease-in-out:            cubic-bezier(0.77, 0, 0.175, 1);
-  --ease-drawer:            cubic-bezier(0.32, 0.72, 0, 1);
-  --ease-bounce:            cubic-bezier(0.34, 1.56, 0.64, 1);
-  --n-spring-snappy:         cubic-bezier(0.23, 1, 0.32, 1);
-  --n-spring-modal:          cubic-bezier(0.16, 1, 0.3, 1);
-  --n-spring-bounce:         cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-in-out:             cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-drawer:             cubic-bezier(0.32, 0.72, 0, 1);
+  --ease-bounce:             cubic-bezier(0.34, 1.56, 0.64, 1);
+  --n-spring-snappy:         var(--ease-spring);
+  --n-spring-modal:          var(--ease-spring);
 
-  --dur-press:               90ms;
+  --dur-press:               80ms;
   --dur-dropdown:            180ms;
   --dur-entrance:            240ms;
-  --dur-modal:               260ms;
+  --dur-modal:               240ms;
 
-  /* Layout */
-  --n-sidebar-w:             248px;
+  /* Layout Constants */
+  --n-sidebar-w:             256px;
 
-  /* Skala Kontrol Tunggal (Single Geometry Control Scale) — DESIGN.md §5.5 */
+  /* ── 6. SKALA GEOMETRI KONTROL TUNGGAL (3-TIER SCALE) ────── */
+  /* LG: 40px (Toolbar filter, input form standar, submit button) */
   --ctl-h-lg:                40px;
-  --ctl-px-lg:               18px;
-  --ctl-r-lg:                8px;
+  --ctl-px-lg:               16px;
+  --ctl-r-lg:                10px;
   --ctl-fs-lg:               14px;
 
+  /* MD: 32px (Kontrol sekunder, baris tombol modal dialog, segmented switches) */
   --ctl-h-md:                32px;
-  --ctl-px-md:               14px;
+  --ctl-px-md:               12px;
   --ctl-r-md:                8px;
   --ctl-fs-md:               13px;
 
+  /* SM: 26px (Khusus aksi baris tabel in-table mini pills) */
   --ctl-h-sm:                26px;
   --ctl-px-sm:               10px;
   --ctl-r-sm:                6px;
@@ -113,9 +129,13 @@
 }
 
 /* ============================================================
-   RESET & GLOBAL TYPOGRAPHY (DESIGN.md §2, mobile-native)
+   RESET & GLOBAL TYPOGRAPHY (Apple HIG Optical Rules)
    ============================================================ */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
 
 html {
   height: 100%;
@@ -124,11 +144,11 @@ html {
 
 body {
   min-height: 100dvh;
-  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, sans-serif;
   letter-spacing: -0.005em;
   color: var(--n-text-primary);
   background: var(--n-bg-base);
-  font-size: 15px;
+  font-size: 14.5px;
   line-height: 1.55;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -138,23 +158,46 @@ button, a, [role="button"], input, select, textarea {
   touch-action: manipulation;
 }
 
-@media (pointer: coarse) {
-  input, select, textarea {
-    font-size: 16px !important;
-  }
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  background: transparent;
 }
 
-button  { font-family: inherit; cursor: pointer; }
-input, select, textarea { font-family: inherit; }
-a { text-decoration: none; color: inherit; }
+input, select, textarea {
+  font-family: inherit;
+}
 
-/* ============================================================
-   UTILITY
-   ============================================================ */
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* Angka Monospaced / Tabular Nums — Wajib Finansial, NUP, Persentase */
+.tnum, .tabular-nums {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
+/* Tactile Response On Pointer Down — Apple Direct Manipulation */
+button:active,
+a[role="button"]:active,
+.btn-primary:active,
+.btn-outline:active,
+.btn-ghost:active,
+.btn-mini:active,
+.tu-subnav-btn:active,
+.nav-item:active {
+  transform: scale(0.975);
+  transition: transform var(--dur-press) ease-out !important;
+}
+
+/* Utilitas Universal */
 .n-hidden { display: none !important; }
 
 /* ============================================================
-   LOADING SCREEN
+   LOADING SCREEN & SPINNER
    ============================================================ */
 #n-loading {
   position: fixed;
@@ -164,27 +207,34 @@ a { text-decoration: none; color: inherit; }
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 18px;
-  z-index: 900;
-  transition: opacity 0.25s;
+  gap: 16px;
+  z-index: 999;
+  transition: opacity 0.25s var(--ease-out);
 }
+
 .n-loading-brand {
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: inherit;
   font-weight: 800;
-  font-size: 1.5rem;
+  font-size: 1.6rem;
   color: var(--n-primary);
-  letter-spacing: -0.02em;
+  letter-spacing: -0.025em;
 }
+
 .n-loading-spin {
-  width: 22px; height: 22px;
-  border: 2px solid var(--n-primary-light);
-  border-top-color: var(--n-primary);
+  width: 26px;
+  height: 26px;
+  border: 2.5px solid var(--n-primary-light);
+  border-top-color: var(--n-primary-accent);
   border-radius: 50%;
-  animation: _spin 0.8s linear infinite;
+  animation: _spin 0.75s linear infinite;
+}
+
+@keyframes _spin {
+  to { transform: rotate(360deg); }
 }
 
 /* ============================================================
-   AUTH VIEWS
+   AUTH VIEWS (Login / Register / Pending)
    ============================================================ */
 .auth-screen {
   min-height: 100vh;
@@ -192,8 +242,9 @@ a { text-decoration: none; color: inherit; }
   align-items: center;
   justify-content: center;
   padding: 24px;
-  background: var(--n-bg-base);
+  background: radial-gradient(100% 100% at 50% 0%, rgba(37, 99, 235, 0.05) 0%, rgba(248, 250, 252, 1) 100%);
 }
+
 .auth-card {
   background: var(--n-material-surface);
   backdrop-filter: var(--n-backdrop-blur);
@@ -201,4337 +252,991 @@ a { text-decoration: none; color: inherit; }
   border: 1px solid var(--n-border-hairline);
   border-radius: var(--n-radius-outer-lg);
   box-shadow: var(--n-shadow-3), var(--n-shadow-inset-bevel);
-  padding: 44px 40px;
+  padding: 40px 36px;
   width: 100%;
   max-width: 440px;
-  animation: _staggerFadeIn 260ms var(--ease-out);
+  animation: _authCardIn 260ms var(--ease-spring);
 }
+
+@keyframes _authCardIn {
+  from { opacity: 0; transform: scale(0.96) translateY(8px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
 .auth-brand {
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   font-weight: 800;
-  font-size: 1.25rem;
+  font-size: 1.35rem;
   color: var(--n-primary);
-  letter-spacing: -0.01em;
-  margin-bottom: 28px;
-}
-/* h1.auth-title: no subtitle follows — DESIGN.md §1.6 */
-.auth-title {
-  font-family: 'Plus Jakarta Sans', sans-serif;
-  font-weight: 700;
-  font-size: 1.375rem;
-  color: var(--n-text-primary);
-  letter-spacing: -0.01em;
+  letter-spacing: -0.02em;
   margin-bottom: 24px;
 }
+
+.auth-brand::before {
+  content: '';
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  background: var(--n-primary-accent);
+}
+
+.auth-title {
+  font-weight: 700;
+  font-size: 1.35rem;
+  color: var(--n-text-primary);
+  letter-spacing: -0.02em;
+  margin-bottom: 20px;
+  line-height: 1.25;
+}
+
 .auth-foot {
   text-align: center;
-  margin-top: 20px;
-  font-size: 0.875rem;
+  margin-top: 24px;
+  font-size: 0.84rem;
   color: var(--n-text-secondary);
 }
-.auth-foot a { color: var(--n-primary); font-weight: 600; cursor: pointer; }
-.auth-foot a:hover { text-decoration: underline; }
+
+.auth-foot a {
+  color: var(--n-primary-accent);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.auth-foot a:hover {
+  text-decoration: underline;
+}
+
+/* Status deteksi live pending approval */
+.pending-live-status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 16px;
+  padding: 10px 14px;
+  border-radius: var(--n-radius-md);
+  background: var(--n-surface-solid);
+  border: 1px solid var(--n-border-hairline);
+  font-size: 0.8125rem;
+  color: var(--n-text-secondary);
+}
+
+.pending-pulse-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--n-status-warning);
+  box-shadow: 0 0 0 0 rgba(217, 119, 6, 0.4);
+  animation: _pulse 1.8s infinite;
+}
+
+@keyframes _pulse {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(217, 119, 6, 0.7); }
+  70% { transform: scale(1); box-shadow: 0 0 0 7px rgba(217, 119, 6, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(217, 119, 6, 0); }
+}
 
 /* ============================================================
-   FORM ELEMENTS — DESIGN.md §3, §4, §5
+   FORM CONTROLS & 3-TIER INPUTS (DESIGN.md §2)
    ============================================================ */
 .form-grp {
   position: relative;
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
-  padding-bottom: 26px; /* band .n-form-hint — jaga kontrol rata antar sel (sejajar horizontal) */
-  margin-bottom: 16px;
+  margin-bottom: 14px;
 }
+
 .form-grp label {
-  flex: 0 0 auto;
   display: block;
   font-size: 0.8125rem;
-  font-weight: 500;
+  font-weight: 600;
   color: var(--n-text-secondary);
-  text-transform: none;
   letter-spacing: -0.005em;
   margin-bottom: 6px;
 }
+
 .form-grp input,
-.form-grp select {
+.form-grp select,
+.form-grp textarea {
   width: 100%;
-  padding: 11px 14px;
-  border: 1px solid var(--n-border-hairline);
-  border-radius: var(--n-radius-inner);
+  height: var(--ctl-h-lg);
+  padding: 0 14px;
+  border: 1px solid var(--n-border);
+  border-radius: var(--ctl-r-lg);
   font-family: inherit;
-  font-size: 0.9375rem;
+  font-size: var(--ctl-fs-lg);
   color: var(--n-text-primary);
-  background: rgba(0, 0, 0, 0.02);
+  background: var(--n-surface-solid);
   outline: none;
-  transition: border-color 0.16s var(--ease-out), background 0.16s var(--ease-out), box-shadow 0.16s var(--ease-out);
+  transition: border-color 0.14s var(--ease-out), box-shadow 0.14s var(--ease-out), background 0.14s var(--ease-out);
   appearance: none;
   -webkit-appearance: none;
 }
-.form-grp input:focus,
-.form-grp select:focus {
-  border-color: var(--n-primary);
-  background: #FFFFFF;
-  box-shadow: 0 0 0 3px var(--n-primary-tint);
+
+.form-grp textarea {
+  height: auto;
+  min-height: 80px;
+  padding: 10px 14px;
 }
+
+.form-grp input:focus,
+.form-grp select:focus,
+.form-grp textarea:focus {
+  border-color: var(--n-primary-accent);
+  background: #FFFFFF;
+  box-shadow: 0 0 0 3.5px var(--n-primary-tint);
+}
+
 .form-grp select {
   cursor: pointer;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23A3AED0' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23475569' stroke-width='2.2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
-  background-position: right 12px center;
+  background-position: right 14px center;
   padding-right: 36px;
 }
 
-/* Hint di bawah kontrol (mis. "Periode: …") — diposisikan absolut di dalam band
-   .form-grp (padding-bottom) sehingga label panjang yang membungkus atau ada/tidaknya
-   hint TIDAK menggeser posisi kotak input antar kolom (alignment horizontal). */
-.n-form-hint {
-  position: absolute;
-  left: 2px;
-  right: 2px;
-  bottom: 5px;
-  font-size: 0.76rem;
-  color: var(--n-text-muted);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-/* Input terkunci — Pagu mengikuti laporan sebelumnya (form Tata Usaha) */
 .form-grp input[readonly] {
-  cursor: not-allowed;
-  opacity: 0.85;
-}
-.form-grp input[readonly]:focus {
-  border-color: var(--n-border-subtle);
-  background: var(--n-surface-2);
-}
-
-/* Bar kontrol & kunci Pagu — muncul di atas Catatan Revisi Pagu */
-.tu-pagu-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 9px 12px;
-  margin: -6px 0 18px;
-  background: var(--n-surface-2);
-  border: 1px solid var(--n-border-subtle);
-  border-radius: var(--n-r-sm);
-  font-size: 0.78rem;
-  color: var(--n-text-muted);
-}
-.tu-pagu-bar.unlocked {
-  border-color: var(--n-warn);
-  background: rgba(245, 158, 11, 0.07);
-}
-.tu-pagu-bar .btn-mini { margin-top: 0; flex: 0 0 auto; }
-
-/* Penghitung "Revisi pagu: sudah N kali" — tepat di bawah baris input Pagu.
-   Steel-blue netral, bukan kartu; informasi sekunder yang harus tetap
-   terbaca tanpa bersaing dengan nilai Pagu itu sendiri. */
-.tu-pagu-rev {
-  margin: -8px 0 18px;
-  font-size: 0.75rem;
-  font-weight: 500;
-  color: var(--n-text-muted);
-}
-.tu-pagu-rev.is-next { color: var(--n-text-secondary); }
-.tu-pagu-rev b { color: var(--n-text-primary); font-weight: 600; }
-
-/* ── ITEM LIST "rincian per-item" (revisi Fase 13) ─────────
-   Baris input berulang di modal form (kapal, rumpon, objek udara,
-   kejadian intelijen). Jumlah = hitungan item, dihitung sistem. */
-.n-list { margin-top: 2px; }
-.n-list-head, .n-list-row { display: grid; gap: 10px; align-items: center; }
-.n-list-head { margin-bottom: 6px; }
-.n-list-head > div {
-  font-size: 0.78rem;
-  font-weight: 600;
+  background: var(--n-canvas-subtle);
+  border-color: var(--n-border-hairline);
   color: var(--n-text-secondary);
-  text-transform: none;
-  letter-spacing: -0.005em;
-}
-.n-list-head > div:last-child, .n-list-delcell { text-align: right; }
-.n-list-delcell {
-  align-self: stretch;
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-}
-.n-list-row {
-  margin-bottom: 10px;
-  animation: _listRowIn 180ms var(--ease-out);
-}
-@keyframes _listRowIn {
-  from { opacity: 0; transform: translateY(6px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-.n-list-row input,
-.n-list-row select {
-  width: 100%;
-  padding: 10px 13px;
-  border: 1px solid var(--n-border-hairline);
-  border-radius: var(--n-radius-inner);
-  font-family: inherit;
-  font-size: 0.9375rem;
-  color: var(--n-text-primary);
-  background: rgba(0, 0, 0, 0.02);
-  outline: none;
-  transition: border-color 0.16s var(--ease-out), background 0.16s var(--ease-out), box-shadow 0.16s var(--ease-out);
-  appearance: none;
-  -webkit-appearance: none;
-}
-.n-list-row input:focus,
-.n-list-row select:focus {
-  border-color: var(--n-primary);
-  background: #FFFFFF;
-  box-shadow: 0 0 0 3px var(--n-primary-tint);
-}
-.n-list-row select { cursor: pointer; }
-.n-list-add {
-  margin: 4px 0 16px;
-  padding: 8px 16px;
-  border: 1px dashed var(--n-border-hairline);
-  border-radius: var(--n-radius-inner);
-  background: rgba(43, 54, 116, 0.03);
-  color: var(--n-primary);
-  font-family: inherit;
-  font-size: 0.82rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.16s var(--ease-out), border-color 0.16s var(--ease-out), transform 90ms var(--ease-out);
-}
-@media (hover: hover) and (pointer: fine) {
-  .n-list-add:hover {
-    border-color: var(--n-primary);
-    background: var(--n-primary-tint);
-  }
-}
-.n-list-add:active {
-  transform: scale(0.97);
-}
-.n-list-del {
-  box-sizing: border-box;
-  width: 44px;
-  min-height: 38px;
-  align-self: stretch;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-  border: 1px solid var(--n-border-hairline);
-  border-radius: var(--n-radius-inner);
-  background: rgba(0, 0, 0, 0.02);
-  color: var(--n-text-muted);
-  cursor: pointer;
-  transition: color 0.14s var(--ease-out), border-color 0.14s var(--ease-out), background 0.14s var(--ease-out), transform 90ms var(--ease-out);
-}
-@media (hover: hover) and (pointer: fine) {
-  .n-list-del:hover {
-    color: var(--n-crit);
-    border-color: var(--n-status-critical-border);
-    background: var(--n-status-critical-bg);
-  }
-}
-.n-list-del:active { transform: scale(0.95); }
-.n-derive-val {
-  font-size: 1.35rem;
-  font-weight: 800;
-  color: var(--n-primary);
-  line-height: 1.2;
-  letter-spacing: -0.02em;
-  font-variant-numeric: tabular-nums;
-  -webkit-font-feature-settings: "tnum";
-  font-feature-settings: "tnum";
+  cursor: not-allowed;
 }
 
-/* ── SEARCH DROPDOWN "Pilih…" (revisi Fase 12/16) ──────────
-   Dropdown kapal mengambang halus dengan backdrop blur, search filter,
-   dan smooth popover entrance. */
-.kdl-sel { position: relative; width: 100%; }
-.form-grp .kdl-field {
-  width: 100%;
-  padding: 11px 14px;
-  padding-right: 58px;
-  border: 1px solid var(--n-border-hairline);
-  border-radius: var(--n-radius-inner);
-  font-family: inherit;
-  font-size: 0.9375rem;
-  color: var(--n-text-primary);
-  background: rgba(0, 0, 0, 0.02);
-  outline: none;
-  cursor: pointer;
-  transition: border-color 0.16s var(--ease-out), background 0.16s var(--ease-out), box-shadow 0.16s var(--ease-out);
+.n-form-hint {
+  font-size: 0.75rem;
+  color: var(--n-text-muted);
+  margin-top: 4px;
+  line-height: 1.35;
 }
-.form-grp .kdl-field:focus {
-  border-color: var(--n-primary);
-  background: #FFFFFF;
-  box-shadow: 0 0 0 3px var(--n-primary-tint);
-}
-.kdl-field::placeholder { color: var(--n-text-muted); }
-.kdl-caret {
-  position: absolute; top: 50%; right: 14px; margin-top: -8px;
-  width: 16px; height: 16px;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23A3AED0' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
-  background-repeat: no-repeat; background-position: center;
-  pointer-events: none;
-}
-.kdl-clear {
-  position: absolute; top: 50%; right: 38px; margin-top: -9px;
-  width: 18px; height: 18px; margin: 0; padding: 0;
-  border: none; background: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23A3AED0' stroke-width='2' stroke-linecap='round'%3E%3Cline x1='18' y1='6' x2='6' y2='18'/%3E%3Cline x1='6' y1='6' x2='18' y2='18'/%3E%3C/svg%3E");
-  background-repeat: no-repeat; background-position: center;
-  cursor: pointer;
-}
-.kdl-panel {
-  position: absolute; top: calc(100% + 6px); left: 0; right: 0; z-index: 60;
-  background: var(--n-material-floating);
-  backdrop-filter: var(--n-backdrop-blur-deep);
-  -webkit-backdrop-filter: var(--n-backdrop-blur-deep);
-  border: 1px solid var(--n-border-hairline);
-  border-radius: var(--n-radius-inner);
-  box-shadow: var(--n-shadow-2), var(--n-shadow-inset-bevel);
-  display: none;
-  overflow: hidden;
-  animation: _dropdownPopIn 180ms var(--ease-out);
-}
-@keyframes _dropdownPopIn {
-  from { opacity: 0; transform: scale(0.96) translateY(-4px); }
-  to { opacity: 1; transform: scale(1) translateY(0); }
-}
-.kdl-panel.kdl-open { display: block; }
-.kdl-q {
-  width: 100%;
+
+/* Pesan status interaktif */
+.n-msg {
   padding: 10px 14px;
-  border: none;
-  border-bottom: 1px solid var(--n-border-hairline);
-  outline: none;
-  font-family: inherit;
-  font-size: 0.875rem;
-  color: var(--n-text-primary);
-  background: rgba(0, 0, 0, 0.02);
-}
-.kdl-q::placeholder { color: var(--n-text-muted); }
-.kdl-list {
-  margin: 0; padding: 4px;
-  list-style: none;
-  max-height: 240px; overflow-y: auto;
-}
-.kdl-list li {
-  padding: 9px 12px;
-  border-radius: 8px;
-  font-size: 0.875rem;
-  color: var(--n-text-primary);
-  cursor: pointer;
-}
-.kdl-list li:hover,
-.kdl-list li.kdl-hl { background: var(--n-surface-hover); color: var(--n-primary); }
-.kdl-list .kdl-empty {
-  color: var(--n-text-muted);
+  border-radius: var(--n-radius-md);
   font-size: 0.8125rem;
-  cursor: default;
+  font-weight: 500;
+  margin-bottom: 14px;
+  display: none;
+  animation: _fadeIn 160ms var(--ease-out);
 }
 
-/* ── LAMPIRAN INLINE (revisi Fase 10) ─────────────────── */
-.attach-row { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
-.attach-check {
-  display: inline-flex; align-items: center; gap: 9px;
-  font-size: 0.875rem; color: var(--n-text-primary); cursor: pointer; user-select: none;
-}
-.attach-check input[type="checkbox"] {
-  width: 16px; height: 16px; accent-color: var(--n-primary); cursor: pointer; margin: 0;
-}
-.attach-fields { display: grid; gap: 12px; }
-.attach-fields .form-grp { margin-bottom: 0; }
-.attach-list { display: flex; flex-wrap: wrap; gap: 8px; }
-.attach-chip {
-  display: inline-flex; align-items: center; gap: 8px;
-  background: var(--n-surface-2); border: 1px solid var(--n-border-subtle);
-  border-radius: var(--n-r-sm); padding: 5px 10px; font-size: 0.8125rem; color: var(--n-text-primary);
-}
-.attach-chip b { font-weight: 600; letter-spacing: 0.03em; }
-.attach-chip button {
-  background: none; border: 0; cursor: pointer; color: var(--n-text-muted); font-size: 0.9rem; line-height: 1; padding: 0;
-  display: inline-flex; align-items: center; justify-content: center;
-  width: 20px; height: 20px; border-radius: 6px;
-  transition: color 0.14s, background 0.14s;
-}
-.attach-chip button:hover { color: var(--n-crit); background: var(--n-surface-hover); }
-.attach-chip button:focus-visible,
-.n-list-del:focus-visible,
-.n-iconbtn:focus-visible,
-.n-iconbtn-sm:focus-visible,
-.n-iconbtn-x:focus-visible {
-  outline: 2px solid var(--n-primary);
-  outline-offset: 2px;
-}
-.attach-retry {
-  display: inline-flex; gap: 8px; align-items: center; margin-top: 6px;
-  background: #FEF3C7; color: #92400E; border: 1px solid #FDE68A; border-radius: var(--n-r-sm);
-  padding: 7px 12px; font-size: 0.8125rem;
-}
-.attach-retry button {
-  background: none; border: 0; color: inherit; font-weight: 600; text-decoration: underline; cursor: pointer; padding: 0;
+.n-msg.active { display: block; }
+.n-msg.is-ok, .n-msg.success { background: var(--n-status-success-bg); color: var(--n-status-success); border: 1px solid var(--n-status-success-border); }
+.n-msg.is-warn, .n-msg.warning { background: var(--n-status-warning-bg); color: var(--n-status-warning); border: 1px solid var(--n-status-warning-border); }
+.n-msg.is-crit, .n-msg.error { background: var(--n-status-critical-bg); color: var(--n-status-critical); border: 1px solid var(--n-status-critical-border); }
+
+.n-info-static {
+  padding: 12px 14px;
+  border-radius: var(--n-radius-md);
+  background: var(--n-canvas-subtle);
+  border: 1px solid var(--n-border-hairline);
+  font-size: 0.8125rem;
+  color: var(--n-text-secondary);
+  line-height: 1.45;
 }
 
 /* ============================================================
-   CONTAINER-DRIVEN CONTROL SCALE & TIERS (DESIGN.md §1 Rule 19 & §5.5)
+   3-TIER CONTROL ROWS & BUTTONS
    ============================================================ */
-
-/* ── KONTROL CONTAINER TIERS ─────────────────────────────── */
 .ctl-row {
-  --ctl-h: var(--ctl-h-md);
-  --ctl-px: var(--ctl-px-md);
-  --ctl-r: var(--ctl-r-md);
-  --ctl-fs: var(--ctl-fs-md);
   display: flex;
   align-items: center;
   gap: 8px;
-  flex-wrap: wrap;
 }
-.ctl-row.ctl-nowrap {
-  flex-wrap: nowrap;
-}
-.ctl-row.ctl-lg,
-.ctl-lg {
-  --ctl-h: var(--ctl-h-lg);
-  --ctl-px: var(--ctl-px-lg);
-  --ctl-r: var(--ctl-r-lg);
-  --ctl-fs: var(--ctl-fs-lg);
-}
-.ctl-row.ctl-sm,
-.ctl-sm {
-  --ctl-h: var(--ctl-h-sm);
-  --ctl-px: var(--ctl-px-sm);
-  --ctl-r: var(--ctl-r-sm);
-  --ctl-fs: var(--ctl-fs-sm);
-}
+
 .ctl-stack {
-  --ctl-h: var(--ctl-h-lg);
-  --ctl-px: var(--ctl-px-lg);
-  --ctl-r: var(--ctl-r-lg);
-  --ctl-fs: var(--ctl-fs-lg);
   display: flex;
   flex-direction: column;
   gap: 8px;
+}
+
+.ctl-fill {
   width: 100%;
 }
-
-/* Penegakan Tinggi Kontrol Anak di dalam Kontainer */
-.ctl-row > button,
-.ctl-row > .btn,
-.ctl-row > a.btn,
-.ctl-row > input:not([type="checkbox"]):not([type="radio"]),
-.ctl-row > select,
-.ctl-row > .ctl-search > input,
-.ctl-row > .n-seg,
-.ctl-row > .n-iconbtn,
-.ctl-row > .n-iconbtn-sm,
-.ctl-row > .n-iconbtn-x,
-.ctl-select,
-.ctl-input,
-.ctl-stack > button,
-.ctl-stack > .btn,
-.ctl-stack > a.btn {
-  height: var(--ctl-h) !important;
-  min-height: var(--ctl-h) !important;
-  max-height: var(--ctl-h) !important;
-  border-radius: var(--ctl-r) !important;
-  font-size: var(--ctl-fs) !important;
-  box-sizing: border-box;
-}
-
-/* Polishing Modern Dropdown Select di dalam .ctl-row / .ctl-select */
-.ctl-row > select,
-.ctl-select {
-  appearance: none;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  cursor: pointer;
-  padding: 0 30px 0 12px !important;
-  border: 1px solid var(--n-border);
-  border-radius: var(--ctl-r) !important;
-  font-family: inherit;
-  font-size: var(--ctl-fs) !important;
-  font-weight: 500;
-  color: var(--n-text-primary);
-  background-color: #FFFFFF;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 24 24' fill='none' stroke='%2364748B' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 10px center;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
-  outline: none;
-  transition: border-color 0.16s var(--ease-out), box-shadow 0.16s var(--ease-out), background-color 0.16s var(--ease-out);
-}
-
-.ctl-row.ctl-sm > select,
-.ctl-select.ctl-sm {
-  padding: 0 26px 0 10px !important;
-  background-position: right 8px center;
-}
-
-.ctl-row > select:hover,
-.ctl-select:hover {
-  border-color: var(--n-border-strong);
-  background-color: #FFFFFF;
-}
-
-.ctl-row > select:focus,
-.ctl-select:focus {
-  border-color: var(--n-primary);
-  background-color: #FFFFFF;
-  box-shadow: 0 0 0 3px var(--n-primary-tint);
-}
-
-/* Search Box & Text Input di dalam .ctl-row */
-.ctl-search {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  height: var(--ctl-h);
-}
-
-.ctl-search-ico {
-  position: absolute;
-  left: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: var(--n-text-muted);
-  pointer-events: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.ctl-search > input,
-.ctl-row > input:not([type="checkbox"]):not([type="radio"]),
-.ctl-input {
-  border: 1px solid var(--n-border);
-  border-radius: var(--ctl-r) !important;
-  font-family: inherit;
-  font-size: var(--ctl-fs) !important;
-  color: var(--n-text-primary);
-  background-color: #FFFFFF;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
-  outline: none;
-  transition: border-color 0.16s var(--ease-out), box-shadow 0.16s var(--ease-out), background-color 0.16s var(--ease-out);
-}
-
-.ctl-search > input {
-  padding-left: 30px !important;
-  padding-right: 12px !important;
-  width: 220px;
-}
-
-.ctl-search > input:hover,
-.ctl-row > input:not([type="checkbox"]):not([type="radio"]):hover,
-.ctl-input:hover {
-  border-color: var(--n-border-strong);
-}
-
-.ctl-search > input:focus,
-.ctl-row > input:not([type="checkbox"]):not([type="radio"]):focus,
-.ctl-input:focus {
-  border-color: var(--n-primary);
-  box-shadow: 0 0 0 3px var(--n-primary-tint);
-  background-color: #FFFFFF;
-}
-
-.ctl-stack > button,
-.ctl-stack > .btn,
-.ctl-stack > a.btn {
-  width: 100%;
-}
-
-.ctl-fill > button,
-.ctl-fill > .btn,
-.ctl-fill > a.btn,
-.ctl-row.ctl-fill > button,
-.ctl-row.ctl-fill > .btn,
-.ctl-row.ctl-fill > a.btn {
+.ctl-fill > * {
   flex: 1 1 0;
 }
 
-/* Kontekstual Otomatis: Modal (LG) & Tabel (SM) */
-.n-modal:not(.n-modal-hd) .btn-primary,
-.n-modal:not(.n-modal-hd) .btn-outline,
-.n-modal:not(.n-modal-hd) .btn-ghost,
-.n-modal:not(.n-modal-hd) .btn-secondary,
-.n-modal:not(.n-modal-hd) .btn-danger,
-.n-modal:not(.n-modal-hd) .btn-danger-solid {
-  --ctl-h: var(--ctl-h-lg);
-  --ctl-px: var(--ctl-px-lg);
-  --ctl-r: var(--ctl-r-lg);
-  --ctl-fs: var(--ctl-fs-lg);
+/* TIER LG: 40px */
+.ctl-lg .btn-primary,
+.ctl-lg .btn-outline,
+.ctl-lg .btn-ghost,
+.ctl-lg .btn-danger-solid,
+.ctl-lg input,
+.ctl-lg select,
+.btn-primary.btn-lg,
+.btn-outline.btn-lg {
+  height: var(--ctl-h-lg) !important;
+  padding: 0 var(--ctl-px-lg) !important;
+  font-size: var(--ctl-fs-lg) !important;
+  border-radius: var(--ctl-r-lg) !important;
 }
 
-.n-table .btn,
-.n-table button,
-table .btn,
-table button {
-  --ctl-h: var(--ctl-h-sm);
-  --ctl-px: var(--ctl-px-sm);
-  --ctl-r: var(--ctl-r-sm);
-  --ctl-fs: var(--ctl-fs-sm);
-}
-
-/* ── GEOMETRI DASAR TOMBOL (SINGLE GEOMETRY BASE) ────────── */
-.btn,
-button.btn,
-a.btn,
+/* TIER MD: 32px (Default) */
 .btn-primary,
 .btn-outline,
 .btn-ghost,
-.btn-secondary,
-.btn-danger,
 .btn-danger-solid,
-.btn-sm,
-.btn-sm-outline,
-.btn-sm-ghost,
-.btn-sm-primary,
-.btn-sm-danger,
-.btn-sm-ok,
-.btn-sm-crit,
-.btn-mini {
+.ctl-row select,
+.ctl-row input {
+  height: var(--ctl-h-md);
+  padding: 0 var(--ctl-px-md);
+  font-size: var(--ctl-fs-md);
+  border-radius: var(--ctl-r-md);
+  font-weight: 600;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  height: var(--ctl-h);
-  min-height: var(--ctl-h);
-  padding: 0 var(--ctl-px);
-  border-radius: var(--ctl-r);
-  font-family: inherit;
-  font-size: var(--ctl-fs);
-  font-weight: 600;
-  line-height: 1;
-  text-decoration: none;
-  cursor: pointer;
-  user-select: none;
+  gap: 7px;
   white-space: nowrap;
-  box-sizing: border-box;
-  transition: background 0.14s var(--ease-out), color 0.14s var(--ease-out), border-color 0.14s var(--ease-out), box-shadow 0.14s var(--ease-out), transform 90ms var(--ease-out);
+  transition: all 0.14s var(--ease-out);
 }
 
-/* ── VARIAN MURNI WARNA & GAYA (TANPA OVERRIDE GEOMETRI) ── */
-/* Primary (Solid Navy) */
-.btn-primary,
-.btn-sm-primary {
+/* TIER SM: 26px (In-table action buttons) */
+.ctl-sm,
+.btn-mini,
+.btn-sm,
+.n-table .btn-mini,
+.n-table .btn-outline,
+.n-table .btn-ghost {
+  height: var(--ctl-h-sm) !important;
+  padding: 0 var(--ctl-px-sm) !important;
+  font-size: var(--ctl-fs-sm) !important;
+  border-radius: var(--ctl-r-sm) !important;
+  font-weight: 600;
+}
+
+/* Varian Tombol */
+.btn-primary {
   background: var(--n-primary);
   color: #FFFFFF;
-  border: 1px solid var(--n-primary);
-  box-shadow: var(--n-shadow-1), inset 0 1px 0 rgba(255, 255, 255, 0.15);
-}
-@media (hover: hover) and (pointer: fine) {
-  .btn-primary:hover:not(:disabled),
-  .btn-sm-primary:hover:not(:disabled) {
-    background: var(--n-primary-hover);
-    box-shadow: var(--n-shadow-2);
-  }
+  border: 1px solid transparent;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.15);
 }
 
-/* Outline (Border Navy/Border Subtle) */
-.btn-outline,
-.btn-sm-outline {
-  background: transparent;
-  color: var(--n-primary);
+.btn-primary:hover {
+  background: var(--n-primary-hover);
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.18);
+}
+
+.btn-outline {
+  background: var(--n-surface-solid);
+  color: var(--n-text-primary);
   border: 1px solid var(--n-border);
-}
-@media (hover: hover) and (pointer: fine) {
-  .btn-outline:hover:not(:disabled),
-  .btn-sm-outline:hover:not(:disabled) {
-    background: var(--n-primary-light);
-    border-color: var(--n-primary);
-  }
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
 }
 
-/* Ghost / Secondary */
-.btn-ghost,
-.btn-sm-ghost {
+.btn-outline:hover {
+  background: var(--n-canvas-subtle);
+  border-color: var(--n-border-strong);
+}
+
+.btn-ghost {
   background: transparent;
   color: var(--n-text-secondary);
   border: 1px solid transparent;
 }
-@media (hover: hover) and (pointer: fine) {
-  .btn-ghost:hover:not(:disabled),
-  .btn-sm-ghost:hover:not(:disabled) {
-    background: var(--n-surface-2);
-    color: var(--n-text-primary);
-  }
-}
 
-.btn-secondary {
-  background: var(--n-surface-2);
+.btn-ghost:hover {
+  background: rgba(15, 23, 42, 0.05);
   color: var(--n-text-primary);
-  border: 1px solid var(--n-border-hairline);
-}
-@media (hover: hover) and (pointer: fine) {
-  .btn-secondary:hover:not(:disabled) {
-    background: var(--n-surface-hover);
-    border-color: var(--n-border);
-  }
-}
-
-/* Danger (Outline & Solid) */
-.btn-danger,
-.btn-sm-danger {
-  background: transparent;
-  color: var(--n-crit);
-  border: 1px solid #FECACA;
-}
-@media (hover: hover) and (pointer: fine) {
-  .btn-danger:hover:not(:disabled),
-  .btn-sm-danger:hover:not(:disabled) {
-    background: #FEF2F2;
-    border-color: var(--n-crit);
-  }
 }
 
 .btn-danger-solid {
   background: var(--n-crit);
   color: #FFFFFF;
-  border: 1px solid var(--n-crit);
-  box-shadow: var(--n-shadow-1), inset 0 1px 0 rgba(255, 255, 255, 0.15);
-}
-@media (hover: hover) and (pointer: fine) {
-  .btn-danger-solid:hover:not(:disabled) {
-    background: #DC2626;
-    box-shadow: var(--n-shadow-2);
-  }
-}
-
-/* Semantic Success (Ok) & Critical (Crit) Variants */
-.btn-sm-ok,
-.btn-ok {
-  background: var(--n-status-success-bg, #ECFDF5);
-  color: var(--n-status-success, #10B981);
-  border: 1px solid var(--n-status-success-border, #A7F3D0);
-}
-@media (hover: hover) and (pointer: fine) {
-  .btn-sm-ok:hover:not(:disabled),
-  .btn-ok:hover:not(:disabled) {
-    background: #D1FAE5;
-  }
-}
-
-.btn-sm-crit,
-.btn-crit {
-  background: var(--n-status-critical-bg, #FEF2F2);
-  color: var(--n-status-critical, #EF4444);
-  border: 1px solid var(--n-status-critical-border, #FECACA);
-}
-@media (hover: hover) and (pointer: fine) {
-  .btn-sm-crit:hover:not(:disabled),
-  .btn-crit:hover:not(:disabled) {
-    background: #FEE2E2;
-  }
-}
-
-/* Mini (alias backward compatibility ke SM tier outline) */
-.btn-mini {
-  --ctl-h: var(--ctl-h-sm);
-  --ctl-px: var(--ctl-px-sm);
-  --ctl-r: var(--ctl-r-sm);
-  --ctl-fs: var(--ctl-fs-sm);
-  background: rgba(0, 0, 0, 0.02);
-  border: 1px solid var(--n-border-hairline);
-  color: var(--n-text-primary);
-}
-@media (hover: hover) and (pointer: fine) {
-  .btn-mini:hover:not(:disabled) {
-    background: var(--n-primary-light);
-    border-color: var(--n-primary);
-    color: var(--n-primary);
-  }
-}
-
-/* Disabled & Focus States */
-.btn:disabled,
-button.btn:disabled,
-.btn-primary:disabled,
-.btn-outline:disabled,
-.btn-ghost:disabled,
-.btn-secondary:disabled,
-.btn-danger:disabled,
-.btn-danger-solid:disabled,
-.btn-mini:disabled,
-.btn-sm:disabled,
-.btn-sm-outline:disabled,
-.btn-sm-ghost:disabled,
-.btn-sm-primary:disabled,
-.btn-sm-danger:disabled,
-.btn-sm-ok:disabled,
-.btn-sm-crit:disabled {
-  opacity: 0.45 !important;
-  cursor: not-allowed !important;
-}
-
-.btn:focus-visible,
-button.btn:focus-visible,
-.btn-primary:focus-visible,
-.btn-outline:focus-visible,
-.btn-danger:focus-visible {
-  outline: 2px solid var(--n-primary-light);
-  outline-offset: 2px;
-}
-
-/* ── SEGMENTED CONTROLS (DESIGN.md §5.5.4) ───────────────── */
-.n-seg {
-  display: inline-flex;
-  align-items: center;
-  background: rgba(0, 0, 0, 0.05);
-  padding: 3px;
-  border-radius: var(--ctl-r);
-  height: var(--ctl-h);
-  box-sizing: border-box;
-}
-.n-seg > button,
-.n-seg > .n-seg-btn,
-.n-seg > .bmn-seg-btn,
-.n-seg > .filter-mode-btn,
-.n-seg > .tu-subnav-btn,
-.n-seg > .sub-tab-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  height: calc(var(--ctl-h) - 6px) !important;
-  min-height: calc(var(--ctl-h) - 6px) !important;
-  max-height: calc(var(--ctl-h) - 6px) !important;
-  padding: 0 12px;
-  border: none;
-  border-radius: max(0px, calc(var(--ctl-r) - 3px));
-  font-family: inherit;
-  font-size: calc(var(--ctl-fs) - 1px);
-  font-weight: 500;
-  cursor: pointer;
-  white-space: nowrap;
-  background: transparent;
-  color: var(--n-text-secondary);
-  transition: background 0.14s var(--ease-out), color 0.14s var(--ease-out), box-shadow 0.14s var(--ease-out);
-  box-sizing: border-box;
-  margin: 0;
-}
-@media (hover: hover) and (pointer: fine) {
-  .n-seg > button:hover:not(.active),
-  .n-seg > .n-seg-btn:hover:not(.active),
-  .n-seg > .bmn-seg-btn:hover:not(.active),
-  .n-seg > .filter-mode-btn:hover:not(.active),
-  .n-seg > .tu-subnav-btn:hover:not(.active),
-  .n-seg > .sub-tab-btn:hover:not(.active) {
-    background: rgba(0, 0, 0, 0.04);
-    color: var(--n-text-primary);
-  }
-}
-.n-seg > button.active,
-.n-seg > .n-seg-btn.active,
-.n-seg > .bmn-seg-btn.active,
-.n-seg > .filter-mode-btn.active,
-.n-seg > .tu-subnav-btn.active,
-.n-seg > .sub-tab-btn.active {
-  background: #FFFFFF;
-  color: var(--n-primary);
-  font-weight: 600;
-  box-shadow: var(--n-shadow-1);
-}
-
-/* Apple & Emil Kowalski Tactile Compression Feedback */
-.btn:active:not(:disabled),
-button.btn:active:not(:disabled),
-.btn-primary:active:not(:disabled),
-.btn-ghost:active:not(:disabled),
-.btn-outline:active:not(:disabled),
-.btn-secondary:active:not(:disabled),
-.btn-danger:active:not(:disabled),
-.btn-danger-solid:active:not(:disabled),
-.btn-mini:active:not(:disabled),
-.btn-sm:active:not(:disabled),
-.btn-sm-outline:active:not(:disabled),
-.btn-sm-ghost:active:not(:disabled),
-.btn-sm-primary:active:not(:disabled),
-.btn-sm-danger:active:not(:disabled),
-.btn-sm-ok:active:not(:disabled),
-.btn-sm-crit:active:not(:disabled),
-.btn-logout:active,
-.n-iconbtn:active:not(:disabled),
-.n-iconbtn-sm:active:not(:disabled),
-.n-iconbtn-x:active:not(:disabled),
-.n-seg > button:active,
-.nav-item:active,
-.n-tab:active,
-.filter-mode-btn:active,
-.sub-tab-btn:active {
-  transform: scale(0.97) !important;
-  transition: transform 90ms var(--ease-out) !important;
-}
-
-/* ── IKON BUTTON (DESIGN.md §7) ───────────────────────────
-   Satu bahasa ikon untuk seluruh situs: outline SVG 24-grid, stroke
-   `currentColor`, tanpa warna/gradien/dekorasi (§1). Dipakai untuk
-   (a) mikro-aksi yang kalau ditulis jadi sempit/crowded — terutama "hapus
-   baris" di baris input berulang, dan (b) tombol BERLABEL lewat `.n-has-ico`
-   (ikon + teks), supaya aksi berulang dikenali sekilas.
-
-   `.n-iconbtn`    — di baris form: kotak 45px, TINGGI PERSIS dengan kotak
-                     input di sebelahnya (0.9375rem x 1.55 + padding 20px +
-                     border 2px = ~45px), jadi rata horizontal tanpa perlu
-                     hacks. Pakai `margin-bottom` 0 karena baris form memakai
-                     `align-items:end` dan `.form-grp` punya band hint 26px.
-   `.n-iconbtn-sm` — versi kecil untuk sel aksi tabel (28px), tetap sebaris
-                     dengan `.btn-sm` di sebelahnya.
-   `.n-has-ico`    — tombol berlabel + ikon. Ikon disisipkan sebagai
-                     `inline-block` (BUKAN mengubah `display` tombol jadi flex):
-                     model layout tombol yang sudah ada tetap utuh, jadi tinggi
-                     tombol tidak bergeser. `vertical-align` optically
-                     memusatkan ikon terhadap teks, dan `nowrap` menjaga agar
-                     teks ikon+tetap satu baris. */
-.n-iconbtn,
-.n-iconbtn-sm {
-  box-sizing: border-box;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-  flex: 0 0 auto;
-  cursor: pointer;
-  color: var(--n-text-muted);
-  transition: color 0.14s, border-color 0.14s, background 0.14s;
-}
-.n-has-ico { white-space: nowrap; }
-.n-has-ico > svg.ico {
-  display: inline-block;
-  width: 1.05em;
-  height: 1.05em;
-  vertical-align: -0.18em;
-  margin-right: 0.45em;
-}
-.n-iconbtn {
-  width: var(--ctl-h);
-  height: var(--ctl-h);
-  border: 1px solid var(--n-border-subtle);
-  border-radius: var(--ctl-r);
-  background: var(--n-surface-2);
-}
-.n-iconbtn:hover { color: var(--n-crit); border-color: var(--n-crit); background: var(--n-surface-1); }
-.n-iconbtn-sm {
-  width: var(--ctl-h-sm);
-  height: var(--ctl-h-sm);
-  padding: 0;
-  border: 1px solid var(--n-border-subtle);
-  border-radius: var(--ctl-r-sm);
-  background: var(--n-surface-2);
-}
-.n-iconbtn-sm:hover { color: var(--n-crit); border-color: var(--n-crit); background: var(--n-surface-1); }
-
-/* `.n-iconbtn-x` — tombol IKON-SAJA (tanpa teks) untuk konteks sempit tempat
-   teks tidak menambah informasi: tutup di header modal/drawer, dan tombol
-   "coba lagi" di dalam pesan error. Mengikuti tier MD (32px), ghost tanpa
-   border supaya tidak bersaing dengan tombol berlabel di sebelahnya. */
-.n-iconbtn-x {
-  box-sizing: border-box;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: var(--ctl-h-md);
-  height: var(--ctl-h-md);
-  padding: 0;
-  flex: 0 0 auto;
-  cursor: pointer;
   border: 1px solid transparent;
-  border-radius: var(--ctl-r-md);
-  background: transparent;
-  color: var(--n-text-muted);
-  transition: color 0.14s, border-color 0.14s, background 0.14s;
-}
-.n-iconbtn-x:hover {
-  color: var(--n-crit);
-  border-color: var(--n-border-subtle);
-  background: var(--n-surface-2);
-}
-.n-iconbtn-x svg { width: 16px; height: 16px; }
-.n-iconbtn .ico, .n-iconbtn-sm .ico { display: block; flex: 0 0 auto; }
-.n-iconbtn svg { width: 18px; height: 18px; }
-.n-iconbtn-sm svg { width: 15px; height: 15px; }
-/* Ikon pada tombol berlabel mengikuti font-size tombol (em), bukan ukuran
-   tetap, supaya tinggi line-box tombol tidak pernah berubah hanya karena
-   ikon disisipkan. */
-.n-has-ico svg { width: 1.05em; height: 1.05em; }
-
-/* ============================================================
-   INLINE MESSAGES
-   ============================================================ */
-.n-msg {
-  padding: 10px 13px;
-  border-radius: var(--n-r-sm);
-  font-size: 0.875rem;
-  display: none;
-  margin-bottom: 14px;
-}
-.n-msg.show      { display: block; }
-.n-msg.error     { background: #FEF2F2; color: var(--n-crit); }
-.n-msg.success   { background: #ECFDF5; color: var(--n-ok);   }
-.n-msg.info      { background: var(--n-primary-light); color: var(--n-primary); }
-.n-msg.warn      { background: #FEF3C7; color: #92400E; }
-/* static info — always visible */
-.n-info-static   { background: var(--n-primary-light); color: var(--n-primary);
-                   padding: 10px 13px; border-radius: var(--n-r-sm); font-size: 0.875rem;
-                   margin-bottom: 18px; }
-
-/* Info rows (pending detail) */
-.info-row {
-  display: flex; justify-content: space-between; align-items: baseline;
-  padding: 9px 0;
-  border-bottom: 1px solid var(--n-border-subtle);
-  font-size: 0.9rem;
-}
-.info-row:last-child { border-bottom: none; }
-.info-row .lbl { font-size: 0.8125rem; font-weight: 500; text-transform: none; letter-spacing: -0.005em; color: var(--n-text-secondary); }
-.info-row .val { font-weight: 500; color: var(--n-text-primary); }
-
-/* ── NOTIFIKASI PERSETUJUAN PENDAFTARAN REAL-TIME ── */
-.n-banner-approved {
-  background: #ECFDF5;
-  border: 1px solid #10B981;
-  border-radius: var(--n-r-md, 12px);
-  padding: 16px;
-  margin-bottom: 20px;
-  text-align: left;
-}
-.n-banner-approved-head {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-weight: 700;
-  color: #065F46;
-  font-size: 0.95rem;
-  margin-bottom: 6px;
-}
-.n-banner-approved-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background: #10B981;
-  color: #FFFFFF;
-  font-size: 0.75rem;
-  font-weight: 800;
-  flex-shrink: 0;
-}
-.n-banner-approved-text {
-  font-size: 0.85rem;
-  color: #047857;
-  line-height: 1.45;
-  margin: 0 0 14px 0;
-}
-.n-banner-approved-actions {
-  display: flex;
-  gap: 8px;
-}
-.n-banner-approved-actions .btn-primary {
-  width: 100%;
-  text-align: center;
-  padding: 10px 16px;
-  font-size: 0.9rem;
+  box-shadow: 0 1px 3px rgba(225, 29, 72, 0.25);
 }
 
-/* Banner Penolakan */
-.n-banner-rejected {
-  background: #FEF2F2;
-  border: 1px solid #EF4444;
-  border-radius: var(--n-r-md, 12px);
-  padding: 16px;
-  margin-bottom: 20px;
-  text-align: left;
-}
-.n-banner-rejected-head {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-weight: 700;
-  color: #991B1B;
-  font-size: 0.95rem;
-  margin-bottom: 6px;
-}
-.n-banner-rejected-text {
-  font-size: 0.85rem;
-  color: #B91C1C;
-  line-height: 1.45;
-  margin: 0 0 14px 0;
-}
-
-/* Status Live Polling di Layar Pending */
-.pending-live-status {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  font-size: 0.8rem;
-  color: var(--n-text-muted);
-  margin-top: 14px;
-}
-.pending-pulse-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--n-primary);
-  display: inline-block;
-  opacity: 0.8;
-  animation: pendingPulse 2s ease-in-out infinite;
-}
-@keyframes pendingPulse {
-  0% { transform: scale(0.9); opacity: 0.4; }
-  50% { transform: scale(1.3); opacity: 1; }
-  100% { transform: scale(0.9); opacity: 0.4; }
+.btn-danger-solid:hover {
+  background: #BE123C;
 }
 
 /* ============================================================
-   APP LAYOUT — sidebar fixed + scrollable main
+   APP SHELL (Translucent Sidebar & Header)
    ============================================================ */
-.sidebar {
-  position: fixed; top: 0; left: 0;
-  width: var(--n-sidebar-w);
-  height: 100vh;
-  background: var(--n-text-primary);
-  border-right: 1px solid rgba(255,255,255,0.10);
-  display: flex; flex-direction: column;
-  z-index: 50;
-  overflow: hidden;
-}
-.app-main {
-  margin-left: var(--n-sidebar-w);
+#app-wrapper {
+  display: flex;
   min-height: 100vh;
-  background: var(--n-bg-base);
 }
 
-/* ============================================================
-   SIDEBAR — brand, nav, footer
-   ============================================================ */
-.sb-brand {
+.sidebar {
+  width: var(--n-sidebar-w);
   flex-shrink: 0;
-  padding: 21px 20px;
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  background: var(--n-material-surface);
+  backdrop-filter: var(--n-backdrop-blur-deep);
+  -webkit-backdrop-filter: var(--n-backdrop-blur-deep);
+  border-right: 1px solid var(--n-border-hairline);
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  z-index: 50;
+}
+
+.sb-brand {
+  padding: 24px 20px 18px;
   font-weight: 800;
-  font-size: 1.1875rem;
-  color: #FFFFFF;
-  letter-spacing: -0.01em;
-  border-bottom: 1px solid rgba(255,255,255,0.10);
+  font-size: 1.25rem;
+  color: var(--n-primary);
+  letter-spacing: -0.025em;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
+
+.sb-brand::before {
+  content: '';
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  background: var(--n-primary-accent);
+}
+
 .sb-nav {
-  flex: 1;
+  flex: 1 1 auto;
   overflow-y: auto;
-  padding: 8px 0 12px;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(255,255,255,0.25) transparent;
+  padding: 8px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
-.sb-nav::-webkit-scrollbar { width: 3px; }
-.sb-nav::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.25); border-radius: 2px; }
 
 .sb-section-label {
-  padding: 14px 20px 4px;
-  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: none;
-  letter-spacing: -0.005em;
-  color: rgba(255,255,255,0.55);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  color: var(--n-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 14px 10px 6px;
 }
-/* nav-item: text-only, no colorful icons (DESIGN.md §1.1) */
+
 .nav-item {
   display: flex;
   align-items: center;
-  padding: 9px 20px;
-  font-family: inherit;
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: rgba(255,255,255,0.78);
-  cursor: pointer;
-  transition: color 0.14s var(--ease-out), background 0.14s var(--ease-out), border-color 0.14s var(--ease-out);
-  border-left: 3px solid transparent;
-  user-select: none;
-}
-@media (hover: hover) and (pointer: fine) {
-  .nav-item:hover { background: rgba(255,255,255,0.08); color: #FFFFFF; }
-}
-.nav-item.active {
-  background: rgba(255,255,255,0.12);
-  color: #FFFFFF;
-  border-left-color: #FFFFFF;
+  justify-content: space-between;
+  padding: 9px 12px;
+  border-radius: var(--n-radius-md);
+  font-size: 0.84rem;
   font-weight: 600;
+  color: var(--n-text-secondary);
+  cursor: pointer;
+  transition: all 0.14s var(--ease-out);
+}
+
+.nav-item:hover {
+  background: rgba(15, 23, 42, 0.04);
+  color: var(--n-text-primary);
+}
+
+.nav-item.active {
+  background: var(--n-primary-light);
+  color: var(--n-primary);
+  font-weight: 700;
 }
 
 .sb-footer {
+  padding: 12px;
+  border-top: 1px solid var(--n-border-hairline);
   position: relative;
-  flex-shrink: 0;
-  padding: 12px 12px;
-  border-top: 1px solid rgba(255, 255, 255, 0.10);
-  background: rgba(0, 0, 0, 0.12);
 }
 
-/* User Trigger Card (Pojok Kiri Bawah) */
 .sb-user-card {
   display: flex;
   align-items: center;
   gap: 10px;
   padding: 8px 10px;
-  border-radius: var(--n-radius-inner);
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--n-radius-md);
   cursor: pointer;
-  user-select: none;
-  transition: all 0.16s var(--ease-out);
-}
-.sb-user-card:hover {
-  background: rgba(255, 255, 255, 0.10);
-  border-color: rgba(255, 255, 255, 0.18);
-  transform: translateY(-1px);
-}
-.sb-user-card:active {
-  transform: scale(0.98);
-}
-.sb-user-card.is-active {
-  background: rgba(255, 255, 255, 0.14);
-  border-color: rgba(255, 255, 255, 0.25);
+  transition: background 0.14s var(--ease-out);
 }
 
-/* Avatar Wrap with Status Dot */
+.sb-user-card:hover {
+  background: rgba(15, 23, 42, 0.04);
+}
+
 .sb-avatar-wrap {
   position: relative;
-  flex-shrink: 0;
 }
+
 .sb-avatar {
-  width: 34px;
-  height: 34px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0.08) 100%);
-  border: 1.5px solid rgba(255, 255, 255, 0.25);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  background: var(--n-primary-light);
+  color: var(--n-primary);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #FFFFFF;
 }
+
 .sb-status-dot {
   position: absolute;
-  bottom: -1px;
-  right: -1px;
-  width: 9px;
-  height: 9px;
+  bottom: 0;
+  right: 0;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
-  background: #10B981; /* Emerald Active */
-  border: 2px solid var(--n-primary);
-  box-shadow: 0 0 5px rgba(16, 185, 129, 0.7);
+  background: var(--n-status-success);
+  border: 1.5px solid #FFFFFF;
 }
 
 .sb-user-info {
   flex: 1 1 auto;
   min-width: 0;
-  display: flex;
-  flex-direction: column;
-}
-.sb-user-name {
-  font-family: inherit;
-  font-size: 0.8125rem;
-  font-weight: 600;
-  color: #FFFFFF;
-  line-height: 1.25;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  margin-bottom: 2px;
-}
-.sb-user-role {
-  font-size: 0.70rem;
-  font-weight: 500;
-  color: rgba(255, 255, 255, 0.65);
-  line-height: 1.2;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.sb-user-chevron {
-  flex-shrink: 0;
-  color: rgba(255, 255, 255, 0.5);
-  transition: transform 0.2s var(--ease-out), color 0.16s ease;
-  display: flex;
-  align-items: center;
-}
-.sb-user-card:hover .sb-user-chevron {
-  color: #FFFFFF;
-}
-.sb-user-card.is-active .sb-user-chevron {
-  transform: rotate(180deg);
-  color: #FFFFFF;
 }
 
-/* Drop-Up Popover Menu */
+.sb-user-name {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--n-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sb-user-role {
+  font-size: 0.72rem;
+  color: var(--n-text-muted);
+}
+
 .sb-user-menu {
   position: absolute;
   bottom: calc(100% + 8px);
-  left: 10px;
-  right: 10px;
-  background: rgba(20, 27, 65, 0.98);
-  backdrop-filter: blur(28px) saturate(190%);
-  -webkit-backdrop-filter: blur(28px) saturate(190%);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  border-radius: 14px;
-  box-shadow: 0 16px 36px -4px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(0, 0, 0, 0.15);
-  padding: 10px;
+  left: 12px;
+  right: 12px;
+  background: var(--n-material-floating);
+  backdrop-filter: var(--n-backdrop-blur);
+  border: 1px solid var(--n-border-hairline);
+  border-radius: var(--n-radius-lg);
+  box-shadow: var(--n-shadow-3);
+  padding: 8px;
   z-index: 100;
-  display: flex;
-  flex-direction: column;
-  animation: _dropUpFade 0.18s var(--ease-out);
-}
-@keyframes _dropUpFade {
-  from {
-    opacity: 0;
-    transform: translateY(8px) scale(0.96);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
+  animation: _menuUp 180ms var(--ease-spring);
 }
 
-.sb-menu-header {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 6px 6px 8px;
-}
-.sb-menu-avatar {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.12);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #FFFFFF;
-  flex-shrink: 0;
-}
-.sb-menu-user {
-  flex: 1 1 auto;
-  min-width: 0;
-}
-.sb-menu-name {
-  font-size: 0.8125rem;
-  font-weight: 700;
-  color: #FFFFFF;
-  line-height: 1.25;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.sb-menu-email {
-  font-size: 0.70rem;
-  color: rgba(255, 255, 255, 0.55);
-  line-height: 1.2;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  margin-top: 1px;
+@keyframes _menuUp {
+  from { opacity: 0; transform: translateY(8px) scale(0.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-.sb-menu-badges {
-  display: flex;
-  padding: 0 6px 6px;
-}
-.sb-role-badge {
-  font-size: 0.65rem;
-  font-weight: 700;
-  padding: 2px 8px;
-  border-radius: 99px;
-  background: rgba(255, 255, 255, 0.12);
-  color: rgba(255, 255, 255, 0.88);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  letter-spacing: 0.02em;
-}
-
-.sb-menu-divider {
-  height: 1px;
-  background: rgba(255, 255, 255, 0.08);
-  margin: 4px 0;
-}
-
-.sb-menu-items {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
 .sb-menu-item {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 8px 10px;
-  border-radius: var(--n-radius-inner);
-  font-size: 0.78rem;
-  font-weight: 500;
-  color: rgba(255, 255, 255, 0.85);
+  padding: 8px 12px;
+  border-radius: var(--n-radius-sm);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--n-text-primary);
   cursor: pointer;
-  user-select: none;
-  transition: all 0.12s var(--ease-out);
-}
-.sb-menu-item:hover {
-  background: rgba(255, 255, 255, 0.10);
-  color: #FFFFFF;
-}
-.sb-menu-item.danger {
-  color: #FCA5A5; /* Soft crimson */
-}
-.sb-menu-item.danger:hover {
-  background: rgba(239, 68, 68, 0.18);
-  color: #EF4444;
 }
 
-/* ============================================================
-   PAGE HEADER — sticky, translucent vibrancy (DESIGN.md §3, §5)
-   ============================================================ */
+.sb-menu-item:hover {
+  background: rgba(15, 23, 42, 0.05);
+}
+
+.sb-menu-item.danger {
+  color: var(--n-crit);
+}
+
+.sb-menu-item.danger:hover {
+  background: var(--n-status-critical-bg);
+}
+
+/* Main Area */
+.app-main {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
 .page-header {
-  position: sticky; top: 0; z-index: 40;
-  background: var(--n-material-header, rgba(244, 247, 254, 0.88));
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  padding: 18px 32px 0;
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: var(--n-material-header);
+  backdrop-filter: var(--n-backdrop-blur);
+  -webkit-backdrop-filter: var(--n-backdrop-blur);
+  padding: 16px 32px;
   border-bottom: 1px solid var(--n-border-hairline);
-  box-shadow: 0 4px 16px -4px rgba(43, 54, 116, 0.04);
+  box-shadow: 0 4px 16px -4px rgba(15, 23, 42, 0.03);
 }
+
 .page-header-inner {
-  display: flex; align-items: flex-start;
+  display: flex;
+  align-items: center;
   justify-content: space-between;
-  gap: 20px;
-  padding-bottom: 16px;
+  gap: 16px;
 }
-/* h1.page-title: title only, no subtitle — DESIGN.md §1.6 */
+
 .page-title {
-  font-family: inherit;
   font-weight: 800;
   font-size: 1.45rem;
   color: var(--n-text-primary);
-  letter-spacing: -0.020em;
-  line-height: 1.25;
-}
-
-/* ============================================================
-   FILTER PERIODE — satu control kohesif + spinner loading (DESIGN.md §7)
-   ============================================================ */
-.filter-periode {
-  display: flex; align-items: center;
-  gap: 10px;
-  flex-shrink: 0;
-  padding-top: 3px;
-}
-.filter-box {
-  display: flex; align-items: center;
-  background: var(--n-material-glass, rgba(255, 255, 255, 0.65));
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border: 1px solid var(--n-border-hairline);
-  border-radius: var(--n-radius-inner);
-  padding: 3px 4px;
-  box-shadow: var(--n-shadow-1), var(--n-shadow-inset-bevel);
-}
-.filter-mode { display: flex; align-items: center; gap: 2px; }
-.filter-mode-btn {
-  padding: 5px 12px;
-  border: none;
-  border-radius: 8px;
-  font-family: inherit;
-  font-size: 0.78rem;
-  font-weight: 500;
-  cursor: pointer;
-  white-space: nowrap;
-  background: transparent;
-  color: var(--n-text-secondary);
-  transition: background 0.14s var(--ease-out), color 0.14s var(--ease-out);
-}
-@media (hover: hover) and (pointer: fine) {
-  .filter-mode-btn:hover { background: rgba(0, 0, 0, 0.04); color: var(--n-text-primary); }
-}
-.filter-mode-btn.active {
-  background: var(--n-primary);
-  color: #fff;
-  box-shadow: var(--n-shadow-1);
-}
-.filter-mode-sep {
-  width: 1px;
-  align-self: stretch;
-  margin: 4px 8px;
-  background: var(--n-border-hairline);
-}
-.filter-inputs { display: flex; align-items: center; gap: 5px; }
-.filter-sel,
-.filter-date {
-  height: 28px;
-  padding: 0 8px;
-  border: 1px solid var(--n-border-subtle);
-  border-radius: 8px;
-  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-  font-size: 0.8rem;
-  font-variant-numeric: tabular-nums;
-  color: var(--n-text-primary);
-  background: var(--n-surface-1);
-  outline: none;
-  cursor: pointer;
-}
-.filter-sel {
-  appearance: none;
-  -webkit-appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23A3AED0' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 8px center;
-  padding-right: 22px;
-}
-.filter-sel:focus, .filter-date:focus { border-color: var(--n-primary); }
-.filter-date { width: 118px; }
-.filter-sep { color: var(--n-text-muted); font-size: 0.75rem; }
-/* Spinner loading di samping filter — muncul otomatis saat ada call ke sheet */
-.filter-busy {
-  display: none;
-  flex-shrink: 0;
-  width: 15px;
-  height: 15px;
-  margin-top: 3px;
-  border: 2px solid var(--n-primary-light);
-  border-top-color: var(--n-primary);
-  border-radius: 50%;
-  animation: _spin 0.7s linear infinite;
-}
-
-/* Indikator sinkronisasi & telemetri terpadu (Fase 17 Refinement) */
-.sync-indicator {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 10px;
-  background: var(--n-material-surface);
-  border: 1px solid var(--n-border-hairline);
-  border-radius: var(--n-radius-pill);
-  font-size: 0.72rem;
-  font-weight: 600;
-  color: var(--n-text-secondary);
-  cursor: pointer;
-  user-select: none;
-  transition: all 0.16s var(--ease-out);
+  letter-spacing: -0.025em;
   line-height: 1.2;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
 }
-.sync-indicator:hover {
-  border-color: rgba(43, 54, 116, 0.25);
-  background: #FFFFFF;
-  color: var(--n-text-primary);
-  box-shadow: var(--n-shadow-1);
+
+.page-content {
+  padding: 24px 32px 48px;
+  flex: 1 1 auto;
 }
-.sync-icon-wrap {
+
+/* ============================================================
+   ANTI-GABRUK SUB-NAVIGASI TATA USAHA (5 SUB-MODUL)
+   ============================================================ */
+.tu-subnav-container {
+  margin-bottom: 24px;
+}
+
+.tu-subnav-bar {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  color: #059669; /* Emerald */
-  transition: transform 0.2s var(--ease-out), color 0.2s var(--ease-out);
-}
-.sync-icon {
-  width: 12px;
-  height: 12px;
-  display: block;
-}
-.sync-indicator.is-syncing .sync-icon-wrap {
-  color: var(--n-primary);
-  animation: _syncSpin 0.9s linear infinite;
-}
-.sync-indicator.is-deferred .sync-icon-wrap {
-  color: #D97706; /* Amber */
-}
-.sync-indicator.is-stale .sync-icon-wrap {
-  color: #DC2626; /* Crimson */
-}
-.sync-indicator.is-deferred {
-  border-color: rgba(245, 158, 11, 0.35);
-  background: rgba(254, 243, 199, 0.4);
-  color: #B45309;
-}
-.sync-indicator.is-stale {
-  border-color: rgba(239, 68, 68, 0.35);
-  background: rgba(254, 226, 226, 0.4);
-  color: #DC2626;
-}
-
-@keyframes _syncSpin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
-/* Floating Hover Popover — memuat detail telemetry & waktu sinkronisasi */
-.sync-popover {
-  position: absolute;
-  top: calc(100% + 8px);
-  right: 0;
-  width: 230px;
-  padding: 10px 12px;
-  background: rgba(255, 255, 255, 0.96);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  background: rgba(15, 23, 42, 0.04);
+  padding: 4px;
+  border-radius: var(--n-radius-md);
   border: 1px solid var(--n-border-hairline);
+  gap: 3px;
+  box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.tu-subnav-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 14px;
   border-radius: var(--n-radius-inner);
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
-  pointer-events: none;
-  opacity: 0;
-  transform: translateY(-4px) scale(0.97);
-  transition: opacity 0.18s var(--ease-out), transform 0.18s var(--ease-out);
-  z-index: 1000;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  text-align: left;
-}
-.sync-popover::before {
-  content: '';
-  position: absolute;
-  top: -5px;
-  right: 18px;
-  width: 8px;
-  height: 8px;
-  background: #FFFFFF;
-  border-left: 1px solid var(--n-border-hairline);
-  border-top: 1px solid var(--n-border-hairline);
-  transform: rotate(45deg);
-}
-.sync-indicator:hover .sync-popover {
-  opacity: 1;
-  transform: translateY(0) scale(1);
-  pointer-events: auto;
-}
-.sync-pop-head {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: var(--n-text-primary);
-}
-.sync-pop-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: #059669;
-}
-.sync-indicator.is-syncing .sync-pop-dot { background: var(--n-primary); }
-.sync-indicator.is-deferred .sync-pop-dot { background: #D97706; }
-.sync-indicator.is-stale .sync-pop-dot { background: #DC2626; }
-
-.sync-pop-data {
-  font-size: 0.72rem;
-  font-weight: 500;
+  font-size: 0.8125rem;
+  font-weight: 600;
   color: var(--n-text-secondary);
-  line-height: 1.35;
+  cursor: pointer;
+  transition: all 0.16s var(--ease-out);
+  white-space: nowrap;
 }
-.sync-pop-action {
-  font-size: 0.68rem;
+
+.tu-subnav-btn:hover:not(.active) {
+  color: var(--n-text-primary);
+  background: rgba(255, 255, 255, 0.6);
+}
+
+.tu-subnav-btn.active {
+  background: var(--n-surface-solid);
   color: var(--n-primary);
-  font-weight: 600;
-  margin-top: 4px;
-  padding-top: 5px;
-  border-top: 1px solid rgba(0, 0, 0, 0.06);
-}
-
-/* Form loading overlay (lebih terlihat saat submit) */
-.n-modal-form-scroll { position: relative; }
-.form-loading-overlay {
-  position: absolute;
-  inset: 0;
-  background: rgba(255,255,255,0.72);
-  backdrop-filter: blur(1px);
-  border-radius: var(--n-r-md);
-  display: none;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  gap: 10px;
-  z-index: 5;
-}
-.form-loading-overlay.show { display: flex; }
-.form-loading-overlay .loading-text {
-  font-size: .82rem;
-  color: var(--n-text-primary);
-  font-weight: 600;
-  letter-spacing: .01em;
-}
-
-/* Success state di dalam modal form */
-.modal-success {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: 24px 12px 12px;
-  gap: 12px;
-  animation: _modalSuccessIn .16s ease-out;
-}
-@keyframes _modalSuccessIn {
-  from { opacity: 0; transform: scale(.985); }
-  to   { opacity: 1; transform: scale(1); }
-}
-.modal-success .ms-icon {
-  width: 46px;
-  height: 46px;
-  border-radius: 50%;
-  background: #ECFDF5;
-  border: 1px solid rgba(16,185,129,0.22);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.modal-success .ms-icon svg {
-  width: 28px;
-  height: 28px;
-  stroke: var(--n-status-success);
-  stroke-width: 2.25;
-}
-.modal-success .ms-title {
-  font-size: 1rem;
   font-weight: 700;
-  color: var(--n-text-primary);
-  letter-spacing: -.01em;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08), 0 4px 12px -2px rgba(15, 23, 42, 0.06);
 }
-.modal-success .ms-sub {
-  font-size: .88rem;
-  color: var(--n-text-secondary);
-  max-width: 38ch;
+
+.tu-pane {
+  animation: _fadeIn 220ms var(--ease-spring);
 }
-.modal-success .ms-auto {
-  font-size: .78rem;
-  color: var(--n-text-muted);
-  margin-top: 4px;
+
+@keyframes _fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 /* ============================================================
-   PAGE CONTENT AREA — DESIGN.md §5
-   ============================================================ */
-.page-content {
-  padding: 28px 32px 40px;
-}
-
-/* ============================================================
-   CARD — DESIGN.md §3, §4, §7
-   ============================================================ */
-/* ============================================================
-   CARD — DESIGN.md §3, §4, §7
+   CARDS, KPI STRIPS & DATA GRIDS
    ============================================================ */
 .n-card {
   background: var(--n-material-surface);
   backdrop-filter: var(--n-backdrop-blur);
   -webkit-backdrop-filter: var(--n-backdrop-blur);
   border: 1px solid var(--n-border-hairline);
-  border-radius: var(--n-radius-outer-lg);
-  box-shadow: var(--n-shadow-1), var(--n-shadow-inset-bevel);
-  padding: 24px;
-  transition: box-shadow 0.2s var(--ease-out), transform 0.2s var(--ease-out);
-}
-@media (hover: hover) and (pointer: fine) {
-  .n-card:hover {
-    box-shadow: var(--n-shadow-2), var(--n-shadow-inset-bevel);
-  }
+  border-radius: var(--n-radius-lg);
+  box-shadow: var(--n-shadow-card), var(--n-shadow-inset-bevel);
+  padding: 20px;
+  transition: box-shadow 0.2s var(--ease-out);
 }
 
-/* ============================================================
-   KPI CARD — DESIGN.md §3, §4, §7 (translucent vibrancy, number is focus)
-   ============================================================ */
-.kpi-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 16px;
-  margin-bottom: 24px;
-}
-.kpi-card {
-  background: var(--n-material-surface);
-  backdrop-filter: var(--n-backdrop-blur);
-  -webkit-backdrop-filter: var(--n-backdrop-blur);
-  border: 1px solid var(--n-border-hairline);
-  border-radius: var(--n-radius-outer-lg);
-  box-shadow: var(--n-shadow-1), var(--n-shadow-inset-bevel);
-  padding: 16px 18px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  gap: 8px;
-  min-height: 132px;
-  box-sizing: border-box;
-  transition: box-shadow 0.2s var(--ease-out), transform 0.2s var(--ease-out);
-  animation: _staggerFadeIn 240ms var(--ease-out) backwards;
-}
-@media (hover: hover) and (pointer: fine) {
-  .kpi-card:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--n-shadow-2), var(--n-shadow-inset-bevel);
-  }
-}
-.kpi-card:active {
-  transform: scale(0.985);
+.n-card:hover {
+  box-shadow: var(--n-shadow-2), var(--n-shadow-inset-bevel);
 }
 
-.kpi-grid > .kpi-card:nth-child(1) { animation-delay: 0ms; }
-.kpi-grid > .kpi-card:nth-child(2) { animation-delay: 35ms; }
-.kpi-grid > .kpi-card:nth-child(3) { animation-delay: 70ms; }
-.kpi-grid > .kpi-card:nth-child(4) { animation-delay: 105ms; }
-.kpi-grid > .kpi-card:nth-child(5) { animation-delay: 140ms; }
-.kpi-grid > .kpi-card:nth-child(6) { animation-delay: 175ms; }
-
-@keyframes _staggerFadeIn {
-  from {
-    opacity: 0;
-    transform: scale(0.96) translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
-}
-
-.kpi-main {
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-.kpi-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  min-height: 22px;
-}
-.kpi-head .ov-trend {
-  margin-top: 0;
-}
-.kpi-vis {
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-}
-.kpi-label {
-  font-family: inherit;
-  font-size: 0.8125rem;
-  font-weight: 600;
-  text-transform: none;
-  letter-spacing: -0.01em;
-  color: var(--n-text-secondary);
-  line-height: 1.25;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  min-width: 0;
-}
-.kpi-value {
-  font-family: inherit;
-  font-weight: 800;
-  font-size: 1.75rem;
-  color: var(--n-text-primary);
-  letter-spacing: -0.025em;
-  line-height: 1.15;
-  font-variant-numeric: tabular-nums;
-  -webkit-font-feature-settings: "tnum";
-  font-feature-settings: "tnum";
-}
-.kpi-track {
-  width: 100%;
-  height: 5px;
-  background: rgba(43, 54, 116, 0.08);
-  border-radius: 99px;
-  overflow: hidden;
-  margin: 3px 0 2px;
-}
-.kpi-track-fill {
-  height: 100%;
-  background: var(--n-primary);
-  border-radius: 99px;
-  transition: width 0.4s var(--ease-out);
-}
-
-.kpi-foot {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  font-size: 0.75rem;
-  line-height: 1.25;
-  color: var(--n-text-secondary);
-  font-variant-numeric: tabular-nums;
-  -webkit-font-feature-settings: "tnum";
-  font-feature-settings: "tnum";
-  margin-top: 1px;
-}
-.kpi-foot-item {
-  display: inline-flex;
-  align-items: baseline;
-  gap: 4px;
-  min-width: 0;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.kpi-foot-item.right {
-  justify-content: flex-end;
-  text-align: right;
-}
-.kpi-foot-lbl {
-  color: var(--n-text-secondary);
-  font-weight: 500;
-  font-size: 0.72rem;
-}
-.kpi-foot-val {
-  color: var(--n-text-primary);
-  font-weight: 700;
-  font-size: 0.75rem;
-  font-variant-numeric: tabular-nums;
-}
-
-.kpi-sub {
-  font-size: 0.75rem;
-  font-variant-numeric: tabular-nums;
-  color: var(--n-text-secondary);
-  line-height: 1.35;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.kpi-unit {
-  font-size: 0.875rem;
-  font-weight: 500;
-  margin-left: 5px;
-  color: var(--n-text-secondary);
-  vertical-align: baseline;
-}
-
-/* ============================================================
-   STATUS BADGES — DESIGN.md §1.3, §3.2 (soft tint, non-jarring)
-   ============================================================ */
-.badge,
-.status-badge {
-  display: inline-flex; align-items: center;
-  padding: 4px 10px;
-  border-radius: var(--n-radius-pill);
-  font-size: 0.72rem;
-  font-weight: 600;
-  white-space: nowrap;
-  letter-spacing: 0.02em;
-  line-height: 1.2;
-}
-
-.badge-ok,
-.status-badge.siap {
-  background: var(--n-status-success-bg);
-  color: #059669;
-  border: 1px solid var(--n-status-success-border);
-}
-
-.badge-warn,
-.status-badge.baseline {
-  background: var(--n-status-warning-bg);
-  color: #B45309;
-  border: 1px solid var(--n-status-warning-border);
-}
-
-.badge-crit,
-.status-badge.tidak-siap,
-.status-badge.dianulir {
-  background: var(--n-status-critical-bg);
-  color: #DC2626;
-  border: 1px solid var(--n-status-critical-border);
-}
-
-.badge-neutral,
-.status-badge.ditimpa {
-  background: rgba(0, 0, 0, 0.04);
-  color: var(--n-text-secondary);
-  border: 1px solid rgba(0, 0, 0, 0.08);
-}
-
-.badge-super,
-.status-badge.aktif {
-  background: var(--n-primary-tint);
-  color: var(--n-primary);
-  border: 1px solid rgba(43, 54, 116, 0.20);
-}
-
-/* ============================================================
-   TABLE — DESIGN.md §4 (horizontal scroll containment, sticky headers)
-   ============================================================ */
-.n-table-wrap {
-  width: 100%;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  border-radius: var(--n-radius-inner);
-  border: 1px solid var(--n-border-hairline);
-  background: var(--n-material-surface);
-  box-shadow: var(--n-shadow-1);
-}
-.n-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
-.n-table th {
-  position: sticky;
-  top: 0;
-  text-align: left;
-  padding: 10px 14px;
-  font-size: 0.78rem;
-  text-transform: none;
-  letter-spacing: -0.005em;
-  color: var(--n-text-secondary);
-  font-weight: 600;
-  background: rgba(255, 255, 255, 0.94);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--n-border-hairline);
-  z-index: 2;
-}
-.n-table td {
-  padding: 12px 14px;
-  border-bottom: 1px solid var(--n-border-subtle);
-  vertical-align: middle;
-  color: var(--n-text-primary);
-  font-variant-numeric: tabular-nums;
-}
-.n-table tr:last-child td { border-bottom: none; }
-.n-table tbody tr {
-  transition: background 0.12s var(--ease-out);
-}
-.n-table tbody tr:hover td { background: var(--n-surface-hover); }
-
-/* ── RIWAYAT DIVISI (seragam lintas modul) ──────────────────
-   Seluruh tabel riwayat modul memakai satu set gaya ini lewat _histBadge() /
-   _histActions() / _histRender() di Script_Main.html, supaya bentuk, badge
-   status, dan aksi Lihat/Revisi/Anulir identik di semua divisi. */
-
-/* Badge status baris riwayat — warna dari token tema, bukan hex inline. */
-.status-badge.aktif       { background: var(--n-primary-light); color: var(--n-primary); }
-.status-badge.ditimpa     { background: var(--n-surface-2);      color: var(--n-text-secondary); }
-.status-badge.dianulir    { background: #FEF2F2;                  color: var(--n-crit); }
-.status-badge.siap        { background: #ECFDF5;                  color: var(--n-ok); }
-.status-badge.tidak-siap  { background: #FEF2F2;                  color: var(--n-crit); }
-.status-badge.baseline    { background: #FEF3C7;                  color: #92400E; }
-
-/* Aksi baris riwayat: Lihat → Revisi → Anulir (urutan tetap, destruktif terakhir). */
-.btn-mini.btn-danger { color: var(--n-crit); border-color: var(--n-crit); }
-.btn-mini.btn-danger:hover { background: #FEF2F2; }
-.hist-actions { display: flex; gap: 6px; flex-wrap: wrap; }
-
-/* Entri non-aktif + komentar anulir inline (ARCHITECTURE.md §5, PRD §7.4). */
-.n-table tbody tr.hist-row-void td { background: #FEF2F2; }
-.n-table tbody tr.hist-row-ditampa td { opacity: 0.6; }
-.hist-void-note td {
-  padding-top: 0;
-  border-bottom: 1px solid #FECACA;
-  color: var(--n-crit);
-  font-size: 0.8125rem;
-}
-.hist-empty { padding: 20px 24px; color: var(--n-text-muted); font-size: 0.875rem; }
-
-/* Judul bagian "Lampiran" di modal Lihat + aksi kelola opsional. */
-.hist-section-hd {
-  display: flex; align-items: center; justify-content: space-between; gap: 12px;
-  margin-bottom: 14px;
-}
-.hist-section-hd .btn-mini { margin-right: 0; }
-
-
-/* ============================================================
-   TABS — pemisah sub-konten (Operasi Kapal/Pesawat, Master Data)
-   ============================================================ */
-.n-tabs {
-  display: flex;
-  gap: 4px;
-  border-bottom: 1px solid var(--n-border-subtle);
-  margin-bottom: 24px;
-}
-.n-tab {
-  padding: 9px 18px;
-  border: none;
-  border-bottom: 2px solid transparent;
-  background: transparent;
-  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-  font-size: 0.845rem;
-  font-weight: 500;
-  color: var(--n-text-secondary);
-  cursor: pointer;
-  transition: color 0.14s, border-color 0.14s, transform 0.1s var(--n-spring-snappy);
-  white-space: nowrap;
-}
-.n-tab:hover { color: var(--n-primary); }
-.n-tab.active {
-  color: var(--n-primary);
-  font-weight: 600;
-  border-bottom-color: var(--n-primary);
-}
-
-/* ============================================================
-   MODULE STUB (Phase 3 placeholder for views not yet built)
-   ============================================================ */
-.module-stub {
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-  padding: 80px 32px;
-  text-align: center;
-}
-.module-stub-title {
-  font-family: 'Plus Jakarta Sans', sans-serif;
-  font-weight: 600;
-  font-size: 0.9375rem;
-  color: var(--n-text-secondary);
-  margin-bottom: 8px;
-}
-.module-stub p {
-  font-size: 0.875rem;
-  color: var(--n-text-muted);
-  line-height: 1.65;
-  max-width: 320px;
-}
-
-/* ============================================================
-   DRAWER KANAN — panel geser persetujuan registrasi
-   ============================================================ */
-.n-drawer {
-  position: fixed; top: 0; right: 0; bottom: 0;
-  width: 560px; max-width: 94vw;
-  background: var(--n-material-floating, rgba(255, 255, 255, 0.95));
-  backdrop-filter: blur(32px) saturate(180%);
-  -webkit-backdrop-filter: blur(32px) saturate(180%);
-  border-left: 1px solid var(--n-border-hairline, rgba(0,0,0,0.07));
-  box-shadow: var(--n-shadow-3);
-  z-index: 210;
-  display: flex; flex-direction: column;
-  transform: translateX(105%);
-  transition: transform 0.34s var(--n-spring-modal);
-}
-.n-drawer.n-open { transform: translateX(0); }
-.sheet-grabber {
-  width: 36px;
-  height: 5px;
-  background: rgba(0, 0, 0, 0.18);
-  border-radius: var(--n-r-pill);
-  margin: 10px auto 4px;
-  display: block;
-  flex-shrink: 0;
-}
-.n-drawer-hd {
-  display: flex; align-items: center; justify-content: space-between;
-  gap: 12px; padding: 18px 22px;
-  border-bottom: 1px solid var(--n-border-hairline, rgba(0,0,0,0.07));
-}
-.n-drawer-hd h2 {
-  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-  font-size: 0.95rem; font-weight: 600;
-  color: var(--n-text-primary); margin: 0;
-}
-.n-drawer-bd { padding: 18px 22px; overflow-y: auto; flex: 1; }
-.n-drawer-bd .n-msg { margin-top: 0; }
-.n-drawer-bd .n-table-wrap { margin-bottom: 0; }
-
-/* overlay reuse utk mask drawer (tetap pakai .n-overlay, z 200) */
-.n-overlay.n-z-drawer { z-index: 205; cursor: pointer; }
-
-/* ============================================================
-   MODAL — Apple anchored spring dialog & backdrop blur
-   ============================================================ */
-.n-overlay {
-  position: fixed; inset: 0;
-  background: rgba(15, 23, 42, 0.45);
-  backdrop-filter: var(--n-backdrop-modal);
-  -webkit-backdrop-filter: var(--n-backdrop-modal);
-  z-index: 200;
-  display: flex; align-items: center; justify-content: center;
-  transition: opacity 0.22s var(--ease-out);
-}
-.n-overlay.n-hidden { display: none !important; }
-.n-modal {
-  background: var(--n-material-floating);
-  backdrop-filter: var(--n-backdrop-blur-deep);
-  -webkit-backdrop-filter: var(--n-backdrop-blur-deep);
-  border: 1px solid var(--n-border-hairline);
-  border-radius: var(--n-radius-outer-lg);
-  box-shadow: var(--n-shadow-3), var(--n-shadow-inset-bevel);
-  padding: 32px; width: 420px; max-width: 92vw;
-  position: relative;   /* fallback overlay loading untuk modal tanpa .n-modal-form-scroll */
-  animation: n-modal-enter 240ms var(--ease-out) forwards;
-}
-@keyframes n-modal-enter {
-  from {
-    transform: scale(0.95) translateY(10px);
-    opacity: 0;
-  }
-  to {
-    transform: scale(1) translateY(0);
-    opacity: 1;
-  }
-}
-.n-modal h2 {
-  font-family: inherit;
-  font-weight: 700; font-size: 1.15rem;
-  letter-spacing: -0.015em;
-  color: var(--n-text-primary);
-  margin-bottom: 18px;
-}
-
-/* ============================================================
-   NAUTIKA SONNER TOASTER ARCHITECTURE (ask-sonner & emil-design-eng)
-   Non-blocking floating stacked toast system with gesture dismiss
-   ============================================================ */
-#n-toaster {
-  position: fixed;
-  bottom: 24px;
-  right: 24px;
-  z-index: 1000;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  pointer-events: none;
-  max-width: 380px;
-  width: calc(100vw - 32px);
-}
-@media (max-width: 600px) {
-  #n-toaster {
-    bottom: max(16px, env(safe-area-inset-bottom));
-    right: 16px;
-    left: 16px;
-    width: auto;
-  }
-}
-.sonner-toast {
-  pointer-events: auto;
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 13px 18px;
-  border-radius: var(--n-radius-inner);
-  background: var(--n-material-floating);
-  backdrop-filter: blur(28px) saturate(190%);
-  -webkit-backdrop-filter: blur(28px) saturate(190%);
-  border: 1px solid var(--n-border-hairline);
-  box-shadow: var(--n-shadow-3), var(--n-shadow-inset-bevel);
-  color: var(--n-text-primary);
-  font-family: inherit;
-  font-size: 0.875rem;
-  line-height: 1.4;
-  transform-origin: bottom right;
-  transition: transform 220ms var(--ease-out), opacity 200ms var(--ease-out);
-  touch-action: pan-x;
-  user-select: none;
-  overflow: hidden;
-}
-.sonner-toast.enter {
-  animation: sonnerEnter 240ms var(--ease-out) forwards;
-}
-.sonner-toast.exit {
-  animation: sonnerExit 180ms var(--ease-out) forwards;
-}
-@keyframes sonnerEnter {
-  from {
-    opacity: 0;
-    transform: scale(0.92) translateY(14px);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
-}
-@keyframes sonnerExit {
-  from {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
-  to {
-    opacity: 0;
-    transform: scale(0.94) translateY(10px);
-  }
-}
-.sonner-toast-icon {
-  flex-shrink: 0;
-  width: 20px;
-  height: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.sonner-toast-content {
-  flex: 1;
-  min-width: 0;
-}
-.sonner-toast-title {
-  font-weight: 600;
-  font-size: 0.875rem;
-  color: var(--n-text-primary);
-  overflow-wrap: break-word;
-  word-break: break-word;
-}
-.sonner-toast-desc {
-  font-size: 0.78rem;
-  color: var(--n-text-secondary);
-  margin-top: 2px;
-  overflow-wrap: break-word;
-  word-break: break-word;
-}
-.sonner-toast-action {
-  flex-shrink: 0;
-  padding: 4px 10px;
-  border-radius: var(--n-radius-pill);
-  border: 1px solid var(--n-border-hairline);
-  background: rgba(0, 0, 0, 0.04);
-  color: var(--n-primary);
-  font-size: 0.75rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.14s var(--ease-out);
-}
-.sonner-toast-action:hover {
-  background: var(--n-primary-light);
-}
-.sonner-toast.success .sonner-toast-icon { color: var(--n-status-success); }
-.sonner-toast.error .sonner-toast-icon { color: var(--n-status-critical); }
-.sonner-toast.warning .sonner-toast-icon { color: var(--n-status-warning); }
-.sonner-toast.loading .sonner-toast-icon { color: var(--n-primary); }
-
-.n-modal-hd { width: 620px; max-width: 94vw; padding: 24px; }
-.n-modal-hd .n-modal-hd-head {
-  display: flex; align-items: center; justify-content: space-between;
-  gap: 16px; margin-bottom: 16px;
-}
-.n-modal-hd .n-modal-hd-head h2 { margin-bottom: 0; overflow-wrap: break-word; }
-.n-modal-hd-scroll { max-height: 66vh; overflow-y: auto; }
-.n-modal-hd-scroll .n-table { margin-bottom: 0; }
-.n-modal-hd-scroll .hd-k {
-  width: 42%; color: var(--n-text-secondary); font-size: .82rem; font-weight: 600;
-  vertical-align: top; padding: 8px 12px 8px 0;
-}
-.n-modal-hd-scroll .hd-v {
-  color: var(--n-text-primary); font-size: .85rem; font-weight: 500;
-  vertical-align: top; padding: 8px 0;
-  overflow-wrap: break-word;
-}
-
-/* form popup modal (Backlog A) */
-.n-modal-form { max-width: 600px; width: 100%; }
-.n-modal-form-scroll { max-height: 62vh; overflow-y: auto; padding-right: 6px; }
-.modal-context {
-  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
-  background: var(--n-surface-2); border: 1px solid var(--n-border);
-  border-radius: var(--n-r-md);
-  padding: 10px 14px; margin: -6px 0 16px;
-  font-size: .82rem; color: var(--n-text-secondary);
-}
-.modal-context .mc-k { font-weight: 600; color: var(--n-text-primary); }
-
-/* ============================================================
-   INLINE SPINNER (inside button while loading)
-   ============================================================ */
-.n-spin-sm {
-  display: inline-block;
-  width: 13px; height: 13px;
-  border: 2px solid rgba(255,255,255,0.35);
-  border-top-color: #fff;
-  border-radius: 50%;
-  animation: _spin 0.7s linear infinite;
-  vertical-align: middle;
-  margin-right: 6px;
-}
-.n-spin-lg {
-  display: inline-block;
-  width: 22px; height: 22px;
-  border: 3px solid rgba(43,54,116,0.12);
-  border-top-color: var(--n-primary);
-  border-right-color: rgba(43,54,116,0.08);
-  border-radius: 50%;
-  animation: _spin 0.7s linear infinite;
-  vertical-align: middle;
-}
-
-/* ============================================================
-   INLINE LOADING (non-full-screen) — spinner + text
-   ============================================================ */
-.md-loading-inline {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 20px 24px;
-  font-size: .875rem;
-  color: var(--n-text-muted);
-}
-.md-loading-inline .n-spin-sm {
-  border-color: rgba(79,70,229,0.25);
-  border-top-color: var(--n-primary);
-}
-
-/* ============================================================
-   SKELETON PLACEHOLDERS (netral — tidak ada warna random)
-   ============================================================ */
-.kpi-skeleton {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
+.content-section {
   margin-bottom: 28px;
 }
-.kpi-skeleton-item {
-  padding: 20px;
-  min-height: 100px;
-}
-.sk-bar {
-  height: 12px;
-  border-radius: 4px;
-  background: var(--n-surface-2);
-  animation: _sk-pulse 1.4s ease-in-out infinite;
-}
-.sk-bar-lg { height: 18px; width: 60%; }
-.sk-bar-sm { height: 11px; width: 90%; }
 
-@keyframes _sk-pulse {
-  0%,100% { opacity: 1; }
-  50%     { opacity: 0.35; }
+.content-section-hd {
+  font-weight: 700;
+  font-size: 0.95rem;
+  letter-spacing: -0.015em;
+  color: var(--n-text-primary);
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* KPI Strips */
+.ov-kpi-row,
+.tu-kpi-grid,
+.tu-pegawai-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.tu-pegawai-kpi-grid {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+@media (max-width: 1200px) {
+  .tu-pegawai-kpi-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .ov-kpi-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
 @media (max-width: 768px) {
-  .kpi-skeleton { grid-template-columns: repeat(2, 1fr); }
+  .tu-pegawai-kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .ov-kpi-row { grid-template-columns: 1fr; }
 }
 
-/* ============================================================
-   SECTION DIVIDER
-   ============================================================ */
-.section-hd {
-  font-family: 'Plus Jakarta Sans', sans-serif;
-  font-weight: 700;
-  font-size: 1rem;
-  color: var(--n-text-primary);
-  margin-bottom: 14px;
+.kpi-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 16px 18px !important;
 }
-/* ============================================================
-   OVERVIEW — headline KPI row (4 columns)
-   ============================================================ */
-.ov-kpi-row {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
-  margin-bottom: 28px;
-}
-/* Reuse .kpi-card from above */
 
-/* ============================================================
-   OVERVIEW — per-divisi cards grid (3 columns)
-   ============================================================ */
-.div-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  /* Kartu hanya setinggi isinya (Fase 14). Sebelumnya `grid-auto-rows: 1fr`
-     memaksa tiap kartu jadi setinggi kartu tertinggi di barisnya, sehingga
-     kartu berisi 1–2 metrik catalogues hole kosong 118–150px di dalam kartu
-     (total 684px di 9 kartu). `align-items: start` menghentikan peregangan;
-     tinggi baris tetap mengikuti kartu tertinggi di baris itu. */
-  align-items: start;
-  gap: 16px;
-}
-.div-card {
-  background: var(--n-material-surface, rgba(255, 255, 255, 0.82));
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border: 1px solid var(--n-border-hairline, rgba(0,0,0,0.07));
-  border-radius: var(--n-r-lg);
-  box-shadow: var(--n-shadow-1);
-  padding: 18px 20px;
-  display: flex;
-  flex-direction: column;
-  box-sizing: border-box;
-  transition: box-shadow 0.25s var(--n-spring-snappy);
-}
-.div-card:hover {
-  box-shadow: var(--n-shadow-2);
-}
-.div-card-title {
-  font-family: 'Plus Jakarta Sans', sans-serif;
-  font-weight: 700;
-  font-size: 0.875rem;
-  color: var(--n-text-primary);
-  margin-bottom: 12px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid var(--n-border-subtle);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-.div-card-metrics {
-  flex: 1 0 auto;
-  display: flex;
-  flex-direction: column;
-}
-.div-metric-row {
-  padding: 8px 0;
-  border-bottom: 1px solid var(--n-border-subtle);
-}
-.div-metric-row:last-child {
-  border-bottom: none;
-}
-.div-metric {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  min-height: 28px;
-  gap: 10px;
-}
-.div-metric-lbl {
-  font-size: 0.8125rem;
-  font-weight: 500;
-  color: var(--n-text-secondary);
-  line-height: 1.3;
-}
-.div-metric-right {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  justify-content: flex-end;
-  flex-shrink: 0;
-}
-.div-metric-val {
-  font-family: 'Plus Jakarta Sans', sans-serif;
-  font-weight: 700;
-  font-size: 1.05rem;
-  color: var(--n-text-primary);
-  font-variant-numeric: tabular-nums;
-  line-height: 1.2;
-}
-.div-metric-val.muted {
-  font-weight: 400;
-  color: var(--n-text-muted);
-  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-  font-size: 0.88rem;
-}
-.div-metric-unit {
-  font-size: 0.75rem;
-  font-weight: 500;
-  color: var(--n-text-muted);
-  margin-left: 2px;
-}
-.div-metric-badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 2px 7px;
-  border-radius: var(--n-r-pill);
-  font-size: 0.68rem;
-  font-weight: 700;
-  white-space: nowrap;
-}
-.div-metric-badge.ok {
-  background: #ECFDF5;
-  color: #047857;
-  border: 1px solid rgba(16,185,129,0.25);
-}
-.div-metric-badge.warn {
-  background: #FFFBEB;
-  color: #B45309;
-  border: 1px solid rgba(245,158,11,0.25);
-}
-.div-metric-badge.crit {
-  background: #FEF2F2;
-  color: #B91C1C;
-  border: 1px solid rgba(239,68,68,0.25);
-}
-.div-metric-badge.info {
-  background: var(--n-primary-light);
-  color: var(--n-primary);
-}
-.div-micro-bar {
-  height: 5px;
-  background: var(--n-surface-2);
-  border-radius: var(--n-r-pill);
-  overflow: hidden;
-  margin-top: 5px;
-}
-.div-micro-bar-fill {
-  height: 100%;
-  border-radius: var(--n-r-pill);
-  background: var(--n-primary);
-  transition: width 0.3s;
-}
-.div-micro-bar-fill.warn { background: var(--n-warn); }
-.div-micro-bar-fill.crit { background: var(--n-crit); }
-/* Footer visual kartu — mengisi ruang kosong di sisa tinggi kartu */
-.div-card-foot {
-  margin-top: auto;
-  padding-top: 12px;
-  border-top: 1px solid var(--n-border-subtle);
-}
-.div-card-foot-cap {
-  font-family: inherit;
+.kpi-label {
   font-size: 0.75rem;
   font-weight: 600;
-  text-transform: none;
-  letter-spacing: -0.005em;
   color: var(--n-text-secondary);
-  margin-bottom: 8px;
-}
-.div-card-foot-dots { display: flex; flex-wrap: wrap; gap: 8px; }
-.div-card-foot-note {
-  font-size: 0.75rem;
-  color: var(--n-text-muted);
-  line-height: 1.5;
-}
-.div-card-foot .ov-bars { margin-top: 2px; }
-.div-card-foot .stk-wrap { margin-top: 6px; }
-
-/* ============================================================
-   HORIZONTAL PROGRESS BAR — pengganti gauge (DESIGN.md §6)
-   ============================================================ */
-.prog-wrap {
-  margin-top: 8px;
-}
-.prog-bar-bg {
-  background: var(--n-surface-2);
-  border-radius: var(--n-r-pill);
-  height: 6px;
-  overflow: hidden;
-}
-.prog-bar-fill {
-  height: 100%;
-  border-radius: var(--n-r-pill);
-  background: var(--n-primary);
-  transition: width 0.3s;
-}
-.prog-bar-fill.warn { background: var(--n-warn); }
-.prog-bar-fill.crit { background: var(--n-crit); }
-.prog-labels {
+  margin-bottom: 6px;
   display: flex;
+  align-items: center;
   justify-content: space-between;
-  margin-top: 4px;
-  font-size: 0.73rem;
-  color: var(--n-text-muted);
 }
 
-/* ============================================================
-   SECTION HEADER inside page content
-   ============================================================ */
-.content-section { margin-bottom: 28px; }
-.content-section-hd {
-  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-  font-weight: 700;
-  font-size: 0.9375rem;
-  letter-spacing: -0.015em;
+.kpi-value {
+  font-size: 1.55rem;
+  font-weight: 800;
   color: var(--n-text-primary);
-  margin-bottom: 14px;
+  line-height: 1.15;
+  letter-spacing: -0.025em;
 }
 
-/* ============================================================
-   ZONA CHART — konteks di antara KPI dan tabel (DESIGN.md §6)
-   ============================================================ */
+.kpi-sub {
+  font-size: 0.74rem;
+  color: var(--n-text-muted);
+  margin-top: 6px;
+}
+
+/* Chart Grid */
 .chart-grid-2 {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 16px;
 }
+
+@media (max-width: 900px) {
+  .chart-grid-2 { grid-template-columns: 1fr; }
+}
+
 .chart-cell {
-  background: var(--n-material-surface, rgba(255, 255, 255, 0.82));
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border: 1px solid var(--n-border-hairline, rgba(0,0,0,0.07));
-  border-radius: var(--n-r-lg);
-  box-shadow: var(--n-shadow-1);
-  padding: 18px 18px 16px;
-  transition: box-shadow 0.25s var(--n-spring-snappy);
+  background: var(--n-material-surface);
+  backdrop-filter: var(--n-backdrop-blur);
+  border: 1px solid var(--n-border-hairline);
+  border-radius: var(--n-radius-lg);
+  box-shadow: var(--n-shadow-card), var(--n-shadow-inset-bevel);
+  padding: 18px;
 }
-.chart-cell:hover {
-  box-shadow: var(--n-shadow-2);
-}
+
 .chart-cell-hd {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 12px;
+  margin-bottom: 14px;
 }
+
 .chart-cell-title {
-  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-  font-weight: 600;
-  font-size: 0.875rem;
-  letter-spacing: -0.010em;
+  font-weight: 700;
+  font-size: 0.88rem;
   color: var(--n-text-primary);
+  letter-spacing: -0.01em;
 }
+
 .chart-cell-sub {
-  font-size: 0.73rem;
+  font-size: 0.74rem;
   color: var(--n-text-muted);
   margin-top: 2px;
 }
+
 .chart-cell-chips {
   display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  justify-content: flex-end;
-  flex-shrink: 0;
+  align-items: center;
+  gap: 8px;
 }
+
 .chart-chip {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
   font-size: 0.72rem;
-  color: var(--n-text-muted);
-}
-.chart-chip i {
-  width: 10px;
-  height: 10px;
-  border-radius: 3px;
-  display: inline-block;
-}
-.chart-box {
-  position: relative;
-  height: 260px;
-}
-.chart-empty {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--n-text-muted);
-  font-size: 0.875rem;
-  text-align: center;
-  padding: 0 20px;
-}
-@media (max-width: 900px) {
-  .chart-grid-2 { grid-template-columns: 1fr; }
-  /* grid kartu divisi: breakpoint tablet/ponsel ada di blok akhir file
-     (harus SESUDAH aturan dasar #ov-div-grid 6 kolom). */
+  font-weight: 600;
+  color: var(--n-text-secondary);
 }
 
-/* ============================================================
-   OVERVIEW — visual pendukung tipis (DESIGN.md §6)
-   Thin progress bar target (divisi), stacked bar proporsi,
-   indikator tren, mini-chart KPI, plot donut & bar kapal teraktif.
-   Warna hanya dari token tema §3.
-   ============================================================ */
-.ov-trend {
-  margin-top: 0;
-  font-size: 0.6875rem;
-  font-weight: 600;
-  line-height: 1.2;
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-  padding: 2px 7px;
-  border-radius: var(--n-radius-pill);
-  background: rgba(0, 0, 0, 0.03);
-  color: var(--n-text-secondary);
-  font-variant-numeric: tabular-nums;
-  -webkit-font-feature-settings: "tnum";
-  font-feature-settings: "tnum";
-  border: 1px solid rgba(0, 0, 0, 0.06);
-  letter-spacing: -0.01em;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-.ov-trend.up {
-  color: #047857;
-  background: rgba(16, 185, 129, 0.06);
-  border-color: rgba(16, 185, 129, 0.15);
-}
-.ov-trend.down {
-  color: var(--n-text-secondary);
-  background: rgba(0, 0, 0, 0.03);
-  border-color: rgba(0, 0, 0, 0.06);
-}
-.ov-trend-cmp {
-  font-weight: 500;
-  font-size: 0.65rem;
-  color: inherit;
-  opacity: 0.8;
-  white-space: nowrap;
-}
-.stk-wrap { margin-top: 8px; }
-.stk-bar {
-  display: flex;
-  height: 6px;
-  border-radius: var(--n-r-pill);
-  overflow: hidden;
-  background: var(--n-surface-2);
-}
-.stk-seg { height: 100%; }
-.stk-legend {
-  display: flex;
-  flex-wrap: wrap;
-  column-gap: 14px;
-  row-gap: 3px;
-  margin-top: 5px;
-}
-.stk-item {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 0.75rem;
-  font-weight: 500;
-  color: var(--n-text-secondary);
-  white-space: nowrap;
-}
-.stk-item i {
+.chart-chip i {
   width: 8px;
   height: 8px;
   border-radius: 2px;
-  display: inline-block;
-  flex-shrink: 0;
-}
-.stk-caption {
-  margin-top: 12px;
-  padding-top: 9px;
-  border-top: 1px solid var(--n-border-subtle);
-  font-size: 0.78rem;
-  font-weight: 600;
-  text-transform: none;
-  letter-spacing: -0.005em;
-  color: var(--n-text-secondary);
-  margin-bottom: 4px;
 }
 
-/* ── Visual mini KPI & sel chart (DESIGN §6.3, §10.2) ── */
-
-/* Titik status (7 divisi melapor) */
-.ov-dots {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-}
-.ov-dot {
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  background: var(--n-surface-2);
-  border: 1.5px solid var(--n-border-subtle);
-  display: inline-block;
-}
-.ov-dot.on {
-  background: var(--n-primary);
-  border-color: var(--n-primary);
-}
-
-/* Baris batang horizontal (label + track + nilai) */
-.ov-bars {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-.bar-line {
-  display: grid;
-  grid-template-columns: 1.4fr 2fr auto;
-  align-items: center;
-  gap: 12px;
-}
-.bar-line.has-rank {
-  grid-template-columns: 24px minmax(100px, 1.4fr) 2fr auto;
-}
-.bar-rank {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 22px;
-  height: 22px;
-  border-radius: 6px;
-  font-size: 0.72rem;
-  font-weight: 600;
-  background: var(--n-surface-2);
-  color: var(--n-text-secondary);
-  font-variant-numeric: tabular-nums;
-}
-.bar-rank.top {
-  background: var(--n-primary);
-  color: #FFFFFF;
-}
-.bar-line-lbl {
-  font-size: 0.8125rem;
-  font-weight: 600;
-  color: var(--n-text-primary);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.bar-line-track {
-  height: 9px;
-  border-radius: 99px;
-  background: var(--n-surface-2);
-  overflow: hidden;
-}
-.bar-line-fill {
-  height: 100%;
-  border-radius: 99px;
-}
-.bar-line-val {
-  font-size: 0.8rem;
-  font-weight: 700;
-  color: var(--n-text-primary);
-  font-variant-numeric: tabular-nums;
-  text-align: right;
-  white-space: nowrap;
-}
-.bar-line-unit {
-  font-size: 0.75rem;
-  font-weight: 500;
-  color: var(--n-text-secondary);
-  margin-left: 2px;
-}
-
-/* Status & Penindakan container */
-#ov-chart-penindakan {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  min-height: 240px;
-}
-#ov-chart-teraktif {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  height: 100%;
-  min-height: 240px;
-  padding: 10px 16px;
-  box-sizing: border-box;
-}
-
-/* Plot donut + legenda (sel chart) */
-.ov-plot {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 36px;
+.chart-box {
   width: 100%;
-  height: 100%;
-  padding: 10px 16px;
-  box-sizing: border-box;
-}
-.ov-plot-legend {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  min-width: 220px;
-}
-.legend-row {
-  display: grid;
-  grid-template-columns: 10px minmax(110px, 1fr) auto auto;
-  align-items: center;
-  gap: 12px;
-  padding: 6px 10px;
-  border-radius: var(--n-r-sm);
-  transition: background 0.15s ease;
-}
-.legend-row:hover {
-  background: var(--n-surface-hover);
-}
-.legend-row i {
-  width: 10px;
-  height: 10px;
-  border-radius: 3px;
-  display: inline-block;
-  flex-shrink: 0;
-}
-.legend-lbl {
-  font-size: 0.8125rem;
-  font-weight: 600;
-  color: var(--n-text-primary);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.legend-val {
-  font-size: 0.82rem;
-  font-weight: 700;
-  color: var(--n-text-primary);
-  font-variant-numeric: tabular-nums;
-  min-width: 22px;
-  text-align: right;
-}
-.legend-pct {
-  font-size: 0.72rem;
-  font-weight: 600;
-  color: var(--n-text-secondary);
-  background: var(--n-surface-2);
-  border-radius: 99px;
-  padding: 2px 7px;
-  min-width: 38px;
-  text-align: center;
-  font-variant-numeric: tabular-nums;
-}
-.ov-plot-bars {
-  height: 100%;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 10px;
-}
-
-
-/* ============================================================
-   FASE 13 — NOTIFIKASI & ADMIN PANEL
-   Badge unread di sidebar, strip peringatan "divisi belum
-   melapor", tabel penuh, dan padding muted untuk state kosong.
-   ============================================================ */
-.nav-badge {
-  margin-left: auto;
-  min-width: 20px;
-  padding: 1px 6px;
-  border-radius: var(--n-r-pill);
-  background: rgba(255,255,255,0.16);
-  color: #FFFFFF;
-  font-size: 0.68rem;
-  font-weight: 700;
-  text-align: center;
-  font-variant-numeric: tabular-nums;
-}
-.nav-item.active .nav-badge { background: rgba(255,255,255,0.28); }
-
-.reminder-strip {
-  margin: 0;
-  padding: 10px 28px;
-  background: var(--n-primary-light);
-  border-bottom: 1px solid var(--n-border-subtle);
-  color: var(--n-text-secondary);
-  font-size: 0.8125rem;
-  font-weight: 500;
-}
-.reminder-strip strong { font-weight: 700; }
-
-.hd-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-.hd-row > div:last-child { display: flex; gap: 8px; }
-
-.n-pad-muted {
-  padding: 20px 24px;
-  color: var(--n-text-muted);
-  font-size: 0.875rem;
-}
-.n-table-full { width: 100%; }
-
-/* Shared spin keyframe (filter-busy, n-spin-sm, n-spin-lg) */
-@keyframes _spin { to { transform: rotate(360deg); } }
-
-/* ============================================================
-   PETA WPP — STATUS & LEGENDA CHOROPLETH
-   Peta tidak punya elemen DOM sendiri di view: container
-   `#map-ops-*` diisi Leaflet. Status muat & legenda dibuat
-   dari JS (satu helper untuk Kapal & Pesawat) lalu diposisikan
-   absolut di atas kanvas peta. Tanpa ini, kegagalan fetch
-   GeoJSON hanya muncul di console — user hanya melihat kotak
-   abu-abu dan mengira peta-nya memang kosong.
-   ============================================================ */
-.ops-map-status {
-  position: absolute;
-  inset: 0;
-  z-index: 500;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 24px;
-  text-align: center;
-  background: rgba(248,250,252,0.88);
-  backdrop-filter: blur(1px);
-}
-.ops-map-status-inner {
-  max-width: 340px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-  color: var(--n-text-secondary);
-  font-size: 0.8125rem;
-  line-height: 1.5;
-}
-.ops-map-status strong {
-  display: block;
-  color: var(--n-text-primary);
-  font-size: 0.875rem;
-  font-weight: 600;
-}
-.ops-map-retry {
-  margin-top: 2px;
-  padding: 7px 16px;
-  border-radius: var(--n-r-pill);
-  border: 1px solid var(--n-primary);
-  background: var(--n-primary);
-  color: #FFFFFF;
-  font-family: inherit;
-  font-size: 0.8125rem;
-  font-weight: 600;
-  cursor: pointer;
-}
-.ops-map-retry:hover { background: #232C5E; }
-.ops-map-retry:focus-visible {
-  outline: 2px solid var(--n-primary);
-  outline-offset: 2px;
-}
-
-.ops-map-legend {
-  position: absolute;
-  left: 12px;
-  bottom: 12px;
-  z-index: 450;
-  padding: 10px 12px;
-  border-radius: var(--n-r-sm);
-  background: rgba(255,255,255,0.94);
-  box-shadow: var(--n-shadow-card);
-  font-size: 0.6875rem;
-  color: var(--n-text-secondary);
-  line-height: 1.45;
-  pointer-events: none;
-}
-.ops-map-legend-title {
-  margin-bottom: 6px;
-  font-weight: 600;
-  color: var(--n-text-primary);
-}
-.ops-map-legend-row {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-}
-.ops-map-legend-row i {
-  width: 12px;
-  height: 12px;
-  flex: 0 0 12px;
-  border-radius: 3px;
-  border: 1px solid rgba(43,54,116,0.18);
-}
-
-/* ── PETA CHOROPLETH IKHTISAR (Fase 14) ───────────────────────
-   Peta hero langsung di bawah KPI Utama: focal point lewat ukuran
-   (bukan gradient/blob — DESIGN §1). Legenda & status memakai pola
-   yang sama dengan peta Operasi supaya konsisten. */
-.ov-map-cell { padding-bottom: 14px; }
-.ov-map-wrap { position: relative; }
-#ov-map {
+  height: 220px;
   position: relative;
-  height: 420px;
-  width: 100%;
-  border-radius: var(--n-r-md);
-  overflow: hidden;
-  background: var(--n-surface-2, #EFF1F6);
-  border: 1px solid var(--n-border-subtle);
-}
-.ov-map-legend {
-  position: absolute;
-  left: 12px;
-  bottom: 12px;
-  z-index: 450;
-  padding: 10px 12px;
-  border-radius: var(--n-r-sm);
-  background: rgba(255,255,255,0.94);
-  box-shadow: var(--n-shadow-card);
-  font-size: 0.6875rem;
-  color: var(--n-text-secondary);
-  line-height: 1.45;
-  pointer-events: none;
-}
-.ov-map-legend-title {
-  margin-bottom: 6px;
-  font-weight: 600;
-  color: var(--n-text-primary);
-}
-.ov-map-legend-row {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-}
-.ov-map-legend-row i {
-  width: 12px;
-  height: 12px;
-  flex: 0 0 12px;
-  border-radius: 3px;
-  border: 1px solid rgba(43,54,116,0.18);
-}
-/* Chip pengalih metrik — tombol sungguhan (bukan span dekoratif). */
-.ov-map-chip {
-  font-family: 'Plus Jakarta Sans', sans-serif;
-  font-size: 0.6875rem;
-  font-weight: 600;
-  color: var(--n-text-secondary);
-  background: var(--n-surface-1);
-  border: 1px solid var(--n-border-subtle);
-  border-radius: 999px;
-  padding: 4px 11px;
-  cursor: pointer;
-  transition: background .15s ease, color .15s ease, border-color .15s ease;
-}
-.ov-map-chip:hover { border-color: var(--n-primary); color: var(--n-text-primary); }
-.ov-map-chip:focus-visible {
-  outline: 2px solid var(--n-primary);
-  outline-offset: 2px;
-}
-.ov-map-chip.is-on {
-  background: var(--n-primary);
-  border-color: var(--n-primary);
-  color: #fff;
-}
-/* Panel ranking WPP — baris hover menyorot poligon di peta. */
-.ov-map-rank { margin-top: 12px; }
-.ov-map-rank-hd {
-  font-size: 0.6875rem;
-  font-weight: 600;
-  color: var(--n-text-secondary);
-  margin-bottom: 6px;
-}
-.ov-map-rank-list {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 8px;
-}
-.ov-map-rank-row {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  grid-template-areas: 'no nm' 'bar bar' 'val val';
-  gap: 2px 6px;
-  align-items: center;
-  padding: 8px 10px;
-  border: 1px solid var(--n-border-subtle);
-  border-radius: var(--n-r-sm);
-  background: var(--n-surface-1);
-  cursor: pointer;
-  transition: border-color .15s ease, background .15s ease;
-}
-.ov-map-rank-row:hover,
-.ov-map-rank-row:focus-visible {
-  border-color: var(--n-primary);
-  background: var(--n-surface-2, #F7F8FC);
-  outline: none;
-}
-.ov-map-rank-no {
-  grid-area: no;
-  font-family: 'Plus Jakarta Sans', sans-serif;
-  font-size: 0.6875rem;
-  font-weight: 700;
-  color: var(--n-primary);
-  width: 15px;
-  height: 15px;
-  border-radius: 50%;
-  background: rgba(43,54,116,0.1);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-.ov-map-rank-nm {
-  grid-area: nm;
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--n-text-primary);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.ov-map-rank-bar {
-  grid-area: bar;
-  display: block;
-  height: 4px;
-  border-radius: 2px;
-  background: rgba(43,54,116,0.1);
-  overflow: hidden;
-  margin-top: 3px;
-}
-.ov-map-rank-bar i {
-  display: block;
-  height: 100%;
-  border-radius: 2px;
-  background: var(--n-primary);
-}
-.ov-map-rank-val {
-  grid-area: val;
-  font-family: 'Plus Jakarta Sans', sans-serif;
-  font-size: 0.8125rem;
-  font-weight: 700;
-  color: var(--n-text-primary);
-  margin-top: 3px;
-}
-.ov-map-rank-empty,
-.ov-map-rank-note {
-  font-size: 0.6875rem;
-  color: var(--n-text-muted);
-  line-height: 1.5;
-}
-.ov-map-rank-note { margin-top: 8px; }
-
-/* ── Peta Sebaran Aset BMN (Sub-Fase 18B.5) ─────────────────── */
-#bmn-upt-map {
-  position: relative;
-  height: 320px;
-  width: 100%;
-  background: var(--n-surface-2, #EFF1F6);
-}
-.bmn-upt-marker-wrap {
-  background: transparent !important;
-  border: none !important;
-}
-.bmn-upt-marker {
-  display: inline-flex;
-  align-items: center;
-  background: #FFFFFF;
-  border: 1.5px solid var(--n-primary);
-  border-radius: 9999px;
-  padding: 2px 8px 2px 2px;
-  box-shadow: 0 2px 6px rgba(43, 54, 116, 0.22);
-  cursor: pointer;
-  white-space: nowrap;
-  font-family: inherit;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
-}
-.bmn-upt-marker:hover {
-  transform: scale(1.08);
-  box-shadow: 0 4px 12px rgba(43, 54, 116, 0.35);
-  z-index: 1000 !important;
-}
-.bmn-upt-marker-count {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background: var(--n-primary);
-  color: #FFFFFF;
-  font-size: 0.7rem;
-  font-weight: 700;
-  padding: 0 4px;
-  margin-right: 6px;
-}
-.bmn-upt-marker.has-rusak-berat {
-  border-color: var(--n-crit);
-}
-.bmn-upt-marker.has-rusak-berat .bmn-upt-marker-count {
-  background: var(--n-crit);
-}
-.bmn-upt-marker-name {
-  font-size: 0.72rem;
-  font-weight: 600;
-  color: var(--n-text-primary);
-}
-.bmn-popover {
-  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-  color: var(--n-text-primary);
-  min-width: 210px;
-  max-width: 260px;
-  padding: 2px;
-}
-.bmn-popover-title {
-  font-weight: 700;
-  font-size: 0.875rem;
-  color: var(--n-primary);
-  margin-bottom: 2px;
-}
-.bmn-popover-sub {
-  font-size: 0.75rem;
-  color: var(--n-text-secondary);
-  margin-bottom: 8px;
-}
-
-/* ── Stepper Alur Administrasi BMN (Sub-Fase 18B.6) ─────────── */
-.n-stepper {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  margin-bottom: 24px;
-  position: relative;
-}
-.n-stepper::before {
-  content: '';
-  position: absolute;
-  top: 14px;
-  left: 32px;
-  right: 32px;
-  height: 2px;
-  background: var(--n-border);
-  z-index: 1;
-}
-.n-step-item {
-  position: relative;
-  z-index: 2;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  flex: 1;
-}
-.n-step-dot {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background: #FFFFFF;
-  border: 2px solid var(--n-border-strong);
-  color: var(--n-text-muted);
-  font-size: 0.75rem;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s ease;
-  margin-bottom: 6px;
-}
-.n-step-label {
-  font-size: 0.72rem;
-  font-weight: 600;
-  color: var(--n-text-muted);
-  line-height: 1.25;
-}
-.n-step-item.active .n-step-dot {
-  border-color: var(--n-primary);
-  background: var(--n-primary);
-  color: #FFFFFF;
-  box-shadow: 0 0 0 3px var(--n-primary-tint);
-}
-.n-step-item.active .n-step-label {
-  color: var(--n-primary);
-  font-weight: 700;
-}
-.n-step-item.completed .n-step-dot {
-  border-color: var(--n-ok);
-  background: var(--n-ok);
-  color: #FFFFFF;
-}
-.n-step-item.completed .n-step-label {
-  color: var(--n-text-primary);
-}
-.n-step-item.rejected .n-step-dot {
-  border-color: var(--n-crit);
-  background: var(--n-crit);
-  color: #FFFFFF;
-}
-.n-step-item.rejected .n-step-label {
-  color: var(--n-crit);
 }
 
 /* ============================================================
-   IKHTISAR — grid kartu divisi dinamis (Fase 14)
-   6 kolom; tiap kartu memilih lebar (.s2/.s3/.s4/.s6) sehingga baris
-   penuh (4+2, 2+2+2, 2+4, 3+3) dan kartu lebar bisa memakan 2 sel.
-   Berbeda dari `.div-grid` dasar (align-items:start — tetap dipakai
-   Profil Kapal `#pk-kpi`), grid Ikhtisar MEMANJANGKAN kartu satu baris
-   sampai sama tinggi; ruang sisa diisi area visual (.vz, flex:1) yang
-   memusatkan isinya, jadi tidak ada lubang kosong.
+   DATA TABLES & STATUS BADGES
    ============================================================ */
-#ov-div-grid {
-  grid-template-columns: repeat(6, minmax(0, 1fr));
-  grid-auto-flow: row dense;
-  align-items: stretch;
-}
-#ov-div-grid > .s2 { grid-column: span 2; }
-#ov-div-grid > .s3 { grid-column: span 3; }
-#ov-div-grid > .s4 { grid-column: span 4; }
-#ov-div-grid > .s6 { grid-column: span 6; }
-
-.div-card-body {
-  flex: 1 1 auto;
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-}
-.div-card-body > .div-card-metrics { flex: 0 0 auto; }
-.div-card.wide .div-card-body {
-  display: grid;
-  grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
-  gap: 24px;
-  align-items: stretch;
-}
-.div-card.wide .div-card-body > .div-card-metrics { justify-content: space-between; }
-.div-card.wide .div-card-metrics .div-metric-row { flex: 1 1 0; display: flex; flex-direction: column; justify-content: center; }
-
-/* Area visual kartu */
-.vz {
-  flex: 1 1 auto;
-  display: flex;
-  flex-direction: column;
-  min-height: 150px;
-  margin-top: 12px;
-  padding-top: 12px;
-  border-top: 1px solid var(--n-border-subtle);
-}
-.div-card.wide .vz {
-  margin-top: 0;
-  padding-top: 0;
-  border-top: none;
-  padding-left: 24px;
-  border-left: 1px solid var(--n-border-subtle);
-}
-.vz > .div-card-foot-cap { margin-bottom: 10px; }
-.vz-body {
-  flex: 1 1 auto;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  min-height: 0;
-}
-.vz-empty {
-  text-align: center;
-  color: var(--n-text-muted);
-  font-size: 0.78rem;
-  padding: 16px 0;
-}
-.vz-legend {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px 14px;
-  margin-top: 10px;
-  font-size: 0.7rem;
-  font-weight: 500;
-  color: var(--n-text-secondary);
-}
-.vz-legend span { display: inline-flex; align-items: center; gap: 6px; }
-.vz-legend i { width: 9px; height: 9px; border-radius: 3px; display: inline-block; flex-shrink: 0; }
-.vz-legend b { color: var(--n-text-primary); font-weight: 700; font-variant-numeric: tabular-nums; }
-
-/* Kolom vertikal */
-.vz-cols { flex: 1 1 auto; display: flex; flex-direction: column; min-height: 130px; }
-.vz-bars { flex: 1 1 auto; display: flex; align-items: stretch; gap: 8px; min-height: 100px; }
-.vz-col { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; }
-.vz-col-bars { flex: 1 1 auto; display: flex; align-items: stretch; justify-content: center; gap: 3px; }
-.vz-bar-wrap { position: relative; flex: 1 1 0; max-width: 34px; }
-.vz-bar {
-  position: absolute;
-  left: 0; right: 0; bottom: 0;
-  border-radius: 4px 4px 0 0;
-}
-.vz-bar-val {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 0.66rem;
-  font-weight: 700;
-  color: var(--n-text-primary);
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
-}
-.vz-col-lbl {
-  margin-top: 6px;
-  padding-top: 4px;
-  border-top: 1px solid rgba(0,0,0,0.12);
-  text-align: center;
-  font-size: 0.75rem;
-  font-weight: 500;
-  color: var(--n-text-secondary);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-/* Donut + legenda */
-.vz-donut { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 14px 18px; }
-.vz-donut-legend { display: flex; flex-direction: column; gap: 2px; min-width: 150px; }
-.vz-donut-legend .legend-row { padding: 4px 6px; gap: 8px; grid-template-columns: 10px minmax(60px, 1fr) auto auto; }
-
-/* Batang horizontal */
-.vz-hbars { flex: 1 1 auto; display: flex; flex-direction: column; justify-content: center; }
-.vz-hbars .ov-bars { flex: 1 1 auto; justify-content: space-evenly; gap: 12px; }
-.vz-hbars .bar-line { grid-template-columns: minmax(92px, 1.7fr) 1.3fr auto; }
-.vz-hbars .bar-line-track { height: 12px; }
-
-/* Garis */
-.vz-line { display: flex; flex-direction: column; flex: 1 1 auto; }
-.vz-line-plot { position: relative; flex: 1 1 auto; min-height: 100px; }
-.vz-line-plot svg { position: absolute; inset: 0; width: 100%; height: 100%; }
-.vz-line-x { display: grid; margin-top: 4px; font-size: 0.72rem; font-weight: 500; color: var(--n-text-secondary); text-align: center; }
-
-/* Waffle */
-.vz-waffle { display: grid; grid-template-columns: repeat(10, minmax(0, 1fr)); gap: 3px; }
-.vz-waffle i { display: block; height: 16px; border-radius: 3px; }
-
-/* Heat strip */
-.vz-heat { display: grid; gap: 4px; }
-.vz-heat-cell {
-  height: 48px;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.8rem;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-}
-.vz-heat-cell.zero { background: var(--n-surface-2); border: 1px solid var(--n-border-subtle); box-sizing: border-box; }
-.vz-heat-lbl { margin-top: 5px; text-align: center; font-size: 0.72rem; font-weight: 500; color: var(--n-text-secondary); }
-
-/* Chip status */
-.vz-chips { display: flex; flex-wrap: wrap; gap: 8px; }
-.vz-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  padding: 5px 11px;
-  border-radius: var(--n-r-pill);
-  background: var(--n-surface-2);
-  border: 1px solid var(--n-border-subtle);
-  font-size: 0.72rem;
-  font-weight: 600;
-  color: var(--n-text-muted);
-}
-.vz-chip i { width: 8px; height: 8px; border-radius: 50%; border: 1.5px solid rgba(43,54,116,0.35); box-sizing: border-box; }
-.vz-chip.on { color: var(--n-text-primary); background: var(--n-primary-light); }
-.vz-chip.on i { background: var(--n-primary); border-color: var(--n-primary); }
-
-/* Grid chart asimetris (12 kolom) — 7/5 dan 5/7, bukan dua kotak sama besar */
-.chart-grid-asym {
-  display: grid;
-  grid-template-columns: repeat(12, minmax(0, 1fr));
-  gap: 16px;
-  align-items: stretch;
-}
-.chart-grid-asym > .cs-5 { grid-column: span 5; }
-.chart-grid-asym > .cs-7 { grid-column: span 7; }
-
-/* Peta & ranking — breakpoint.
-   WAJIB diletakkan SESUDAH aturan dasar #ov-map / .ov-map-rank-list di atas.
-   Specificity-nya sama (ID / class), jadi aturan dasar yang ditulis belakangan
-   menang — media query yang diletakkan sebelum aturan dasar akan mati diam-diam
-   (sudah pernah terjadi: tinggi peta tetap 420px di 768px). Berlaku juga untuk
-   #ov-div-grid dan .chart-grid-asym di atas. */
-@media (max-width: 1100px) {
-  .div-card.wide .div-card-body { grid-template-columns: 1fr; gap: 0; }
-  .div-card.wide .vz { margin-top: 12px; padding: 12px 0 0; border-left: none; border-top: 1px solid var(--n-border-subtle); }
-}
-@media (max-width: 900px) {
-  #ov-map { height: 340px; }
-  .ov-map-rank-list { grid-template-columns: repeat(3, 1fr); }
-  #ov-div-grid { grid-template-columns: repeat(2, 1fr); }
-  #ov-div-grid > .s3, #ov-div-grid > .s4, #ov-div-grid > .s6 { grid-column: span 2; }
-  #ov-div-grid > .s2 { grid-column: span 1; }
-  /* 5 kartu s2 → ganjil di 2 kolom: Pemantauan (anak ke-6, urutan dijaga test
-     'layout kartu divisi') mengisi lebar penuh supaya tidak ada lubang. */
-  #ov-div-grid > .s2:nth-child(6) { grid-column: span 2; }
-  .chart-grid-asym > .cs-5, .chart-grid-asym > .cs-7 { grid-column: span 12; }
-}
-@media (max-width: 600px) {
-  #ov-map { height: 280px; }
-  .ov-map-rank-list { grid-template-columns: repeat(2, 1fr); }
-  #ov-div-grid { grid-template-columns: 1fr; }
-  #ov-div-grid > .s2, #ov-div-grid > .s3, #ov-div-grid > .s4, #ov-div-grid > .s6,
-  #ov-div-grid > .s2:nth-child(6) { grid-column: span 1; }
-}
-
-/* ============================================================
-   TABULAR NUMBERS & REDUCED MOTION (DESIGN.md §2.2, §5c.5)
-   ============================================================ */
-.kpi-value,
-.kpi-sub,
-.div-metric-val,
-.n-table td,
-.n-table th,
-.n-badge,
-.status-badge,
-.filter-date,
-.filter-sel,
-.n-derive-val,
-.stat-val,
-.timestamp-label,
-#sync-indicator,
-.coord-val,
-.table-num {
-  font-variant-numeric: tabular-nums;
-  -webkit-font-feature-settings: "tnum";
-  font-feature-settings: "tnum";
-}
-
-/* =========================================================
-   FASE 18: INTERLOCK VALIDASI LAIK LAUT & PETA TAKTIS 34 KAPAL
-   ========================================================= */
-
-/* ── 1. Interlock Warning Banner ── */
-.interlock-warn-banner {
-  margin-top: 8px;
-  margin-bottom: 8px;
-  background: #FFF1F2;
-  border: 1px solid #FECDD3;
-  border-left: 4px solid var(--n-status-critical, #EF4444);
-  border-radius: var(--n-r-sm, 6px);
-  padding: 10px 14px;
-}
-.interlock-banner-inner {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-}
-.interlock-banner-icon {
-  font-size: 1.15rem;
-  color: var(--n-status-critical, #EF4444);
-  line-height: 1.2;
-}
-.interlock-banner-text {
+.n-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
   font-size: 0.8125rem;
-  line-height: 1.45;
-  color: #881337;
 }
 
-/* ── 2. Peta Taktis 34 Kapal: Filter Chips & Markers ── */
-.ov-fleet-filter-bar {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 12px;
-  background: var(--n-surface-1);
-  border-bottom: 1px solid var(--n-border-subtle);
-}
-.ov-fleet-chip {
-  font-family: 'Plus Jakarta Sans', sans-serif;
-  font-size: 0.6875rem;
-  font-weight: 600;
+.n-table th {
+  padding: 11px 14px;
+  font-weight: 700;
+  font-size: 0.74rem;
   color: var(--n-text-secondary);
-  background: var(--n-surface-2, #EFF1F6);
-  border: 1px solid var(--n-border-subtle);
-  border-radius: 999px;
-  padding: 4px 10px;
-  cursor: pointer;
-  transition: background .15s ease, color .15s ease, border-color .15s ease;
-}
-.ov-fleet-chip:hover {
-  border-color: var(--n-primary);
-  color: var(--n-text-primary);
-}
-.ov-fleet-chip.is-on {
-  background: var(--n-primary, #2B3674);
-  border-color: var(--n-primary, #2B3674);
-  color: #fff;
+  background: rgba(15, 23, 42, 0.02);
+  border-bottom: 1px solid var(--n-border);
+  letter-spacing: 0.01em;
+  white-space: nowrap;
 }
 
-/* Tactical Ship Marker on Leaflet */
-.ship-marker-wrap {
-  background: transparent !important;
-  border: none !important;
+.n-table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--n-border-hairline);
+  color: var(--n-text-primary);
+  vertical-align: middle;
 }
-.ship-marker {
+
+.n-table tr:hover td {
+  background: rgba(15, 23, 42, 0.02);
+}
+
+/* Status Badges */
+.badge {
   display: inline-flex;
   align-items: center;
   gap: 5px;
   padding: 3px 8px;
-  background: rgba(255, 255, 255, 0.94);
-  border: 1px solid var(--n-border-subtle);
-  border-radius: 999px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
-  cursor: pointer;
-  position: relative;
-  transition: transform .15s ease, box-shadow .15s ease;
+  border-radius: var(--n-radius-xs);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
   white-space: nowrap;
 }
-.ship-marker:hover {
-  transform: translateY(-2px) scale(1.05);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.18);
-  z-index: 1000;
-}
-.ship-marker-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  flex: 0 0 8px;
-}
-.ship-marker.status-op .ship-marker-dot { background: #10B981; }
-.ship-marker.status-siap .ship-marker-dot { background: #F59E0B; }
-.ship-marker.status-galangan .ship-marker-dot { background: #EF4444; }
 
-.ship-marker-lbl {
-  font-family: 'Plus Jakarta Sans', sans-serif;
-  font-size: 0.6875rem;
-  font-weight: 700;
-  color: var(--n-text-primary, #1B2559);
-}
+.badge-success { background: var(--n-status-success-bg); color: var(--n-status-success); border: 1px solid var(--n-status-success-border); }
+.badge-warning { background: var(--n-status-warning-bg); color: var(--n-status-warning); border: 1px solid var(--n-status-warning-border); }
+.badge-critical { background: var(--n-status-critical-bg); color: var(--n-status-critical); border: 1px solid var(--n-status-critical-border); }
+.badge-purple { background: var(--n-status-purple-bg); color: var(--n-purple); border: 1px solid var(--n-status-purple-border); }
+.badge-neutral { background: rgba(15, 23, 42, 0.06); color: var(--n-text-secondary); }
 
-/* Radar Beacon Pulse for Operasional ships */
-.ship-beacon-pulse {
-  position: absolute;
-  left: 6px;
-  top: 50%;
-  width: 14px;
-  height: 14px;
-  margin-top: -7px;
-  margin-left: -3px;
-  border-radius: 50%;
-  background: rgba(16, 185, 129, 0.4);
-  animation: shipPulse 2s infinite ease-out;
-  pointer-events: none;
-}
-@keyframes shipPulse {
-  0% { transform: scale(0.6); opacity: 0.9; }
-  100% { transform: scale(2.4); opacity: 0; }
-}
-
-/* Ship Popover in Leaflet */
-.n-leaflet-pop .leaflet-popup-content-wrapper {
-  padding: 0;
-  border-radius: var(--n-r-md, 8px);
-  overflow: hidden;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
-  border: 1px solid var(--n-border-subtle);
-}
-.n-leaflet-pop .leaflet-popup-content {
-  margin: 0;
-  line-height: 1.4;
-}
-.ship-popover {
-  font-family: 'Plus Jakarta Sans', sans-serif;
-  color: var(--n-text-primary);
-}
-.ship-pop-hd {
-  padding: 12px 14px 10px;
-  background: var(--n-surface-1, #fff);
-  border-bottom: 1px solid var(--n-border-subtle);
-}
-.ship-pop-badge {
-  display: inline-block;
-  font-size: 0.625rem;
-  font-weight: 700;
-  padding: 2px 7px;
-  border-radius: 999px;
-  margin-bottom: 6px;
-}
-.ship-pop-name {
-  font-size: 0.9375rem;
-  font-weight: 700;
-  color: var(--n-primary, #2B3674);
-}
-.ship-pop-sub {
-  font-size: 0.6875rem;
-  color: var(--n-text-secondary);
-}
-.ship-pop-body {
-  padding: 10px 14px;
-  font-size: 0.75rem;
-  background: #FAFAFC;
-}
-.ship-pop-row {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 4px;
-}
-.ship-pop-lbl {
-  color: var(--n-text-secondary);
-}
-.ship-pop-benchmark {
-  margin-top: 8px;
-  padding-top: 8px;
-  border-top: 1px dashed var(--n-border-subtle);
-}
-.ship-bm-row {
-  display: flex;
-  justify-content: space-between;
-  font-size: 0.6875rem;
-  color: var(--n-text-secondary);
-  margin-bottom: 3px;
-}
-.ship-bm-bar {
-  height: 5px;
-  background: #E2E8F0;
-  border-radius: 999px;
-  overflow: hidden;
-  margin-bottom: 6px;
-}
-.ship-bm-fill {
-  height: 100%;
-  background: #2563EB;
-  border-radius: 999px;
-}
-.ship-bm-fill.ship-bm-center {
-  background: #0D9488;
-}
-.ship-pop-ft {
-  padding: 8px 14px;
-  background: var(--n-surface-1, #fff);
-  border-top: 1px solid var(--n-border-subtle);
-  text-align: right;
-}
-
-/* ── 3. Kapal Terbaik: Toolbar, Podium & Table ── */
-.kt-page-toolbar {
+/* ============================================================
+   STEPPERS & PROGRESS TRACKERS ([TU-B] & [TU-E])
+   ============================================================ */
+.stepper-container {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 12px;
+  padding: 18px 24px;
+  background: var(--n-surface-solid);
+  border: 1px solid var(--n-border-hairline);
+  border-radius: var(--n-radius-lg);
   margin-bottom: 20px;
-  padding: 12px 18px;
-  background: var(--n-surface-1, #fff);
-  border: 1px solid var(--n-border-subtle);
-  border-radius: var(--n-r-md, 8px);
 }
-.kt-toolbar-left {
+
+.stepper-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  flex: 1 1 0;
+  text-align: center;
+}
+
+.stepper-step:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  top: 14px;
+  left: 55%;
+  right: -45%;
+  height: 2px;
+  background: var(--n-border);
+  z-index: 1;
+}
+
+.stepper-step.completed:not(:last-child)::after {
+  background: var(--n-status-success);
+}
+
+.stepper-dot {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--n-canvas-subtle);
+  border: 2px solid var(--n-border);
+  color: var(--n-text-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
   display: flex;
   align-items: center;
-  gap: 10px;
+  justify-content: center;
+  position: relative;
+  z-index: 2;
 }
-.kt-back-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-weight: 600;
-  font-size: 0.8125rem;
-  color: var(--n-primary, #2B3674);
-  background: rgba(43, 54, 116, 0.06);
-  border: 1px solid rgba(43, 54, 116, 0.12);
-  padding: 6px 14px;
-  border-radius: var(--n-r-sm, 6px);
-  cursor: pointer;
-  transition: all 0.15s ease;
+
+.stepper-step.active .stepper-dot {
+  background: var(--n-primary-accent);
+  border-color: var(--n-primary-accent);
+  color: #FFFFFF;
+  box-shadow: 0 0 0 4px var(--n-primary-tint);
 }
-.kt-back-btn:hover {
-  background: rgba(43, 54, 116, 0.12);
+
+.stepper-step.completed .stepper-dot {
+  background: var(--n-status-success);
+  border-color: var(--n-status-success);
+  color: #FFFFFF;
 }
-.kt-toolbar-right {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-.kt-filter-group {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.kt-filter-lbl {
+
+.stepper-label {
   font-size: 0.75rem;
   font-weight: 600;
   color: var(--n-text-secondary);
-}
-.kt-select {
-  padding: 5px 10px;
-  font-size: 0.8125rem;
-  border-radius: var(--n-r-sm, 6px);
-  border: 1px solid var(--n-border-subtle);
-  background: #fff;
-  color: var(--n-text-primary);
-}
-.kt-btn-refresh {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 6px 8px;
-}
-
-/* ── Visual Podium (Top 3) ── */
-.kt-podium-wrapper {
-  margin-bottom: 24px;
-}
-.kt-podium-grid {
-  display: grid;
-  grid-template-columns: 1fr 1.15fr 1fr;
-  align-items: flex-end;
-  gap: 16px;
   margin-top: 8px;
 }
-@media (max-width: 840px) {
-  .kt-podium-grid {
-    grid-template-columns: 1fr;
-  }
-}
-.kt-podium-slot {
-  display: flex;
-  flex-direction: column;
-}
-.kt-pedestal-card {
-  background: var(--n-surface-1, #fff);
-  border-radius: var(--n-r-md, 8px) var(--n-r-md, 8px) 0 0;
-  border: 1px solid var(--n-border-subtle);
-  border-bottom: none;
-  padding: 20px 16px 16px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
-  text-align: center;
-  position: relative;
-}
-.kt-podium-slot.is-gold .kt-pedestal-card {
-  border-color: #FBBF24;
-  box-shadow: 0 8px 24px rgba(245, 158, 11, 0.12);
-  background: linear-gradient(180deg, #FFFDF5 0%, #FFFFFF 100%);
-}
-.kt-podium-slot.is-silver .kt-pedestal-card {
-  border-color: #CBD5E1;
-}
-.kt-podium-slot.is-bronze .kt-pedestal-card {
-  border-color: #FDBA74;
-}
 
-.kt-card-badge-wrap {
-  margin-bottom: 10px;
-}
-.kt-medal-badge {
-  font-size: 0.6875rem;
-  font-weight: 700;
-  padding: 4px 12px;
-  border-radius: 999px;
-  display: inline-block;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
-.kt-medal-badge.is-gold {
-  background: #FEF3C7;
-  color: #B45309;
-  border: 1px solid #FDE68A;
-}
-.kt-medal-badge.is-silver {
-  background: #F1F5F9;
-  color: #475569;
-  border: 1px solid #E2E8F0;
-}
-.kt-medal-badge.is-bronze {
-  background: #FFEDD5;
-  color: #C2410C;
-  border: 1px solid #FED7AA;
-}
-
-.kt-card-title {
-  font-size: 1.125rem;
-  font-weight: 800;
-  color: var(--n-primary, #2B3674);
-  margin-bottom: 2px;
-  letter-spacing: -0.01em;
-}
-.kt-card-sub {
-  font-size: 0.75rem;
-  color: var(--n-text-secondary);
-  margin-bottom: 12px;
-}
-
-.kt-hero-score {
-  margin: 12px 0 10px 0;
-  text-align: center;
-}
-.kt-hero-score-val {
-  font-size: 2.25rem;
-  font-weight: 800;
-  color: var(--n-primary, #2B3674);
-  line-height: 1;
-  letter-spacing: -0.04em;
-}
-.kt-podium-slot.is-gold .kt-hero-score-val {
-  color: #B45309;
-}
-.kt-hero-score-unit {
-  font-size: 0.625rem;
-  font-weight: 700;
-  color: var(--n-text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  display: block;
-  margin-top: 3px;
-}
-.kt-hero-chips {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 8px;
-  margin: 12px 0 14px 0;
-}
-.kt-hero-chip {
-  font-size: 0.6875rem;
-  color: var(--n-text-secondary);
-  background: rgba(43, 54, 116, 0.04);
-  border: 1px solid var(--n-border-subtle);
-  border-radius: 999px;
-  padding: 3px 10px;
-  white-space: nowrap;
-}
-.kt-hero-chip strong {
+.stepper-step.active .stepper-label {
   color: var(--n-text-primary);
   font-weight: 700;
-}
-.kt-card-btn {
-  width: 100%;
-  font-size: 0.75rem;
-  font-weight: 600;
-  padding: 6px 12px;
-}
-
-.kt-pedestal-block {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 0 0 var(--n-r-md, 8px) var(--n-r-md, 8px);
-  font-weight: 800;
-  font-size: 1.5rem;
-}
-.kt-podium-slot.is-gold .kt-pedestal-block {
-  height: 70px;
-  background: linear-gradient(180deg, #F59E0B 0%, #D97706 100%);
-  color: #fff;
-  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.25);
-}
-.kt-podium-slot.is-silver .kt-pedestal-block {
-  height: 52px;
-  background: linear-gradient(180deg, #94A3B8 0%, #64748B 100%);
-  color: #fff;
-}
-.kt-podium-slot.is-bronze .kt-pedestal-block {
-  height: 38px;
-  background: linear-gradient(180deg, #EA580C 0%, #C2410C 100%);
-  color: #fff;
-}
-.kt-pedestal-rank {
-  font-family: 'Plus Jakarta Sans', sans-serif;
-  letter-spacing: -0.05em;
-}
-
-/* ── Leaderboard Table Styles ── */
-.kt-table-search {
-  min-width: 260px;
-}
-.kt-table-wrap {
-  margin-top: 10px;
-}
-.kt-table th {
-  white-space: nowrap;
-  font-size: 0.6875rem;
-}
-.cell-rank {
-  font-weight: 700;
-  text-align: center;
-  width: 44px;
-}
-.cell-rank.rank-gold {
-  background: #FEF3C7;
-  color: #B45309;
-}
-.cell-rank.rank-silver {
-  background: #F1F5F9;
-  color: #475569;
-}
-.cell-rank.rank-bronze {
-  background: #FFEDD5;
-  color: #C2410C;
-}
-
-.kt-ship-cell {
-  display: flex;
-  flex-direction: column;
-}
-.kt-ship-name {
-  font-weight: 600;
-}
-.kt-com-cell {
-  display: flex;
-  flex-direction: column;
-}
-.cell-score {
-  min-width: 90px;
-}
-.kt-score-inline {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 2px;
-}
-.kt-score-num {
-  font-size: 0.875rem;
-  color: var(--n-primary, #2B3674);
-}
-.kt-score-meter {
-  width: 60px;
-  height: 4px;
-  background: #E2E8F0;
-  border-radius: 999px;
-  overflow: hidden;
-}
-.kt-meter-fill {
-  height: 100%;
-  background: var(--n-primary, #2B3674);
-  border-radius: 999px;
 }
 
 /* ============================================================
-   TATA USAHA SUB-NAV & KEPEGAWAIAN (FASE 18B.1)
+   MODALS, OVERLAYS & DRAWERS (Apple Blurred Backdrop)
    ============================================================ */
-.tu-subnav-bar {
-  display: inline-flex;
+.n-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.40);
+  backdrop-filter: var(--n-backdrop-modal);
+  -webkit-backdrop-filter: var(--n-backdrop-modal);
+  display: flex;
   align-items: center;
-  background: var(--n-surface-2, #F4F7FE);
-  padding: 4px;
-  border-radius: var(--n-radius-md, 14px);
-  gap: 4px;
-  border: 1px solid var(--n-border-subtle, rgba(43, 54, 116, 0.08));
+  justify-content: center;
+  z-index: 200;
+  padding: 20px;
+  animation: _fadeIn 160ms var(--ease-out);
 }
 
-.tu-subnav-btn {
-  display: inline-flex;
-  align-items: center;
-  padding: 8px 16px;
-  border-radius: var(--n-radius-inner, 10px);
-  border: none;
-  background: transparent;
-  color: var(--n-text-secondary, #707EAE);
-  font-family: inherit;
-  font-size: 0.8125rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 140ms var(--ease-out);
-  white-space: nowrap;
-}
-
-.tu-subnav-btn:hover:not(.active) {
-  color: var(--n-text-primary, #2B3674);
-  background: rgba(255, 255, 255, 0.5);
-}
-
-.tu-subnav-btn.active {
-  background: #FFFFFF;
-  color: var(--n-primary, #2B3674);
-  box-shadow: 0 2px 6px rgba(43, 54, 116, 0.08);
-}
-
-.tu-pegawai-kpi-grid {
-  display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
-  gap: 12px;
+.n-modal {
+  background: var(--n-material-floating);
+  border: 1px solid var(--n-border-hairline);
+  border-radius: var(--n-radius-outer-lg);
+  box-shadow: var(--n-shadow-3), var(--n-shadow-inset-bevel);
   width: 100%;
-}
-
-@media (max-width: 1200px) {
-  .tu-pegawai-kpi-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-}
-
-@media (max-width: 640px) {
-  .tu-pegawai-kpi-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-.tu-pegawai-kpi-grid .kpi-card {
-  padding: 16px 14px !important;
+  max-width: 520px;
+  max-height: 90vh;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  min-width: 0;
-  min-height: 84px;
-  box-sizing: border-box;
-}
-
-.tu-pegawai-kpi-grid .kpi-label {
-  font-size: 0.74rem;
-  font-weight: 600;
-  color: var(--n-text-secondary);
-  white-space: nowrap;
   overflow: hidden;
-  text-overflow: ellipsis;
-  margin-bottom: 6px;
+  padding: 28px;
+  animation: _modalScale 220ms var(--ease-spring);
 }
 
-.tu-pegawai-kpi-grid .kpi-value {
-  font-size: 1.45rem !important;
-  font-weight: 700;
+@keyframes _modalScale {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.n-modal h2 {
+  font-weight: 800;
+  font-size: 1.25rem;
+  color: var(--n-text-primary);
+  letter-spacing: -0.02em;
+  margin-bottom: 16px;
+}
+
+.n-modal-scroll {
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+/* Drawer */
+.n-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 480px;
+  max-width: 90vw;
+  background: var(--n-material-floating);
+  backdrop-filter: var(--n-backdrop-blur);
+  border-left: 1px solid var(--n-border-hairline);
+  box-shadow: var(--n-shadow-3);
+  z-index: 210;
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  animation: _drawerIn 260ms var(--ease-drawer);
+}
+
+@keyframes _drawerIn {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+/* ============================================================
+   TOASTER (Sonner Glass Pattern)
+   ============================================================ */
+#n-toaster {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 999;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  pointer-events: none;
+}
+
+.n-toast {
+  pointer-events: auto;
+  background: var(--n-material-floating);
+  backdrop-filter: var(--n-backdrop-blur);
+  border: 1px solid var(--n-border-hairline);
+  border-radius: var(--n-radius-md);
+  box-shadow: var(--n-shadow-3);
+  padding: 12px 18px;
+  font-size: 0.84rem;
+  font-weight: 600;
   color: var(--n-text-primary);
   display: flex;
-  align-items: baseline;
-  gap: 6px;
-  line-height: 1.2;
-}
-
-.tu-kpi-pct {
-  font-size: 0.75rem;
-  font-weight: 500;
-  color: var(--n-text-muted, #A3AED0);
-  font-variant-numeric: tabular-nums;
-}
-
-.bmn-seg-btn {
-  display: inline-flex;
   align-items: center;
-  padding: 6px 12px;
-  border-radius: 6px;
-  border: none;
-  background: transparent;
-  color: var(--n-text-secondary, #707EAE);
-  font-family: inherit;
-  font-size: 0.75rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 140ms var(--ease-out);
-  white-space: nowrap;
-}
-
-.bmn-seg-btn:hover:not(.active) {
-  color: var(--n-text-primary, #2B3674);
-  background: rgba(255, 255, 255, 0.5);
-}
-
-.bmn-seg-btn.active {
-  background: #FFFFFF;
-  color: var(--n-primary, #2B3674);
-  box-shadow: 0 1px 4px rgba(43, 54, 116, 0.08);
-}
-
-/* SMART BULK IMPORT BMN (SAKTI) STYLES */
-.bmn-dropzone {
-  border: 2px dashed rgba(43, 54, 116, 0.22);
-  border-radius: 12px;
-  padding: 28px 16px;
-  text-align: center;
-  background: rgba(43, 54, 116, 0.02);
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.bmn-dropzone:hover,
-.bmn-dropzone.dragover {
-  border-color: var(--n-primary, #2B3674);
-  background: rgba(43, 54, 116, 0.06);
-}
-
-.bmn-paste-area {
-  width: 100%;
-  box-sizing: border-box;
-  min-height: 140px;
-  font-family: 'JetBrains Mono', 'Fira Code', Menlo, Consolas, monospace;
-  font-size: 0.78rem;
-  line-height: 1.4;
-  padding: 10px 12px;
-  border-radius: 8px;
-  border: 1px solid var(--n-border, rgba(0,0,0,0.12));
-  background: #FFFFFF;
-  color: var(--n-text-primary, #2B3674);
-  resize: vertical;
-}
-
-.bmn-paste-area:focus {
-  outline: none;
-  border-color: var(--n-primary, #2B3674);
-  box-shadow: 0 0 0 3px rgba(43, 54, 116, 0.12);
-}
-
-.bmn-import-stat-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
   gap: 10px;
+  animation: _toastIn 220ms var(--ease-spring);
 }
 
-@media (max-width: 640px) {
-  .bmn-import-stat-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
+@keyframes _toastIn {
+  from { opacity: 0; transform: translateY(12px) scale(0.95); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-.bmn-import-stat-card {
-  background: #F8FAFC;
-  border: 1px solid rgba(0,0,0,0.06);
-  border-radius: 10px;
-  padding: 10px 12px;
-  display: flex;
-  flex-direction: column;
-}
-
-.bmn-import-stat-card .stat-num {
-  font-size: 1.2rem;
-  font-weight: 700;
-  color: var(--n-text-primary, #2B3674);
-  line-height: 1.2;
-}
-
-.bmn-import-stat-card .stat-lbl {
-  font-size: 0.7rem;
-  color: var(--n-text-muted, #A3AED0);
-  margin-top: 2px;
-}
-
-.bmn-import-stat-card.is-valid .stat-num {
-  color: #059669;
-}
-
-.bmn-import-stat-card.is-invalid .stat-num {
-  color: #DC2626;
-}
-
+/* ============================================================
+   ACCESSIBILITY & REDUCED MOTION
+   ============================================================ */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
@@ -4541,4 +1246,11 @@ button.btn:active:not(:disabled),
   }
 }
 
+@media (prefers-reduced-transparency: reduce) {
+  .sidebar, .page-header, .n-modal, .n-drawer, .n-card, .auth-card {
+    background: #FFFFFF !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+}
 </style>

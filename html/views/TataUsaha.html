@@ -5,34 +5,47 @@
      Konten dirender oleh _renderTataUsaha() di Script_Main.html. -->
 <div id="view-tpl-tata-usaha" hidden>
 
-  <!-- ── SUB-NAVIGASI TATA USAHA (APPLE-GRADE SEGMENTED CONTROLS) ── -->
-  <div class="content-section" style="margin-bottom: 20px;">
+  <!-- ── SUB-NAVIGASI TATA USAHA (5 SUB-MODUL ANTI-GABRUK) ── -->
+  <div class="tu-subnav-container">
     <div class="tu-subnav-bar">
-      <button type="button" class="tu-subnav-btn active" id="tu-tab-btn-anggaran" onclick="_tuSwitchTab('anggaran')">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-          stroke-linecap="round" stroke-linejoin="round" style="margin-right:6px;">
+      <button type="button" class="tu-subnav-btn active" data-tu-tab="anggaran" id="tu-tab-btn-anggaran" onclick="_tuSwitchTab('anggaran')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <rect x="2" y="4" width="20" height="16" rx="2"></rect>
           <line x1="2" y1="10" x2="22" y2="10"></line>
         </svg>
-        Anggaran &amp; Realisasi
+        <span>Realisasi Anggaran</span>
       </button>
-      <button type="button" class="tu-subnav-btn" id="tu-tab-btn-pegawai" onclick="_tuSwitchTab('pegawai')">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-          stroke-linecap="round" stroke-linejoin="round" style="margin-right:6px;">
+      <button type="button" class="tu-subnav-btn" data-tu-tab="paket" id="tu-tab-btn-paket" onclick="_tuSwitchTab('paket')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+          <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+          <path d="M9 14l2 2 4-4"></path>
+        </svg>
+        <span>Paket Pengadaan</span>
+      </button>
+      <button type="button" class="tu-subnav-btn" data-tu-tab="pegawai" id="tu-tab-btn-pegawai" onclick="_tuSwitchTab('pegawai')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
           <circle cx="9" cy="7" r="4"></circle>
           <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
           <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
         </svg>
-        Kepegawaian
+        <span>Kepegawaian</span>
       </button>
-      <button type="button" class="tu-subnav-btn" id="tu-tab-btn-bmn" onclick="_tuSwitchTab('bmn')">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-          stroke-linecap="round" stroke-linejoin="round" style="margin-right:6px;">
+      <button type="button" class="tu-subnav-btn" data-tu-tab="bmn" id="tu-tab-btn-bmn" onclick="_tuSwitchTab('bmn')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
           <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
         </svg>
-        Inventaris BMN &amp; Aset
+        <span>Inventaris BMN</span>
+      </button>
+      <button type="button" class="tu-subnav-btn" data-tu-tab="penghapusan" id="tu-tab-btn-penghapusan" onclick="_tuSwitchTab('penghapusan')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <line x1="9" y1="15" x2="15" y2="15"></line>
+        </svg>
+        <span>Usulan Penghapusan</span>
       </button>
     </div>
   </div>
@@ -291,7 +304,211 @@
 
 
   <!-- ══════════════════════════════════════════════════════════ -->
-  <!-- TAB 2: KEPEGAWAIAN (5 KATEGORI: PNS, P3K, P3K-PW, PJLP, MAGANG) -->
+  <!-- TAB 2: MONITORING PAKET PENGADAAN (SUB-MODUL B)            -->
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <div id="tu-pane-paket" class="tu-pane n-hidden">
+    <!-- ── 6-STAGE WORKFLOW STEPPER ───────────────────────── -->
+    <div class="content-section">
+      <div class="stepper-container">
+        <div class="stepper-step completed">
+          <div class="stepper-dot">1</div>
+          <div class="stepper-label">Persiapan</div>
+        </div>
+        <div class="stepper-step completed">
+          <div class="stepper-dot">2</div>
+          <div class="stepper-label">Pemilihan</div>
+        </div>
+        <div class="stepper-step active">
+          <div class="stepper-dot">3</div>
+          <div class="stepper-label">Kontrak</div>
+        </div>
+        <div class="stepper-step">
+          <div class="stepper-dot">4</div>
+          <div class="stepper-label">Pelaksanaan</div>
+        </div>
+        <div class="stepper-step">
+          <div class="stepper-dot">5</div>
+          <div class="stepper-label">BAST</div>
+        </div>
+        <div class="stepper-step">
+          <div class="stepper-dot">6</div>
+          <div class="stepper-label">Selesai</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── KPI STRIP PAKET ────────────────────────────────── -->
+    <div class="content-section">
+      <div class="ov-kpi-row" id="tu-paket-kpi-strip">
+        <div class="n-card kpi-card">
+          <div class="kpi-label">Total Paket Pekerjaan</div>
+          <div class="kpi-value tnum" id="tu-paket-kpi-total">0 paket</div>
+          <div class="kpi-sub" id="tu-paket-kpi-total-sub">Seluruh divisi Dit. POA</div>
+        </div>
+        <div class="n-card kpi-card">
+          <div class="kpi-label">Total Nilai Kontrak</div>
+          <div class="kpi-value tnum" id="tu-paket-kpi-kontrak">Rp 0</div>
+          <div class="kpi-sub" id="tu-paket-kpi-kontrak-sub">Komitmen rekanan penyedia</div>
+        </div>
+        <div class="n-card kpi-card">
+          <div class="kpi-label">Rata-rata Progres Fisik</div>
+          <div class="kpi-value tnum" id="tu-paket-kpi-progres">0%</div>
+          <div class="kpi-sub" id="tu-paket-kpi-progres-sub">Capaian fisik lapangan</div>
+        </div>
+        <div class="n-card kpi-card">
+          <div class="kpi-label">Realisasi Keuangan</div>
+          <div class="kpi-value tnum" id="tu-paket-kpi-realisasi">Rp 0</div>
+          <div class="kpi-sub" id="tu-paket-kpi-realisasi-sub">Pencairan termin pembayaran</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── MASTER CARD TABEL PAKET ────────────────────────── -->
+    <div class="content-section">
+      <div class="n-card" style="padding:0; overflow:hidden;">
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:16px 20px; border-bottom:1px solid var(--n-border-hairline); gap:12px; flex-wrap:wrap;">
+          <div style="display:flex; align-items:center; gap:10px;">
+            <h3 style="margin:0; font-size:1rem; font-weight:700; color:var(--n-text-primary);">
+              Daftar Progres Paket Pekerjaan &amp; Pengadaan
+            </h3>
+            <span class="badge" id="tu-paket-badge-total" style="background:rgba(43,54,116,0.08); color:var(--n-primary); font-size:.75rem; font-weight:600;">
+              0 paket
+            </span>
+          </div>
+          <div class="ctl-row">
+            <button type="button" class="btn-outline" onclick="_tuLoadPaket(true)">
+              Muat Ulang
+            </button>
+            <button type="button" class="btn-primary" onclick="_tuOpenPaketModal()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+              Catat Progres Paket
+            </button>
+          </div>
+        </div>
+
+        <!-- Filter Sub-Toolbar -->
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 20px; background:rgba(0,0,0,0.015); border-bottom:1px solid var(--n-border-hairline); gap:12px; flex-wrap:wrap;">
+          <div class="ctl-row">
+            <select id="tu-paket-filter-tahap" onchange="_tuFilterPaket()" style="height:var(--ctl-h-md); font-size:var(--ctl-fs-md); border-radius:var(--ctl-r-md);">
+              <option value="ALL">Semua Tahap Pekerjaan</option>
+              <option value="PERSIAPAN">Tahap 1: Persiapan</option>
+              <option value="PEMILIHAN">Tahap 2: Pemilihan</option>
+              <option value="KONTRAK">Tahap 3: Kontrak</option>
+              <option value="PELAKSANAAN">Tahap 4: Pelaksanaan</option>
+              <option value="BAST">Tahap 5: BAST</option>
+              <option value="SELESAI">Tahap 6: Selesai</option>
+            </select>
+          </div>
+          <div class="ctl-row">
+            <input type="text" id="tu-paket-search" placeholder="Cari nama paket, rekanan..." oninput="_tuFilterPaket()" style="height:var(--ctl-h-md); font-size:var(--ctl-fs-md); border-radius:var(--ctl-r-md); padding:0 12px; width:220px;">
+          </div>
+        </div>
+
+        <div id="tu-paket-msg" class="n-msg" style="margin:8px 20px 0 20px;"></div>
+        <div style="overflow-x:auto;" id="tu-paket-table-wrap">
+          <div style="padding:32px; text-align:center; color:var(--n-text-muted); font-size:.875rem;">
+            Memuat daftar paket pengadaan…
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── MODAL INPUT PROGRES PAKET ─────────────────────── -->
+    <div class="n-overlay n-hidden" id="modal-tu-paket-form">
+      <div class="n-modal n-modal-form" style="max-width: 620px;">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px;">
+          <div>
+            <h2 id="tu-paket-modal-title" style="margin:0 0 4px 0;">Catat Progres Paket Pengadaan</h2>
+            <div style="font-size:0.78rem; color:var(--n-text-muted);">Siklus hidup 6 tahap pekerjaan Dit. POA</div>
+          </div>
+          <button class="btn-ghost" style="padding:4px;" onclick="closeModal('modal-tu-paket-form')" aria-label="Tutup">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+
+        <div class="n-modal-scroll">
+          <div id="tu-paket-form-msg" class="n-msg"></div>
+
+          <form id="tu-paket-form" onsubmit="event.preventDefault(); _tuSubmitPaket();">
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 6px;">
+              <div class="form-grp" style="grid-column: span 2;">
+                <label for="tu-pkt-nama">Nama Paket Pekerjaan <span style="color:var(--n-crit)">*</span></label>
+                <input type="text" id="tu-pkt-nama" placeholder="Contoh: Pengadaan Genset Pangkalan Benoa 2026" required>
+              </div>
+              <div class="form-grp">
+                <label for="tu-pkt-tahap">Tahap Pekerjaan <span style="color:var(--n-crit)">*</span></label>
+                <select id="tu-pkt-tahap" required onchange="_tuOnPaketTahapChange()">
+                  <option value="PERSIAPAN">1. Persiapan</option>
+                  <option value="PEMILIHAN">2. Pemilihan</option>
+                  <option value="KONTRAK">3. Kontrak</option>
+                  <option value="PELAKSANAAN">4. Pelaksanaan</option>
+                  <option value="BAST">5. BAST</option>
+                  <option value="SELESAI">6. Selesai</option>
+                </select>
+              </div>
+              <div class="form-grp">
+                <label for="tu-pkt-divisi">Unit Kerja Pelaksana</label>
+                <select id="tu-pkt-divisi">
+                  <option value="DIV-TU">Subbag Tata Usaha</option>
+                  <option value="DIV-OPS">Operasi Armada</option>
+                  <option value="DIV-RAWAT">Perawatan Armada</option>
+                  <option value="DIV-LOG">Logistik</option>
+                  <option value="DIV-PANTAU">Pemantauan</option>
+                  <option value="DIV-INTEL">Intelijen</option>
+                  <option value="DIV-AWAK">Pengawakan</option>
+                </select>
+              </div>
+              <div class="form-grp">
+                <label for="tu-pkt-no-kontrak">Nomor Kontrak / SPK <span id="tu-pkt-kontrak-req" class="n-hidden" style="color:var(--n-crit)">*</span></label>
+                <input type="text" id="tu-pkt-no-kontrak" placeholder="Contoh: 042/SPK/POA/2026">
+              </div>
+              <div class="form-grp">
+                <label for="tu-pkt-rekanan">Rekanan Penyedia / Vendor <span id="tu-pkt-rekanan-req" class="n-hidden" style="color:var(--n-crit)">*</span></label>
+                <input type="text" id="tu-pkt-rekanan" placeholder="Nama PT / CV Rekanan">
+              </div>
+              <div class="form-grp">
+                <label for="tu-pkt-nilai">Nilai Kontrak (Rp)</label>
+                <input type="number" id="tu-pkt-nilai" min="0" step="1" placeholder="0" class="tnum">
+              </div>
+              <div class="form-grp">
+                <label for="tu-pkt-progres-fisik">Progres Fisik (%) <span style="color:var(--n-crit)">*</span></label>
+                <input type="number" id="tu-pkt-progres-fisik" min="0" max="100" step="0.1" placeholder="0" class="tnum" required>
+              </div>
+              <div class="form-grp">
+                <label for="tu-pkt-realisasi-keu">Realisasi Keuangan (Rp)</label>
+                <input type="number" id="tu-pkt-realisasi-keu" min="0" step="1" placeholder="0" class="tnum">
+              </div>
+              <div class="form-grp">
+                <label for="tu-pkt-evidence">Tautan Dokumen / Evidence (Drive URL)</label>
+                <input type="url" id="tu-pkt-evidence" placeholder="https://drive.google.com/file/d/...">
+              </div>
+              <div class="form-grp" style="grid-column: span 2;">
+                <label for="tu-pkt-kendala">Kendala / Keterangan Pelaksanaan</label>
+                <textarea id="tu-pkt-kendala" rows="2" placeholder="Catatan kendala lapangan, deviasi progres, dsb..."></textarea>
+              </div>
+            </div>
+
+            <div class="ctl-row ctl-lg" style="justify-content:flex-end; margin-top:20px; padding-top:14px; border-top:1px solid var(--n-border-hairline);">
+              <button type="button" class="btn-ghost" onclick="closeModal('modal-tu-paket-form')">Batal</button>
+              <button type="submit" class="btn-primary" id="tu-pkt-btn-save">
+                Simpan Progres Paket
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div><!-- /tu-pane-paket -->
+
+
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <!-- TAB 3: KEPEGAWAIAN (5 KATEGORI: PNS, P3K, P3K-PW, PJLP, MAGANG) -->
   <!-- ══════════════════════════════════════════════════════════ -->
   <div id="tu-pane-pegawai" class="tu-pane n-hidden">
 
@@ -426,18 +643,6 @@
   <!-- TAB 3: INVENTARIS BMN & ASET (FASE 18B.2 PREVIEW)         -->
   <!-- ══════════════════════════════════════════════════════════ -->
   <div id="tu-pane-bmn" class="tu-pane n-hidden">
-
-    <!-- Switcher Antara Daftar Inventaris vs Siklus Penghapusan Kemenkeu (Sub-Fase 18B.6) -->
-    <div class="content-section" style="margin-bottom:16px;">
-      <div class="n-seg" style="display:inline-flex;">
-        <button type="button" class="bmn-mode-btn active" id="bmn-tab-btn-register" onclick="_bmnSwitchMainTab('register')">
-          Daftar Inventaris Aset
-        </button>
-        <button type="button" class="bmn-mode-btn" id="bmn-tab-btn-penghapusan" onclick="_bmnSwitchMainTab('penghapusan')">
-          Siklus Usulan Penghapusan (Kemenkeu)
-        </button>
-      </div>
-    </div>
 
     <!-- SUB-VIEW 1: DAFTAR / DASHBOARD BMN -->
     <div id="bmn-view-list">
@@ -613,93 +818,6 @@
         </div>
       </div>
     </div><!-- /bmn-view-list -->
-
-    <!-- SUB-VIEW 3: SIKLUS PENGHAPUSAN BMN LEGAL KEMENKEU (SUB-FASE 18B.6) -->
-    <div id="bmn-view-penghapusan" class="n-hidden">
-      <!-- 4 KPI Cards Penghapusan -->
-      <div class="content-section">
-        <div class="ov-kpi-row" id="bmn-hps-kpi-strip" style="grid-template-columns: repeat(4, 1fr);">
-          <div class="n-card kpi-card">
-            <div class="kpi-label">Total Berkas Usulan</div>
-            <div class="kpi-value tnum" id="bmn-hps-kpi-total">0 berkas</div>
-            <div class="kpi-sub" id="bmn-hps-kpi-total-sub">Seluruh berkas terdaftar</div>
-          </div>
-          <div class="n-card kpi-card">
-            <div class="kpi-label">Dalam Proses Kemenkeu</div>
-            <div class="kpi-value tnum" id="bmn-hps-kpi-proses">0 berkas</div>
-            <div class="kpi-sub" id="bmn-hps-kpi-proses-sub">Tahap Usulan &amp; Izin DJKN</div>
-          </div>
-          <div class="n-card kpi-card">
-            <div class="kpi-label">Menunggu SK &amp; BAST</div>
-            <div class="kpi-value tnum" id="bmn-hps-kpi-sk">0 berkas</div>
-            <div class="kpi-sub" id="bmn-hps-kpi-sk-sub">Tahap SK KKP / Eksekusi</div>
-          </div>
-          <div class="n-card kpi-card">
-            <div class="kpi-label">Selesai Dihapus (BAST)</div>
-            <div class="kpi-value tnum" id="bmn-hps-kpi-selesai">0 unit</div>
-            <div class="kpi-sub" id="bmn-hps-kpi-selesai-sub">Rp 0 (Nilai Buku)</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Master Card Berkas Usulan Penghapusan -->
-      <div class="content-section">
-        <div class="n-card" style="padding:0; overflow:hidden; border-radius:var(--n-radius-md); box-shadow:var(--n-shadow-1);">
-          <!-- Baris 1: Header Tabel & Aksi -->
-          <div style="display:flex; justify-content:space-between; align-items:center; padding:16px 20px; border-bottom:1px solid var(--n-border-hairline); gap:12px; flex-wrap:wrap;">
-            <div style="display:flex; align-items:center; gap:10px;">
-              <h3 style="margin:0; font-size:1rem; font-weight:700; color:var(--n-text-primary);">
-                Berkas Usulan Penghapusan BMN
-              </h3>
-              <span class="badge" id="bmn-hps-badge-total" style="background:rgba(43,54,116,0.08); color:var(--n-primary); font-size:.75rem; font-weight:600;">
-                0 berkas
-              </span>
-            </div>
-            <div class="ctl-row">
-              <button type="button" class="btn-outline" onclick="_bmnLoadPenghapusanList(true)">
-                Muat Ulang
-              </button>
-              <button type="button" class="btn-primary" onclick="_bmnOpenCreateHapusModal()">
-                + Buat Usulan Penghapusan
-              </button>
-            </div>
-          </div>
-
-          <!-- Baris 2: Sub-Toolbar Filter Tahap & Pencarian -->
-          <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 20px; background:rgba(0,0,0,0.015); border-bottom:1px solid var(--n-border-hairline); gap:12px; flex-wrap:wrap;">
-            <!-- Segmented Filter Tahap -->
-            <div class="n-seg">
-              <button type="button" class="bmn-hps-seg-btn active" data-hps-tahap="ALL" onclick="_bmnSetHpsTahap('ALL')">Semua Berkas</button>
-              <button type="button" class="bmn-hps-seg-btn" data-hps-tahap="DRAFT_USULAN" onclick="_bmnSetHpsTahap('DRAFT_USULAN')">Draft</button>
-              <button type="button" class="bmn-hps-seg-btn" data-hps-tahap="SURAT_USULAN" onclick="_bmnSetHpsTahap('SURAT_USULAN')">Surat Usulan</button>
-              <button type="button" class="bmn-hps-seg-btn" data-hps-tahap="PERSETUJUAN_KEMENKEU" onclick="_bmnSetHpsTahap('PERSETUJUAN_KEMENKEU')">Persetujuan Kemenkeu</button>
-              <button type="button" class="bmn-hps-seg-btn" data-hps-tahap="SK_PENGHAPUSAN" onclick="_bmnSetHpsTahap('SK_PENGHAPUSAN')">SK Penghapusan</button>
-              <button type="button" class="bmn-hps-seg-btn" data-hps-tahap="BAST_SELESAI" onclick="_bmnSetHpsTahap('BAST_SELESAI')">Selesai (BAST)</button>
-              <button type="button" class="bmn-hps-seg-btn" data-hps-tahap="DITOLAK" onclick="_bmnSetHpsTahap('DITOLAK')">Ditolak</button>
-            </div>
-
-            <!-- Live Search -->
-            <div class="ctl-row">
-              <div class="ctl-search">
-                <svg class="ctl-search-ico" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                  <circle cx="11" cy="11" r="8"></circle>
-                  <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                </svg>
-                <input type="text" id="bmn-hps-search-input" placeholder="Cari ID usulan, no. surat..." oninput="_bmnDebouncedHpsSearch()">
-              </div>
-            </div>
-          </div>
-
-          <!-- Wadah Isi Tabel Berkas Usulan -->
-          <div id="bmn-hps-table-msg" class="n-msg" style="margin:8px 20px 0 20px;"></div>
-          <div style="overflow-x:auto;" id="bmn-hps-table-wrap">
-            <div style="padding:32px; text-align:center; color:var(--n-text-muted); font-size:.875rem;">
-              Memuat daftar usulan penghapusan BMN…
-            </div>
-          </div>
-        </div>
-      </div>
-    </div><!-- /bmn-view-penghapusan -->
 
     <!-- SUB-VIEW 2: FORM TAMBAH / EDIT ASET (IN-PAGE, FULL VIEW NO POPUP) -->
     <div id="bmn-view-form" class="n-hidden">
@@ -928,6 +1046,98 @@
         </div>
       </div>
     </div><!-- /bmn-view-form -->
+  </div><!-- /tu-pane-bmn -->
+
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <!-- TAB 5: USULAN PENGHAPUSAN BMN KEMENKEU (ANTI-GABRUK)      -->
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <div id="tu-pane-penghapusan" class="tu-pane n-hidden">
+    <div id="bmn-view-penghapusan">
+      <!-- 4 KPI Cards Penghapusan -->
+      <div class="content-section">
+        <div class="ov-kpi-row" id="bmn-hps-kpi-strip" style="grid-template-columns: repeat(4, 1fr);">
+          <div class="n-card kpi-card">
+            <div class="kpi-label">Total Berkas Usulan</div>
+            <div class="kpi-value tnum" id="bmn-hps-kpi-total">0 berkas</div>
+            <div class="kpi-sub" id="bmn-hps-kpi-total-sub">Seluruh berkas terdaftar</div>
+          </div>
+          <div class="n-card kpi-card">
+            <div class="kpi-label">Dalam Proses Kemenkeu</div>
+            <div class="kpi-value tnum" id="bmn-hps-kpi-proses">0 berkas</div>
+            <div class="kpi-sub" id="bmn-hps-kpi-proses-sub">Tahap Usulan &amp; Izin DJKN</div>
+          </div>
+          <div class="n-card kpi-card">
+            <div class="kpi-label">Menunggu SK &amp; BAST</div>
+            <div class="kpi-value tnum" id="bmn-hps-kpi-sk">0 berkas</div>
+            <div class="kpi-sub" id="bmn-hps-kpi-sk-sub">Tahap SK KKP / Eksekusi</div>
+          </div>
+          <div class="n-card kpi-card">
+            <div class="kpi-label">Selesai Dihapus (BAST)</div>
+            <div class="kpi-value tnum" id="bmn-hps-kpi-selesai">0 unit</div>
+            <div class="kpi-sub" id="bmn-hps-kpi-selesai-sub">Rp 0 (Nilai Buku)</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Master Card Berkas Usulan Penghapusan -->
+      <div class="content-section">
+        <div class="n-card" style="padding:0; overflow:hidden; border-radius:var(--n-radius-md); box-shadow:var(--n-shadow-1);">
+          <!-- Baris 1: Header Tabel & Aksi -->
+          <div style="display:flex; justify-content:space-between; align-items:center; padding:16px 20px; border-bottom:1px solid var(--n-border-hairline); gap:12px; flex-wrap:wrap;">
+            <div style="display:flex; align-items:center; gap:10px;">
+              <h3 style="margin:0; font-size:1rem; font-weight:700; color:var(--n-text-primary);">
+                Berkas Usulan Penghapusan BMN
+              </h3>
+              <span class="badge" id="bmn-hps-badge-total" style="background:rgba(43,54,116,0.08); color:var(--n-primary); font-size:.75rem; font-weight:600;">
+                0 berkas
+              </span>
+            </div>
+            <div class="ctl-row">
+              <button type="button" class="btn-outline" onclick="_bmnLoadPenghapusanList(true)">
+                Muat Ulang
+              </button>
+              <button type="button" class="btn-primary" onclick="_bmnOpenCreateHapusModal()">
+                + Buat Usulan Penghapusan
+              </button>
+            </div>
+          </div>
+
+          <!-- Baris 2: Sub-Toolbar Filter Tahap & Pencarian -->
+          <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 20px; background:rgba(0,0,0,0.015); border-bottom:1px solid var(--n-border-hairline); gap:12px; flex-wrap:wrap;">
+            <!-- Segmented Filter Tahap -->
+            <div class="n-seg">
+              <button type="button" class="bmn-hps-seg-btn active" data-hps-tahap="ALL" onclick="_bmnSetHpsTahap('ALL')">Semua Berkas</button>
+              <button type="button" class="bmn-hps-seg-btn" data-hps-tahap="DRAFT_USULAN" onclick="_bmnSetHpsTahap('DRAFT_USULAN')">Draft</button>
+              <button type="button" class="bmn-hps-seg-btn" data-hps-tahap="SURAT_USULAN" onclick="_bmnSetHpsTahap('SURAT_USULAN')">Surat Usulan</button>
+              <button type="button" class="bmn-hps-seg-btn" data-hps-tahap="PERSETUJUAN_KEMENKEU" onclick="_bmnSetHpsTahap('PERSETUJUAN_KEMENKEU')">Persetujuan Kemenkeu</button>
+              <button type="button" class="bmn-hps-seg-btn" data-hps-tahap="SK_PENGHAPUSAN" onclick="_bmnSetHpsTahap('SK_PENGHAPUSAN')">SK Penghapusan</button>
+              <button type="button" class="bmn-hps-seg-btn" data-hps-tahap="BAST_SELESAI" onclick="_bmnSetHpsTahap('BAST_SELESAI')">Selesai (BAST)</button>
+              <button type="button" class="bmn-hps-seg-btn" data-hps-tahap="DITOLAK" onclick="_bmnSetHpsTahap('DITOLAK')">Ditolak</button>
+            </div>
+
+            <!-- Live Search -->
+            <div class="ctl-row">
+              <div class="ctl-search">
+                <svg class="ctl-search-ico" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                <input type="text" id="bmn-hps-search-input" placeholder="Cari ID usulan, no. surat..." oninput="_bmnDebouncedHpsSearch()">
+              </div>
+            </div>
+          </div>
+
+          <!-- Wadah Isi Tabel Berkas Usulan -->
+          <div id="bmn-hps-table-msg" class="n-msg" style="margin:8px 20px 0 20px;"></div>
+          <div style="overflow-x:auto;" id="bmn-hps-table-wrap">
+            <div style="padding:32px; text-align:center; color:var(--n-text-muted); font-size:.875rem;">
+              Memuat daftar usulan penghapusan BMN…
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div><!-- /tu-pane-penghapusan -->
 
     <!-- MODAL ANULIR BMN -->
     <div class="n-overlay n-hidden" id="modal-bmn-anulir">
@@ -1383,8 +1593,5 @@
           <button type="button" class="btn-ghost" onclick="closeModal('modal-bmn-void-hapus')">Batal</button>
         </div>
       </div>
-    </div>
-
-  </div><!-- /tu-pane-bmn -->
 
 </div><!-- /view-tpl-tata-usaha -->

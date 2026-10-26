@@ -971,3 +971,219 @@ function tataUsaha_anulirPegawai(token, params) {
     return { success: false, error: e.message };
   }
 }
+
+// ===========================================================================
+// SUB-MODUL B: MONITORING PAKET PENGADAAN & PEKERJAAN (PRD §3.2)
+// ===========================================================================
+
+var _TU_TAHAP_PAKET = ['PERSIAPAN', 'PEMILIHAN', 'KONTRAK', 'PELAKSANAAN', 'BAST', 'SELESAI'];
+
+/**
+ * Mengambil ringkasan & riwayat progres paket pengadaan.
+ * @param {string} token
+ * @param {Object} filter
+ */
+function tataUsaha_getPaket(token, filter) {
+  try {
+    var session = _tuRequireSession(token);
+    _tuAssertRead(session);
+
+    var sheet = openTuSheet(SHEET_TU.PAKET_PROGRES);
+    var rows = sheetToObjects(sheet);
+
+    var activeRows = rows.filter(function (r) {
+      return String(r['Status']) === ROW_STATUS.ACTIVE;
+    });
+
+    var totalNilaiKontrak = 0;
+    var totalRealisasiKeu = 0;
+    var totalProgresFisik = 0;
+
+    activeRows.forEach(function (r) {
+      totalNilaiKontrak += _num(r['NilaiKontrak']);
+      totalRealisasiKeu += _num(r['RealisasiKeuangan']);
+      totalProgresFisik += _num(r['ProgresFisikPct']);
+    });
+
+    var avgProgresFisik = activeRows.length > 0
+      ? Math.round((totalProgresFisik / activeRows.length) * 10) / 10
+      : 0;
+
+    // Riwayat diurutkan descending
+    var history = rows.slice().sort(function (a, b) {
+      return new Date(b['Timestamp'] || 0) - new Date(a['Timestamp'] || 0);
+    }).map(function (r) {
+      return {
+        rowId: String(r['RowID'] || ''),
+        periode: String(r['Periode'] || ''),
+        divisiId: String(r['DivisiID'] || ''),
+        namaPaket: String(r['NamaPaket'] || r['PaketID'] || ''),
+        paketId: String(r['PaketID'] || ''),
+        tahap: String(r['TahapPekerjaan'] || ''),
+        noKontrak: String(r['NomorKontrak'] || ''),
+        rekanan: String(r['RekananPenyedia'] || ''),
+        nilaiKontrak: _num(r['NilaiKontrak']),
+        progresFisik: _num(r['ProgresFisikPct']),
+        realisasiKeuangan: _num(r['RealisasiKeuangan']),
+        kendala: String(r['KendalaKeterangan'] || ''),
+        evidenceUrl: String(r['EvidenceUrl'] || ''),
+        status: String(r['Status'] || ''),
+        submittedBy: String(r['SubmittedBy'] || ''),
+        timestamp: r['Timestamp'] instanceof Date ? r['Timestamp'].toISOString() : String(r['Timestamp'] || '')
+      };
+    });
+
+    return {
+      success: true,
+      data: {
+        totalPaket: activeRows.length,
+        totalNilaiKontrak: totalNilaiKontrak,
+        totalRealisasiKeu: totalRealisasiKeu,
+        avgProgresFisik: avgProgresFisik,
+        items: history
+      }
+    };
+  } catch (e) {
+    Logger.log('[tataUsaha_getPaket] ' + e.message);
+    return { success: false, error: e.message };
+  }
+}
+
+/**
+ * Mencatat / memperbarui progres paket pekerjaan pengadaan.
+ * @param {string} token
+ * @param {Object} payload
+ */
+function tataUsaha_submitPaket(token, payload) {
+  try {
+    var session = _tuRequireSession(token);
+    _tuAssertWrite(session);
+
+    if (!payload) throw new Error('Data payload tidak boleh kosong.');
+    var namaPaket = String(payload.namaPaket || '').trim();
+    var tahap = String(payload.tahap || '').toUpperCase();
+    var divisiId = String(payload.divisiId || _TU_DIVISI_ID).trim();
+    var progresFisik = parseFloat(payload.progresFisik);
+
+    if (!namaPaket) throw new Error('Nama paket pekerjaan wajib diisi.');
+    if (_TU_TAHAP_PAKET.indexOf(tahap) === -1) throw new Error('Tahap pekerjaan tidak valid.');
+    if (isNaN(progresFisik) || progresFisik < 0 || progresFisik > 100) {
+      throw new Error('Progres fisik harus berada di antara 0 dan 100%.');
+    }
+
+    var tahapIdx = _TU_TAHAP_PAKET.indexOf(tahap);
+    var noKontrak = String(payload.noKontrak || '').trim();
+    var rekanan = String(payload.rekanan || '').trim();
+
+    // Validasi: tahap >= KONTRAK mewajibkan nomor kontrak dan rekanan
+    if (tahapIdx >= 2) {
+      if (!noKontrak) throw new Error('Nomor Kontrak wajib diisi untuk tahap ' + tahap + '.');
+      if (!rekanan) throw new Error('Rekanan Penyedia wajib diisi untuk tahap ' + tahap + '.');
+    }
+
+    var lock = LockService.getScriptLock();
+    lock.waitLock(15000);
+
+    try {
+      var sheet = openTuSheet(SHEET_TU.PAKET_PROGRES);
+      var periode = getCurrentPeriode();
+      var ts = new Date();
+      var rowId = 'PKT-' + ts.getFullYear() + '-' + Utilities.getUuid().substring(0, 8).toUpperCase();
+
+      var newRow = {
+        RowID: rowId,
+        DivisiID: divisiId,
+        Periode: periode,
+        SubmittedBy: session.userId,
+        Timestamp: ts,
+        Status: ROW_STATUS.ACTIVE,
+        SupersedesRowID: '',
+        VoidReason: '',
+        VoidedBy: '',
+        VoidedAt: '',
+        PaketID: namaPaket,
+        NamaPaket: namaPaket,
+        TahapPekerjaan: tahap,
+        NomorKontrak: noKontrak,
+        NilaiKontrak: _num(payload.nilaiKontrak),
+        RekananPenyedia: rekanan,
+        ProgresFisikPct: progresFisik,
+        RealisasiKeuangan: _num(payload.realisasiKeuangan),
+        KendalaKeterangan: String(payload.kendala || '').trim(),
+        EvidenceUrl: String(payload.evidenceUrl || '').trim()
+      };
+
+      appendRowData(sheet, newRow);
+
+      logAudit(session.userId, 'SUBMIT_PAKET', 'TX_Paket_Progres', rowId, {
+        tahap: tahap,
+        namaPaket: namaPaket,
+        progresFisik: progresFisik
+      });
+
+      return { success: true, message: 'Progres paket berhasil disimpan.', rowId: rowId };
+    } finally {
+      lock.releaseLock();
+    }
+  } catch (e) {
+    Logger.log('[tataUsaha_submitPaket] ' + e.message);
+    return { success: false, error: e.message };
+  }
+}
+
+/**
+ * Menganulir entri progres paket.
+ * @param {string} token
+ * @param {Object} params
+ */
+function tataUsaha_anulirPaket(token, params) {
+  try {
+    var session = _tuRequireSession(token);
+    _tuAssertVoid(session);
+
+    if (!params || !params.rowId) throw new Error('RowID paket wajib diisi.');
+    var alasan = String(params.alasan || '').trim();
+    if (!alasan) throw new Error('Alasan anulir wajib diisi.');
+
+    var lock = LockService.getScriptLock();
+    lock.waitLock(15000);
+
+    try {
+      var sheet = openTuSheet(SHEET_TU.PAKET_PROGRES);
+      var rows = sheetToObjects(sheet);
+      var targetIdx = -1;
+
+      for (var i = 0; i < rows.length; i++) {
+        if (rows[i]['RowID'] === params.rowId && String(rows[i]['Status']) === ROW_STATUS.ACTIVE) {
+          targetIdx = i + 2;
+          break;
+        }
+      }
+
+      if (targetIdx === -1) throw new Error('Data paket tidak ditemukan atau sudah tidak aktif.');
+
+      var headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+      var colStatus = headers.indexOf('Status') + 1;
+      var colReason = headers.indexOf('VoidReason') + 1;
+      var colBy     = headers.indexOf('VoidedBy') + 1;
+      var colAt     = headers.indexOf('VoidedAt') + 1;
+
+      sheet.getRange(targetIdx, colStatus).setValue(ROW_STATUS.VOID);
+      sheet.getRange(targetIdx, colReason).setValue(alasan);
+      sheet.getRange(targetIdx, colBy).setValue(session.userId);
+      sheet.getRange(targetIdx, colAt).setValue(new Date());
+
+      logAudit(session.userId, 'ANULIR_PAKET', 'TX_Paket_Progres', params.rowId, {
+        alasan: alasan
+      });
+
+      return { success: true, message: 'Progres paket berhasil dianulir.' };
+    } finally {
+      lock.releaseLock();
+    }
+  } catch (e) {
+    Logger.log('[tataUsaha_anulirPaket] ' + e.message);
+    return { success: false, error: e.message };
+  }
+}
+
