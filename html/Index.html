@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nautika — Direktorat POA, KKP RI</title>
+  <meta name="description" content="Sistem Monitoring dan Pelaporan Direktorat Pengendalian Operasi Armada, Kementerian Kelautan dan Perikanan Republik Indonesia.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <?!= html_include('html/Style'); ?>
+</head>
+<body>
+
+<!-- =========================================================
+     LOADING — tampil saat cek sesi awal
+     ========================================================= -->
+<div id="n-loading">
+  <div class="n-loading-brand">Nautika</div>
+  <div class="n-loading-spin"></div>
+</div>
+
+<!-- =========================================================
+     AUTH WRAPPER — login / register / pending
+     ========================================================= -->
+<div id="auth-wrapper" class="n-hidden">
+
+  <!-- LOGIN -->
+  <div id="v-login" class="auth-screen n-hidden">
+    <div class="auth-card">
+      <div class="auth-brand">Nautika</div>
+      <h1 class="auth-title">Masuk ke Akun</h1>
+      <div id="login-msg" class="n-msg"></div>
+      <form id="form-login" onsubmit="handleLogin(event)">
+        <div class="form-grp">
+          <label for="login-email">Email / NIP</label>
+          <input type="email" id="login-email" placeholder="nama@instansi.go.id"
+                 required autocomplete="email">
+        </div>
+        <div class="form-grp">
+          <label for="login-password">Password</label>
+          <input type="password" id="login-password" placeholder="••••••••"
+                 required autocomplete="current-password">
+        </div>
+        <button type="submit" class="btn-primary" id="btn-login">Masuk</button>
+      </form>
+      <div class="auth-foot">
+        Belum punya akun? <a onclick="showAuthView('register')">Daftar</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- REGISTER -->
+  <div id="v-register" class="auth-screen n-hidden">
+    <div class="auth-card">
+      <div class="auth-brand">Nautika</div>
+      <h1 class="auth-title">Daftar Akun Baru</h1>
+      <div id="register-banner-host"></div>
+      <div id="register-msg" class="n-msg"></div>
+      <form id="form-register" onsubmit="handleRegister(event)">
+        <div class="form-grp">
+          <label for="reg-nama">Nama Lengkap</label>
+          <input type="text" id="reg-nama" placeholder="Nama sesuai dokumen resmi" required>
+        </div>
+        <div class="form-grp">
+          <label for="reg-email">Email</label>
+          <input type="email" id="reg-email" placeholder="nama@instansi.go.id" required>
+          <span class="n-form-hint">Dipakai untuk masuk dan menerima kode verifikasi.</span>
+        </div>
+        <div class="form-grp">
+          <label for="reg-nip">NIP</label>
+          <input type="text" id="reg-nip" inputmode="numeric" placeholder="Nomor Induk Pegawai"
+                 required autocomplete="off">
+        </div>
+        <div class="form-grp">
+          <label for="reg-password">Password</label>
+          <input type="password" id="reg-password" placeholder="Minimal 8 karakter"
+                 required minlength="8">
+        </div>
+        <div class="form-grp">
+          <label for="reg-divisi">Unit Kerja</label>
+          <select id="reg-divisi" required>
+            <option value="">— Pilih Unit Kerja —</option>
+          </select>
+        </div>
+        <div class="form-grp">
+          <label for="reg-role">Jabatan yang Dilamar</label>
+          <select id="reg-role" required>
+            <option value="">— Pilih Jabatan —</option>
+            <option value="STAF">Staf / Pegawai</option>
+            <option value="KADIV">Kepala Divisi / Ketua Tim Kerja / Kepala Sub Direktorat</option>
+          </select>
+        </div>
+        <button type="submit" class="btn-primary" id="btn-register">Verifikasi Email</button>
+      </form>
+
+      <!-- Tahap 2: OTP -->
+      <div id="reg-otp-step" class="n-hidden">
+        <div class="form-grp">
+          <label for="reg-otp">Kode Verifikasi</label>
+          <input type="text" id="reg-otp" inputmode="numeric" maxlength="6"
+                 placeholder="6 digit" autocomplete="one-time-code">
+          <span class="n-form-hint" id="reg-otp-hint">Kode dikirim ke</span>
+        </div>
+        <div class="ctl-row ctl-lg ctl-fill">
+          <button type="button" class="btn-primary" id="btn-otp-verify"
+                  onclick="_regVerifyOtp()">Verifikasi</button>
+          <button type="button" class="btn-outline" id="btn-otp-resend"
+                  onclick="_regResendOtp()">Kirim Ulang</button>
+        </div>
+        <button type="button" class="btn-ghost" style="margin-top:8px;width:100%"
+                onclick="_regResetOtp()">Ganti Email</button>
+      </div>
+      <div class="auth-foot">
+        Sudah punya akun? <a onclick="showAuthView('login')">Masuk</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- PENDING -->
+  <div id="v-pending" class="auth-screen n-hidden">
+    <div class="auth-card">
+      <div class="auth-brand">Nautika</div>
+      <h1 class="auth-title">Menunggu Persetujuan</h1>
+      <div id="pending-banner-host"></div>
+      <div class="n-info-static">
+        Akun Anda sedang dalam proses verifikasi oleh administrator.
+        Sistem secara otomatis mendeteksi status persetujuan saat halaman ini tetap terbuka.
+      </div>
+      <div id="pending-info"></div>
+      <div id="pending-live-status" class="pending-live-status">
+        <span class="pending-pulse-dot"></span>
+        <span>Memeriksa status persetujuan secara otomatis…</span>
+      </div>
+      <div class="ctl-row ctl-lg ctl-fill" style="justify-content:center;margin-top:20px;">
+        <button type="button" class="btn-outline" onclick="showAuthView('login')">Halaman Masuk</button>
+        <button type="button" class="btn-ghost" onclick="_pendingCancelOrNew()">Daftar Baru</button>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end auth-wrapper -->
+
+<!-- =========================================================
+     APP WRAPPER — sidebar + konten
+     ========================================================= -->
+<div id="app-wrapper" class="n-hidden">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sb-brand">Nautika</div>
+    <nav class="sb-nav" id="sb-nav">
+      <!-- diisi oleh _renderSidebar() -->
+    </nav>
+    <div class="sb-footer" id="sb-footer">
+      <!-- Drop-Up Menu (Profil, Admin, Keluar) -->
+      <div class="sb-user-menu n-hidden" id="sb-user-menu">
+        <div class="sb-menu-header">
+          <div class="sb-menu-avatar">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+              <circle cx="12" cy="7" r="4"/>
+            </svg>
+          </div>
+          <div class="sb-menu-user">
+            <div class="sb-menu-name" id="sb-menu-name">Memuat…</div>
+            <div class="sb-menu-email" id="sb-menu-email">—</div>
+          </div>
+        </div>
+        <div class="sb-menu-badges">
+          <span class="sb-role-badge" id="sb-menu-role">Pengguna</span>
+        </div>
+        <div class="sb-menu-divider"></div>
+        <div class="sb-menu-items">
+          <div class="sb-menu-item n-hidden" id="sb-menu-admin-item" onclick="_handleMenuNav('kelola-akun')">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="7" height="7"/>
+              <rect x="14" y="3" width="7" height="7"/>
+              <rect x="14" y="14" width="7" height="7"/>
+              <rect x="3" y="14" width="7" height="7"/>
+            </svg>
+            <span>Admin Panel</span>
+          </div>
+          <div class="sb-menu-item" onclick="_handleMenuNav('notifikasi')">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+            </svg>
+            <span>Notifikasi</span>
+          </div>
+          <div class="sb-menu-divider"></div>
+          <div class="sb-menu-item danger" onclick="handleLogout()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+              <polyline points="16 17 21 12 16 7"/>
+              <line x1="21" y1="12" x2="9" y2="12"/>
+            </svg>
+            <span>Keluar</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Trigger Card (Pojok Kiri Bawah) -->
+      <div class="sb-user-card" id="sb-user-card" onclick="_toggleUserMenu(event)" role="button" tabindex="0" title="Buka menu akun">
+        <div class="sb-avatar-wrap">
+          <div class="sb-avatar" id="sb-avatar">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+              <circle cx="12" cy="7" r="4"/>
+            </svg>
+          </div>
+          <span class="sb-status-dot" title="Sesi Aktif"></span>
+        </div>
+        <div class="sb-user-info">
+          <div class="sb-user-name" id="sb-user-name">Memuat…</div>
+          <div class="sb-user-role" id="sb-user-role">—</div>
+        </div>
+        <div class="sb-user-chevron" id="sb-user-chevron">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="18 15 12 9 6 15"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="app-main">
+    <div class="reminder-strip n-hidden" id="reminder-strip">
+      <!-- diisi _renderReminderStrip() — peringatan "divisi belum melapor" -->
+    </div>
+    <div class="page-header" id="page-header">
+      <!-- diisi oleh _renderPageHeader() -->
+    </div>
+    <div class="page-content" id="page-content">
+      <!-- diisi oleh _renderViewContent() -->
+    </div>
+  </main>
+
+</div><!-- end app-wrapper -->
+
+<!-- =========================================================
+     DRAWER KANAN — persetujuan registrasi
+     Dibuka dari banner "Lihat & putuskan" (KADIV/approver).
+     id dr-* dipakai ulang oleh APPROVAL_WRAPS di Script_Main.html.
+     ========================================================= -->
+<div class="n-overlay n-z-drawer n-hidden" id="dr-mask" onclick="closeApprovalDrawer()" aria-hidden="true"></div>
+<div class="n-drawer n-hidden" id="dr-drawer">
+  <div class="sheet-grabber"></div>
+  <div class="n-drawer-hd">
+    <div>
+      <h2>Persetujuan Registrasi</h2>
+      <div class="n-drawer-sub">Antrean terbatas pada kewenangan Anda</div>
+    </div>
+    <button class="n-iconbtn-x" data-ico="x" title="Tutup" aria-label="Tutup" onclick="closeApprovalDrawer()"></button>
+  </div>
+  <div class="n-drawer-bd">
+    <div id="dr-approval-msg" class="n-msg"></div>
+    <div id="dr-approval-table-wrap"></div>
+  </div>
+</div>
+
+<!-- =========================================================
+     MODAL — alasan penolakan registrasi
+     ========================================================= -->
+<div class="n-overlay n-hidden" id="modal-reject">
+  <div class="n-modal">
+    <h2>Tolak Registrasi</h2>
+    <div class="form-grp">
+      <label for="reject-reason">Alasan Penolakan</label>
+      <input type="text" id="reject-reason" placeholder="Tuliskan alasan penolakan">
+    </div>
+    <div class="ctl-stack" style="margin-top:16px;">
+      <button class="btn-danger-solid" id="btn-confirm-reject">Konfirmasi Penolakan</button>
+      <button class="btn-ghost" onclick="closeRejectModal()">Batal</button>
+    </div>
+  </div>
+</div>
+
+<!-- =========================================================
+     MODAL — Lihat Riwayat (detail submission; berlaku semua modul)
+     diisi oleh _hdOpen(i) dari Script_Main.html
+     ========================================================= -->
+<div class="n-overlay n-hidden" id="modal-hd">
+  <div class="n-modal n-modal-hd">
+    <div class="n-modal-hd-head">
+      <h2 id="hd-title"></h2>
+      <button class="n-iconbtn-x" data-ico="x" title="Tutup" aria-label="Tutup" onclick="_hdClose()"></button>
+    </div>
+    <div class="n-modal-hd-scroll">
+      <table class="n-table"><tbody id="hd-body"></tbody></table>
+      <div class="content-section" style="margin-top:20px;">
+        <div class="content-section-hd hist-section-hd">Lampiran <span id="hd-evidence-manage"></span></div>
+        <div id="hd-evidence"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- =========================================================
+     MODAL — Kelola Akun (Admin Panel / tab Pengguna, SUPERADMIN)
+     Diisi oleh _adnOpenEdit() dari Script_Main.html
+     ========================================================= -->
+<div class="n-overlay n-hidden" id="modal-admin-user">
+  <div class="n-modal">
+    <h2 id="adn-form-title">Kelola Akun</h2>
+    <div id="adn-form-msg" class="n-msg"></div>
+    <div class="n-info-static" style="margin-bottom:16px">
+      <div id="adn-f-nama" style="font-weight:600;"></div>
+      <div id="adn-f-email" style="font-size:.8125rem;"></div>
+    </div>
+    <div class="form-grp">
+      <label for="adn-f-role">Jabatan</label>
+      <select id="adn-f-role" onchange="_adnOnRoleChange()"></select>
+    </div>
+    <div class="form-grp">
+      <label for="adn-f-divisi">Unit Kerja</label>
+      <select id="adn-f-divisi"></select>
+    </div>
+    <div class="form-grp">
+      <label for="adn-f-status">Status Akun</label>
+      <select id="adn-f-status"></select>
+    </div>
+    <div class="form-grp">
+      <label for="adn-f-password">Reset Password (opsional)</label>
+      <input type="password" id="adn-f-password" placeholder="Minimal 8 karakter" autocomplete="new-password">
+    </div>
+    <div class="ctl-stack" style="margin-top:16px;">
+      <button class="btn-primary" id="btn-adn-save" onclick="_adnSaveUser()">Simpan Perubahan</button>
+      <button class="btn-outline" id="btn-adn-reset" onclick="_adnResetPassword()">Reset Password</button>
+      <button class="btn-ghost" onclick="_adnCloseForm()">Batal</button>
+    </div>
+  </div>
+</div>
+
+<!-- =========================================================
+     VIEW TEMPLATES — server-side included, disimpan hidden
+     Script_Main.html membaca innerHTML dan me-render konten
+     ========================================================= -->
+<div id="view-templates" hidden>
+  <?!= html_include('html/views/TataUsaha'); ?>
+  <?!= html_include('html/views/Operasi'); ?>
+  <?!= html_include('html/views/OperasiLaut'); ?>
+  <?!= html_include('html/views/OperasiUdara'); ?>
+  <?!= html_include('html/views/MasterData'); ?>
+  <?!= html_include('html/views/Intelijen'); ?>
+  <?!= html_include('html/views/Pemantauan'); ?>
+  <?!= html_include('html/views/Perawatan'); ?>
+  <?!= html_include('html/views/Logistik'); ?>
+  <?!= html_include('html/views/Pengawakan'); ?>
+  <?!= html_include('html/views/Kegiatan'); ?>
+  <?!= html_include('html/views/Riwayat'); ?>
+  <?!= html_include('html/views/Notifikasi'); ?>
+  <?!= html_include('html/views/Admin'); ?>
+  <?!= html_include('html/views/KapalTerbaik'); ?>
+</div>
+
+<!-- =========================================================
+     SONNER TOASTER CONTAINER — ask-sonner pattern
+     ========================================================= -->
+<div id="n-toaster" aria-live="polite" aria-atomic="true"></div>
+
+<?!= html_include('html/Script_Charts'); ?>
+<?!= html_include('html/Script_Main'); ?>
+</body>
+</html>

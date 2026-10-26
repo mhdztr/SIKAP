@@ -1,0 +1,188 @@
+<!-- html/views/Intelijen.html -->
+<!--
+  Modul Intelijen (DIV-INTEL) — PRD §5.5, §8.2.
+  Di-include ke Index.html via html_include(), dirender oleh _renderIntelijen().
+-->
+<div id="view-tpl-intelijen" hidden>
+
+  <!-- ── KPI STRIP ───────────────────────────────── -->
+  <div class="content-section">
+    <div id="int-kpi-strip">
+      <!-- diisi _intelRenderKPI() -->
+    </div>
+  </div>
+
+  <!-- ── KONTEKS INTELIJEN (CHART — DESIGN §6) ─────────── -->
+  <div class="content-section">
+    <div class="content-section-hd">Konteks Intelijen</div>
+    <div class="chart-grid-2">
+      <div class="chart-cell">
+        <div class="chart-cell-hd">
+          <div>
+            <div class="chart-cell-title">Temuan per Kategori</div>
+            <div class="chart-cell-sub">Periode ini — terurut menurun</div>
+          </div>
+        </div>
+        <div class="chart-box" style="height:290px;"><canvas id="int-chart-jenis"></canvas></div>
+      </div>
+      <div class="chart-cell">
+        <div class="chart-cell-hd">
+          <div>
+            <div class="chart-cell-title">Tren Bulanan Temuan</div>
+            <div class="chart-cell-sub">Januari s/d bulan terpilih pada filter</div>
+          </div>
+          <div class="chart-cell-chips">
+            <span class="chart-chip"><i style="background:#2B3674;"></i>Total</span>
+            <span class="chart-chip"><i style="background:rgba(43,54,116,0.35);"></i>Kawasan</span>
+          </div>
+        </div>
+        <div class="chart-box"><canvas id="int-chart-tren"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── KAWASAN KONSERVASI (LIST/TABLE — §8.2, bukan peta) ─── -->
+  <div class="content-section">
+    <div class="content-section-hd">Kawasan Konservasi</div>
+    <div class="n-card" style="padding:0;overflow-x:auto;" id="int-kawasan-wrap">
+      <div style="padding:20px 24px;color:var(--n-text-muted);font-size:.875rem;">Memuat kawasan…</div>
+    </div>
+  </div>
+
+  <!-- ── FORM INPUT MINGGUAN (POPUP, BACKLOG A) ───── -->
+  <div class="content-section">
+    <button type="button" class="btn-primary" onclick="intelOpenForm()">Input Laporan Intelijen</button>
+  </div>
+
+  <!-- ── MODAL — INPUT LAPORAN INTELIJEN ──────────── -->
+  <div class="n-overlay n-hidden" id="modal-int-form">
+    <div class="n-modal n-modal-form">
+      <h2>Input Laporan Intelijen</h2>
+      <div class="n-modal-form-scroll">
+        <div id="int-form-msg" class="n-msg"></div>
+
+        <!-- Periode -->
+        <div class="form-grp" style="max-width:420px;">
+          <label>Periode Laporan</label>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
+            <select id="int-periode-tahun"><option value="">Tahun</option></select>
+            <select id="int-periode-bulan"><option value="">Bulan</option></select>
+            <select id="int-periode-minggu"><option value="">Minggu Ke-</option></select>
+          </div>
+          <div class="n-form-hint" id="int-periode-hint">Periode: —</div>
+        </div>
+
+        <div style="border-top:1px solid var(--n-border-subtle);margin:24px 0;"></div>
+        <h3 style="font-size:1rem;color:var(--n-text-primary);margin-bottom:4px;">Angka Intelijen Mingguan</h3>
+        <div style="font-size:.78rem;color:var(--n-text-muted);margin-bottom:14px;">Jumlah temuan dihitung otomatis dari daftar kejadian di bawah (jenis &amp; deskripsi tiap temuan).</div>
+
+        <div style="display:grid;grid-template-columns:repeat(5, 1fr);gap:10px;">
+          <div class="form-grp">
+            <label for="int-cap-dredging">Dredging</label>
+            <div class="n-derive-val" id="int-cap-dredging">0</div>
+          </div>
+          <div class="form-grp">
+            <label for="int-cap-perizinan">Perizinan</label>
+            <div class="n-derive-val" id="int-cap-perizinan">0</div>
+          </div>
+          <div class="form-grp">
+            <label for="int-cap-transmitter">Transmitter</label>
+            <div class="n-derive-val" id="int-cap-transmitter">0</div>
+          </div>
+          <div class="form-grp">
+            <label for="int-cap-nota">Nota Dinas</label>
+            <div class="n-derive-val" id="int-cap-nota">0</div>
+          </div>
+          <div class="form-grp">
+            <label for="int-cap-pengangkut">Pengangkut Ikan Hidup</label>
+            <div class="n-derive-val" id="int-cap-pengangkut">0</div>
+          </div>
+        </div>
+
+        <div id="int-kejadian-list"></div>
+        <button type="button" class="n-list-add" onclick="_intelAddKejadian()">Tambah Kejadian</button>
+
+        <div style="border-top:1px solid var(--n-border-subtle);margin:24px 0;"></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+          <h3 style="font-size:1rem;color:var(--n-text-primary);margin:0;">Pelanggaran Kawasan Konservasi</h3>
+          <button type="button" class="btn-mini" onclick="intelAddKawasanRow()">Tambah Kawasan</button>
+        </div>
+        <div id="int-kawasan-rows"></div>
+
+        <div id="intel-attach" style="margin-top:20px;"></div>
+      </div>
+
+      <div class="ctl-row ctl-lg ctl-fill" style="margin-top:20px;">
+        <button class="btn-primary" id="int-btn-submit" onclick="intelSubmit()">Simpan Laporan</button>
+        <button class="btn-outline" onclick="closeModal('modal-int-form')">Batal</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── TABEL RIWAYAT ─────────────────────────────── -->
+  <div class="content-section">
+    <div class="content-section-hd">Riwayat Laporan</div>
+    <div id="int-history-msg" class="n-msg"></div>
+    <div class="n-card" style="padding:0;overflow-x:auto;" id="int-history-wrap">
+      <div style="padding:20px 24px;color:var(--n-text-muted);font-size:.875rem;">Memuat riwayat…</div>
+    </div>
+  </div>
+
+  <!-- ── MODAL REVISI ──────────────────────────────── -->
+  <div class="n-overlay n-hidden" id="modal-int-revisi">
+    <div class="n-modal" style="max-width:520px;width:100%;">
+      <h2>Revisi Data Intelijen</h2>
+      <div id="int-revisi-info" style="margin-bottom:14px;font-size:.875rem;color:var(--n-text-secondary);"></div>
+      <div id="int-revisi-msg" class="n-msg"></div>
+
+      <div id="rv-int-kawasan-block">
+        <div class="form-grp">
+          <label for="rv-int-jumlah">Jumlah</label>
+          <input type="number" id="rv-int-jumlah" min="0" step="1">
+        </div>
+        <div class="form-grp">
+          <label for="rv-int-keterangan">Keterangan</label>
+          <input type="text" id="rv-int-keterangan" placeholder="Opsional">
+        </div>
+      </div>
+      <div id="rv-int-kejadian-block" style="display:none;">
+        <div style="font-size:.78rem;color:var(--n-text-muted);margin-bottom:12px;">Jumlah dihitung sistem dari daftar kejadian (satu baris per deskripsi).</div>
+        <div id="rv-int-kejadian-list"></div>
+        <button type="button" class="n-list-add" onclick="_intelAddRvKejadian()">Tambah Kejadian</button>
+      </div>
+      <div class="form-grp">
+        <label for="rv-int-alasan">Alasan Revisi <span style="color:var(--n-status-critical);">*</span></label>
+        <input type="text" id="rv-int-alasan" placeholder="Jelaskan yang diubah dan mengapa">
+      </div>
+      <div id="intel-revisi-attach"></div>
+
+      <div class="ctl-row ctl-lg ctl-fill" style="margin-top:20px;">
+        <button class="btn-primary" id="int-btn-revisi-save" onclick="intelRevisiConfirm()">Simpan Revisi</button>
+        <button class="btn-outline" onclick="closeModal('modal-int-revisi')">Batal</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── MODAL ANULIR ──────────────────────────────── -->
+  <div class="n-overlay n-hidden" id="modal-int-anulir">
+    <div class="n-modal" style="max-width:520px;width:100%;">
+      <h2>Anulir Data Intelijen</h2>
+      <div id="int-anulir-info" style="margin-bottom:14px;font-size:.875rem;color:var(--n-text-secondary);"></div>
+      <div id="int-anulir-msg" class="n-msg"></div>
+
+      <div class="n-info-static" style="margin-bottom:14px;">
+        Komentar anulir terlihat oleh seluruh anggota divisi. Staf dapat melaporkan ulang setelah memperbaiki data.
+      </div>
+      <div class="form-grp">
+        <label for="an-int-alasan">Komentar Anulir <span style="color:var(--n-status-critical);">*</span></label>
+        <input type="text" id="an-int-alasan" placeholder="Jelaskan apa yang perlu diperbaiki">
+      </div>
+
+      <div class="ctl-row ctl-lg ctl-fill" style="margin-top:20px;">
+        <button class="btn-danger-solid" id="int-btn-anulir-save" onclick="intelAnulirConfirm()">Anulir Data</button>
+        <button class="btn-outline" onclick="closeModal('modal-int-anulir')">Batal</button>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /view-tpl-intelijen -->

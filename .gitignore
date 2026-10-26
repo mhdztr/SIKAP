@@ -1,2 +1,17 @@
-node_modules
+# Dokumentasi — tidak perlu di-push ke GAS
+# Config lokal — tidak dibutuhkan di GAS
 .clasp.json
+.claspignore
+.gitignore
+# Git
+.git/**
+# Script pembantu / artifact verifikasi — BUKAN bagian GAS project.
+# (Pernah ter-push duluan dan bikin duplikat function di GAS editor → merah.)
+test.js
+test_pure.js
+fix.py
+hotfix.py
+lint_ui.js
+# Data geospasial besar — di-fetch dari GitHub oleh frontend, bukan di-host GAS
+*.geojson
+.agents/
