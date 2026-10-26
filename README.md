@@ -1,20 +1,16 @@
-# SIKAP - Portal Timja Logistik
+# SIKAP (Sistem Informasi Keuangan, Anggaran, dan Kepegawaian)
+> **Aplikasi Satelit Mandiri Subbag Tata Usaha — Dit. POA (Ditjen PSDKP - KKP)**
 
-Aplikasi satelit Timja Logistik (Amunisi, BBM, Logistik Personil)
+- **Script ID (Google Apps Script):** `1Cpuia8-M-g0b3S_IOKKrwn-T4XSIjQbHiYJm85Mhr7XhVFfe3QugZmJv`
+- **Repositori GitHub:** `https://github.com/mhdztr/SIKAP.git`
+- **Spreadsheet Basis Data:** `RadarPOA_SIKAP_DB`
+- **Drive Folder Evidence:** `POA_Evidence_SIKAP`
+- **Peran Sistem:** Mengelola tata kelola sumber daya manajerial Direktorat (realisasi anggaran SP2D/Akrual, pengadaan paket pekerjaan, kepegawaian aparatur, dan manajemen inventaris fisik BMN ekstensif).
 
-## Arsitektur
-Bagian dari ekosistem terdistribusi **Radar POA** (desentralisasi input, agregasi terpusat). Setiap aplikasi satelit memiliki Google Apps Script terpisah, Google Sheet terisolasi, dan Google Drive folder terpisah.
-
-## Dokumen Wajib
-- [PRD.md](PRD.md)
-- [ARCHITECTURE.md](ARCHITECTURE.md)
-- [DATA_SCHEMA.md](DATA_SCHEMA.md)
-- [DESIGN.md](DESIGN.md)
-- [AGENTS.md](AGENTS.md)
-- [CHANGELOG.md](CHANGELOG.md)
-- [PHASES.md](PHASES.md)
-
-## Deployment
-Menggunakan [clasp](https://github.com/google/clasp). Push dilakukan oleh user sesuai aturan AGENTS.md §5b.
-
-
+## Referensi Wajib
+1. `PRD.md` — Kebutuhan fungsional dan aturan bisnis (Sumber kebenaran tertinggi).
+2. `ARCHITECTURE.md` — Struktur teknis, LockService, state machine, dan algoritma geotagging.
+3. `DATA_SCHEMA.md` — Skema kolom tabel transaksi dan master.
+4. `DESIGN.md` — Standar antarmuka 3-tier controls scale dan Apple HIG.
+5. `PHASES.md` — Roadmap dan rencana pengembangan bertahap.
+6. `AGENTS.md` — Instruksi dan batasan kerja bagi coding agent.
