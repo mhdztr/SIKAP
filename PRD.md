@@ -1,27 +1,18 @@
 # PRD.md — Product Requirements Document
 
 ## Nama Proyek
-Portal Timja Logistik (SIKAP)
+**SIKAP** — Portal Timja Logistik (Nautika Logistik / Radar POA Logistik)
 
 ## Tujuan
-Mendukung transformasi arsitektur Nautika menjadi ekosistem terdistribusi Radar POA sesuai Master Blueprint v2.1.0.
+Pengendalian operasional logistik persenjataan, BBM, dan hak logistik personil secara terpisah per konteks.
 
-## Ruang Lingkup
-3 sub-modul: Amunisi (baseline + penggunaan mingguan + alert stok), BBM (pagu vs realisasi), Logistik Personil (Natura/BPDT/Air/Delegasi/Jaga Sandar)
+## Ruang Lingkup (3 Sub-Modul)
+1. **[LOG-A] Amunisi & Senjata Api** — Baseline stok awal tahunan, penggunaan amunisi mingguan per jenis, stok akhir terhitung server-side, peringatan non-blocking jika melebihi stok
+2. **[LOG-B] Bahan Bakar Minyak (BBM)** — Baseline pagu BBM Reguler/ABT, realisasi mingguan, harga acuan, sisa kuota & % realisasi
+3. **[LOG-C] Logistik & Hak Operasional Personil** — Realisasi komponen (NATURA, BPDT, AIR_BERSIH, DELEGASI, JAGA_SANDAR)
 
 ## Prinsip
-- Desentralisasi input, agregasi terpusat (kecuali Radar POA yang juga punya modul Kegiatan Direktorat)
-- Anti-gabruk (modul terpisah, validasi terisolasi)
-- RBAC ditegakkan di server
-- Versioning & anulir (tidak overwrite historis)
-- Perhitungan server-side
-- Kontrol UI 3-tier (LG/MD/SM)
+Anti-gabruk, kalkulasi server-side, warning non-blocking (bukan hard block), versioning/anulir
 
-## RBAC Umum
-Mengacu pada pola aplikasi Nautika dengan penegakan scope per divisi/role di server.
-
-## Data
-Mengacu pada `DATA_SCHEMA.md`. Menggunakan master data bersama dari `RadarPOA_Master_DB` (untuk aplikasi satelit) sesuai kebutuhan.
-
-## Desain
-Mengacu pada `DESIGN.md` (Apple HIG, 3-tier control, negative prompt).
+## RBAC
+Kadiv Logistik, Staf Logistik. Penegakan server-side.

@@ -1,21 +1,18 @@
 # CHANGELOG.md
 
-## [Fase 1 — Initialization & Project Setup (Establishment)] — 26 Oct 2026
+## [Fase 1 — Initialization & Project Setup] — 26 Okt 2026
 **Status:** Selesai
 
 **Pencapaian:**
-- Inisialisasi repositori Git/GitHub terpisah
-- Inisialisasi Google Apps Script dengan clasp (Script ID terkonfigurasi)
-- Penyiapan `.gitignore` dan `.claspignore`
-- Pembuatan seluruh dokumen wajib untuk proyek: `PRD.md`, `ARCHITECTURE.md`, `DATA_SCHEMA.md`, `DESIGN.md`, `AGENTS.md`, `CHANGELOG.md`, `PHASES.md`, `README.md`
-- Penyiapan struktur dasar untuk ekosistem terdistribusi Radar POA
-- Penentuan mapping per proyek sesuai blueprint v2.1.0
+- Inisialisasi repo SIKAP (Portal Logistik)
+- Konfigurasi clasp (1Cpuia8-M-g0b3S_IOKKrwn-T4XSIjQbHiYJm85Mhr7XhVFfe3QugZmJv)
+- Dokumen wajib lengkap
+- Scope 3 sub-modul terpisah
 
 **Keputusan teknis:**
-- Mengikuti arsitektur terdistribusi (desentralisasi input, agregasi terpusat)
-- Menerapkan pola anti-gabruk, versioning/anulir, RBAC server-side, kontrol UI 3-tier
-- Commit diperbolehkan oleh agent, push hanya oleh user
-- Format commit: feat/chore/fix/docs
+- Stok amunisi dihitung server-side, warning non-blocking jika < 0
+- BBM dipisah Reguler/ABT
+- Form terpisah per konteks (anti-gabruk)
+- Versioning/anulir, RBAC server-side
 
-**Item terbuka/follow-up:**
-- Lanjut ke Fase 2 sesuai scope proyek
+**Item terbuka/follow-up:** Fase 2-4

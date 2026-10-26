@@ -1,26 +1,17 @@
 # ARCHITECTURE.md — Arsitektur Teknis
 
-## Struktur Folder GAS
-Mengikuti pola Nautika:
-- `utils/` (Constants, DateUtil, Lock, helpers)
-- `services/` (business logic per modul)
-- `data/` (SheetAccess, ValidationRules)
-- `html/` (Index, Style, Script_*, views)
+## Peran
+Satelit mandiri Timja Logistik. Data ke `RadarPOA_Logistik_DB`.
 
-## Entry Point
-`Code.js` (doGet / routing). Struktur mengikuti arsitektur proyek.
+## Layanan
+`LogistikService.js` dengan fungsi `logistik_*` terpisah per sub-modul.
 
-## Service Functions
-Penamaan: `modul_aksi` (contoh: `tataUsaha_submitMingguan`). Semua fungsi publik yang dipanggil via `google.script.run` wajib diurutkan/terdefinisi dengan jelas.
+## Kalkulasi Server-Side
+- Amunisi: `StokAkhir = StokAwal - Σ Penggunaan_Minggu (tahun berjalan)`
+- BBM: `SisaKuotaBBM = PaguBBM - Σ Realisasi_Minggu`, `%RealisasiBBM = ...`
 
-## LockService
-Semua endpoint tulis wajib menggunakan `LockService.getScriptLock()` dengan timeout yang wajar.
+## Warning System
+Peringatan stok amunisi negatif bersifat **non-blocking** (hanya warning, tetap bisa dicatat dengan justifikasi).
 
-## Versioning & Anulir
-Transaksi menggunakan pola `RowID`, `SupersedesRowID`, `Status` (`ACTIVE/SUPERSEDED/VOID`), `VoidReason`, `VoidedBy`, `VoidedAt`. Jangan UPDATE baris historis.
-
-## RBAC
-Ditegakkan di server (service layer). UI hanya penyajian.
-
-## Federasi (Radar POA)
-Radar POA menggunakan `SpreadsheetApp.openById()` untuk menarik data satelit, `CacheService` untuk caching, dan tombol `Sync Now` untuk cache-bust.
+## Aturan
+LockService, versioning/anulir, RBAC server-side, anti-gabruk
