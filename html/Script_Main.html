@@ -20,7 +20,7 @@ var ROLE_LABEL = {
 var APP = {
   token:          null,
   user:           null,
-  currentView:    'overview',
+  currentView:    'tata-usaha',
   pendingQueueId: null,
   profilKapalId:  '',
   filter: {
@@ -272,31 +272,15 @@ function _syncCheckDeferred() {
 // minRoles: null = semua APPROVED; array = hanya role tsb
 var NAV_SECTIONS = [
   {
-    label: 'UTAMA',
+    label: 'SUBBAG TATA USAHA',
     items: [
-      { id: 'overview',      label: 'Ikhtisar',            divisiId: null,         minRoles: null }
-    ]
-  },
-  {
-    label: 'DIVISI',
-    items: [
-      { id: 'tata-usaha',    label: 'Tata Usaha',          divisiId: 'DIV-TU',     minRoles: null },
-      { id: 'operasi',       label: 'Operasi',             divisiId: 'DIV-OPS',    minRoles: null },
-      { id: 'intelijen',     label: 'Intelijen',           divisiId: 'DIV-INTEL',  minRoles: null },
-      { id: 'pemantauan',    label: 'Pemantauan',          divisiId: 'DIV-PANTAU', minRoles: null },
-      { id: 'perawatan',     label: 'Perawatan',           divisiId: 'DIV-RAWAT',  minRoles: null },
-      { id: 'logistik',      label: 'Logistik',            divisiId: 'DIV-LOG',    minRoles: null },
-      { id: 'pengawakan',    label: 'Pengawakan',          divisiId: 'DIV-AWAK',   minRoles: null },
-      { id: 'kegiatan',      label: 'Kegiatan Pendukung',  divisiId: null,         minRoles: ['SUPERADMIN','DIREKTUR','KADIV'] }
+      { id: 'tata-usaha',    label: 'Tata Usaha',          divisiId: 'DIV-TU',     minRoles: null }
     ]
   },
   {
     label: 'SISTEM',
     items: [
-      { id: 'notifikasi',  label: 'Notifikasi',       divisiId: null, minRoles: null },
-      { id: 'kelola-akun', label: 'Admin Panel',      divisiId: null, minRoles: ['SUPERADMIN','DIREKTUR'] },
-      { id: 'master-data', label: 'Master Data',      divisiId: null, minRoles: ['SUPERADMIN','DIREKTUR'] },
-      { id: 'riwayat',     label: 'Riwayat Laporan',  divisiId: null, minRoles: null }
+      { id: 'kelola-akun', label: 'Admin Panel',      divisiId: null, minRoles: ['SUPERADMIN','DIREKTUR'] }
     ]
   }
 ];
@@ -1031,7 +1015,7 @@ function _initApp() {
   document.getElementById('auth-wrapper').classList.add('n-hidden');
   document.getElementById('app-wrapper').classList.remove('n-hidden');
   _renderSidebar();
-  var hash = (window.location.hash || '').replace('#', '') || 'overview';
+  var hash = (window.location.hash || '').replace('#', '') || 'tata-usaha';
   _routeTo(hash);
   _applyShellStatus(); // badge notifikasi + strip "divisi belum melapor" (Fase 13)
   _startAppHeartbeat();
@@ -1150,7 +1134,7 @@ function _routeTo(viewId) {
   var item = _navItem(viewId);
   // Jika view tidak ada atau tidak bisa diakses → ke overview
   if (!item || !_canAccess(item, APP.user)) {
-    viewId = 'overview';
+    viewId = 'tata-usaha';
   }
   APP.currentView = viewId;
   if (window.location.hash !== '#' + viewId) {

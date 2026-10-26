@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Nautika — Direktorat POA, KKP RI</title>
-  <meta name="description" content="Sistem Monitoring dan Pelaporan Direktorat Pengendalian Operasi Armada, Kementerian Kelautan dan Perikanan Republik Indonesia.">
+  <title>SIKAP — Subbag Tata Usaha, Dit. POA KKP RI</title>
+  <meta name="description" content="Sistem Informasi Keuangan, Anggaran, dan Kepegawaian (Subbag Tata Usaha - Dit. POA KKP RI).">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -17,7 +17,7 @@
      LOADING — tampil saat cek sesi awal
      ========================================================= -->
 <div id="n-loading">
-  <div class="n-loading-brand">Nautika</div>
+  <div class="n-loading-brand">SIKAP</div>
   <div class="n-loading-spin"></div>
 </div>
 
@@ -29,7 +29,7 @@
   <!-- LOGIN -->
   <div id="v-login" class="auth-screen n-hidden">
     <div class="auth-card">
-      <div class="auth-brand">Nautika</div>
+      <div class="auth-brand">SIKAP</div>
       <h1 class="auth-title">Masuk ke Akun</h1>
       <div id="login-msg" class="n-msg"></div>
       <form id="form-login" onsubmit="handleLogin(event)">
@@ -54,7 +54,7 @@
   <!-- REGISTER -->
   <div id="v-register" class="auth-screen n-hidden">
     <div class="auth-card">
-      <div class="auth-brand">Nautika</div>
+      <div class="auth-brand">SIKAP</div>
       <h1 class="auth-title">Daftar Akun Baru</h1>
       <div id="register-banner-host"></div>
       <div id="register-msg" class="n-msg"></div>
@@ -121,7 +121,7 @@
   <!-- PENDING -->
   <div id="v-pending" class="auth-screen n-hidden">
     <div class="auth-card">
-      <div class="auth-brand">Nautika</div>
+      <div class="auth-brand">SIKAP</div>
       <h1 class="auth-title">Menunggu Persetujuan</h1>
       <div id="pending-banner-host"></div>
       <div class="n-info-static">
@@ -149,7 +149,7 @@
 
   <!-- SIDEBAR -->
   <aside class="sidebar">
-    <div class="sb-brand">Nautika</div>
+    <div class="sb-brand">SIKAP</div>
     <nav class="sb-nav" id="sb-nav">
       <!-- diisi oleh _renderSidebar() -->
     </nav>
@@ -340,20 +340,7 @@
      ========================================================= -->
 <div id="view-templates" hidden>
   <?!= html_include('html/views/TataUsaha'); ?>
-  <?!= html_include('html/views/Operasi'); ?>
-  <?!= html_include('html/views/OperasiLaut'); ?>
-  <?!= html_include('html/views/OperasiUdara'); ?>
-  <?!= html_include('html/views/MasterData'); ?>
-  <?!= html_include('html/views/Intelijen'); ?>
-  <?!= html_include('html/views/Pemantauan'); ?>
-  <?!= html_include('html/views/Perawatan'); ?>
-  <?!= html_include('html/views/Logistik'); ?>
-  <?!= html_include('html/views/Pengawakan'); ?>
-  <?!= html_include('html/views/Kegiatan'); ?>
-  <?!= html_include('html/views/Riwayat'); ?>
-  <?!= html_include('html/views/Notifikasi'); ?>
   <?!= html_include('html/views/Admin'); ?>
-  <?!= html_include('html/views/KapalTerbaik'); ?>
 </div>
 
 <!-- =========================================================

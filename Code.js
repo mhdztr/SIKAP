@@ -1,21 +1,18 @@
 /**
- * Code.js — Entry point Google Apps Script (Nautika)
+ * Code.js — Entry point Google Apps Script (SIKAP)
  *
- * doGet()  : serve SPA frontend (diimplementasi Fase 3)
+ * doGet()  : serve SPA frontend
  * doPost() : tidak dipakai — semua komunikasi client-server lewat google.script.run
  *
- * Struktur kode mengikuti ARCHITECTURE.md §7:
+ * Struktur kode mengikuti ARCHITECTURE.md §2:
  *   /utils        — Constants.js, DateUtil.js, Lock.js
- *   /services     — AuthService.js, TataUsahaService.js, dst.
- *   /data         — SheetAccess.js, ValidationRules.js
- *   /html         — Index.html, Style.html, Script_Main.html, /views
- *   Setup.js      — inisialisasi database (jalankan sekali, lihat petunjuk di file itu)
- *   Router.js     — mapping aksi frontend → service function
+ *   /services     — AuthService.js, TataUsahaService.js, BMNService.js, AdminService.js, EvidenceService.js
+ *   /data         — SheetAccess.js
+ *   /html         — Index.html, Style.html, Script_Main.html, Script_Charts.html, /views
  */
 
 /**
  * Serve SPA frontend.
- * Fase 3+: serve html/Index (shell SPA penuh, auth terintegrasi).
  *
  * @param {GoogleAppsScript.Events.DoGet} e
  * @returns {GoogleAppsScript.HTML.HtmlOutput}
@@ -23,7 +20,7 @@
 function doGet(e) {
   return HtmlService.createTemplateFromFile('html/Index')
     .evaluate()
-    .setTitle('Nautika — Direktorat POA, KKP RI')
+    .setTitle('SIKAP — Subbag Tata Usaha, Dit. POA KKP RI')
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
 }
 
