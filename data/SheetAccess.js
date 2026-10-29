@@ -202,6 +202,11 @@ function _autoCreateTuSheet(ss, sheetName) {
       'PaketID', 'TahapPekerjaan', 'NilaiKontrak', 'RekananPenyedia', 'NomorKontrak',
       'ProgresFisikPct', 'RealisasiKeuangan', 'KendalaKeterangan', 'EvidenceUrl'
     ]);
+  } else if (sheetName === SHEET_TU.EVIDENCE) {
+    headers = [
+      'EvidenceID', 'RefSheet', 'RefRowID', 'DriveFileID', 'FileName',
+      'FileType', 'SourceMode', 'UploadedBy', 'UploadedAt', 'Status', 'Catatan'
+    ];
   } else {
     headers = STD_COLS;
   }

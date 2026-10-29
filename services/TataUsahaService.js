@@ -80,7 +80,7 @@ function tataUsaha_getKPI(token, filter) {
     var session = _tuRequireSession(token);
     _tuAssertRead(session);
 
-    var sheet  = openTransaksiSheet(SHEET_TX.TATA_USAHA);
+    var sheet  = openTuSheet(SHEET_TU.TATA_USAHA);
     var rows   = sheetToObjects(sheet);
     var range  = filterToDateRange(filter || { mode: 'monthly', month: new Date().getMonth()+1, year: new Date().getFullYear() });
 
@@ -213,7 +213,7 @@ function tataUsaha_getHistory(token, filter) {
     var session = _tuRequireSession(token);
     _tuAssertRead(session);
 
-    var sheet = openTransaksiSheet(SHEET_TX.TATA_USAHA);
+    var sheet = openTuSheet(SHEET_TU.TATA_USAHA);
     var rows  = sheetToObjects(sheet);
     var range = filterToDateRange(filter || { mode: 'monthly', month: new Date().getMonth()+1, year: new Date().getFullYear() });
 
@@ -330,7 +330,7 @@ function tataUsaha_submitMingguan(token, params) {
         return { success: false, error: 'Format Periode tidak valid. Gunakan YYYY-MM-WW.' };
       }
 
-      var sheet = openTransaksiSheet(SHEET_TX.TATA_USAHA);
+      var sheet = openTuSheet(SHEET_TU.TATA_USAHA);
       var rows  = sheetToObjects(sheet);
 
       // Cek duplikat: blokir hanya jika ada ACTIVE untuk periode yang sama
@@ -463,7 +463,7 @@ function tataUsaha_revisi(token, params) {
       if (!targetRowId) return { success: false, error: 'targetRowId wajib diisi.' };
       if (!alasanRevisi) return { success: false, error: 'Alasan revisi wajib diisi.' };
 
-      var sheet   = openTransaksiSheet(SHEET_TX.TATA_USAHA);
+      var sheet   = openTuSheet(SHEET_TU.TATA_USAHA);
       var oldRow  = findRowByField(sheet, 'RowID', targetRowId);
       if (!oldRow || String(oldRow.obj['Status']) !== ROW_STATUS.ACTIVE) {
         return { success: false, error: 'Baris tidak ditemukan atau bukan status ACTIVE.' };
@@ -545,7 +545,7 @@ function tataUsaha_anulir(token, params) {
         };
       }
 
-      var sheet  = openTransaksiSheet(SHEET_TX.TATA_USAHA);
+      var sheet  = openTuSheet(SHEET_TU.TATA_USAHA);
       var target = findRowByField(sheet, 'RowID', targetRowId);
       if (!target) {
         return { success: false, error: 'Baris tidak ditemukan.' };
@@ -632,7 +632,7 @@ function _tuAuditLog(userId, aksi, rowId, alasan) {
       'LogID':       'LOG-' + Utilities.getUuid().replace(/-/g,'').substring(0,12).toUpperCase(),
       'UserID':      userId,
       'Aksi':        aksi,
-      'SheetTarget': SHEET_TX.TATA_USAHA,
+      'SheetTarget': SHEET_TU.TATA_USAHA,
       'RowIDTarget': rowId,
       'Alasan':      alasan,
       'Timestamp':   new Date()
@@ -676,7 +676,7 @@ function tataUsaha_getTren(token, filter) {
     var session = _tuRequireSession(token);
     _tuAssertRead(session);
 
-    var sheet = openTransaksiSheet(SHEET_TX.TATA_USAHA);
+    var sheet = openTuSheet(SHEET_TU.TATA_USAHA);
     var rows  = sheetToObjects(sheet);
     var months = utils_getTrendMonths(filter);
 

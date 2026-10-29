@@ -17,8 +17,11 @@ var SHEET_TU = {
   BMN_PENGHAPUSAN_DETAIL: 'TX_BMN_Penghapusan_Detail',
   MASTER_LOKASI_UPT: 'Master_Lokasi_UPT',
   MASTER_BMN_KATEGORI: 'Master_BMN_Kategori',
-  MASTER_PAKET: 'Master_Paket'
+  MASTER_PAKET: 'Master_Paket',
+  EVIDENCE: 'TX_Evidence'
 };
+
+var SHEET_TX = SHEET_TU;
 
 var SHEET_MASTER = {
   USERS: 'Users',

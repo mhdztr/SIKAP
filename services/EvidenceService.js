@@ -45,9 +45,7 @@ function _evAssertRowScope(session, divisiId) {
  * @returns {{divisiId:string, divisiName:string, ym:string, periode:string, konteks:string}}
  */
 function _evResolveContext(refSheet, refRowId, session) {
-  var sheet = (refSheet === 'TX_BMN_Aset' || (typeof SHEET_TU !== 'undefined' && refSheet === SHEET_TU.BMN_ASET))
-    ? openTuSheet(refSheet)
-    : openTransaksiSheet(refSheet);
+  var sheet = openTuSheet(refSheet);
   if (!sheet) throw new Error('Sheet tujuan "' + refSheet + '" tidak ditemukan.');
 
   var found = findRowById(sheet, refRowId);
@@ -85,17 +83,17 @@ function _evDivisiFolderName(divisiId) {
 
 /** Nama konteks folder: `Jenis-Label` (keputusan Fase 9, lihat CHANGELOG). */
 function _evKonteks(refSheet, row) {
-  if (refSheet === SHEET_TX.PERAWATAN_KESIAPAN) {
-    return 'Kesiapan-' + _evKapalLabel(row['KapalID']);
-  }
-  if (refSheet === SHEET_TX.PERAWATAN_DOCKING) {
-    return 'Docking-' + _evKapalLabel(row['KapalID']);
-  }
-  if (refSheet === SHEET_TX.PERAWATAN_ITEM) {
-    return 'Item-' + _evSlug(String(row['NamaPekerjaan'] || row['RowID'] || 'item'), 40);
-  }
   if (refSheet === 'TX_BMN_Aset' || (typeof SHEET_TU !== 'undefined' && refSheet === SHEET_TU.BMN_ASET)) {
     return 'BMN-' + _evSlug(String(row['KodeBarang'] || row['AsetID'] || 'aset'), 40);
+  }
+  if (refSheet === 'TX_BMN_Penghapusan' || (typeof SHEET_TU !== 'undefined' && refSheet === SHEET_TU.BMN_PENGHAPUSAN)) {
+    return 'Penghapusan-' + _evSlug(String(row['PenghapusanID'] || 'berkas'), 40);
+  }
+  if (refSheet === 'TX_Paket_Progres' || (typeof SHEET_TU !== 'undefined' && refSheet === SHEET_TU.PAKET_PROGRES)) {
+    return 'Paket-' + _evSlug(String(row['PaketID'] || row['NomorKontrak'] || 'paket'), 40);
+  }
+  if (refSheet === 'TX_TataUsaha' || (typeof SHEET_TU !== 'undefined' && refSheet === SHEET_TU.TATA_USAHA)) {
+    return 'Anggaran-' + _evSlug(String(row['Periode'] || 'laporan'), 40);
   }
   return _evSlug(String(refSheet), 40);
 }
@@ -399,7 +397,7 @@ function evidence_carry(token, params) {
     _evAssertRowScope(session, _evRowDivisi(refSheet, fromRowId));
     _evAssertRowScope(session, _evRowDivisi(refSheet, toRowId));
 
-    var evRows = sheetToObjects(openTransaksiSheet(SHEET_TX.EVIDENCE));
+    var evRows = sheetToObjects(openTuSheet(SHEET_TU.EVIDENCE));
     var copied = 0;
     evRows.forEach(function (r) {
       if (String(r['RefSheet']) !== String(refSheet)) return;
@@ -426,7 +424,7 @@ function evidence_list(token, refSheet, refRowId) {
     var session = _evRequireSession(token);
     _evResolveContext(refSheet, refRowId, session);
 
-    var rows = sheetToObjects(openTransaksiSheet(SHEET_TX.EVIDENCE));
+    var rows = sheetToObjects(openTuSheet(SHEET_TU.EVIDENCE));
     var data = rows
       .filter(function (r) {
         return String(r['RefSheet']) === String(refSheet) &&
@@ -445,7 +443,7 @@ function evidence_list(token, refSheet, refRowId) {
 
 function _evAppendEvidence(refSheet, refRowId, driveFileId, fileName, fileType, sourceMode, userId) {
   var evidenceId = 'EV-' + Utilities.getUuid().replace(/-/g, '').substring(0, 14).toUpperCase();
-  appendRowData(openTransaksiSheet(SHEET_TX.EVIDENCE), {
+  appendRowData(openTuSheet(SHEET_TU.EVIDENCE), {
     'EvidenceID':  evidenceId,
     'RefSheet':    refSheet,
     'RefRowID':    refRowId,
@@ -479,7 +477,7 @@ function _evAuditLog(userId, aksi, rowId, alasan) {
       'LogID':       'LOG-' + Utilities.getUuid().replace(/-/g, '').substring(0, 12).toUpperCase(),
       'UserID':      userId,
       'Aksi':        aksi,
-      'SheetTarget': SHEET_TX.EVIDENCE,
+      'SheetTarget': SHEET_TU.EVIDENCE,
       'RowIDTarget': rowId,
       'Alasan':      alasan,
       'Timestamp':   new Date()
@@ -503,9 +501,7 @@ function _evReqRows(val, label) {
 
 /** DivisiID sebuah baris tujuan (untuk scope check). */
 function _evRowDivisi(refSheet, refRowId) {
-  var sheet = (refSheet === 'TX_BMN_Aset' || (typeof SHEET_TU !== 'undefined' && refSheet === SHEET_TU.BMN_ASET))
-    ? openTuSheet(refSheet)
-    : openTransaksiSheet(refSheet);
+  var sheet = openTuSheet(refSheet);
   var found = findRowById(sheet, refRowId);
   return found ? String(found.obj['DivisiID'] || '') : '';
 }
