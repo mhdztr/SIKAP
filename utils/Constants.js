@@ -82,12 +82,29 @@ function getSpreadsheetIds() {
   var props = PropertiesService.getScriptProperties();
   var masterId = props.getProperty(PROP_KEY.MASTER_SS_ID);
   var tuId = props.getProperty(PROP_KEY.TU_SS_ID) || props.getProperty(PROP_KEY.SIKAP_SS_ID);
-  var logId = props.getProperty(PROP_KEY.LOG_SS_ID) || masterId;
-  if (!masterId && !tuId) throw new Error('[SIKAP] Spreadsheet ID belum tersimpan.');
+
+  if (!tuId && !masterId) {
+    if (typeof ensureTuSpreadsheet === 'function') {
+      try {
+        tuId = ensureTuSpreadsheet();
+      } catch (e) {
+        Logger.log('[getSpreadsheetIds] ensureTuSpreadsheet: ' + e.message);
+      }
+    }
+  }
+
+  var resolvedMaster = masterId || tuId;
+  var resolvedTu = tuId || masterId;
+  var logId = props.getProperty(PROP_KEY.LOG_SS_ID) || resolvedMaster;
+
+  if (!resolvedMaster && !resolvedTu) {
+    throw new Error('[SIKAP] Spreadsheet ID belum tersimpan.');
+  }
+
   return {
-    masterId: masterId,
-    transaksiId: tuId || null,
-    logId: logId || null,
-    tuId: tuId || null
+    masterId: resolvedMaster,
+    transaksiId: resolvedTu,
+    logId: logId,
+    tuId: resolvedTu
   };
 }

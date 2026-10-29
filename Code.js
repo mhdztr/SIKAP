@@ -151,12 +151,35 @@ function debug_adminCheck() {
     return results;
   }
 }
-
-
-
-
-
-
+/**
+ * Setup & verifikasi akun Superadmin, Kadiv TU, dan Staf TU.
+ * Dapat dipanggil langsung dari editor GAS atau via clasp run setup_seedSuperadmin.
+ */
+function setup_seedSuperadmin() {
+  try {
+    var usersSheet = openMasterSheet(SHEET_MASTER.USERS);
+    _ensureSuperadminSeeded(usersSheet);
+    var users = sheetToObjects(usersSheet);
+    return {
+      success: true,
+      message: 'Akun Superadmin, Kadiv TU, dan Staf TU berhasil diverifikasi.',
+      totalUsers: users.length,
+      users: users.map(function (u) {
+        return {
+          userId: u['UserID'],
+          nama: u['Nama'],
+          email: u['Email'],
+          nip: u['NIP'],
+          role: u['Role'],
+          status: u['Status']
+        };
+      })
+    };
+  } catch (err) {
+    Logger.log('[setup_seedSuperadmin] Error: ' + err.message);
+    return { success: false, error: err.message, stack: err.stack };
+  }
+}
 
 function auth_checkStatusByEmail(email){ return auth_checkStatusByEmail_global(email); }
 function auth_checkStatusByEmail_global(email){ return auth_checkStatusByEmail_global_fn ? auth_checkStatusByEmail_global_fn(email) : null; }

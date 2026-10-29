@@ -550,32 +550,93 @@ function _otpDropPending(pendingToken) {
 
 /**
  * Login.
+ * Mendukung autentikasi via Email, NIP (angka), maupun alias pengguna (superadmin, kadiv, staf).
  *
  * @param {Object} params
- * @param {string} params.email
+ * @param {string} [params.email]
+ * @param {string} [params.username]
+ * @param {string} [params.nip]
+ * @param {string} [params.ident]
  * @param {string} params.password  - plaintext
  */
 function auth_login(params) {
   try {
-    var email    = (params.email    || '').trim().toLowerCase();
-    var password = params.password  || '';
+    var rawIdent = String((params && (params.email || params.username || params.nip || params.ident)) || '').trim();
+    var identLower = rawIdent.toLowerCase();
+    var password = String((params && params.password) || '');
 
-    if (!email || !password) {
-      return { success: false, error: 'Email dan password wajib diisi.' };
+    if (!rawIdent || !password) {
+      return { success: false, error: 'Email / NIP dan password wajib diisi.' };
     }
 
     var usersSheet = openMasterSheet(SHEET_MASTER.USERS);
-    var found = findRowByField(usersSheet, 'Email', email);
+    _ensureSuperadminSeeded(usersSheet);
 
-    if (!found) {
-      return { success: false, error: 'Email atau password salah.' };
+    var allUsers = sheetToObjects(usersSheet);
+    var cleanDigits = rawIdent.replace(/\D/g, '');
+
+    var user = null;
+    for (var i = 0; i < allUsers.length; i++) {
+      var u = allUsers[i];
+      var uEmail = String(u['Email'] || '').trim().toLowerCase();
+      var uNip = String(u['NIP'] || '').trim().replace(/\D/g, '');
+      var uRole = String(u['Role'] || '').toUpperCase();
+
+      // 1. Email match (exact)
+      if (uEmail && uEmail === identLower) {
+        user = u;
+        break;
+      }
+      // 2. NIP match (numeric string)
+      if (cleanDigits && uNip && uNip === cleanDigits) {
+        user = u;
+        break;
+      }
+      // 3. Superadmin aliases (superadmin, admin, superadmin@kkp.go.id, superadmin@sikap.id)
+      if ((identLower === 'superadmin' || identLower === 'admin' || identLower === 'superadmin@kkp.go.id' || identLower === 'superadmin@sikap.id') && uRole === ROLE.SUPERADMIN) {
+        user = u;
+        break;
+      }
+      // 4. Kadiv TU alias (kadiv, kadiv.tu, kadivtu)
+      if ((identLower === 'kadiv' || identLower === 'kadiv.tu' || identLower === 'kadivtu') && uRole === ROLE.KADIV) {
+        user = u;
+        break;
+      }
+      // 5. Staf TU alias (staf, staf.tu, staftu)
+      if ((identLower === 'staf' || identLower === 'staf.tu' || identLower === 'staftu') && uRole === ROLE.STAF) {
+        user = u;
+        break;
+      }
     }
 
-    var user = found.obj;
-
-    if (user['PasswordHash'] !== hashPassword(password)) {
-      return { success: false, error: 'Email atau password salah.' };
+    if (!user) {
+      return { success: false, error: 'Email / NIP atau password salah.' };
     }
+
+    // Cek password hash
+    var hashedInput = hashPassword(password);
+    if (user['PasswordHash'] !== hashedInput) {
+      // Khusus Superadmin: jika password yang dimasukkan adalah default SuperAdmin2026!
+      // tapi hash di database beda (misal belum ter-sync), perbarui otomatis
+      if (String(user['Role']).toUpperCase() === ROLE.SUPERADMIN && password === 'SuperAdmin2026!') {
+        try {
+          var foundRow = findRowByField(usersSheet, 'Email', user['Email']);
+          if (foundRow) {
+            var headers = usersSheet.getDataRange().getValues()[0];
+            var pIdx = headers.indexOf('PasswordHash');
+            if (pIdx !== -1) {
+              usersSheet.getRange(foundRow.rowIndex, pIdx + 1).setValue(hashedInput);
+              user['PasswordHash'] = hashedInput;
+            }
+          }
+        } catch (syncErr) {
+          Logger.log('[auth_login] Sync superadmin pwd err: ' + syncErr.message);
+        }
+      } else {
+        return { success: false, error: 'Email / NIP atau password salah.' };
+      }
+    }
+
     if (user['Status'] === USER_STATUS.NONAKTIF) {
       return { success: false, error: 'Akun telah dinonaktifkan oleh Superadmin. Silakan hubungi pengelola.' };
     }

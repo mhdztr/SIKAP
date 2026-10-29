@@ -79,17 +79,64 @@ function hashPassword(plaintext) {
 
 function openMasterSheet(sheetName) {
   var ids = getSpreadsheetIds();
-  return SpreadsheetApp.openById(ids.masterId).getSheetByName(sheetName);
+  var ss = null;
+  if (ids.masterId) {
+    try {
+      ss = SpreadsheetApp.openById(ids.masterId);
+    } catch (e) {
+      Logger.log('[openMasterSheet] masterId ' + ids.masterId + ' tidak dapat dibuka: ' + e.message);
+    }
+  }
+  if (!ss) {
+    var tuId = ensureTuSpreadsheet();
+    ss = SpreadsheetApp.openById(tuId);
+  }
+  var sheet = ss.getSheetByName(sheetName);
+  if (!sheet) {
+    sheet = _autoCreateMasterSheet(ss, sheetName);
+  }
+  if (sheetName === SHEET_MASTER.USERS) {
+    _ensureSuperadminSeeded(sheet);
+  }
+  return sheet;
 }
 
 function openTransaksiSheet(sheetName) {
   var ids = getSpreadsheetIds();
-  return SpreadsheetApp.openById(ids.transaksiId).getSheetByName(sheetName);
+  var ss = null;
+  if (ids.transaksiId) {
+    try {
+      ss = SpreadsheetApp.openById(ids.transaksiId);
+    } catch (e) {
+      Logger.log('[openTransaksiSheet] transaksiId ' + ids.transaksiId + ' err: ' + e.message);
+    }
+  }
+  if (!ss) {
+    var tuId = ensureTuSpreadsheet();
+    ss = SpreadsheetApp.openById(tuId);
+  }
+  return ss.getSheetByName(sheetName) || _autoCreateTuSheet(ss, sheetName);
 }
 
 function openLogSheet(sheetName) {
   var ids = getSpreadsheetIds();
-  return SpreadsheetApp.openById(ids.logId).getSheetByName(sheetName);
+  var ss = null;
+  if (ids.logId) {
+    try {
+      ss = SpreadsheetApp.openById(ids.logId);
+    } catch (e) {
+      Logger.log('[openLogSheet] logId ' + ids.logId + ' err: ' + e.message);
+    }
+  }
+  if (!ss) {
+    var tuId = ensureTuSpreadsheet();
+    ss = SpreadsheetApp.openById(tuId);
+  }
+  var sheet = ss.getSheetByName(sheetName);
+  if (!sheet) {
+    sheet = _autoCreateLogSheet(ss, sheetName);
+  }
+  return sheet;
 }
 
 /**
@@ -217,8 +264,179 @@ function _autoCreateTuSheet(ss, sheetName) {
     .setFontWeight('bold')
     .setBackground('#E8EAF6');
   created.setFrozenRows(1);
-  Logger.log('[_autoCreateTuSheet] Sheet ' + sheetName + ' dibuat otomatis di Nautika_TU.');
+  Logger.log('[_autoCreateTuSheet] Sheet ' + sheetName + ' dibuat otomatis di database TU.');
   return created;
+}
+
+function _autoCreateMasterSheet(ss, sheetName) {
+  var existing = ss.getSheetByName(sheetName);
+  if (existing) return existing;
+
+  var headers = [];
+  var seedRows = [];
+
+  if (sheetName === SHEET_MASTER.USERS) {
+    headers = [
+      'UserID', 'Nama', 'Email', 'NIP', 'PasswordHash',
+      'DivisiID', 'Role', 'Status', 'ApprovedBy', 'RegisteredAt', 'ApprovedAt'
+    ];
+  } else if (sheetName === SHEET_MASTER.DIVISI) {
+    headers = ['DivisiID', 'NamaResmi', 'NamaDashboard', 'Kode'];
+    seedRows = [
+      ['DIV-TU', 'Subbagian Tata Usaha', 'Tata Usaha', 'TU'],
+      ['DIV-OPS', 'Subdirektorat Pemantauan dan Operasi Armada', 'Operasi Armada', 'OPS'],
+      ['DIV-SARPRAS', 'Subdirektorat Sarana dan Prasarana Pengawasan', 'Sarana Prasarana', 'SARPRAS'],
+      ['DIV-ALAT', 'Subdirektorat Alutsista dan Teknologi', 'Alutsista', 'ALAT']
+    ];
+  } else if (sheetName === SHEET_MASTER.OPSI) {
+    headers = ['Kode', 'Urutan', 'Label', 'LabelTampil', 'Aktif', 'DibuatOleh', 'DibuatAt'];
+  } else {
+    headers = ['ID', 'Nama', 'Keterangan'];
+  }
+
+  var created = ss.insertSheet(sheetName);
+  created.getRange(1, 1, 1, headers.length)
+    .setValues([headers])
+    .setFontWeight('bold')
+    .setBackground('#E8EAF6');
+  created.setFrozenRows(1);
+
+  if (seedRows.length > 0) {
+    created.getRange(2, 1, seedRows.length, seedRows[0].length).setValues(seedRows);
+  }
+
+  Logger.log('[_autoCreateMasterSheet] Sheet ' + sheetName + ' dibuat otomatis.');
+  return created;
+}
+
+function _autoCreateLogSheet(ss, sheetName) {
+  var existing = ss.getSheetByName(sheetName);
+  if (existing) return existing;
+
+  var headers = [];
+  if (sheetName === SHEET_LOG.APPROVAL_QUEUE) {
+    headers = [
+      'QueueID', 'UserID', 'RoleDilamar', 'DivisiID', 'Status',
+      'KeputusanOleh', 'KeputusanAt', 'AlasanReject', 'CreatedAt'
+    ];
+  } else if (sheetName === SHEET_LOG.AUDIT_LOG) {
+    headers = ['LogID', 'UserID', 'Aksi', 'SheetTarget', 'RowIDTarget', 'Alasan', 'Timestamp'];
+  } else if (sheetName === SHEET_LOG.NOTIFICATIONS) {
+    headers = ['NotifID', 'UserID', 'Jenis', 'Pesan', 'IsRead', 'CreatedAt'];
+  } else {
+    headers = ['LogID', 'UserID', 'Aksi', 'Timestamp'];
+  }
+
+  var created = ss.insertSheet(sheetName);
+  created.getRange(1, 1, 1, headers.length)
+    .setValues([headers])
+    .setFontWeight('bold')
+    .setBackground('#F1F5F9');
+  created.setFrozenRows(1);
+  return created;
+}
+
+/**
+ * Memastikan akun Superadmin, Kadiv TU, dan Staf TU selalu tersedia.
+ * Idempoten: jika belum ada akun berstatus APPROVED, akun default akan dibuat.
+ */
+function _ensureSuperadminSeeded(usersSheet) {
+  try {
+    if (!usersSheet) return;
+
+    var lastRow = usersSheet.getLastRow();
+    var expectedHeaders = [
+      'UserID', 'Nama', 'Email', 'NIP', 'PasswordHash',
+      'DivisiID', 'Role', 'Status', 'ApprovedBy', 'RegisteredAt', 'ApprovedAt'
+    ];
+    if (lastRow === 0) {
+      usersSheet.getRange(1, 1, 1, expectedHeaders.length)
+        .setValues([expectedHeaders])
+        .setFontWeight('bold')
+        .setBackground('#E8EAF6');
+      usersSheet.setFrozenRows(1);
+      lastRow = 1;
+    }
+
+    var data = usersSheet.getDataRange().getValues();
+    var headers = data[0] || expectedHeaders;
+    var emailIdx = headers.indexOf('Email');
+    var roleIdx = headers.indexOf('Role');
+    var statusIdx = headers.indexOf('Status');
+    var pwdIdx = headers.indexOf('PasswordHash');
+
+    var superadminRowIdx = -1;
+    for (var r = 1; r < data.length; r++) {
+      var rowRole = String(data[r][roleIdx] || '').toUpperCase();
+      var rowEmail = String(data[r][emailIdx] || '').toLowerCase();
+      if (rowRole === ROLE.SUPERADMIN || rowEmail === 'superadmin@sikap.go.id') {
+        superadminRowIdx = r + 1; // 1-based row index
+        break;
+      }
+    }
+
+    var now = new Date();
+    if (superadminRowIdx > 0) {
+      // Pastikan status APPROVED dan password hash valid jika belum
+      var currStatus = String(data[superadminRowIdx - 1][statusIdx] || '').toUpperCase();
+      var currPwd = String(data[superadminRowIdx - 1][pwdIdx] || '');
+      if (currStatus !== USER_STATUS.APPROVED && statusIdx !== -1) {
+        usersSheet.getRange(superadminRowIdx, statusIdx + 1).setValue(USER_STATUS.APPROVED);
+      }
+      if (!currPwd && pwdIdx !== -1) {
+        usersSheet.getRange(superadminRowIdx, pwdIdx + 1).setValue(hashPassword('SuperAdmin2026!'));
+      }
+    } else {
+      // Append default users
+      var defaultUsers = [
+        [
+          'USR-SUPERADMIN-001',
+          'Super Administrator SIKAP',
+          'superadmin@sikap.go.id',
+          '198501012010011001',
+          hashPassword('SuperAdmin2026!'),
+          '',
+          ROLE.SUPERADMIN,
+          USER_STATUS.APPROVED,
+          'SYSTEM',
+          now,
+          now
+        ],
+        [
+          'USR-KADIV-TU-001',
+          'Kepala Subbag Tata Usaha',
+          'kadiv.tu@sikap.go.id',
+          '198005122005011002',
+          hashPassword('KadivTU2026!'),
+          'DIV-TU',
+          ROLE.KADIV,
+          USER_STATUS.APPROVED,
+          'USR-SUPERADMIN-001',
+          now,
+          now
+        ],
+        [
+          'USR-STAF-TU-001',
+          'Staf Pelaksana TU',
+          'staf.tu@sikap.go.id',
+          '199203152018021003',
+          hashPassword('StafTU2026!'),
+          'DIV-TU',
+          ROLE.STAF,
+          USER_STATUS.APPROVED,
+          'USR-KADIV-TU-001',
+          now,
+          now
+        ]
+      ];
+      defaultUsers.forEach(function (uRow) {
+        usersSheet.appendRow(uRow);
+      });
+      Logger.log('[_ensureSuperadminSeeded] Akun-akun default berhasil di-seed.');
+    }
+  } catch (err) {
+    Logger.log('[_ensureSuperadminSeeded] Error: ' + err.message);
+  }
 }
 
 /**

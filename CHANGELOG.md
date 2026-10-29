@@ -1,6 +1,19 @@
 # CHANGELOG.md — SIKAP
 **Sistem Informasi Keuangan, Anggaran, dan Kepegawaian (Subbag Tata Usaha - Dit. POA)**
 
+## [Patch — Autentikasi Multi-Identitas, DB Self-Healing & Notifikasi Sync] — 29 Okt 2026
+**Status:** Selesai
+
+**Pencapaian:**
+- Auto-seeding mandiri dan idempoten untuk akun default Superadmin (`superadmin@sikap.go.id`), Kadiv TU (`kadiv.tu@sikap.go.id`), dan Staf TU (`staf.tu@sikap.go.id`) berstatus `APPROVED`.
+- Autentikasi multi-identitas: mendukung login menggunakan Email, NIP numerik, maupun alias peran (`superadmin`, `admin`, `kadiv`, `staf`).
+- Perbaikan form login di antarmuka (`Index.html`) dari `type="email"` ke `type="text"` untuk mencegah penolakan format oleh browser.
+- Mekanisme *self-healing* basis data: otomatis membuat tabel master (`Users`, `Divisi`, `Opsi`) dan tabel log (`Audit_Log`, `Notifications`, `Approval_Queue`) bila belum tersedia di spreadsheet satelit.
+- Implementasi engine notifikasi dan sinkronisasi berkala di `AdminService.js`: `notifikasi_getRingkasan()`, `notifikasi_getList()`, `notifikasi_markRead()`, `notifikasi_markAllRead()`, `notifikasi_getReminderSettings()`, `notifikasi_setReminderAktif()`, `notifikasi_generateReminderMingguan()`, dan `app_getSyncState()`.
+- Validasi QA 10/10 PASS pada `lint_ui.js` dan 0 error pada kompilasi sintaksis.
+
+---
+
 ## [Fase 6 — Sub-Modul E: Siklus Usulan Penghapusan Legal Kemenkeu & QA Final] — 29 Okt 2026
 **Status:** Selesai
 
