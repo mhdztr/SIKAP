@@ -425,13 +425,13 @@ function auth_requestOtp(params) {
     CacheService.getScriptCache().put(_OTP_PREFIX + email, JSON.stringify(payload), _OTP_TTL_SEC);
     CacheService.getScriptCache().put(sendKey, String(Date.now()), _OTP_RESEND_TTL_SEC + _OTP_TTL_SEC);
 
-    var res = _ntfKirimEmail(email, 'Kode Verifikasi Registrasi Nautika',
+    var res = _ntfKirimEmail(email, 'Kode Verifikasi Registrasi SIKAP',
       'Halo ' + (nama || 'Calon Pengguna') + ',\n\n' +
-      'Kode verifikasi untuk pendaftaran akun Nautika:\n\n' +
+      'Kode verifikasi untuk pendaftaran akun SIKAP:\n\n' +
       '    ' + code + '\n\n' +
       'Kode berlaku ' + Math.round(_OTP_TTL_SEC / 60) + ' menit dan hanya dapat dipakai sekali.\n' +
       'Jika Anda tidak meminta kode ini, abaikan email ini.\n\n' +
-      '— Sistem Nautika, Direktorat Pengendalian Operasi Armada');
+      '— SIKAP, Subbag Tata Usaha Dit. POA');
 
     if (!res.ok) {
       // Jangan simpan kode kalau email gagal terkirim — user tidak akan pernah

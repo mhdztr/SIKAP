@@ -68,7 +68,7 @@ function debug_ping() {
   try {
     res.steps.push('properties');
     var props = PropertiesService.getScriptProperties();
-    var mId = props.getProperty('NAUTIKA_MASTER_SS_ID');
+    var mId = props.getProperty('SIKAP_MASTER_SS_ID') || props.getProperty('NAUTIKA_MASTER_SS_ID');
     res.masterId = mId;
 
     res.steps.push('spreadsheet');

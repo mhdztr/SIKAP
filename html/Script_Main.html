@@ -6,7 +6,7 @@
    ============================================================ */
 
 // ── KONSTANTA ─────────────────────────────────────────────
-var TOKEN_KEY  = 'nautika_token';
+var TOKEN_KEY  = 'sikap_token';
 var MONTHS     = ['Januari','Februari','Maret','April','Mei','Juni',
                   'Juli','Agustus','September','Oktober','November','Desember'];
 var ROLE_LABEL = {
@@ -360,7 +360,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // Cek sesi
   var savedToken = null;
-  try { savedToken = sessionStorage.getItem(TOKEN_KEY); } catch (e) { /* sandbox restriction */ }
+  try { savedToken = sessionStorage.getItem(TOKEN_KEY) || sessionStorage.getItem('nautika_token'); } catch (e) { /* sandbox restriction */ }
 
   if (savedToken) {
     try {
@@ -398,7 +398,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Cek apakah ada pendaftaran pending yang sedang dipantau di sesi ini
     var restoredPending = false;
     try {
-      var rawPending = sessionStorage.getItem('NAUTIKA_PENDING_REG');
+      var rawPending = sessionStorage.getItem('SIKAP_PENDING_REG') || sessionStorage.getItem('NAUTIKA_PENDING_REG');
       if (rawPending) {
         var pData = JSON.parse(rawPending);
         if (pData && (pData.email || pData.userId)) {
@@ -508,7 +508,7 @@ function _onRegistrationApproved(data) {
   var email = data.email || (_lastPendingPayload && _lastPendingPayload.email) || '';
   var nama  = data.nama  || (_lastPendingPayload && _lastPendingPayload.nama)  || 'Pengguna';
 
-  try { sessionStorage.removeItem('NAUTIKA_PENDING_REG'); } catch (e) {}
+  try { sessionStorage.removeItem('SIKAP_PENDING_REG'); sessionStorage.removeItem('NAUTIKA_PENDING_REG'); } catch (e) {}
 
   var titleEl = document.querySelector('#v-pending .auth-title');
   if (titleEl) titleEl.textContent = 'Pendaftaran Disetujui';
@@ -533,7 +533,7 @@ function _onRegistrationApproved(data) {
       '</div>' +
       '<p class="n-banner-approved-text">' +
         'Pendaftaran akun atas nama <b>' + _esc(nama) + '</b> telah diterima dan disetujui oleh atasan/administrator. ' +
-        'Akun Anda kini aktif. Silakan masuk untuk mengakses sistem Nautika.' +
+        'Akun Anda kini aktif. Silakan masuk untuk mengakses sistem SIKAP.' +
       '</p>' +
       '<div class="n-banner-approved-actions">' +
         '<button type="button" class="btn-primary" onclick="_pendingGoToLogin(\'' + _esc(email) + '\')">' +
@@ -573,7 +573,7 @@ function _onRegistrationRejected(data) {
   var email  = data.email || (_lastPendingPayload && _lastPendingPayload.email) || '';
   var alasan = data.alasanReject || 'Pendaftaran tidak memenuhi kriteria verifikasi.';
 
-  try { sessionStorage.removeItem('NAUTIKA_PENDING_REG'); } catch (e) {}
+  try { sessionStorage.removeItem('SIKAP_PENDING_REG'); sessionStorage.removeItem('NAUTIKA_PENDING_REG'); } catch (e) {}
 
   var titleEl = document.querySelector('#v-pending .auth-title');
   if (titleEl) titleEl.textContent = 'Pendaftaran Ditolak';
@@ -649,7 +649,7 @@ function _pendingCancelOrNew() {
   _clearPendingAutoRedirect();
   _stopPendingStatusPolling();
   _lastPendingPayload = null;
-  try { sessionStorage.removeItem('NAUTIKA_PENDING_REG'); } catch (e) {}
+  try { sessionStorage.removeItem('SIKAP_PENDING_REG'); sessionStorage.removeItem('NAUTIKA_PENDING_REG'); } catch (e) {}
   _clearPendingBanners();
   _showAuthView('register');
   _regResetOtp();
@@ -882,7 +882,7 @@ function _regSubmitRegister() {
         divisiId: (res.data && res.data.divisiId) || payload.divisiId
       };
       try {
-        sessionStorage.setItem('NAUTIKA_PENDING_REG', JSON.stringify(registeredUser));
+        sessionStorage.setItem('SIKAP_PENDING_REG', JSON.stringify(registeredUser));
       } catch (e) {}
 
       document.getElementById('form-register').reset();
@@ -996,7 +996,7 @@ function _asyncResErr(res) {
 function _asyncResFail(key, wrap, res, retryCall) {
   _asyncDisarm(key);
   if (window.console && console.error) {
-    console.error('[nautika] respons tidak valid: ' + key, res);
+    console.error('[sikap] respons tidak valid: ' + key, res);
   }
   _asyncFailUi(wrap, _asyncResErr(res), retryCall);
 }
@@ -1004,7 +1004,7 @@ function _asyncResFail(key, wrap, res, retryCall) {
 // Dipanggil dari catch di dalam success handler: tampilkan error, jangan spinner.
 function _asyncRenderFail(key, wrap, e) {
   _asyncDisarm(key);
-  if (window.console && console.error) console.error('[nautika] render gagal: ' + key, e);
+  if (window.console && console.error) console.error('[sikap] render gagal: ' + key, e);
   if (!wrap || !wrap.isConnected) return;
   wrap.innerHTML = '<div class="n-msg error">Gagal menampilkan data: ' +
     _esc(e && e.message ? e.message : String(e)) + '</div>';
@@ -1025,14 +1025,46 @@ function _initApp() {
   });
 }
 
-// ── SIDEBAR ───────────────────────────────────────────────
+// ── SIDEBAR & TOPBAR NAVIGATION ───────────────────────────
+function _sikapSelectModule(modName) {
+  if (modName === 'admin') {
+    _routeTo('kelola-akun');
+    _sikapHighlightModule('admin');
+  } else {
+    if (APP.currentView !== 'tata-usaha') {
+      _routeTo('tata-usaha');
+    }
+    _tuSwitchTab(modName);
+    _sikapHighlightModule(modName);
+  }
+}
+
+function _sikapHighlightModule(modName) {
+  var btns = document.querySelectorAll('.modulenav-btn');
+  btns.forEach(function (b) {
+    if (b.id === 'mod-nav-' + modName) {
+      b.classList.add('active');
+    } else {
+      b.classList.remove('active');
+    }
+  });
+}
+
 function _renderSidebar() {
   var user = APP.user || {};
-  // Footer trigger card & popover menu
+  // User trigger card & popover menu
   var nameEl = document.getElementById('sb-user-name');
   if (nameEl) nameEl.textContent = user.nama || 'Pengguna';
   var roleEl = document.getElementById('sb-user-role');
   if (roleEl) roleEl.textContent = ROLE_LABEL[user.role] || user.role || '—';
+
+  var initialsEl = document.getElementById('user-avatar-initials');
+  if (initialsEl) {
+    var nm = (user.nama || 'TU').trim();
+    var parts = nm.split(/\s+/);
+    var ini = parts.length > 1 ? (parts[0][0] + parts[1][0]) : nm.substring(0, 2);
+    initialsEl.textContent = ini.toUpperCase();
+  }
 
   var menuName = document.getElementById('sb-menu-name');
   if (menuName) menuName.textContent = user.nama || 'Pengguna';
@@ -1050,24 +1082,18 @@ function _renderSidebar() {
     }
   }
 
-  // Nav
+  var modAdmin = document.getElementById('mod-nav-admin');
+  if (modAdmin) {
+    if (user.role === 'SUPERADMIN' || user.role === 'DIREKTUR') {
+      modAdmin.classList.remove('n-hidden');
+    } else {
+      modAdmin.classList.add('n-hidden');
+    }
+  }
+
+  // Compatibility Nav
   var nav = document.getElementById('sb-nav');
-  var html = '';
-  NAV_SECTIONS.forEach(function (section) {
-    var visibleItems = section.items.filter(function (it) { return _canAccess(it, user); });
-    if (visibleItems.length === 0) return;
-    html += '<div class="sb-section-label">' + section.label + '</div>';
-    visibleItems.forEach(function (it) {
-      html += '<div class="nav-item" id="nav-' + it.id + '" onclick="_routeTo(\'' + it.id + '\')">' +
-        _esc(it.label);
-      // Badge jumlah notifikasi belum dibaca (Fase 13)
-      if (it.id === 'notifikasi') {
-        html += '<span class="nav-badge n-hidden" id="nav-notif-badge">0</span>';
-      }
-      html += '</div>';
-    });
-  });
-  nav.innerHTML = html;
+  if (nav) nav.innerHTML = '';
 }
 
 // ── USER ACCOUNT MENU (Drop-Up Popover) ───────────────────
@@ -1172,7 +1198,7 @@ function _routeKapalTerbaik() {
   _applyShellStatus();
 }
 
-// ── PAGE HEADER ───────────────────────────────────────────
+// ── PAGE HEADER & FILTER CONTROLS ─────────────────────────
 function _renderPageHeader(viewId) {
   // filter tidak tampil di master-data, profil kapal & kapal terbaik (tidak relevan / punya filter sendiri)
   var noFilter = (viewId === 'master-data' || viewId === 'profil-kapal' ||
@@ -1180,30 +1206,17 @@ function _renderPageHeader(viewId) {
                   viewId === 'kapal-terbaik');
   var filterHtml = noFilter ? '' : _buildFilterHtml();
 
-  document.getElementById('page-header').innerHTML =
-    '<div class="page-header-inner">' +
-      '<h1 class="page-title">' + _esc(_viewTitle(viewId)) + '</h1>' +
-      '<div class="filter-periode">' +
-        '<div id="sync-indicator" class="sync-indicator" onclick="_triggerManualSync()" title="Data tersinkron dengan server. Klik untuk periksa pembaruan.">' +
-          '<span class="sync-icon-wrap">' +
-            '<svg class="sync-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">' +
-              '<path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-1.19"/>' +
-            '</svg>' +
-          '</span>' +
-          '<span class="sync-indicator-text">Tersinkron</span>' +
-          '<div class="sync-popover">' +
-            '<div class="sync-pop-head">' +
-              '<span class="sync-pop-dot"></span>' +
-              '<span class="sync-pop-status">Sistem Tersinkron</span>' +
-            '</div>' +
-            '<div class="sync-pop-data" id="sync-pop-data">Data per: &mdash;</div>' +
-            '<div class="sync-pop-action">Klik untuk periksa pembaruan</div>' +
-          '</div>' +
-        '</div>' +
-        (filterHtml ? '<div class="filter-box">' + filterHtml + '</div>' : '') +
-        '<span id="filter-busy" class="filter-busy" title="Memuat data&hellip;"></span>' +
-      '</div>' +
-    '</div>';
+  var filterWrap = document.getElementById('topbar-filter-periode');
+  if (filterWrap) {
+    filterWrap.innerHTML = filterHtml ? '<div class="filter-box">' + filterHtml + '</div><span id="filter-busy" class="filter-busy" title="Memuat data&hellip;"></span>' : '';
+  }
+
+  var ph = document.getElementById('page-header');
+  if (ph) {
+    ph.innerHTML = '';
+  }
+
+  _sikapHighlightModule(viewId === 'kelola-akun' ? 'admin' : (_TU.activeTab || 'anggaran'));
   _syncBusy();
   _syncUpdateIndicator(APP_SYNC.deferredReload ? 'deferred' : 'synced');
   _updateTelemetryTimestampUI();
@@ -3578,7 +3591,7 @@ function _adnLoadReminder() {
         _adnRenderReminder(res.data);
       } catch (e) {
         _asyncDisarm('adn-reminder');
-        if (window.console && console.error) console.error('[nautika] render gagal: reminder', e);
+        if (window.console && console.error) console.error('[sikap] render gagal: reminder', e);
         if (statusEl) statusEl.textContent = 'Gagal menampilkan status: ' +
           (e && e.message ? e.message : String(e));
       }
@@ -5140,7 +5153,7 @@ function _icoWatch() {
 }
 
 // ============================================================
-// NAUTIKA TOAST SYSTEM (ask-sonner & emil-design-eng)
+// SIKAP TOAST SYSTEM (ask-sonner & emil-design-eng)
 // Non-blocking, stacked, spring-animated, swipe-to-dismiss
 // ============================================================
 var toast = (function () {
@@ -6321,43 +6334,132 @@ function _tuRenderKPI(d) {
   var el = document.getElementById('tu-kpi-strip');
   if (!el) return;
 
-  var paguSource = d.paguReguler > 0 || d.paguABT > 0 ? 'Berlaku tahunan' : 'Belum diisi';
-
   var progSP2D   = Math.min(Math.max(d.pctSerapanNasional !== undefined ? d.pctSerapanNasional : (d.pctSP2D || 0), 0), 100);
   var progAkrual = Math.min(Math.max(d.pctAkrual || 0, 0), 100);
-  var clsSP2D    = progSP2D   >= 90 ? 'warn' : '';
-  var clsAkrual  = progAkrual >= 90 ? 'warn' : '';
+  var selisih    = Math.abs((d.realisasiAkrual || 0) - (d.realisasiSP2D || 0));
+  var isKasLebihBesar = (d.realisasiSP2D || 0) >= (d.realisasiAkrual || 0);
 
-  // Baris 1: Pagu Total + Serapan Nasional (SP2D) + Realisasi Akrual (2x2 Matrix APBN)
-  var html = '<div class="ov-kpi-row" style="grid-template-columns:repeat(3,1fr);">';
-  // Pagu Anggaran Total
-  html += '<div class="kpi-card"><div class="kpi-label">Pagu Anggaran Total</div>' +
-    '<div class="kpi-value" style="font-size:1.35rem;">' + _rupiah(d.paguTotal) + '</div>' +
-    '<div class="kpi-sub">Reg: ' + _rupiah(d.paguReguler) + ' \u00B7 ABT: ' + _rupiah(d.paguABT) + '</div></div>';
-  // Serapan Nasional SP2D
-  html += '<div class="kpi-card"><div class="kpi-label">Serapan Nasional (SP2D)</div>' +
-    '<div class="kpi-value" style="font-size:1.5rem;">' + (d.pctSerapanNasional !== undefined ? d.pctSerapanNasional : (d.pctSP2D || 0)) + '<span style="font-size:.9rem;font-weight:500;color:var(--n-text-secondary);">%</span></div>' +
-    '<div class="prog-wrap"><div class="prog-bar-bg"><div class="prog-bar-fill ' + clsSP2D + '" style="width:' + progSP2D + '%;"></div></div></div>' +
-    '<div class="kpi-sub">' + _rupiah(d.realisasiSP2D) + ' dari ' + _rupiah(d.paguTotal) + '</div></div>';
-  // Realisasi Akrual
-  html += '<div class="kpi-card"><div class="kpi-label">Realisasi Akrual (Fisik)</div>' +
-    '<div class="kpi-value" style="font-size:1.5rem;">' + (d.pctAkrual || 0) + '<span style="font-size:.9rem;font-weight:500;color:var(--n-text-secondary);">%</span></div>' +
-    '<div class="prog-wrap"><div class="prog-bar-bg"><div class="prog-bar-fill ' + clsAkrual + '" style="width:' + progAkrual + '%;"></div></div></div>' +
-    '<div class="kpi-sub">' + _rupiah(d.realisasiAkrual) + ' dari ' + _rupiah(d.paguTotal) + '</div></div>';
-  html += '</div>';
+  var html = '' +
+    '<div class="sikap-treasury-cockpit">' +
+      '<!-- Top Command Bar: Title, Subtitle, Status Badges, Action Button -->' +
+      '<div class="treasury-header">' +
+        '<div class="treasury-title-group">' +
+          '<h2 class="treasury-title">Dasbor Penyerapan Anggaran &amp; Kas Negara</h2>' +
+          '<div class="treasury-subtitle">Subbag Tata Usaha \u2014 Direktorat Pengawasan Sumber Daya Kelautan dan Perikanan</div>' +
+        '</div>' +
+        '<div class="treasury-actions">' +
+          '<span class="treasury-tag-revision">Revisi Pagu: ' + (d.revisiPagu || 0) + 'x</span>' +
+          '<button type="button" class="btn-primary" onclick="tuOpenForm()">' +
+            '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>' +
+            '<span>Input Laporan Mingguan</span>' +
+          '</button>' +
+        '</div>' +
+      '</div>' +
 
-  // Baris 2: Realisasi Reguler + Realisasi ABT + Sisa Konsolidasi
-  html += '<div class="ov-kpi-row" style="grid-template-columns:repeat(3,1fr);margin-top:0;">';
-  html += '<div class="kpi-card"><div class="kpi-label">Realisasi Reguler (SP2D)</div>' +
-    '<div class="kpi-value" style="font-size:1.25rem;">' + _rupiah(d.realisasiSP2D_Reguler || 0) + '</div>' +
-    '<div class="kpi-sub">Serapan: ' + (d.pctSP2D_Reguler || 0) + '% \u00B7 Sisa: ' + _rupiah(d.sisaSP2D_Reguler || 0) + '</div></div>';
-  html += '<div class="kpi-card"><div class="kpi-label">Realisasi ABT (SP2D)</div>' +
-    '<div class="kpi-value" style="font-size:1.25rem;">' + _rupiah(d.realisasiSP2D_ABT || 0) + '</div>' +
-    '<div class="kpi-sub">Serapan: ' + (d.pctSP2D_ABT || 0) + '% \u00B7 Sisa: ' + _rupiah(d.sisaSP2D_ABT || 0) + '</div></div>';
-  html += '<div class="kpi-card"><div class="kpi-label">Sisa Anggaran Kas (SP2D)</div>' +
-    '<div class="kpi-value" style="font-size:1.25rem;color:' + (d.sisaSP2D < 0 ? 'var(--n-crit)' : 'inherit') + ';">' + _rupiah(d.sisaSP2D) + '</div>' +
-    '<div class="kpi-sub">Sisa Akrual: ' + _rupiah(d.sisaAkrual) + ' \u00B7 Rev. Pagu: ' + (d.revisiPagu || 0) + 'x</div></div>';
-  html += '</div>';
+      '<!-- 4-Card Executive Metric Grid (Ground-Up, Distinct Layout) -->' +
+      '<div class="treasury-kpi-grid">' +
+        '<!-- Card 1: Total Alokasi Pagu DIPA -->' +
+        '<div class="treasury-kpi-card">' +
+          '<div class="treasury-kpi-label">Total Alokasi Pagu DIPA</div>' +
+          '<div class="treasury-kpi-val">' + _rupiah(d.paguTotal) + '</div>' +
+          '<div class="treasury-ledger-list">' +
+            '<div class="treasury-ledger-item">' +
+              '<span class="ledger-dot"></span>' +
+              '<span class="ledger-label">DIPA Induk (Reguler):</span>' +
+              '<span class="ledger-value">' + _rupiah(d.paguReguler) + '</span>' +
+            '</div>' +
+            '<div class="treasury-ledger-item">' +
+              '<span class="ledger-dot ledger-dot-soft"></span>' +
+              '<span class="ledger-label">Belanja Tambahan (ABT):</span>' +
+              '<span class="ledger-value">' + _rupiah(d.paguABT) + '</span>' +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+
+        '<!-- Card 2: Realisasi Kas SP2D -->' +
+        '<div class="treasury-kpi-card">' +
+          '<div class="treasury-kpi-label">Realisasi Kas Negara (SP2D)</div>' +
+          '<div class="treasury-pct-row">' +
+            '<span class="treasury-pct text-emerald">' + (d.pctSerapanNasional !== undefined ? d.pctSerapanNasional : (d.pctSP2D || 0)) + '%</span>' +
+            '<span class="treasury-nominal">' + _rupiah(d.realisasiSP2D) + '</span>' +
+          '</div>' +
+          '<div class="treasury-progress-track">' +
+            '<div class="treasury-progress-bar" style="width:' + progSP2D + '%;"></div>' +
+          '</div>' +
+          '<div class="treasury-card-foot">' +
+            '<span>Sisa Pagu Kas:</span>' +
+            '<span class="treasury-foot-val ' + (d.sisaSP2D < 0 ? 'text-crit' : 'text-emerald') + '">' + _rupiah(d.sisaSP2D) + '</span>' +
+          '</div>' +
+        '</div>' +
+
+        '<!-- Card 3: Capaian Komitmen Akrual -->' +
+        '<div class="treasury-kpi-card">' +
+          '<div class="treasury-kpi-label">Capaian Komitmen Fisik (Akrual)</div>' +
+          '<div class="treasury-pct-row">' +
+            '<span class="treasury-pct text-emerald" style="opacity:0.85;">' + (d.pctAkrual || 0) + '%</span>' +
+            '<span class="treasury-nominal">' + _rupiah(d.realisasiAkrual) + '</span>' +
+          '</div>' +
+          '<div class="treasury-progress-track">' +
+            '<div class="treasury-progress-bar treasury-bar-soft" style="width:' + progAkrual + '%;"></div>' +
+          '</div>' +
+          '<div class="treasury-card-foot">' +
+            '<span>Sisa Komitmen Fisik:</span>' +
+            '<span class="treasury-foot-val">' + _rupiah(d.sisaAkrual) + '</span>' +
+          '</div>' +
+        '</div>' +
+
+        '<!-- Card 4: Kesiapan Fiskal & Likuiditas -->' +
+        '<div class="treasury-kpi-card">' +
+          '<div class="treasury-kpi-label">Status Likuiditas &amp; Fiskal</div>' +
+          '<div class="treasury-status-badge ' + (d.sisaSP2D < 0 ? 'status-deficit' : 'status-safe') + '">' +
+            '<span class="status-indicator-dot"></span>' +
+            '<span>' + (d.sisaSP2D < 0 ? 'Pagu Defisit' : 'Likuiditas Kas Aman') + '</span>' +
+          '</div>' +
+          '<div class="treasury-delta-box">' +
+            '<div class="delta-header">Selisih Kas vs Komitmen:</div>' +
+            '<div class="delta-value">' + _rupiah(selisih) + '</div>' +
+            '<div class="delta-desc">' + (isKasLebihBesar ? 'Kas KPPN mendahului akrual' : 'Akrual fisik mendahului kas') + '</div>' +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+
+      '<!-- Skema Komparasi DIPA Induk vs Belanja Tambahan (ABT) -->' +
+      '<div class="treasury-schema-row">' +
+        '<div class="schema-card">' +
+          '<div class="schema-card-head">' +
+            '<span class="schema-badge">DIPA Induk (Reguler)</span>' +
+            '<span class="schema-stat">Serapan: <strong>' + (d.pctSP2D_Reguler || 0) + '%</strong></span>' +
+          '</div>' +
+          '<div class="schema-metrics">' +
+            '<div class="schema-col">' +
+              '<span class="schema-lbl">Realisasi SP2D</span>' +
+              '<span class="schema-val">' + _rupiah(d.realisasiSP2D_Reguler || 0) + '</span>' +
+            '</div>' +
+            '<div class="schema-col">' +
+              '<span class="schema-lbl">Sisa Pagu Kas</span>' +
+              '<span class="schema-val">' + _rupiah(d.sisaSP2D_Reguler || 0) + '</span>' +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+
+        '<div class="schema-card">' +
+          '<div class="schema-card-head">' +
+            '<span class="schema-badge schema-badge-abt">Belanja Tambahan (ABT)</span>' +
+            '<span class="schema-stat">Serapan: <strong>' + (d.pctSP2D_ABT || 0) + '%</strong></span>' +
+          '</div>' +
+          '<div class="schema-metrics">' +
+            '<div class="schema-col">' +
+              '<span class="schema-lbl">Realisasi SP2D</span>' +
+              '<span class="schema-val">' + _rupiah(d.realisasiSP2D_ABT || 0) + '</span>' +
+            '</div>' +
+            '<div class="schema-col">' +
+              '<span class="schema-lbl">Sisa Pagu ABT</span>' +
+              '<span class="schema-val">' + _rupiah(d.sisaSP2D_ABT || 0) + '</span>' +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
 
   el.innerHTML = html;
 }
@@ -6769,6 +6871,7 @@ function tuAnulirConfirm() {
 
 function _tuSwitchTab(tabName) {
   _TU.activeTab = tabName || 'anggaran';
+  _sikapHighlightModule(_TU.activeTab);
 
   // Toggle active class on tab buttons
   var btns = document.querySelectorAll('.tu-subnav-btn');
@@ -8779,7 +8882,7 @@ function _bmnDownloadTemplate() {
     var ws = XLSX.utils.aoa_to_sheet(wsData);
     var wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Template_BMN_SAKTI');
-    XLSX.writeFile(wb, 'Template_Impor_BMN_SAKTI_Nautika.xlsx');
+    XLSX.writeFile(wb, 'Template_Impor_BMN_SAKTI_SIKAP.xlsx');
   });
 }
 
@@ -10447,14 +10550,14 @@ function _composePeriode(prefix) {
 }
 
 function _ensureCartoKey(cb) {
-  if (window._nautikaCartoKey !== undefined) { cb(window._nautikaCartoKey); return; }
+  if (window._sikapCartoKey !== undefined) { cb(window._sikapCartoKey); return; }
   google.script.run
     .withSuccessHandler(function (key) {
-      window._nautikaCartoKey = key || '';
-      cb(window._nautikaCartoKey);
+      window._sikapCartoKey = key || '';
+      cb(window._sikapCartoKey);
     })
     .withFailureHandler(function () {
-      window._nautikaCartoKey = '';
+      window._sikapCartoKey = '';
       cb('');
     })
     .utils_getCartoKey();

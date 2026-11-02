@@ -140,10 +140,10 @@ function openLogSheet(sheetName) {
 }
 
 /**
- * Membuka sheet pada spreadsheet dedicated Nautika_TU.
+ * Membuka sheet pada spreadsheet dedicated SIKAP_TU.
  * Otomatis melakukan self-heal membuat spreadsheet dan sheet jika belum ada.
  *
- * @param {string} sheetName - nama sheet di Nautika_TU (SHEET_TU.*)
+ * @param {string} sheetName - nama sheet di SIKAP_TU (SHEET_TU.*)
  * @returns {GoogleAppsScript.Spreadsheet.Sheet}
  */
 function openTuSheet(sheetName) {
@@ -157,9 +157,9 @@ function openTuSheet(sheetName) {
 }
 
 /**
- * Memastikan spreadsheet Nautika_TU sudah ada dan ID tersimpan di Script Properties.
+ * Memastikan spreadsheet SIKAP_TU sudah ada dan ID tersimpan di Script Properties.
  * Idempoten: jika ID sudah ada & valid, langsung mengembalikannya.
- * @returns {string} ID spreadsheet Nautika_TU
+ * @returns {string} ID spreadsheet SIKAP_TU
  */
 function ensureTuSpreadsheet() {
   var props = PropertiesService.getScriptProperties();
@@ -173,11 +173,11 @@ function ensureTuSpreadsheet() {
     }
   }
 
-  // Buat spreadsheet Nautika_TU baru
+  // Buat spreadsheet SIKAP_TU baru
   var ss = SpreadsheetApp.create(SS_NAME.TU);
   tuId = ss.getId();
   props.setProperty(PROP_KEY.TU_SS_ID, tuId);
-  Logger.log('[ensureTuSpreadsheet] Nautika_TU berhasil dibuat dengan ID: ' + tuId);
+  Logger.log('[ensureTuSpreadsheet] SIKAP_TU berhasil dibuat dengan ID: ' + tuId);
 
   // Inisialisasi sheet standar TU
   _autoCreateTuSheet(ss, SHEET_TU.PEGAWAI);
@@ -440,7 +440,7 @@ function _ensureSuperadminSeeded(usersSheet) {
 }
 
 /**
- * Pastikan kolom ada pada sheet di Nautika_TU (self-heal).
+ * Pastikan kolom ada pada sheet di SIKAP_TU (self-heal).
  *
  * @param {string} sheetName - nama sheet TU
  * @param {string} colName - nama kolom
@@ -487,7 +487,7 @@ function ensureTxColumn(sheetName, colName) {
 
 /**
  * Pastikan kolom ada pada sheet master (self-heal), setara ensureTxColumn
- * tapi untuk sheet di Nautika_Master. Dipakai untuk kolom `Users.NIP` yang
+ * tapi untuk sheet di SIKAP_Master. Dipakai untuk kolom `Users.NIP` yang
  * ditambahkan setelah DB terlanjur dibuat.
  *
  * @param {string} sheetName  - nama sheet master
@@ -961,7 +961,7 @@ function clearOpsiCache() {
 }
 
 /**
- * Global audit logging helper — mencatat transaksi ke SHEET_LOG.AUDIT_LOG di Nautika_Log.
+ * Global audit logging helper — mencatat transaksi ke SHEET_LOG.AUDIT_LOG di SIKAP_Log.
  *
  * @param {string} userId - ID pengguna yang melakukan aksi
  * @param {string} aksi - Jenis aksi (e.g. 'SUBMIT_PEGAWAI', 'ANULIR_PEGAWAI', 'CREATE_BMN', etc.)

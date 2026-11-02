@@ -78,19 +78,22 @@ Untuk menjaga keselarasan proporsi visual antarmuka dan menghilangkan ketidakter
 
 ---
 
-## 3. Prinsip Modular Anti-Gabruk (5 Sub-Modul Mandiri)
+## 3. Arsitektur Shell: Top-Bar Executive Command & Anti-Gabruk 5 Sub-Modul
 
-Sesuai PRD §2, antarmuka Subbag Tata Usaha dibagi ke dalam 5 sub-modul independen melalui *Apple-grade Segmented Pill Navigation* yang berada di puncak modul:
+Menghilangkan sepenuhnya left-sidebar statis warisan armada Nautika yang hampa/kosong. SIKAP mengadopsi arsitektur **Top-Bar Executive Command** satu-layer penuh (*full-bleed layout*) yang mencerminkan portal bendahara dan perbendaharaan negara Republik Indonesia:
 
 ```
-┌─────────────────────────────────────────────────────────────────────────────────────────────────┐
+┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ [Crest] SIKAP — Sistem Informasi Keuangan, Anggaran, & Kepegawaian                             │
+│         Subbag Tata Usaha · Dit. POA                      [● Tersinkron] [Filter] [User Pill ▼]│
+├────────────────────────────────────────────────────────────────────────────────────────────────┤
 │ [ Realisasi Anggaran ]  [ Paket Pengadaan ]  [ Kepegawaian ]  [ Inventaris BMN ]  [ Usulan Hapus ]│
-└─────────────────────────────────────────────────────────────────────────────────────────────────┘
+└────────────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
 1. **[TU-A] Realisasi Anggaran (SP2D & Akrual):**
-   - Matriks input 2x2 APBN (Pagu Reguler vs ABT, Realisasi SP2D vs Akrual).
-   - KPI strip serapan nasional linear progress bar, sisa pagu kas, akumulasi fisik akrual.
+   - **Hero APBN Cockpit Card:** Dasbor bento alokasi DIPA Dit. POA, serapan SP2D (kas cair) vs Akrual (komitmen fisik), rasio sisa likuiditas, dan aksi cepat catat laporan mingguan.
+   - Analisis Kurva-S serapan fiskal YTD kumulatif vs realisasi bulanan.
    - Tabel riwayat transaksi dengan in-table action tier SM (Revisi dan Anulir).
 2. **[TU-B] Monitoring Paket Pengadaan:**
    - Visualisasi siklus 6 tahap pekerjaan (`PERSIAPAN` → `PEMILIHAN` → `KONTRAK` → `PELAKSANAAN` → `BAST` → `SELESAI`).

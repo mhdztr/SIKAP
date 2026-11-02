@@ -2,7 +2,7 @@
  * services/BMNService.js
  * Modul Tata Usaha: Manajemen Inventaris Barang Milik Negara (BMN) & Siklus Penghapusan Kemenkeu.
  *
- * Mengelola data di spreadsheet dedicated Nautika_TU:
+ * Mengelola data di spreadsheet dedicated SIKAP_TU:
  * - TX_BMN_Aset: Register fisik inventaris BMN per-item (Anti-Jebret: 1 baris = 1 unit fisik).
  * - TX_BMN_Penghapusan: Berkas usulan penghapusan bertingkat (Kemenkeu / DJKN / KPKNL).
  * - TX_BMN_Penghapusan_Detail: Item aset dalam berkas usulan.
@@ -144,7 +144,7 @@ function _bmnComputeAge(tglPerolehanStr, masaManfaatTahun) {
 // ── PUBLIC API: MASTER DATA BMN ───────────────────────────
 
 /**
- * Mengambil master UPT dan Kategori BMN dari Nautika_TU.
+ * Mengambil master UPT dan Kategori BMN dari SIKAP_TU.
  */
 function bmn_getMasters(token) {
   try {

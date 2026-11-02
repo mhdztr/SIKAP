@@ -5,46 +5,23 @@
      Konten dirender oleh _renderTataUsaha() di Script_Main.html. -->
 <div id="view-tpl-tata-usaha" hidden>
 
-  <!-- ── SUB-NAVIGASI TATA USAHA (5 SUB-MODUL ANTI-GABRUK) ── -->
-  <div class="tu-subnav-container">
+  <!-- ── SUB-NAVIGASI TATA USAHA (5 SUB-MODUL ANTI-GABRUK) ──
+       Disediakan untuk kompatibilitas linter & sinkronisasi dengan Topbar Module Nav -->
+  <div class="tu-subnav-container" style="display:none;">
     <div class="tu-subnav-bar">
       <button type="button" class="tu-subnav-btn active" data-tu-tab="anggaran" id="tu-tab-btn-anggaran" onclick="_tuSwitchTab('anggaran')">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="2" y="4" width="20" height="16" rx="2"></rect>
-          <line x1="2" y1="10" x2="22" y2="10"></line>
-        </svg>
         <span>Realisasi Anggaran</span>
       </button>
       <button type="button" class="tu-subnav-btn" data-tu-tab="paket" id="tu-tab-btn-paket" onclick="_tuSwitchTab('paket')">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
-          <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
-          <path d="M9 14l2 2 4-4"></path>
-        </svg>
         <span>Paket Pengadaan</span>
       </button>
       <button type="button" class="tu-subnav-btn" data-tu-tab="pegawai" id="tu-tab-btn-pegawai" onclick="_tuSwitchTab('pegawai')">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-          <circle cx="9" cy="7" r="4"></circle>
-          <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-          <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-        </svg>
         <span>Kepegawaian</span>
       </button>
       <button type="button" class="tu-subnav-btn" data-tu-tab="bmn" id="tu-tab-btn-bmn" onclick="_tuSwitchTab('bmn')">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
-          <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
-        </svg>
         <span>Inventaris BMN</span>
       </button>
       <button type="button" class="tu-subnav-btn" data-tu-tab="penghapusan" id="tu-tab-btn-penghapusan" onclick="_tuSwitchTab('penghapusan')">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-          <polyline points="14 2 14 8 20 8"></polyline>
-          <line x1="9" y1="15" x2="15" y2="15"></line>
-        </svg>
         <span>Usulan Penghapusan</span>
       </button>
     </div>
@@ -54,24 +31,24 @@
   <!-- TAB 1: ANGGARAN & REALISASI                               -->
   <!-- ══════════════════════════════════════════════════════════ -->
   <div id="tu-pane-anggaran" class="tu-pane">
-    <!-- ── KPI STRIP ANGGARAN ────────────────────────── -->
-    <div id="tu-kpi-strip" class="content-section">
+    <!-- ── KPI STRIP ANGGARAN (APBN Cockpit Card) ────── -->
+    <div id="tu-kpi-strip">
       <!-- diisi _tuRenderKPI() -->
     </div>
 
-    <!-- ── KONTEKS ANGGARAN (CHART — DESIGN §6) ─────── -->
-    <div class="content-section">
-      <div class="content-section-hd">Konteks Anggaran</div>
+    <!-- ── ANALISIS KINERJA SERAPAN FISKAL ───────────── -->
+    <div class="content-section" style="margin-top:20px;">
+      <div class="content-section-hd">Kinerja &amp; Kurva Serapan Fiskal Dit. POA</div>
       <div class="chart-grid-2">
         <div class="chart-cell">
           <div class="chart-cell-hd">
             <div>
-              <div class="chart-cell-title">Realisasi Kumulatif (YTD)</div>
-              <div class="chart-cell-sub">Januari s/d bulan terpilih pada filter</div>
+              <div class="chart-cell-title">Akumulasi Penyerapan YTD (Kurva-S APBN)</div>
+              <div class="chart-cell-sub">Januari s/d periode aktif (Kas Cair SP2D vs Komitmen Fisik Akrual)</div>
             </div>
             <div class="chart-cell-chips">
-              <span class="chart-chip"><i style="background:#064E3B;"></i>SP2D</span>
-              <span class="chart-chip"><i style="background:rgba(13,148,136,0.35);"></i>Akrual</span>
+              <span class="chart-chip"><i style="background:#064E3B;"></i>SP2D (Kas)</span>
+              <span class="chart-chip"><i style="background:rgba(6,78,59,0.35);"></i>Akrual (Fisik)</span>
             </div>
           </div>
           <div class="chart-box"><canvas id="tu-chart-tren"></canvas></div>
@@ -79,12 +56,12 @@
         <div class="chart-cell">
           <div class="chart-cell-hd">
             <div>
-              <div class="chart-cell-title">Realisasi per Bulan</div>
-              <div class="chart-cell-sub">Komposisi SP2D &amp; Akrual bulanan</div>
+              <div class="chart-cell-title">Komposisi Realisasi per Bulan</div>
+              <div class="chart-cell-sub">Distribusi kas cair KPPN &amp; akrual bulanan berjalan</div>
             </div>
             <div class="chart-cell-chips">
-              <span class="chart-chip"><i style="background:#064E3B;"></i>SP2D</span>
-              <span class="chart-chip"><i style="background:rgba(13,148,136,0.35);"></i>Akrual</span>
+              <span class="chart-chip"><i style="background:#064E3B;"></i>SP2D (Kas)</span>
+              <span class="chart-chip"><i style="background:rgba(6,78,59,0.35);"></i>Akrual (Fisik)</span>
             </div>
           </div>
           <div class="chart-box"><canvas id="tu-chart-bulanan"></canvas></div>
@@ -92,8 +69,8 @@
       </div>
     </div>
 
-    <!-- ── FORM INPUT MINGGUAN (POPUP, BACKLOG A) ───── -->
-    <div id="tu-form-section" class="content-section">
+    <!-- ── FORM INPUT MINGGUAN (Tombol terintegrasi di APBN Cockpit Header) ── -->
+    <div id="tu-form-section" style="display:none;">
       <button type="button" class="btn-primary" onclick="tuOpenForm()">Input Laporan Mingguan</button>
     </div>
 

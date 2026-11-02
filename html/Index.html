@@ -143,105 +143,168 @@
 </div><!-- end auth-wrapper -->
 
 <!-- =========================================================
-     APP WRAPPER — sidebar + konten
+     APP WRAPPER — SIKAP Ground-Up Top-Bar Command Architecture
      ========================================================= -->
 <div id="app-wrapper" class="n-hidden">
 
-  <!-- SIDEBAR -->
-  <aside class="sidebar">
-    <div class="sb-brand">
-      <div class="sb-brand-mark">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-        </svg>
+  <!-- TOP APPLICATION BAR (SIKAP Executive Command Header) -->
+  <header class="app-topbar" id="app-topbar">
+    <div class="topbar-inner">
+      <!-- Brand & Official Institutional Identity -->
+      <div class="topbar-brand">
+        <div class="brand-crest" title="Direktorat Jenderal Pengawasan Sumber Daya Kelautan dan Perikanan">
+          <img src="data:image/png;base64,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" alt="Logo Ditjen PSDKP" width="40" height="46" style="display:block;object-fit:contain;">
+        </div>
+        <div class="brand-titles">
+          <div class="brand-acronym">SIKAP</div>
+          <div class="brand-fullname">Sistem Informasi Keuangan, Anggaran, dan Kepegawaian</div>
+        </div>
       </div>
-      <div class="sb-brand-text">
-        <span class="sb-brand-title">SIKAP</span>
-        <span class="sb-brand-dept">Subbag Tata Usaha</span>
-      </div>
-    </div>
-    <nav class="sb-nav" id="sb-nav">
-      <!-- diisi oleh _renderSidebar() -->
-    </nav>
-    <div class="sb-footer" id="sb-footer">
-      <!-- Drop-Up Menu (Profil, Admin, Keluar) -->
-      <div class="sb-user-menu n-hidden" id="sb-user-menu">
-        <div class="sb-menu-header">
-          <div class="sb-menu-avatar">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-              <circle cx="12" cy="7" r="4"/>
-            </svg>
+
+      <!-- User Profile Pill & Dropdown (Clean, Uncrowded Header) -->
+      <div class="user-menu-container">
+        <div class="sb-user-card" id="sb-user-card" onclick="_toggleUserMenu(event)" role="button" tabindex="0" title="Buka menu akun">
+          <div class="user-avatar-pill" id="user-avatar-initials">SA</div>
+          <div class="sb-user-info">
+            <div class="sb-user-name" id="sb-user-name">Memuat…</div>
+            <div class="sb-user-role" id="sb-user-role">—</div>
           </div>
-          <div class="sb-menu-user">
-            <div class="sb-menu-name" id="sb-menu-name">Memuat…</div>
-            <div class="sb-menu-email" id="sb-menu-email">—</div>
+          <div class="sb-user-chevron" id="sb-user-chevron">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
           </div>
         </div>
-        <div class="sb-menu-badges">
-          <span class="sb-role-badge" id="sb-menu-role">Pengguna</span>
-        </div>
-        <div class="sb-menu-divider"></div>
-        <div class="sb-menu-items">
-          <div class="sb-menu-item n-hidden" id="sb-menu-admin-item" onclick="_handleMenuNav('kelola-akun')">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="3" y="3" width="7" height="7"/>
-              <rect x="14" y="3" width="7" height="7"/>
-              <rect x="14" y="14" width="7" height="7"/>
-              <rect x="3" y="14" width="7" height="7"/>
-            </svg>
-            <span>Admin Panel</span>
+
+        <!-- Dropdown Popover User (Admin Panel ADA DI SINI) -->
+        <div class="sb-user-menu n-hidden" id="sb-user-menu">
+          <div class="sb-menu-header">
+            <div class="sb-menu-avatar">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+              </svg>
+            </div>
+            <div class="sb-menu-user">
+              <div class="sb-menu-name" id="sb-menu-name">Memuat…</div>
+              <div class="sb-menu-email" id="sb-menu-email">—</div>
+            </div>
           </div>
-          <div class="sb-menu-item" onclick="_handleMenuNav('notifikasi')">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
-              <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
-            </svg>
-            <span>Notifikasi</span>
+          <div class="sb-menu-badges">
+            <span class="sb-role-badge" id="sb-menu-role">Pengguna</span>
           </div>
           <div class="sb-menu-divider"></div>
-          <div class="sb-menu-item danger" onclick="handleLogout()">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-              <polyline points="16 17 21 12 16 7"/>
-              <line x1="21" y1="12" x2="9" y2="12"/>
-            </svg>
-            <span>Keluar</span>
+          <div class="sb-menu-items">
+            <div class="sb-menu-item n-hidden" id="sb-menu-admin-item" onclick="_handleMenuNav('kelola-akun')">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="7" height="7"/>
+                <rect x="14" y="3" width="7" height="7"/>
+                <rect x="14" y="14" width="7" height="7"/>
+                <rect x="3" y="14" width="7" height="7"/>
+              </svg>
+              <span>Admin Panel</span>
+            </div>
+            <div class="sb-menu-item" onclick="_handleMenuNav('notifikasi')">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+              </svg>
+              <span>Notifikasi</span>
+            </div>
+            <div class="sb-menu-divider"></div>
+            <div class="sb-menu-item danger" onclick="handleLogout()">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                <polyline points="16 17 21 12 16 7"/>
+                <line x1="21" y1="12" x2="9" y2="12"/>
+              </svg>
+              <span>Keluar</span>
+            </div>
           </div>
-        </div>
-      </div>
-
-      <!-- Trigger Card (Pojok Kiri Bawah) -->
-      <div class="sb-user-card" id="sb-user-card" onclick="_toggleUserMenu(event)" role="button" tabindex="0" title="Buka menu akun">
-        <div class="sb-avatar-wrap">
-          <div class="sb-avatar" id="sb-avatar">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-              <circle cx="12" cy="7" r="4"/>
-            </svg>
-          </div>
-          <span class="sb-status-dot" title="Sesi Aktif"></span>
-        </div>
-        <div class="sb-user-info">
-          <div class="sb-user-name" id="sb-user-name">Memuat…</div>
-          <div class="sb-user-role" id="sb-user-role">—</div>
-        </div>
-        <div class="sb-user-chevron" id="sb-user-chevron">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="18 15 12 9 6 15"/>
-          </svg>
         </div>
       </div>
     </div>
-  </aside>
 
-  <!-- MAIN -->
+    <!-- PRIMARY MODULE NAVIGATION BAR (5 Sub-Modul Anti-Gabruk SAJA) -->
+    <nav class="app-modulenav">
+      <div class="modulenav-container">
+        <button type="button" class="modulenav-btn active" id="mod-nav-anggaran" onclick="_sikapSelectModule('anggaran')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+            <line x1="2" y1="10" x2="22" y2="10"></line>
+          </svg>
+          <span>Realisasi Anggaran</span>
+        </button>
+        <button type="button" class="modulenav-btn" id="mod-nav-paket" onclick="_sikapSelectModule('paket')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+            <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+            <path d="M9 14l2 2 4-4"></path>
+          </svg>
+          <span>Paket Pengadaan</span>
+        </button>
+        <button type="button" class="modulenav-btn" id="mod-nav-pegawai" onclick="_sikapSelectModule('pegawai')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+          </svg>
+          <span>Kepegawaian</span>
+        </button>
+        <button type="button" class="modulenav-btn" id="mod-nav-bmn" onclick="_sikapSelectModule('bmn')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+            <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+          </svg>
+          <span>Inventaris BMN</span>
+        </button>
+        <button type="button" class="modulenav-btn" id="mod-nav-penghapusan" onclick="_sikapSelectModule('penghapusan')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="9" y1="15" x2="15" y2="15"></line>
+          </svg>
+          <span>Usulan Penghapusan</span>
+        </button>
+      </div>
+    </nav>
+
+    <!-- DEDICATED TOOLBAR (Filter Periode & Sync Status Dipindah ke Bawah) -->
+    <div class="app-toolbar" id="app-toolbar">
+      <div class="toolbar-inner">
+        <div class="toolbar-left" id="topbar-filter-periode">
+          <!-- Filter Periode diisi oleh _renderPageHeader() -->
+        </div>
+        <div class="toolbar-right">
+          <!-- Live Sync Pill -->
+          <div id="sync-indicator" class="sync-indicator" onclick="_triggerManualSync()" title="Data tersinkron dengan server. Klik untuk periksa pembaruan.">
+            <span class="sync-dot-live"></span>
+            <span class="sync-indicator-text">Tersinkron</span>
+            <div class="sync-popover" id="sync-popover">
+              <div class="sync-pop-head">
+                <span class="sync-pop-dot"></span>
+                <span class="sync-pop-status">Sistem Tersinkron</span>
+              </div>
+              <div class="sync-pop-data" id="sync-pop-data">Data per: &mdash;</div>
+              <div class="sync-pop-action">Klik untuk periksa pembaruan</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hidden compatibility nav container for JS _renderSidebar -->
+    <div id="sb-nav" style="display:none;"></div>
+  </header>
+
+  <!-- MAIN VIEWPORT -->
   <main class="app-main">
     <div class="reminder-strip n-hidden" id="reminder-strip">
-      <!-- diisi _renderReminderStrip() — peringatan "divisi belum melapor" -->
+      <!-- diisi _renderReminderStrip() -->
     </div>
-    <div class="page-header" id="page-header">
-      <!-- diisi oleh _renderPageHeader() -->
+    <div class="page-header" id="page-header" style="display:none;">
+      <!-- kompatibilitas _renderPageHeader -->
     </div>
     <div class="page-content" id="page-content">
       <!-- diisi oleh _renderViewContent() -->

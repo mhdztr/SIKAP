@@ -1,22 +1,6 @@
 <!--
-  html/Script_Charts.html — Wrapper charting dashboard (Fase 8).
-
-  Satu library chart: Chart.js v4 (4.4.1), di-inject on-demand dari
-  unpkg — pola identik dengan loader Leaflet di Script_Main.html
-  (_loadLeaflet). Chart.js tidak di-load di Index.html supaya tidak
-  memblokir render awal.
-
-  Keputusan teknis (dictatat di CHANGELOG.md, entri Fase 8):
-  - Chart.js v4.4.1, di-pin (tidak tag "latest").
-  - Canvas tidak bisa membaca CSS custom properties, jadi warna chart
-    di-mirror dari token Style.html lewat objek _CHART_COLORS (hex).
-  - Registry _NAUTIKA_CHARTS + _chartTeardownAll() supaya instance lama
-    di-destroy saat SPA berpindah view/tab (mencegah chart bocor).
-  - Label nilai langsung pada bar (nvVal) & ujung garis (nvEnd) lebih
-    diutamakan daripada legenda (DESIGN.md §6). Legenda diganti chip
-    statis di template view; legend Chart.js dimatikan.
-  - Tipe dipakai: bar horizontal (indexAxis 'y'), bar grup, line/area.
-    Gauge/3D/radar tidak dipakai (negative prompt DESIGN.md §1/§6).
+  html/Script_Charts.html — Wrapper charting dashboard SIKAP.
+  Satu library chart: Chart.js v4 (4.4.1), di-inject on-demand dari unpkg.
 -->
 
 <script>
@@ -110,16 +94,16 @@ function _chartMonthLabel(mm) {
 // ============================================================
 // REGISTRY + TEARDOWN
 // ============================================================
-var _NAUTIKA_CHARTS = {};
+var _SIKAP_CHARTS = {};
 
 function _chartDestroy(canvasId) {
-  var c = _NAUTIKA_CHARTS[canvasId];
-  if (c) { try { c.destroy(); } catch (e) {} delete _NAUTIKA_CHARTS[canvasId]; }
+  var c = _SIKAP_CHARTS[canvasId];
+  if (c) { try { c.destroy(); } catch (e) {} delete _SIKAP_CHARTS[canvasId]; }
 }
 
 function _chartTeardownAll() {
-  for (var k in _NAUTIKA_CHARTS) { try { _NAUTIKA_CHARTS[k].destroy(); } catch (e) {} }
-  _NAUTIKA_CHARTS = {};
+  for (var k in _SIKAP_CHARTS) { try { _SIKAP_CHARTS[k].destroy(); } catch (e) {} }
+  _SIKAP_CHARTS = {};
 }
 
 // ============================================================
@@ -401,7 +385,7 @@ function _chartLine(canvasId, labels, datasets, opts) {
         }
       })
     });
-    _NAUTIKA_CHARTS[canvasId] = chart;
+    _SIKAP_CHARTS[canvasId] = chart;
   });
 }
 
@@ -482,7 +466,7 @@ function _chartBar(canvasId, labels, datasets, opts) {
             }
       })
     });
-    _NAUTIKA_CHARTS[canvasId] = chart;
+    _SIKAP_CHARTS[canvasId] = chart;
   });
 }
 // ============================================================
@@ -541,7 +525,7 @@ function _chartDonut(canvasId, labels, values, colors, opts) {
         }
       })
     });
-    _NAUTIKA_CHARTS[canvasId] = chart;
+    _SIKAP_CHARTS[canvasId] = chart;
   });
 }
 </script>
