@@ -6,46 +6,51 @@
    ============================================================ */
 
 :root {
-  /* ── 1. PALET WARNA (Slate & Maritime Navy) ──────────────── */
-  --n-bg-base:               #F8FAFC;   /* Slate Ultra-Light Canvas */
-  --n-canvas-subtle:         #F1F5F9;   /* Slate 100 */
-  --n-surface-1:             rgba(255, 255, 255, 0.85); /* Apple Frosted Glass */
-  --n-surface-2:             rgba(248, 250, 252, 0.75); /* Secondary Surface */
-  --n-surface-hover:         rgba(241, 245, 249, 0.88);
+  /* ── 1. PALET WARNA SIKAP (Imperial Forest Jade & Viridian Teal) ── */
+  --n-bg-base:               #F8FAFC;   /* Crisp Porcelain Canvas */
+  --n-canvas-subtle:         #F1F5F9;   /* Slate 100 Neutral */
+  --n-surface-1:             rgba(255, 255, 255, 0.90); /* Apple Frosted Mineral Glass */
+  --n-surface-2:             rgba(248, 250, 252, 0.80); /* Secondary Surface */
+  --n-surface-hover:         rgba(240, 253, 244, 0.70); /* Subtle Mint Mist Hover */
   --n-surface-solid:         #FFFFFF;
   --n-surface-elevated:      #FFFFFF;
 
   /* Tipografi & Kontras */
-  --n-text-primary:          #0F172A;   /* Slate 900 (Deep, high contrast) */
-  --n-text-secondary:        #475569;   /* Slate 600 (Informative neutral) */
-  --n-text-muted:            #94A3B8;   /* Slate 400 (Subtle hint & placeholder) */
+  --n-text-primary:          #0F172A;   /* Slate 900 (High contrast readability) */
+  --n-text-secondary:        #334155;   /* Slate 700 (Clear informative neutral) */
+  --n-text-muted:            #64748B;   /* Slate 500 (Subtle hint & placeholder) */
 
   /* Hairlines & Borders */
   --n-border:                rgba(15, 23, 42, 0.10);
   --n-border-hairline:       rgba(15, 23, 42, 0.07);
   --n-border-subtle:         rgba(15, 23, 42, 0.05);
-  --n-border-strong:         rgba(15, 23, 42, 0.18);
-  --n-border-highlight:      rgba(255, 255, 255, 0.85); /* Inner Glass Light Bevel */
-  --n-border-focused:        #2563EB;
+  --n-border-strong:         rgba(6, 78, 59, 0.20);
+  --n-border-highlight:      rgba(255, 255, 255, 0.95); /* Inner Glass Light Bevel */
+  --n-border-focused:        #0D9488;   /* Viridian Teal Focus */
 
-  /* Aksen Brand & Primer */
-  --n-primary:               #1E3A8A;   /* Deep Maritime Navy (Navy 900) */
-  --n-primary-hover:         #172554;
-  --n-primary-active:        #0F172A;
-  --n-primary-accent:        #2563EB;   /* Electric Blue Accent (Blue 600) */
-  --n-primary-light:         #EFF6FF;   /* Blue 50 */
-  --n-primary-tint:          rgba(37, 99, 235, 0.08);
+  /* Aksen Brand SIKAP: Imperial Forest Jade & Viridian Teal */
+  --n-primary:               #064E3B;   /* Imperial Forest Jade (Wibawa Tata Usaha & Fiskal) */
+  --n-primary-hover:         #022C22;   /* Deep Evergreen 950 */
+  --n-primary-active:        #064E3B;
+  --n-primary-accent:        #0D9488;   /* Viridian Teal 600 */
+  --n-primary-light:         #ECFDF5;   /* Mint Cream 50 */
+  --n-primary-tint:          rgba(13, 148, 136, 0.12); /* Fokus Glow Ring */
+
+  /* Aksen Finansial Khusus (Pagu APBN & Nilai BMN) */
+  --n-gold:                  #B45309;   /* Amber Gold 700 (Simbol Pagu & Aset Negara) */
+  --n-gold-light:            #FEF3C7;   /* Amber 100 */
+  --n-gold-border:           rgba(217, 119, 6, 0.25);
 
   /* Status Semantik (Official Gov Palette) */
   --n-ok:                    #059669;   /* Emerald 600 */
   --n-status-success:        #059669;
-  --n-status-success-bg:     rgba(16, 185, 129, 0.10);
-  --n-status-success-border: rgba(16, 185, 129, 0.22);
+  --n-status-success-bg:     rgba(5, 150, 105, 0.10);
+  --n-status-success-border: rgba(5, 150, 105, 0.22);
 
   --n-warn:                  #D97706;   /* Amber 600 */
   --n-status-warning:        #D97706;
-  --n-status-warning-bg:     rgba(245, 158, 11, 0.10);
-  --n-status-warning-border: rgba(245, 158, 11, 0.22);
+  --n-status-warning-bg:     rgba(217, 119, 6, 0.10);
+  --n-status-warning-border: rgba(217, 119, 6, 0.22);
 
   --n-crit:                  #E11D48;   /* Rose 600 */
   --n-status-critical:       #E11D48;
@@ -154,6 +159,34 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* ── BROWSER SURFACES (Impeccable Craft-Floor) ─────────────── */
+::selection {
+  background: #CCFBF1;
+  color: #042F2E;
+}
+
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(15, 23, 42, 0.16);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(6, 78, 59, 0.35);
+}
+
+input, select, textarea {
+  caret-color: var(--n-primary-accent);
+}
+
 button, a, [role="button"], input, select, textarea {
   touch-action: manipulation;
 }
@@ -242,7 +275,7 @@ a[role="button"]:active,
   align-items: center;
   justify-content: center;
   padding: 24px;
-  background: radial-gradient(100% 100% at 50% 0%, rgba(37, 99, 235, 0.05) 0%, rgba(248, 250, 252, 1) 100%);
+  background: radial-gradient(100% 100% at 50% 0%, rgba(13, 148, 136, 0.08) 0%, rgba(248, 250, 252, 1) 100%);
 }
 
 .auth-card {
@@ -266,7 +299,7 @@ a[role="button"]:active,
 .auth-brand {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
   font-weight: 800;
   font-size: 1.35rem;
   color: var(--n-primary);
@@ -276,10 +309,11 @@ a[role="button"]:active,
 
 .auth-brand::before {
   content: '';
-  width: 10px;
-  height: 10px;
-  border-radius: 3px;
-  background: var(--n-primary-accent);
+  width: 12px;
+  height: 12px;
+  border-radius: 4px;
+  background: linear-gradient(135deg, var(--n-primary-accent) 0%, var(--n-primary) 100%);
+  box-shadow: 0 2px 5px rgba(13, 148, 136, 0.35);
 }
 
 .auth-title {
@@ -578,22 +612,48 @@ a[role="button"]:active,
 }
 
 .sb-brand {
-  padding: 24px 20px 18px;
+  padding: 22px 20px 18px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid var(--n-border-hairline);
+  margin-bottom: 8px;
+}
+
+.sb-brand-mark {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--n-radius-inner);
+  background: linear-gradient(135deg, var(--n-primary) 0%, #065F46 100%);
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(6, 78, 59, 0.25);
+  flex-shrink: 0;
+}
+
+.sb-brand-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.sb-brand-title {
   font-weight: 800;
   font-size: 1.25rem;
   color: var(--n-primary);
   letter-spacing: -0.025em;
-  display: flex;
-  align-items: center;
-  gap: 10px;
+  line-height: 1.1;
 }
 
-.sb-brand::before {
-  content: '';
-  width: 10px;
-  height: 10px;
-  border-radius: 3px;
-  background: var(--n-primary-accent);
+.sb-brand-dept {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--n-text-muted);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-top: 2px;
 }
 
 .sb-nav {
@@ -636,6 +696,7 @@ a[role="button"]:active,
   background: var(--n-primary-light);
   color: var(--n-primary);
   font-weight: 700;
+  box-shadow: inset 3px 0 0 var(--n-primary);
 }
 
 .sb-footer {
@@ -828,7 +889,8 @@ a[role="button"]:active,
   background: var(--n-surface-solid);
   color: var(--n-primary);
   font-weight: 700;
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08), 0 4px 12px -2px rgba(15, 23, 42, 0.06);
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08), 0 4px 12px -2px rgba(6, 78, 59, 0.10);
+  border: 1px solid rgba(6, 78, 59, 0.12);
 }
 
 .tu-pane {

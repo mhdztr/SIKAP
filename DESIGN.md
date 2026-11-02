@@ -112,23 +112,24 @@ Sesuai PRD §2, antarmuka Subbag Tata Usaha dibagi ke dalam 5 sub-modul independ
 
 ---
 
-## 4. Palet Warna Harmonis & Semantik Status
+## 4. Palet Warna Harmonis & Semantik Status (SIKAP Signature)
 
-Seluruh palet warna mematuhi standar kontras tinggi WCAG AAA untuk keterbacaan data instansi pemerintah:
+Seluruh palet warna mematuhi standar kontras tinggi WCAG AAA untuk keterbacaan data instansi pemerintah, dengan diferensiasi tegas dari tema *Maritime Navy* Nautika:
 
 | Token Semantik | Kode Warna (Hex) | Background Tint (RGBA) | Border Aksesibilitas | Makna Operasional |
 |---|:---:|---|---|---|
-| **Kanvas Dasar** | `#F8FAFC` | — | `rgba(15, 23, 42, 0.08)` | Latar belakang ultra-light slate. |
-| **Kartu Translusen**| `#FFFFFF` | `rgba(255, 255, 255, 0.85)`| `rgba(15, 23, 42, 0.10)` | Permukaan kartu kaca translusen. |
-| **Aksen Primer** | `#1E3A8A` | `rgba(30, 58, 138, 0.08)` | `rgba(30, 58, 138, 0.25)` | Deep Maritime Navy (Warna resmi PSDKP). |
-| **Sorotan Elektrik**| `#2563EB` | `rgba(37, 99, 235, 0.10)` | `rgba(37, 99, 235, 0.30)` | Electric Blue (Fokus input & tombol aktif). |
-| **Teks Primer** | `#0F172A` | — | — | Slate Dark (Kontras tertinggi untuk angka). |
-| **Teks Sekunder** | `#475569` | — | — | Slate Neutral (Label informatif). |
-| **Teks Muted** | `#94A3B8` | — | — | Slate 400 (Placeholder & petunjuk halus). |
-| **Status Sukses** | `#059669` | `rgba(16, 185, 129, 0.10)`| `rgba(16, 185, 129, 0.22)` | Kondisi Baik, Selesai, BAST Sah. |
-| **Status Peringatan**| `#D97706` | `rgba(245, 158, 11, 0.10)`| `rgba(245, 158, 11, 0.22)` | Rusak Ringan, Proses Berjalan, Menunggu Izin. |
+| **Kanvas Dasar** | `#F8FAFC` | — | `rgba(15, 23, 42, 0.08)` | Latar belakang ultra-light porcelain slate. |
+| **Kartu Translusen**| `#FFFFFF` | `rgba(255, 255, 255, 0.90)`| `rgba(15, 23, 42, 0.10)` | Permukaan kartu kaca mineral translusen. |
+| **Aksen Primer** | `#064E3B` | `rgba(6, 78, 59, 0.08)` | `rgba(6, 78, 59, 0.25)` | **Imperial Forest Jade** (Wibawa Tata Usaha, Perbendaharaan & Aset). |
+| **Aksen Sorotan**| `#0D9488` | `rgba(13, 148, 136, 0.12)` | `rgba(13, 148, 136, 0.30)` | **Viridian Teal** (Fokus interaktif & tombol navigasi aktif). |
+| **Aksen Fiskal** | `#B45309` | `rgba(217, 119, 6, 0.12)` | `rgba(217, 119, 6, 0.25)` | **Warm Gold / Amber** (Pagu DIPA APBN & Nilai Perolehan BMN). |
+| **Teks Primer** | `#0F172A` | — | — | Slate Dark (Kontras tertinggi untuk angka & data). |
+| **Teks Sekunder** | `#334155` | — | — | Slate Neutral (Label informatif). |
+| **Teks Muted** | `#64748B` | — | — | Slate 500 (Placeholder & petunjuk halus, WCAG AAA). |
+| **Status Sukses** | `#059669` | `rgba(5, 150, 105, 0.10)`| `rgba(5, 150, 105, 0.22)` | Kondisi Baik, Selesai, BAST Sah. |
+| **Status Peringatan**| `#D97706` | `rgba(217, 119, 6, 0.10)`| `rgba(217, 119, 6, 0.22)` | Rusak Ringan, Proses Berjalan, Menunggu Izin. |
 | **Status Kritis** | `#E11D48` | `rgba(225, 29, 72, 0.10)` | `rgba(225, 29, 72, 0.22)` | Rusak Berat, Ditolak, Dibatalkan/VOID. |
-| **Status Karantina**| `#7C3AED` | `rgba(124, 58, 237, 0.10)`| `rgba(124, 58, 237, 0.22)` | Dalam Proses Usulan Penghapusan Legal. |
+| **Status Karantina**| `#7C3AED` | `rgba(124, 58, 237, 0.10)`| `rgba(124, 58, 237, 0.22)` | Dalam Proses Usulan Penghapusan Legal DJKN. |
 
 ---
 
@@ -143,7 +144,7 @@ Sesuai aturan ketat proyek, sistem memiliki 5 batasan negatif yang diaudit secar
 3. **Dilarang Menggunakan 3D Chart, Bevel Retro Tebal, dan Drop Shadow Pekat:**  
    Grafik konteks bulanan disajikan dalam bentuk 2D area / bar chart bersih tanpa efek miring/3D. Bayangan kartu menggunakan ambient multi-layer halus.
 4. **Dilarang Menggunakan Palet Warna Pelangi Acak:**  
-   Seluruh antarmuka hanya menggunakan turunan Maritime Navy, Slate, dan warna semantik status resmi di atas.
+   Seluruh antarmuka hanya menggunakan turunan Imperial Forest Jade, Viridian Teal, Warm Gold, Slate, dan warna semantik status resmi di atas.
 5. **Dilarang Animasi Melayang Tak Berujung (Infinite Wobble/Shake):**  
    Seluruh animasi transisi wajib bertujuan fungsional (*purpose-driven motion*), seperti pembukaan modal pegas atau pemudaran baris tabel saat revisi.
 
@@ -155,7 +156,7 @@ Sesuai aturan ketat proyek, sistem memiliki 5 batasan negatif yang diaudit secar
 Komponen visual pelacak tahapan surat Kemenkeu:
 - Lingkaran nomor tahapan (`.n-step-circle` diameter 32px) dengan transisi pegas.
 - Tahap yang sudah selesai diberi warna hijau (`.is-done` dengan ikon centang SVG).
-- Tahap yang sedang aktif diberi aksen Maritime Navy (`.is-active`).
+- Tahap yang sedang aktif diberi aksen Viridian Teal (`.is-active`).
 - Tahap yang belum dilewati bernuansa netral translusen (`.is-pending`).
 
 ### 6.2 Sistem Notifikasi Toast (Sonner-Grade)

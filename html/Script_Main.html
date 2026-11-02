@@ -1376,8 +1376,8 @@ function _renderOverview(el) {
               '<div class="chart-cell-sub">Januari s/d bulan terpilih pada filter (SP2D vs Akrual)</div>' +
             '</div>' +
             '<div class="chart-cell-chips">' +
-              '<span class="chart-chip"><i style="background:#2B3674;"></i>SP2D</span>' +
-              '<span class="chart-chip"><i style="background:rgba(43,54,116,0.6);"></i>Akrual</span>' +
+              '<span class="chart-chip"><i style="background:#064E3B;"></i>SP2D</span>' +
+              '<span class="chart-chip"><i style="background:rgba(13,148,136,0.45);"></i>Akrual</span>' +
             '</div>' +
           '</div>' +
           '<div class="chart-box"><canvas id="ov-chart-real"></canvas></div>' +
@@ -1389,8 +1389,8 @@ function _renderOverview(el) {
               '<div class="chart-cell-sub">Kapal pengawas vs pesawat udara</div>' +
             '</div>' +
             '<div class="chart-cell-chips">' +
-              '<span class="chart-chip"><i style="background:#2B3674;"></i>Kapal</span>' +
-              '<span class="chart-chip"><i style="background:rgba(43,54,116,0.35);"></i>Pesawat</span>' +
+              '<span class="chart-chip"><i style="background:#064E3B;"></i>Kapal</span>' +
+              '<span class="chart-chip"><i style="background:rgba(13,148,136,0.35);"></i>Pesawat</span>' +
             '</div>' +
           '</div>' +
           '<div class="chart-box"><canvas id="ov-chart-op"></canvas></div>' +
@@ -2137,7 +2137,7 @@ function _ovSpark(series, color, fillColor) {
   var area = line + ' L' + (w - pad).toFixed(1) + ' ' + (h - pad) + ' L' + pad + ' ' + (h - pad) + ' Z';
   var last = pts[pts.length - 1];
   return '<svg width="' + w + '" height="' + h + '" viewBox="0 0 ' + w + ' ' + h + '">' +
-    '<path d="' + area + '" fill="' + (fillColor || 'rgba(43,54,116,0.14)') + '" stroke="none"/>' +
+    '<path d="' + area + '" fill="' + (fillColor || 'rgba(6,78,59,0.14)') + '" stroke="none"/>' +
     '<path d="' + line + '" fill="none" stroke="' + (color || 'var(--n-primary)') + '" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>' +
     '<rect x="' + (last[0] - 3) + '" y="' + (last[1] - 3) + '" width="6" height="6" rx="3" fill="' + (color || 'var(--n-primary)') + '"/>' +
   '</svg>';
@@ -2264,9 +2264,9 @@ function _ovTone(t) {
     case 'ok':      return 'var(--n-ok)';
     case 'warn':    return 'var(--n-warn)';
     case 'crit':    return 'var(--n-crit)';
-    case 'soft':    return 'rgba(43,54,116,0.62)';
-    case 'light':   return 'rgba(43,54,116,0.35)';
-    case 'lighter': return 'rgba(43,54,116,0.20)';
+    case 'soft':    return 'rgba(6,78,59,0.62)';
+    case 'light':   return 'rgba(6,78,59,0.35)';
+    case 'lighter': return 'rgba(6,78,59,0.20)';
     default:        return 'var(--n-primary)';
   }
 }
@@ -2432,7 +2432,7 @@ function _vzLine(v) {
       return [padX + i * sx, H - padY - ((Number(x) || 0) / max) * (H - padY * 2)];
     });
     var d = pts.map(function (p, i) { return (i ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1); }).join(' ');
-    var area = si === 0 ? '<path d="' + d + ' L' + (W - padX) + ' ' + (H - padY) + ' L' + padX + ' ' + (H - padY) + ' Z" fill="rgba(43,54,116,0.10)"/>' : '';
+    var area = si === 0 ? '<path d="' + d + ' L' + (W - padX) + ' ' + (H - padY) + ' L' + padX + ' ' + (H - padY) + ' Z" fill="rgba(6,78,59,0.10)"/>' : '';
     return area + '<path d="' + d + '" fill="none" stroke="' + _ovTone(s.tone) + '" stroke-width="2" vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-linejoin="round"/>';
   }).join('');
   var grid = [0.25, 0.5, 0.75].map(function (f) {
@@ -2487,7 +2487,7 @@ function _vzHeat(v) {
   var cells = labels.map(function (l, i) {
     var n = vals[i] || 0;
     var a = n > 0 ? (0.14 + 0.78 * n / max) : 0;
-    var style = n > 0 ? 'background:rgba(43,54,116,' + a.toFixed(2) + ');color:' + (a > 0.5 ? '#FFFFFF' : 'var(--n-text-primary)') + ';' : '';
+    var style = n > 0 ? 'background:rgba(6,78,59,' + a.toFixed(2) + ');color:' + (a > 0.5 ? '#FFFFFF' : 'var(--n-text-primary)') + ';' : '';
     return '<div class="vz-heat-unit" title="' + _esc(_ovMonthShort(l) + ': ' + n + ' kegiatan') + '">' +
       '<div class="vz-heat-cell' + (n > 0 ? '' : ' zero') + '" style="' + style + '">' + (n > 0 ? n : '') + '</div>' +
       '<div class="vz-heat-lbl">' + _esc(_ovMonthShort(l)) + '</div></div>';
@@ -2641,11 +2641,11 @@ var _OV_MAP = {
   fleetLayer: null
 };
 
-// Ramp 1 hue navy, sama dengan peta Operasi (§8.1: gradasi intensitas satu
+// Ramp 1 hue forest jade (PRD §8.1: gradasi intensitas satu
 // warna, bukan traffic-light). Hex, bukan var(): Leaflet menulis fill sebagai
 // ATRIBUT SVG.
-var _OV_MAP_RAMP = ['#E4E7F2', '#A9B0D0', '#6B76A8', '#2B3674'];
-var _OV_MAP_RAMP_LINE = 'rgba(43,54,116,0.45)';
+var _OV_MAP_RAMP = ['#ECFDF5', '#A7F3D0', '#10B981', '#064E3B'];
+var _OV_MAP_RAMP_LINE = 'rgba(6,78,59,0.45)';
 
 // Deskripsi metrik di bawah judul (data provenance, bukan hiasan).
 var _OV_MAP_META = {
@@ -6931,7 +6931,7 @@ function _tuRenderPegawaiChart(d) {
   _chartBar(canvasId, labels, [{
     label: 'Personil',
     data: counts,
-    color: '#2B3674'
+    color: '#064E3B'
   }], {
     horizontal: true,
     emptyMsg: 'Belum ada data personil.',
@@ -7184,7 +7184,7 @@ function _tuRenderPaketTable(items) {
   var stageBadges = {
     'PERSIAPAN':    '<span class="badge" style="background:rgba(100,116,139,0.12); color:#475569;">1. Persiapan</span>',
     'PEMILIHAN':    '<span class="badge" style="background:rgba(245,158,11,0.12); color:#d97706;">2. Pemilihan</span>',
-    'KONTRAK':      '<span class="badge" style="background:rgba(37,99,235,0.12); color:#2563eb;">3. Kontrak</span>',
+    'KONTRAK':      '<span class="badge" style="background:rgba(4,120,87,0.12); color:#047857;">3. Kontrak</span>',
     'PELAKSANAAN':  '<span class="badge" style="background:rgba(99,102,241,0.12); color:#4f46e5;">4. Pelaksanaan</span>',
     'BAST':         '<span class="badge" style="background:rgba(13,148,136,0.12); color:#0d9488;">5. BAST</span>',
     'SELESAI':      '<span class="badge" style="background:rgba(16,185,129,0.12); color:#059669;">6. Selesai</span>'
@@ -7765,7 +7765,7 @@ function _bmnRenderTable(data) {
 
     // Klasifikasi Badge
     var pBadge = a.kategoriPencatatan === 'BUKU'
-      ? '<span class="badge" style="background:rgba(43,54,116,0.08);color:var(--n-primary);font-size:.7rem;">Buku (53)</span>'
+      ? '<span class="badge" style="background:var(--n-primary-light);color:var(--n-primary);font-size:.7rem;">Buku (53)</span>'
       : '<span class="badge" style="background:#F1F5F9;color:#475569;font-size:.7rem;">Reguler (52)</span>';
 
     // Umur & Masa Manfaat
@@ -10264,16 +10264,15 @@ function _opsMapLegend(mapId, colors) {
   host.appendChild(el);
 }
 
-// Peta warna choropleth — SATU hue (navy), pucat → pekat (PRD §8.1: bukan
+// Peta warna choropleth — SATU hue (forest jade), pucat → pekat (PRD §8.1: bukan
 // traffic-light multi-warna). Di-mirror dari token Style.html sebagai hex
 // karena Leaflet menulis gaya sebagai ATRIBUT SVG (`fill="..."`), dan `var()`
-// hanya resolve di CSS — bukan di atribut. (Bug lama: `var(--n-primary)`
-// membuat setiap WPP terisi hitam, bukan navy.)
+// hanya resolve di CSS — bukan di atribut.
 var _OPS_WPP_SCALE = [
-  { max: 0,  fill: '#E4E7F2', label: '0 kapal' },          // ~ --n-primary-light
-  { max: 5,  fill: '#A9B0D0', label: '1-5 kapal' },
-  { max: 15, fill: '#6B76A8', label: '6-15 kapal' },
-  { max: Infinity, fill: '#2B3674', label: '>15 kapal' }  // --n-primary
+  { max: 0,  fill: '#ECFDF5', label: '0 kapal' },          // ~ --n-primary-light
+  { max: 5,  fill: '#A7F3D0', label: '1-5 kapal' },
+  { max: 15, fill: '#10B981', label: '6-15 kapal' },
+  { max: Infinity, fill: '#064E3B', label: '>15 kapal' }  // --n-primary
 ];
 function _opsWppFill(intensitas) {
   var n = Number(intensitas) || 0;
@@ -10519,7 +10518,7 @@ function _renderWppLayer() {
             fillOpacity: 0.85,
             weight: 1,
             opacity: 1,
-            color: 'rgba(43,54,116,0.45)'
+            color: 'rgba(6,78,59,0.45)'
           };
         },
         onEachFeature: function(feature, layer) {
@@ -11796,7 +11795,7 @@ function _renderOpsUdaraWppLayer() {
             fillOpacity: 0.85,
             weight: 1,
             opacity: 1,
-            color: 'rgba(43,54,116,0.45)'
+            color: 'rgba(6,78,59,0.45)'
           };
         },
         onEachFeature: function(feature, layer) {

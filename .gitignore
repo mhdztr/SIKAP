@@ -15,3 +15,6 @@ lint_ui.js
 # Data geospasial besar — di-fetch dari GitHub oleh frontend, bukan di-host GAS
 *.geojson
 .agents/
+.impeccable/
+.codex/
+skills-lock.json
