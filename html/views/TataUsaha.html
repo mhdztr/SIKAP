@@ -44,7 +44,6 @@
           <div class="chart-cell-hd">
             <div>
               <div class="chart-cell-title">Akumulasi Penyerapan YTD (Kurva-S APBN)</div>
-              <div class="chart-cell-sub">Januari s/d periode aktif (Kas Cair SP2D vs Komitmen Fisik Akrual)</div>
             </div>
             <div class="chart-cell-chips">
               <span class="chart-chip"><i style="background:#064E3B;"></i>SP2D (Kas)</span>
@@ -57,7 +56,6 @@
           <div class="chart-cell-hd">
             <div>
               <div class="chart-cell-title">Komposisi Realisasi per Bulan</div>
-              <div class="chart-cell-sub">Distribusi kas cair KPPN &amp; akrual bulanan berjalan</div>
             </div>
             <div class="chart-cell-chips">
               <span class="chart-chip"><i style="background:#064E3B;"></i>SP2D (Kas)</span>
@@ -366,10 +364,24 @@
           </div>
         </div>
 
-        <!-- Filter Sub-Toolbar -->
-        <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 20px; background:rgba(0,0,0,0.015); border-bottom:1px solid var(--n-border-hairline); gap:12px; flex-wrap:wrap;">
-          <div class="ctl-row">
-            <select id="tu-paket-filter-tahap" onchange="_tuFilterPaket()" style="height:var(--ctl-h-md); font-size:var(--ctl-fs-md); border-radius:var(--ctl-r-md);">
+        <!-- Filter Sub-Toolbar (Standardized Apple HIG Tier MD) -->
+        <div class="table-toolbar">
+          <div class="table-toolbar-left">
+            <div class="n-seg">
+              <button type="button" class="tu-paket-seg-btn active" data-paket-status="ALL" onclick="_tuSetPaketSeg('ALL')">Semua Paket</button>
+              <button type="button" class="tu-paket-seg-btn" data-paket-status="AKTIF" onclick="_tuSetPaketSeg('AKTIF')">Aktif Berjalan</button>
+              <button type="button" class="tu-paket-seg-btn" data-paket-status="SELESAI" onclick="_tuSetPaketSeg('SELESAI')">Selesai</button>
+            </div>
+          </div>
+          <div class="table-toolbar-right">
+            <div class="ctl-search">
+              <svg class="ctl-search-ico" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+              <input type="text" id="tu-paket-search" placeholder="Cari nama paket, rekanan..." oninput="_tuFilterPaket()">
+            </div>
+            <select id="tu-paket-filter-tahap" class="ctl-select" onchange="_tuFilterPaket()">
               <option value="ALL">Semua Tahap Pekerjaan</option>
               <option value="PERSIAPAN">Tahap 1: Persiapan</option>
               <option value="PEMILIHAN">Tahap 2: Pemilihan</option>
@@ -378,9 +390,6 @@
               <option value="BAST">Tahap 5: BAST</option>
               <option value="SELESAI">Tahap 6: Selesai</option>
             </select>
-          </div>
-          <div class="ctl-row">
-            <input type="text" id="tu-paket-search" placeholder="Cari nama paket, rekanan..." oninput="_tuFilterPaket()" style="height:var(--ctl-h-md); font-size:var(--ctl-fs-md); border-radius:var(--ctl-r-md); padding:0 12px; width:220px;">
           </div>
         </div>
 
@@ -617,12 +626,33 @@
 
 
   <!-- ══════════════════════════════════════════════════════════ -->
-  <!-- TAB 3: INVENTARIS BMN & ASET (FASE 18B.2 PREVIEW)         -->
+  <!-- TAB 4: MANAJEMEN BMN (REGISTER INVENTARIS & USULAN HAPUS)   -->
   <!-- ══════════════════════════════════════════════════════════ -->
   <div id="tu-pane-bmn" class="tu-pane n-hidden">
 
-    <!-- SUB-VIEW 1: DAFTAR / DASHBOARD BMN -->
-    <div id="bmn-view-list">
+    <!-- ── SUB-NAVIGASI BMN (REGISTER ASET vs USULAN PENGHAPUSAN) ── -->
+    <div class="bmn-subnav-wrap">
+      <div class="bmn-subnav-bar">
+        <button type="button" class="bmn-subnav-btn active" id="bmn-subtab-aset" onclick="_bmnSelectSubTab('aset')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+            <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+          </svg>
+          <span>Register Inventaris Aset</span>
+        </button>
+        <button type="button" class="bmn-subnav-btn" id="bmn-subtab-penghapusan" onclick="_bmnSelectSubTab('penghapusan')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="9" y1="15" x2="15" y2="15"></line>
+          </svg>
+          <span>Usulan Penghapusan (Kemenkeu)</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- SUB-VIEW 1: DAFTAR / DASHBOARD INVENTARIS BMN -->
+    <div id="bmn-subview-aset">
       <!-- 4 KPI Cards BMN -->
       <div class="content-section">
         <div class="ov-kpi-row" id="bmn-kpi-strip" style="grid-template-columns: repeat(4, 1fr);">
@@ -649,53 +679,50 @@
         </div>
       </div>
 
-      <!-- Notification Summary & Rekapitulasi Kondisi Fisik BMN (Sub-Fase 18B.5) -->
-      <div class="content-section" style="margin-bottom:16px;" id="bmn-summary-banner-wrap">
-        <div class="n-card" style="padding:14px 20px; display:flex; justify-content:space-between; align-items:center; gap:16px; flex-wrap:wrap; border-left:4px solid var(--n-primary);">
-          <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
-            <div style="font-weight:700; font-size:.875rem; color:var(--n-text-primary);">
-              Rekapitulasi Fisik:
+      <!-- Rekapitulasi Kondisi Fisik BMN (Executive 3-Column Highlight Grid) -->
+      <div class="content-section" style="margin-bottom:20px;" id="bmn-summary-banner-wrap">
+        <div class="bmn-rekap-grid">
+          <!-- Kolom 1: Kondisi Baik -->
+          <div class="bmn-rekap-card">
+            <div class="bmn-rekap-head">
+              <span class="bmn-rekap-indicator dot-baik"></span>
+              <span class="bmn-rekap-title">Kondisi Baik</span>
+              <span class="bmn-rekap-badge badge-baik" id="bmn-sum-badge-baik">0%</span>
             </div>
-            <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
-              <span class="badge" style="background:rgba(16,185,129,0.12); color:#059669; font-weight:600; font-size:.75rem;" id="bmn-sum-badge-baik">
-                Baik: 0 unit (0%)
-              </span>
-              <span class="badge" style="background:rgba(245,158,11,0.12); color:#D97706; font-weight:600; font-size:.75rem;" id="bmn-sum-badge-rr">
-                Rusak Ringan: 0 unit (0%)
-              </span>
-              <span class="badge" style="background:rgba(239,68,68,0.12); color:#DC2626; font-weight:600; font-size:.75rem;" id="bmn-sum-badge-rb">
-                Rusak Berat: 0 unit (0%)
-              </span>
-            </div>
-            <div id="bmn-sum-alert-text" style="font-size:.78rem; color:var(--n-text-secondary);">
-              Memuat status inventaris BMN...
+            <div class="bmn-rekap-body">
+              <div class="bmn-rekap-count" id="bmn-sum-count-baik">0 unit</div>
+              <div class="bmn-rekap-sub">Kondisi prima siap operasional</div>
             </div>
           </div>
-          <div class="ctl-row ctl-sm" id="bmn-sum-actions">
-            <!-- Actionable button rendered dynamically when Rusak Berat > 0 -->
-          </div>
-        </div>
-      </div>
 
-      <!-- Peta Sebaran Geospasial Aset BMN di 15 UPT KKP (Sub-Fase 18B.5) -->
-      <div class="content-section" style="margin-bottom:20px;">
-        <div class="n-card" style="padding:0; overflow:hidden; border-radius:var(--n-radius-md); box-shadow:var(--n-shadow-1);">
-          <div style="display:flex; justify-content:space-between; align-items:center; padding:14px 20px; border-bottom:1px solid var(--n-border-hairline); gap:12px; flex-wrap:wrap;">
-            <div>
-              <h3 style="margin:0; font-size:.95rem; font-weight:700; color:var(--n-text-primary);">
-                Sebaran Geospasial Aset BMN (Pusat &amp; 15 UPT PSDKP)
-              </h3>
-              <div style="font-size:.75rem; color:var(--n-text-secondary); margin-top:2px;">
-                Konsentrasi unit fisik di Pangkalan, Stasiun, dan Kantor Pusat KKP
-              </div>
+          <!-- Kolom 2: Rusak Ringan -->
+          <div class="bmn-rekap-card">
+            <div class="bmn-rekap-head">
+              <span class="bmn-rekap-indicator dot-rr"></span>
+              <span class="bmn-rekap-title">Rusak Ringan</span>
+              <span class="bmn-rekap-badge badge-rr" id="bmn-sum-badge-rr">0%</span>
             </div>
-            <div class="ctl-row ctl-sm">
-              <button type="button" class="btn-outline" onclick="_bmnResetMapFocus()">
-                Fokus Indonesia
-              </button>
+            <div class="bmn-rekap-body">
+              <div class="bmn-rekap-count" id="bmn-sum-count-rr">0 unit</div>
+              <div class="bmn-rekap-sub">Perlu pemeliharaan / perbaikan berkala</div>
             </div>
           </div>
-          <div id="bmn-upt-map"></div>
+
+          <!-- Kolom 3: Rusak Berat -->
+          <div class="bmn-rekap-card">
+            <div class="bmn-rekap-head">
+              <span class="bmn-rekap-indicator dot-rb"></span>
+              <span class="bmn-rekap-title">Rusak Berat</span>
+              <span class="bmn-rekap-badge badge-rb" id="bmn-sum-badge-rb">0%</span>
+            </div>
+            <div class="bmn-rekap-body">
+              <div class="bmn-rekap-count" id="bmn-sum-count-rb">0 unit</div>
+              <div class="bmn-rekap-sub">Kandidat usulan penghapusan aset</div>
+            </div>
+            <div class="bmn-rekap-action" id="bmn-sum-actions">
+              <!-- Rendered if Rusak Berat > 0 -->
+            </div>
+          </div>
         </div>
       </div>
 
@@ -735,20 +762,21 @@
           </div>
 
           <!-- Baris 2: Toolbar Filter & Pencarian Cepat -->
-          <div
-            style="display:flex; justify-content:space-between; align-items:center; padding:10px 20px; background:rgba(0,0,0,0.015); border-bottom:1px solid var(--n-border-hairline); gap:12px; flex-wrap:wrap;">
-            <!-- Segmented Klasifikasi (Buku vs Reguler) -->
-            <div class="n-seg">
-              <button type="button" class="bmn-seg-btn active" data-bmn-pencatatan="ALL"
-                onclick="_bmnSetPencatatan('ALL')">Semua Aset</button>
-              <button type="button" class="bmn-seg-btn" data-bmn-pencatatan="BUKU"
-                onclick="_bmnSetPencatatan('BUKU')">Buku (53)</button>
-              <button type="button" class="bmn-seg-btn" data-bmn-pencatatan="REGULER"
-                onclick="_bmnSetPencatatan('REGULER')">Reguler (52)</button>
+          <div class="table-toolbar">
+            <div class="table-toolbar-left">
+              <!-- Segmented Klasifikasi (Buku vs Reguler) -->
+              <div class="n-seg">
+                <button type="button" class="bmn-seg-btn active" data-bmn-pencatatan="ALL"
+                  onclick="_bmnSetPencatatan('ALL')">Semua Aset</button>
+                <button type="button" class="bmn-seg-btn" data-bmn-pencatatan="BUKU"
+                  onclick="_bmnSetPencatatan('BUKU')">Buku (53)</button>
+                <button type="button" class="bmn-seg-btn" data-bmn-pencatatan="REGULER"
+                  onclick="_bmnSetPencatatan('REGULER')">Reguler (52)</button>
+              </div>
             </div>
 
             <!-- Filter Dropdowns & Live Search -->
-            <div class="ctl-row">
+            <div class="table-toolbar-right">
               <div class="ctl-search">
                 <svg class="ctl-search-ico" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
                   stroke-linecap="round" stroke-linejoin="round">
@@ -1023,98 +1051,99 @@
         </div>
       </div>
     </div><!-- /bmn-view-form -->
-  </div><!-- /tu-pane-bmn -->
+    </div><!-- /bmn-subview-aset -->
 
-  <!-- ══════════════════════════════════════════════════════════ -->
-  <!-- TAB 5: USULAN PENGHAPUSAN BMN KEMENKEU (ANTI-GABRUK)      -->
-  <!-- ══════════════════════════════════════════════════════════ -->
-  <div id="tu-pane-penghapusan" class="tu-pane n-hidden">
-    <div id="bmn-view-penghapusan">
-      <!-- 4 KPI Cards Penghapusan -->
-      <div class="content-section">
-        <div class="ov-kpi-row" id="bmn-hps-kpi-strip" style="grid-template-columns: repeat(4, 1fr);">
-          <div class="n-card kpi-card">
-            <div class="kpi-label">Total Berkas Usulan</div>
-            <div class="kpi-value tnum" id="bmn-hps-kpi-total">0 berkas</div>
-            <div class="kpi-sub" id="bmn-hps-kpi-total-sub">Seluruh berkas terdaftar</div>
-          </div>
-          <div class="n-card kpi-card">
-            <div class="kpi-label">Dalam Proses Kemenkeu</div>
-            <div class="kpi-value tnum" id="bmn-hps-kpi-proses">0 berkas</div>
-            <div class="kpi-sub" id="bmn-hps-kpi-proses-sub">Tahap Usulan &amp; Izin DJKN</div>
-          </div>
-          <div class="n-card kpi-card">
-            <div class="kpi-label">Menunggu SK &amp; BAST</div>
-            <div class="kpi-value tnum" id="bmn-hps-kpi-sk">0 berkas</div>
-            <div class="kpi-sub" id="bmn-hps-kpi-sk-sub">Tahap SK KKP / Eksekusi</div>
-          </div>
-          <div class="n-card kpi-card">
-            <div class="kpi-label">Selesai Dihapus (BAST)</div>
-            <div class="kpi-value tnum" id="bmn-hps-kpi-selesai">0 unit</div>
-            <div class="kpi-sub" id="bmn-hps-kpi-selesai-sub">Rp 0 (Nilai Buku)</div>
+    <!-- SUB-VIEW 2: USULAN PENGHAPUSAN BMN KEMENKEU (TERPADU DI BMN) -->
+    <div id="bmn-subview-penghapusan" class="n-hidden">
+      <div id="bmn-view-penghapusan">
+        <!-- 4 KPI Cards Penghapusan -->
+        <div class="content-section">
+          <div class="ov-kpi-row" id="bmn-hps-kpi-strip" style="grid-template-columns: repeat(4, 1fr);">
+            <div class="n-card kpi-card">
+              <div class="kpi-label">Total Berkas Usulan</div>
+              <div class="kpi-value tnum" id="bmn-hps-kpi-total">0 berkas</div>
+              <div class="kpi-sub" id="bmn-hps-kpi-total-sub">Seluruh berkas terdaftar</div>
+            </div>
+            <div class="n-card kpi-card">
+              <div class="kpi-label">Dalam Proses Kemenkeu</div>
+              <div class="kpi-value tnum" id="bmn-hps-kpi-proses">0 berkas</div>
+              <div class="kpi-sub" id="bmn-hps-kpi-proses-sub">Tahap Usulan &amp; Izin DJKN</div>
+            </div>
+            <div class="n-card kpi-card">
+              <div class="kpi-label">Menunggu SK &amp; BAST</div>
+              <div class="kpi-value tnum" id="bmn-hps-kpi-sk">0 berkas</div>
+              <div class="kpi-sub" id="bmn-hps-kpi-sk-sub">Tahap SK KKP / Eksekusi</div>
+            </div>
+            <div class="n-card kpi-card">
+              <div class="kpi-label">Selesai Dihapus (BAST)</div>
+              <div class="kpi-value tnum" id="bmn-hps-kpi-selesai">0 unit</div>
+              <div class="kpi-sub" id="bmn-hps-kpi-selesai-sub">Rp 0 (Nilai Buku)</div>
+            </div>
           </div>
         </div>
-      </div>
 
-      <!-- Master Card Berkas Usulan Penghapusan -->
-      <div class="content-section">
-        <div class="n-card" style="padding:0; overflow:hidden; border-radius:var(--n-radius-md); box-shadow:var(--n-shadow-1);">
-          <!-- Baris 1: Header Tabel & Aksi -->
-          <div style="display:flex; justify-content:space-between; align-items:center; padding:16px 20px; border-bottom:1px solid var(--n-border-hairline); gap:12px; flex-wrap:wrap;">
-            <div style="display:flex; align-items:center; gap:10px;">
-              <h3 style="margin:0; font-size:1rem; font-weight:700; color:var(--n-text-primary);">
-                Berkas Usulan Penghapusan BMN
-              </h3>
-              <span class="badge" id="bmn-hps-badge-total" style="background:var(--n-primary-light); color:var(--n-primary); font-size:.75rem; font-weight:600;">
-                0 berkas
-              </span>
-            </div>
-            <div class="ctl-row">
-              <button type="button" class="btn-outline" onclick="_bmnLoadPenghapusanList(true)">
-                Muat Ulang
-              </button>
-              <button type="button" class="btn-primary" onclick="_bmnOpenCreateHapusModal()">
-                + Buat Usulan Penghapusan
-              </button>
-            </div>
-          </div>
-
-          <!-- Baris 2: Sub-Toolbar Filter Tahap & Pencarian -->
-          <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 20px; background:rgba(0,0,0,0.015); border-bottom:1px solid var(--n-border-hairline); gap:12px; flex-wrap:wrap;">
-            <!-- Segmented Filter Tahap -->
-            <div class="n-seg">
-              <button type="button" class="bmn-hps-seg-btn active" data-hps-tahap="ALL" onclick="_bmnSetHpsTahap('ALL')">Semua Berkas</button>
-              <button type="button" class="bmn-hps-seg-btn" data-hps-tahap="DRAFT_USULAN" onclick="_bmnSetHpsTahap('DRAFT_USULAN')">Draft</button>
-              <button type="button" class="bmn-hps-seg-btn" data-hps-tahap="SURAT_USULAN" onclick="_bmnSetHpsTahap('SURAT_USULAN')">Surat Usulan</button>
-              <button type="button" class="bmn-hps-seg-btn" data-hps-tahap="PERSETUJUAN_KEMENKEU" onclick="_bmnSetHpsTahap('PERSETUJUAN_KEMENKEU')">Persetujuan Kemenkeu</button>
-              <button type="button" class="bmn-hps-seg-btn" data-hps-tahap="SK_PENGHAPUSAN" onclick="_bmnSetHpsTahap('SK_PENGHAPUSAN')">SK Penghapusan</button>
-              <button type="button" class="bmn-hps-seg-btn" data-hps-tahap="BAST_SELESAI" onclick="_bmnSetHpsTahap('BAST_SELESAI')">Selesai (BAST)</button>
-              <button type="button" class="bmn-hps-seg-btn" data-hps-tahap="DITOLAK" onclick="_bmnSetHpsTahap('DITOLAK')">Ditolak</button>
+        <!-- Master Card Berkas Usulan Penghapusan -->
+        <div class="content-section">
+          <div class="n-card" style="padding:0; overflow:hidden; border-radius:var(--n-radius-md); box-shadow:var(--n-shadow-1);">
+            <!-- Baris 1: Header Tabel & Aksi -->
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:16px 20px; border-bottom:1px solid var(--n-border-hairline); gap:12px; flex-wrap:wrap;">
+              <div style="display:flex; align-items:center; gap:10px;">
+                <h3 style="margin:0; font-size:1rem; font-weight:700; color:var(--n-text-primary);">
+                  Berkas Usulan Penghapusan BMN
+                </h3>
+                <span class="badge" id="bmn-hps-badge-total" style="background:var(--n-primary-light); color:var(--n-primary); font-size:.75rem; font-weight:600;">
+                  0 berkas
+                </span>
+              </div>
+              <div class="ctl-row">
+                <button type="button" class="btn-outline" onclick="_bmnLoadPenghapusanList(true)">
+                  Muat Ulang
+                </button>
+                <button type="button" class="btn-primary" onclick="_bmnOpenCreateHapusModal()">
+                  + Buat Usulan Penghapusan
+                </button>
+              </div>
             </div>
 
-            <!-- Live Search -->
-            <div class="ctl-row">
-              <div class="ctl-search">
-                <svg class="ctl-search-ico" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                  <circle cx="11" cy="11" r="8"></circle>
-                  <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                </svg>
-                <input type="text" id="bmn-hps-search-input" placeholder="Cari ID usulan, no. surat..." oninput="_bmnDebouncedHpsSearch()">
+            <!-- Baris 2: Sub-Toolbar Filter Tahap & Pencarian -->
+            <div class="table-toolbar">
+              <div class="table-toolbar-left">
+                <div class="n-seg">
+                  <button type="button" class="bmn-hps-seg-btn active" data-hps-tahap="ALL" onclick="_bmnSetHpsTahap('ALL')">Semua Berkas</button>
+                  <button type="button" class="bmn-hps-seg-btn" data-hps-tahap="DRAFT_USULAN" onclick="_bmnSetHpsTahap('DRAFT_USULAN')">Draft</button>
+                  <button type="button" class="bmn-hps-seg-btn" data-hps-tahap="SURAT_USULAN" onclick="_bmnSetHpsTahap('SURAT_USULAN')">Surat Usulan</button>
+                  <button type="button" class="bmn-hps-seg-btn" data-hps-tahap="PERSETUJUAN_KEMENKEU" onclick="_bmnSetHpsTahap('PERSETUJUAN_KEMENKEU')">Persetujuan Kemenkeu</button>
+                  <button type="button" class="bmn-hps-seg-btn" data-hps-tahap="SK_PENGHAPUSAN" onclick="_bmnSetHpsTahap('SK_PENGHAPUSAN')">SK Penghapusan</button>
+                  <button type="button" class="bmn-hps-seg-btn" data-hps-tahap="BAST_SELESAI" onclick="_bmnSetHpsTahap('BAST_SELESAI')">Selesai (BAST)</button>
+                  <button type="button" class="bmn-hps-seg-btn" data-hps-tahap="DITOLAK" onclick="_bmnSetHpsTahap('DITOLAK')">Ditolak</button>
+                </div>
+              </div>
+              <div class="table-toolbar-right">
+                <div class="ctl-search">
+                  <svg class="ctl-search-ico" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                  </svg>
+                  <input type="text" id="bmn-hps-search-input" placeholder="Cari ID usulan, no. surat..." oninput="_bmnDebouncedHpsSearch()">
+                </div>
+              </div>
+            </div>
+
+            <!-- Wadah Isi Tabel Berkas Usulan -->
+            <div id="bmn-hps-table-msg" class="n-msg" style="margin:8px 20px 0 20px;"></div>
+            <div style="overflow-x:auto;" id="bmn-hps-table-wrap">
+              <div style="padding:32px; text-align:center; color:var(--n-text-muted); font-size:.875rem;">
+                Memuat daftar usulan penghapusan BMN…
               </div>
             </div>
           </div>
-
-          <!-- Wadah Isi Tabel Berkas Usulan -->
-          <div id="bmn-hps-table-msg" class="n-msg" style="margin:8px 20px 0 20px;"></div>
-          <div style="overflow-x:auto;" id="bmn-hps-table-wrap">
-            <div style="padding:32px; text-align:center; color:var(--n-text-muted); font-size:.875rem;">
-              Memuat daftar usulan penghapusan BMN…
-            </div>
-          </div>
         </div>
       </div>
-    </div>
-  </div><!-- /tu-pane-penghapusan -->
+    </div><!-- /bmn-subview-penghapusan -->
+  </div><!-- /tu-pane-bmn -->
+
+  <!-- Wadah Kompatibilitas Linter & Legacy Handler -->
+  <div id="tu-pane-penghapusan" style="display:none;"></div>
 
     <!-- MODAL ANULIR BMN -->
     <div class="n-overlay n-hidden" id="modal-bmn-anulir">
