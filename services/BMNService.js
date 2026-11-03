@@ -143,6 +143,36 @@ function _bmnComputeAge(tglPerolehanStr, masaManfaatTahun) {
 
 // ── PUBLIC API: MASTER DATA BMN ───────────────────────────
 
+var _BMN_DEFAULT_UPTS_BACKEND = [
+  { lokasiId: 'UPT-PUSAT-POA', namaLokasi: 'Dit. POA (Pusat KKP Jakarta)', jenis: 'PUSAT', wilayah: 'PUSAT', latitude: -6.175392, longitude: 106.827153, alamat: 'Gedung Mina Bahari IV Lt. 9, Jakarta Pusat' },
+  { lokasiId: 'UPT-JKT', namaLokasi: 'Pangkalan PSDKP Jakarta', jenis: 'PANGKALAN', wilayah: 'WPPNRI 711', latitude: -6.110214, longitude: 106.804322, alamat: 'Jl. Muara Baru No. 1, Jakarta Utara' },
+  { lokasiId: 'UPT-BTM', namaLokasi: 'Pangkalan PSDKP Batam', jenis: 'PANGKALAN', wilayah: 'WPPNRI 711', latitude: 1.082828, longitude: 103.955618, alamat: 'Jl. Trans Barelang Jembatan II, Batam' },
+  { lokasiId: 'UPT-BNO', namaLokasi: 'Pangkalan PSDKP Benoa', jenis: 'PANGKALAN', wilayah: 'WPPNRI 573', latitude: -8.751612, longitude: 115.215541, alamat: 'Pelabuhan Benoa, Denpasar, Bali' },
+  { lokasiId: 'UPT-BTG', namaLokasi: 'Pangkalan PSDKP Bitung', jenis: 'PANGKALAN', wilayah: 'WPPNRI 716', latitude: 1.440231, longitude: 125.191244, alamat: 'Jl. Tandurusa, Bitung, Sulawesi Utara' },
+  { lokasiId: 'UPT-LMP', namaLokasi: 'Pangkalan PSDKP Lampulo', jenis: 'PANGKALAN', wilayah: 'WPPNRI 572', latitude: 5.586912, longitude: 95.328312, alamat: 'Pelabuhan Perikanan Lampulo, Banda Aceh' },
+  { lokasiId: 'UPT-TUL', namaLokasi: 'Pangkalan PSDKP Tual', jenis: 'PANGKALAN', wilayah: 'WPPNRI 718', latitude: -5.628912, longitude: 132.748312, alamat: 'Dumar, Tual, Maluku Tenggara' },
+  { lokasiId: 'UPT-BLW', namaLokasi: 'Stasiun PSDKP Belawan', jenis: 'STASIUN', wilayah: 'WPPNRI 571', latitude: 3.784212, longitude: 98.692812, alamat: 'Jl. Pelabuhan Raya, Belawan, Medan' },
+  { lokasiId: 'UPT-PTK', namaLokasi: 'Stasiun PSDKP Pontianak', jenis: 'STASIUN', wilayah: 'WPPNRI 711', latitude: -0.026312, longitude: 109.342512, alamat: 'Jl. Raya Sungai Kakap, Pontianak' },
+  { lokasiId: 'UPT-CLP', namaLokasi: 'Stasiun PSDKP Cilacap', jenis: 'STASIUN', wilayah: 'WPPNRI 573', latitude: -7.738112, longitude: 109.015212, alamat: 'Jl. Lingkar Penyu, Cilacap, Jawa Tengah' },
+  { lokasiId: 'UPT-TRK', namaLokasi: 'Stasiun PSDKP Tarakan', jenis: 'STASIUN', wilayah: 'WPPNRI 716', latitude: 3.303912, longitude: 117.591212, alamat: 'Jl. Yos Sudarso, Juwata, Tarakan' },
+  { lokasiId: 'UPT-KPG', namaLokasi: 'Stasiun PSDKP Kupang', jenis: 'STASIUN', wilayah: 'WPPNRI 573', latitude: -10.177212, longitude: 123.607012, alamat: 'Jl. Tenau, Alak, Kupang, NTT' },
+  { lokasiId: 'UPT-AMB', namaLokasi: 'Stasiun PSDKP Ambon', jenis: 'STASIUN', wilayah: 'WPPNRI 715', latitude: -3.695412, longitude: 128.181412, alamat: 'Hative Kecil, Sirimau, Ambon' },
+  { lokasiId: 'UPT-BIK', namaLokasi: 'Stasiun PSDKP Biak', jenis: 'STASIUN', wilayah: 'WPPNRI 717', latitude: -1.178912, longitude: 136.082512, alamat: 'Jl. Sorido Raya, Biak Kota, Papua' },
+  { lokasiId: 'UPT-THN', namaLokasi: 'Stasiun PSDKP Tahuna', jenis: 'STASIUN', wilayah: 'WPPNRI 716', latitude: 3.611112, longitude: 125.492512, alamat: 'Kolongan Beha Baru, Tahuna Barat' },
+  { lokasiId: 'UPT-PDG', namaLokasi: 'Stasiun PSDKP Padang', jenis: 'STASIUN', wilayah: 'WPPNRI 572', latitude: -0.957512, longitude: 100.368312, alamat: 'Bungus Teluk Kabung, Padang, Sumbar' }
+];
+
+var _BMN_DEFAULT_KAT_BACKEND = [
+  { kodeKategori: 'KAT-TIK', namaKategori: 'Peralatan Komputer & TIK', masaManfaatTahun: 4, akunModal: '532111', akunBarang: '521811' },
+  { kodeKategori: 'KAT-KAPAL', namaKategori: 'Kapal Pengawas & Motor Tempel', masaManfaatTahun: 10, akunModal: '532115', akunBarang: '521811' },
+  { kodeKategori: 'KAT-RADAR', namaKategori: 'Radar, Navigasi & Komunikasi Maritim', masaManfaatTahun: 5, akunModal: '532111', akunBarang: '521811' },
+  { kodeKategori: 'KAT-SENJATA', namaKategori: 'Senjata Api Khusus & Perlengkapan Pengawasan', masaManfaatTahun: 10, akunModal: '532119', akunBarang: '521811' },
+  { kodeKategori: 'KAT-KANTOR', namaKategori: 'Peralatan & Perlengkapan Kantor', masaManfaatTahun: 5, akunModal: '532111', akunBarang: '521811' },
+  { kodeKategori: 'KAT-MEUBEL', namaKategori: 'Mebel & Perabot Kantor', masaManfaatTahun: 5, akunModal: '532111', akunBarang: '521811' },
+  { kodeKategori: 'KAT-KENDARAAN', namaKategori: 'Kendaraan Dinas Operasional', masaManfaatTahun: 7, akunModal: '532112', akunBarang: '521811' },
+  { kodeKategori: 'KAT-GEDUNG', namaKategori: 'Gedung, Bangunan & Dermaga', masaManfaatTahun: 20, akunModal: '533111', akunBarang: '521811' }
+];
+
 /**
  * Mengambil master UPT dan Kategori BMN dari SIKAP_TU.
  */
@@ -162,34 +192,67 @@ function bmn_getMasters(token) {
       return String(r['Status'] || 'AKTIF').toUpperCase() === 'AKTIF';
     });
 
+    // Self-healing: jika sheet master kosong, lakukan auto-seeding
+    if (uptRows.length === 0 && typeof _seedLokasiUpt === 'function') {
+      try {
+        _seedLokasiUpt(uptSheet.getParent());
+        uptRows = sheetToObjects(uptSheet).filter(function (r) {
+          return String(r['Status'] || 'AKTIF').toUpperCase() === 'AKTIF';
+        });
+      } catch (eSeedUpt) {
+        Logger.log('[bmn_getMasters] Gagal seed UPT: ' + eSeedUpt.message);
+      }
+    }
+
+    if (katRows.length === 0 && typeof _seedBmnKategori === 'function') {
+      try {
+        _seedBmnKategori(katSheet.getParent());
+        katRows = sheetToObjects(katSheet).filter(function (r) {
+          return String(r['Status'] || 'AKTIF').toUpperCase() === 'AKTIF';
+        });
+      } catch (eSeedKat) {
+        Logger.log('[bmn_getMasters] Gagal seed Kategori: ' + eSeedKat.message);
+      }
+    }
+
+    var uptList = (uptRows.length > 0) ? uptRows.map(function (u) {
+      return {
+        lokasiId:   String(u['LokasiID']),
+        namaLokasi: String(u['NamaLokasi']),
+        jenis:      String(u['Jenis']),
+        wilayah:    String(u['Wilayah']),
+        latitude:   parseFloat(u['Latitude']) || null,
+        longitude:  parseFloat(u['Longitude']) || null,
+        alamat:     String(u['Alamat'] || '')
+      };
+    }) : _BMN_DEFAULT_UPTS_BACKEND;
+
+    var kategoriList = (katRows.length > 0) ? katRows.map(function (k) {
+      return {
+        kodeKategori:     String(k['KodeKategori']),
+        namaKategori:     String(k['NamaKategori']),
+        masaManfaatTahun: parseFloat(k['MasaManfaatTahun']) || 0,
+        akunModal:        String(k['AkunBelanjaModal'] || ''),
+        akunBarang:       String(k['AkunBelanjaBarang'] || '')
+      };
+    }) : _BMN_DEFAULT_KAT_BACKEND;
+
     return {
       success: true,
       data: {
-        uptList: uptRows.map(function (u) {
-          return {
-            lokasiId:   String(u['LokasiID']),
-            namaLokasi: String(u['NamaLokasi']),
-            jenis:      String(u['Jenis']),
-            wilayah:    String(u['Wilayah']),
-            latitude:   parseFloat(u['Latitude']) || null,
-            longitude:  parseFloat(u['Longitude']) || null,
-            alamat:     String(u['Alamat'] || '')
-          };
-        }),
-        kategoriList: katRows.map(function (k) {
-          return {
-            kodeKategori:     String(k['KodeKategori']),
-            namaKategori:     String(k['NamaKategori']),
-            masaManfaatTahun: parseFloat(k['MasaManfaatTahun']) || 0,
-            akunModal:        String(k['AkunBelanjaModal'] || ''),
-            akunBarang:       String(k['AkunBelanjaBarang'] || '')
-          };
-        })
+        uptList: uptList,
+        kategoriList: kategoriList
       }
     };
   } catch (e) {
     Logger.log('[bmn_getMasters] ' + e.message);
-    return { success: false, error: e.message };
+    return {
+      success: true,
+      data: {
+        uptList: _BMN_DEFAULT_UPTS_BACKEND,
+        kategoriList: _BMN_DEFAULT_KAT_BACKEND
+      }
+    };
   }
 }
 

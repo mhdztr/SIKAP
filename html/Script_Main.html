@@ -5435,6 +5435,23 @@ function _msg(id, type, text) {
       el.textContent = text;
     }
   }
+
+  // Khusus form BMN: sinkronisasi notifikasi ke banner inline geotagging di Seksi 4
+  if (id === 'bmn-form-msg') {
+    var inlineEl = document.getElementById('bmn-geotag-inline-msg');
+    if (inlineEl) {
+      if (!type) {
+        inlineEl.className = 'n-msg';
+        inlineEl.textContent = '';
+        inlineEl.style.display = 'none';
+      } else {
+        inlineEl.className = 'n-msg ' + type + ' show';
+        inlineEl.textContent = text;
+        inlineEl.style.display = 'block';
+      }
+    }
+  }
+
   // Elevated floating Sonner toast (ask-sonner / emil-design-eng)
   if (type && text && typeof toast !== 'undefined') {
     var t = String(type).toLowerCase();
@@ -5613,6 +5630,14 @@ function closeModal(id) {
   }
   var idx = _MODAL_STACK.indexOf(id);
   if (idx !== -1) _MODAL_STACK.splice(idx, 1);
+
+  // Pulihkan modal induk pegawai jika modal sertifikat ditutup
+  if (id === 'modal-tu-sertifikat' && typeof _TU !== 'undefined' && _TU._parentModalBeforeSertifikat) {
+    var pId = _TU._parentModalBeforeSertifikat;
+    _TU._parentModalBeforeSertifikat = null;
+    openModal(pId);
+  }
+
   _syncCheckDeferred();
 }
 
@@ -8142,6 +8167,12 @@ function _tuOpenSertifikatModal(pegId, kodePelatihan) {
   }
 
   _msg('tu-sert-modal-msg', null);
+  // Sembunyikan modal detail sementara agar modal sertifikat fokus di layer teratas
+  var parentDetailModal = document.getElementById('modal-tu-pegawai-detail');
+  if (parentDetailModal && !parentDetailModal.classList.contains('n-hidden')) {
+    parentDetailModal.classList.add('n-hidden');
+    _TU._parentModalBeforeSertifikat = 'modal-tu-pegawai-detail';
+  }
   openModal('modal-tu-sertifikat');
 }
 
@@ -9065,6 +9096,36 @@ function _tuAnulirPaket(rowId) {
 // SUB-MODUL BMN & INVENTARIS ASET (FASE 18B.2)
 // ============================================================
 
+var _BMN_DEFAULT_UPTS = [
+  { lokasiId: 'UPT-PUSAT-POA', namaLokasi: 'Dit. POA (Pusat KKP Jakarta)', jenis: 'PUSAT', wilayah: 'PUSAT', latitude: -6.175392, longitude: 106.827153, alamat: 'Gedung Mina Bahari IV Lt. 9, Jakarta Pusat' },
+  { lokasiId: 'UPT-JKT', namaLokasi: 'Pangkalan PSDKP Jakarta', jenis: 'PANGKALAN', wilayah: 'WPPNRI 711', latitude: -6.110214, longitude: 106.804322, alamat: 'Jl. Muara Baru No. 1, Jakarta Utara' },
+  { lokasiId: 'UPT-BTM', namaLokasi: 'Pangkalan PSDKP Batam', jenis: 'PANGKALAN', wilayah: 'WPPNRI 711', latitude: 1.082828, longitude: 103.955618, alamat: 'Jl. Trans Barelang Jembatan II, Batam' },
+  { lokasiId: 'UPT-BNO', namaLokasi: 'Pangkalan PSDKP Benoa', jenis: 'PANGKALAN', wilayah: 'WPPNRI 573', latitude: -8.751612, longitude: 115.215541, alamat: 'Pelabuhan Benoa, Denpasar, Bali' },
+  { lokasiId: 'UPT-BTG', namaLokasi: 'Pangkalan PSDKP Bitung', jenis: 'PANGKALAN', wilayah: 'WPPNRI 716', latitude: 1.440231, longitude: 125.191244, alamat: 'Jl. Tandurusa, Bitung, Sulawesi Utara' },
+  { lokasiId: 'UPT-LMP', namaLokasi: 'Pangkalan PSDKP Lampulo', jenis: 'PANGKALAN', wilayah: 'WPPNRI 572', latitude: 5.586912, longitude: 95.328312, alamat: 'Pelabuhan Perikanan Lampulo, Banda Aceh' },
+  { lokasiId: 'UPT-TUL', namaLokasi: 'Pangkalan PSDKP Tual', jenis: 'PANGKALAN', wilayah: 'WPPNRI 718', latitude: -5.628912, longitude: 132.748312, alamat: 'Dumar, Tual, Maluku Tenggara' },
+  { lokasiId: 'UPT-BLW', namaLokasi: 'Stasiun PSDKP Belawan', jenis: 'STASIUN', wilayah: 'WPPNRI 571', latitude: 3.784212, longitude: 98.692812, alamat: 'Jl. Pelabuhan Raya, Belawan, Medan' },
+  { lokasiId: 'UPT-PTK', namaLokasi: 'Stasiun PSDKP Pontianak', jenis: 'STASIUN', wilayah: 'WPPNRI 711', latitude: -0.026312, longitude: 109.342512, alamat: 'Jl. Raya Sungai Kakap, Pontianak' },
+  { lokasiId: 'UPT-CLP', namaLokasi: 'Stasiun PSDKP Cilacap', jenis: 'STASIUN', wilayah: 'WPPNRI 573', latitude: -7.738112, longitude: 109.015212, alamat: 'Jl. Lingkar Penyu, Cilacap, Jawa Tengah' },
+  { lokasiId: 'UPT-TRK', namaLokasi: 'Stasiun PSDKP Tarakan', jenis: 'STASIUN', wilayah: 'WPPNRI 716', latitude: 3.303912, longitude: 117.591212, alamat: 'Jl. Yos Sudarso, Juwata, Tarakan' },
+  { lokasiId: 'UPT-KPG', namaLokasi: 'Stasiun PSDKP Kupang', jenis: 'STASIUN', wilayah: 'WPPNRI 573', latitude: -10.177212, longitude: 123.607012, alamat: 'Jl. Tenau, Alak, Kupang, NTT' },
+  { lokasiId: 'UPT-AMB', namaLokasi: 'Stasiun PSDKP Ambon', jenis: 'STASIUN', wilayah: 'WPPNRI 715', latitude: -3.695412, longitude: 128.181412, alamat: 'Hative Kecil, Sirimau, Ambon' },
+  { lokasiId: 'UPT-BIK', namaLokasi: 'Stasiun PSDKP Biak', jenis: 'STASIUN', wilayah: 'WPPNRI 717', latitude: -1.178912, longitude: 136.082512, alamat: 'Jl. Sorido Raya, Biak Kota, Papua' },
+  { lokasiId: 'UPT-THN', namaLokasi: 'Stasiun PSDKP Tahuna', jenis: 'STASIUN', wilayah: 'WPPNRI 716', latitude: 3.611112, longitude: 125.492512, alamat: 'Kolongan Beha Baru, Tahuna Barat' },
+  { lokasiId: 'UPT-PDG', namaLokasi: 'Stasiun PSDKP Padang', jenis: 'STASIUN', wilayah: 'WPPNRI 572', latitude: -0.957512, longitude: 100.368312, alamat: 'Bungus Teluk Kabung, Padang, Sumbar' }
+];
+
+var _BMN_DEFAULT_KAT = [
+  { kodeKategori: 'KAT-TIK', namaKategori: 'Peralatan Komputer & TIK', masaManfaatTahun: 4 },
+  { kodeKategori: 'KAT-KAPAL', namaKategori: 'Kapal Pengawas & Motor Tempel', masaManfaatTahun: 10 },
+  { kodeKategori: 'KAT-RADAR', namaKategori: 'Radar, Navigasi & Komunikasi Maritim', masaManfaatTahun: 5 },
+  { kodeKategori: 'KAT-SENJATA', namaKategori: 'Senjata Api Khusus & Perlengkapan Pengawasan', masaManfaatTahun: 10 },
+  { kodeKategori: 'KAT-KANTOR', namaKategori: 'Peralatan & Perlengkapan Kantor', masaManfaatTahun: 5 },
+  { kodeKategori: 'KAT-MEUBEL', namaKategori: 'Mebel & Perabot Kantor', masaManfaatTahun: 5 },
+  { kodeKategori: 'KAT-KENDARAAN', namaKategori: 'Kendaraan Dinas Operasional', masaManfaatTahun: 7 },
+  { kodeKategori: 'KAT-GEDUNG', namaKategori: 'Gedung, Bangunan & Dermaga', masaManfaatTahun: 20 }
+];
+
 var _BMN = {
   subTab: 'aset', // 'aset' | 'penghapusan'
   view: 'list', // 'list' | 'form'
@@ -9075,7 +9136,10 @@ var _BMN = {
   lokasiId: 'ALL',
   q: '',
   searchTimer: null,
-  masters: null,
+  masters: {
+    uptList: _BMN_DEFAULT_UPTS,
+    kategoriList: _BMN_DEFAULT_KAT
+  },
   summary: null,
   listData: null,
   pendingRowId: null,
@@ -9812,26 +9876,29 @@ function _bmnParseCoordinatesFromText(rawText) {
 
   // Deteksi kata kunci nama UPT / Pangkalan / Stasiun PSDKP di seluruh teks gambar
   var uptKeywords = [
-    { name: 'Pangkalan PSDKP Batam', match: /Batam/i },
-    { name: 'Pangkalan PSDKP Benoa', match: /Benoa/i },
-    { name: 'Pangkalan PSDKP Bitung', match: /Bitung/i },
-    { name: 'Pangkalan PSDKP Lampulo', match: /Lampulo/i },
-    { name: 'Pangkalan PSDKP Tual', match: /Tual/i },
-    { name: 'Pangkalan PSDKP Jakarta', match: /Jakarta|Muara Baru/i },
-    { name: 'Stasiun PSDKP Belawan', match: /Belawan/i },
-    { name: 'Stasiun PSDKP Pontianak', match: /Pontianak/i },
-    { name: 'Stasiun PSDKP Cilacap', match: /Cilacap/i },
-    { name: 'Stasiun PSDKP Tarakan', match: /Tarakan/i },
-    { name: 'Stasiun PSDKP Kupang', match: /Kupang/i },
-    { name: 'Stasiun PSDKP Ambon', match: /Ambon/i },
-    { name: 'Stasiun PSDKP Biak', match: /Biak/i },
-    { name: 'Stasiun PSDKP Tahuna', match: /Tahuna/i },
-    { name: 'Stasiun PSDKP Padang', match: /Padang/i }
+    { name: 'Dit. POA (Pusat KKP Jakarta)', id: 'UPT-PUSAT-POA', match: /Jakarta|Muara Baru|Dit\.?\s*POA|Pusat|Mina Bahari|Gambir/i },
+    { name: 'Pangkalan PSDKP Batam', id: 'UPT-BTM', match: /Batam|Barelang|Batu Ampar|Sekupang/i },
+    { name: 'Pangkalan PSDKP Benoa', id: 'UPT-BNO', match: /Benoa|Denpasar|Bali/i },
+    { name: 'Pangkalan PSDKP Bitung', id: 'UPT-BTG', match: /Bitung|Aertembaga|Manado/i },
+    { name: 'Pangkalan PSDKP Lampulo', id: 'UPT-LMP', match: /Lampulo|Banda Aceh|Aceh/i },
+    { name: 'Pangkalan PSDKP Tual', id: 'UPT-TUL', match: /Tual|Maluku Tenggara|Dullah/i },
+    { name: 'Pangkalan PSDKP Jakarta', id: 'UPT-JKT', match: /Pangkalan.*Jakarta|Muara Baru/i },
+    { name: 'Stasiun PSDKP Belawan', id: 'UPT-BLW', match: /Belawan|Medan|Sumatera Utara/i },
+    { name: 'Stasiun PSDKP Pontianak', id: 'UPT-PTK', match: /Pontianak|Sungai Kakap|Kalimantan Barat/i },
+    { name: 'Stasiun PSDKP Cilacap', id: 'UPT-CLP', match: /Cilacap|Jawa Tengah|Teluk Penyu/i },
+    { name: 'Stasiun PSDKP Tarakan', id: 'UPT-TRK', match: /Tarakan|Kalimantan Utara|Juwata/i },
+    { name: 'Stasiun PSDKP Kupang', id: 'UPT-KPG', match: /Kupang|Tenau|Nusa Tenggara Timur|NTT/i },
+    { name: 'Stasiun PSDKP Ambon', id: 'UPT-AMB', match: /Ambon|Maluku|Hative/i },
+    { name: 'Stasiun PSDKP Biak', id: 'UPT-BIK', match: /Biak|Papua|Numfor/i },
+    { name: 'Stasiun PSDKP Tahuna', id: 'UPT-THN', match: /Tahuna|Sangihe/i },
+    { name: 'Stasiun PSDKP Padang', id: 'UPT-PDG', match: /Padang|Bungus|Sumatera Barat/i }
   ];
   var locationHint = null;
+  var matchedUptObj = null;
   for (var u = 0; u < uptKeywords.length; u++) {
     if (uptKeywords[u].match.test(rawText)) {
       locationHint = uptKeywords[u].name;
+      matchedUptObj = uptKeywords[u];
       break;
     }
   }
@@ -9877,7 +9944,7 @@ function _bmnParseCoordinatesFromText(rawText) {
     var lonA = parsePart(lonLabelM[1], true);
     if (latA !== null && lonA !== null && !isNaN(latA) && !isNaN(lonA) && latA >= -90 && latA <= 90 && lonA >= -180 && lonA <= 180) {
       if (/LS/i.test(latLabelM[0]) && latA > 0) latA = -latA;
-      return { latitude: latA, longitude: lonA, raw: 'LABELED', locationHint: locationHint };
+      return { latitude: latA, longitude: lonA, raw: 'LABELED', locationHint: locationHint, uptId: matchedUptObj ? matchedUptObj.id : null };
     }
   }
 
@@ -9902,12 +9969,12 @@ function _bmnParseCoordinatesFromText(rawText) {
     if (lonDir === 'W' || lonDir === 'BB') lonVal = -lonVal;
 
     if (latVal >= -15 && latVal <= 10 && lonVal >= 90 && lonVal <= 145) {
-      return { latitude: latVal, longitude: lonVal, raw: 'DMS_DDM', locationHint: locationHint };
+      return { latitude: latVal, longitude: lonVal, raw: 'DMS_DDM', locationHint: locationHint, uptId: matchedUptObj ? matchedUptObj.id : null };
     }
   }
 
-  // 3. Decimal Coordinates Pair: "-6.178949, 106.834359"
-  var decRegex = /([+-]?\d{1,2}\.\d{4,8})\s*([°\s]*([NS]|LS|LU))?[^\d\w+-]+([+-]?\d{2,3}\.\d{4,8})\s*([°\s]*([EW]|BT|BB))?/i;
+  // 3. Decimal Coordinates Pair: "-6.178949, 106.834359" atau "1.082828, 103.955618"
+  var decRegex = /([+-]?\d{1,2}\.\d{3,8})\s*([°\s]*([NS]|LS|LU))?[^\d\w+-]+([+-]?\d{2,3}\.\d{3,8})\s*([°\s]*([EW]|BT|BB))?/i;
   var dMatch = text.match(decRegex);
   if (dMatch) {
     var dLat = parseFloat(dMatch[1]);
@@ -9917,12 +9984,12 @@ function _bmnParseCoordinatesFromText(rawText) {
     if ((dLatDir === 'S' || dLatDir === 'LS') && dLat > 0) dLat = -dLat;
     if ((dLonDir === 'W' || dLonDir === 'BB') && dLon > 0) dLon = -dLon;
     if (dLat >= -15 && dLat <= 10 && dLon >= 90 && dLon <= 145) {
-      return { latitude: dLat, longitude: dLon, raw: 'DEC_PAIR', locationHint: locationHint };
+      return { latitude: dLat, longitude: dLon, raw: 'DEC_PAIR', locationHint: locationHint, uptId: matchedUptObj ? matchedUptObj.id : null };
     }
   }
 
   if (locationHint) {
-    return { latitude: null, longitude: null, raw: 'LOCATION_NAME', locationHint: locationHint };
+    return { latitude: null, longitude: null, raw: 'LOCATION_NAME', locationHint: locationHint, uptId: matchedUptObj ? matchedUptObj.id : null };
   }
 
   return null;
@@ -9948,82 +10015,23 @@ function _bmnScanWatermarkOcr(file, cb) {
             return;
           }
 
-          function createRegionCanvas(sy, sh, targetW) {
-            var rCanvas = document.createElement('canvas');
-            var scale = targetW / origW;
-            rCanvas.width = targetW;
-            rCanvas.height = Math.round(sh * scale);
-            var rCtx = rCanvas.getContext('2d');
-            rCtx.drawImage(img, 0, sy, origW, sh, 0, 0, rCanvas.width, rCanvas.height);
+          // Full-image OCR: render kanvas penuh dengan skala tajam max 1400px (tanpa cropping)
+          var fullCanvas = document.createElement('canvas');
+          var maxDim = 1400;
+          var fScale = Math.min(1, maxDim / Math.max(origW, origH));
+          fullCanvas.width = Math.round(origW * fScale);
+          fullCanvas.height = Math.round(origH * fScale);
+          var fCtx = fullCanvas.getContext('2d');
+          fCtx.drawImage(img, 0, 0, origW, origH, 0, 0, fullCanvas.width, fullCanvas.height);
 
-            // Binarization & peningkatan kontras untuk teks watermark putih/kuning
-            try {
-              var imgData = rCtx.getImageData(0, 0, rCanvas.width, rCanvas.height);
-              var data = imgData.data;
-              for (var i = 0; i < data.length; i += 4) {
-                var r = data[i], g = data[i+1], b = data[i+2];
-                var lum = 0.299 * r + 0.587 * g + 0.114 * b;
-                var val = lum > 140 ? 255 : (lum < 90 ? 0 : lum);
-                data[i] = val;
-                data[i+1] = val;
-                data[i+2] = val;
-              }
-              rCtx.putImageData(imgData, 0, 0);
-            } catch (eFilter) {}
-            return rCanvas;
-          }
-
-          // Step 1: Scan Bottom 35% banner (letak utama watermark kamera timestamp & GPS)
-          var bottomH = Math.round(origH * 0.35);
-          var bottomY = origH - bottomH;
-          var bottomCanvas = createRegionCanvas(bottomY, bottomH, Math.min(origW, 1200));
-
-          window.Tesseract.recognize(bottomCanvas, 'eng')
-            .then(function(bRes) {
-              var bText = (bRes && bRes.data && bRes.data.text) || '';
-              var coords = _bmnParseCoordinatesFromText(bText);
-              if (coords) {
-                if (cb) cb(coords, bText);
-                return;
-              }
-
-              // Step 2: Scan Top 30% banner
-              var topH = Math.round(origH * 0.30);
-              var topCanvas = createRegionCanvas(0, topH, Math.min(origW, 1200));
-
-              window.Tesseract.recognize(topCanvas, 'eng')
-                .then(function(tRes) {
-                  var tText = (tRes && tRes.data && tRes.data.text) || '';
-                  var tCoords = _bmnParseCoordinatesFromText(tText);
-                  if (tCoords) {
-                    if (cb) cb(tCoords, tText);
-                    return;
-                  }
-
-                  // Step 3: Scan Full Canvas fallback (skala max 1000px agar cepat & tidak crash)
-                  var fullCanvas = document.createElement('canvas');
-                  var fScale = Math.min(1, 1000 / Math.max(origW, origH));
-                  fullCanvas.width = Math.round(origW * fScale);
-                  fullCanvas.height = Math.round(origH * fScale);
-                  var fCtx = fullCanvas.getContext('2d');
-                  fCtx.drawImage(img, 0, 0, origW, origH, 0, 0, fullCanvas.width, fullCanvas.height);
-
-                  window.Tesseract.recognize(fullCanvas, 'eng')
-                    .then(function(fRes) {
-                      var fText = (fRes && fRes.data && fRes.data.text) || '';
-                      var fCoords = _bmnParseCoordinatesFromText(fText);
-                      if (cb) cb(fCoords, fText);
-                    })
-                    .catch(function() {
-                      if (cb) cb(null);
-                    });
-                })
-                .catch(function() {
-                  if (cb) cb(null);
-                });
+          window.Tesseract.recognize(fullCanvas, 'eng')
+            .then(function(fRes) {
+              var fText = (fRes && fRes.data && fRes.data.text) || '';
+              var fCoords = _bmnParseCoordinatesFromText(fText);
+              if (cb) cb(fCoords, fText);
             })
             .catch(function(err) {
-              console.warn('[OCR Watermark] Gagal proses:', err);
+              console.warn('[OCR Watermark] Gagal proses full canvas:', err);
               if (cb) cb(null);
             });
         });
@@ -10080,7 +10088,7 @@ function _bmnClientMatchNearestUpt(lat, lon, uptList) {
   };
 }
 
-function _bmnApplyCoordinates(lat, lon, source, silent) {
+function _bmnApplyCoordinates(lat, lon, source, silent, locationHint) {
   lat = parseFloat(lat);
   lon = parseFloat(lon);
   if (isNaN(lat) || isNaN(lon)) return;
@@ -10096,26 +10104,56 @@ function _bmnApplyCoordinates(lat, lon, source, silent) {
   if (inLon) inLon.value = lon.toFixed(6);
   if (inSrc) inSrc.value = source;
 
-  var uptList = (_BMN.masters && _BMN.masters.uptList) || [];
+  var uptList = (_BMN.masters && _BMN.masters.uptList && _BMN.masters.uptList.length) ? _BMN.masters.uptList : _BMN_DEFAULT_UPTS;
   var match = _bmnClientMatchNearestUpt(lat, lon, uptList);
+
+  var selectedUpt = (match && match.nearestUpt) ? match.nearestUpt : null;
+
+  // Jika ada locationHint spesifik dari OCR, prioritaskan UPT yang sesuai namanya
+  if (locationHint) {
+    for (var u = 0; u < uptList.length; u++) {
+      if (uptList[u].namaLokasi.indexOf(locationHint) !== -1 || locationHint.indexOf(uptList[u].namaLokasi) !== -1) {
+        selectedUpt = uptList[u];
+        break;
+      }
+    }
+  }
+
+  // LANGSUNG TULIS & SET LOKASI UPT PADA FORMULIR
+  var selUpt = document.getElementById('bmn-form-upt');
+  if (selUpt && selectedUpt) {
+    if (selUpt.options.length <= 1) {
+      _bmnPopulateMasterSelects({ uptList: uptList });
+    }
+    selUpt.value = selectedUpt.lokasiId;
+    if (!selUpt.value || selUpt.selectedIndex <= 0) {
+      for (var optIdx = 0; optIdx < selUpt.options.length; optIdx++) {
+        if (selUpt.options[optIdx].value === selectedUpt.lokasiId ||
+            selUpt.options[optIdx].text.indexOf(selectedUpt.namaLokasi) !== -1 ||
+            selectedUpt.namaLokasi.indexOf(selUpt.options[optIdx].text) !== -1) {
+          selUpt.selectedIndex = optIdx;
+          break;
+        }
+      }
+    }
+  }
+
+  // LANGSUNG TULIS DETAIL RUANGAN JIKA MASIH KOSONG
+  var inRuangan = document.getElementById('bmn-form-ruangan');
+  if (inRuangan && !inRuangan.value.trim() && selectedUpt) {
+    inRuangan.value = selectedUpt.namaLokasi;
+  }
 
   if (match) {
     if (inDst) inDst.value = match.minDistance;
-    // Jika berada dalam radius 25 km, otomatis set dropdown UPT
-    if (match.isWithinRadius) {
-      var selUpt = document.getElementById('bmn-form-upt');
-      if (selUpt && (!selUpt.value || selUpt.value === 'UPT-PUSAT-POA' || source === 'EXIF_FOTO' || source === 'OCR_STEMPEL' || source === 'GPS_PERANGKAT')) {
-        selUpt.value = match.nearestUpt.lokasiId;
-      }
-    }
   } else {
     if (inDst) inDst.value = '';
   }
 
-  _bmnRenderGeotagStatus(lat, lon, source, match);
+  _bmnRenderGeotagStatus(lat, lon, source, match, selectedUpt);
 }
 
-function _bmnRenderGeotagStatus(lat, lon, source, match) {
+function _bmnRenderGeotagStatus(lat, lon, source, match, selectedUpt) {
   var emptyEl  = document.getElementById('bmn-geotag-empty-state');
   var activeEl = document.getElementById('bmn-geotag-active-state');
   var resetBtn = document.getElementById('bmn-btn-reset-gps');
@@ -10127,8 +10165,14 @@ function _bmnRenderGeotagStatus(lat, lon, source, match) {
   if (activeEl) activeEl.style.display = 'flex';
   if (resetBtn) resetBtn.style.display = 'inline-block';
 
+  var uptName = (selectedUpt && selectedUpt.namaLokasi) || (match && match.nearestUpt && match.nearestUpt.namaLokasi) || 'Lokasi Fisik Terdeteksi';
+
   if (textEl) {
-    textEl.textContent = 'Lat: ' + lat.toFixed(5) + ' · Lon: ' + lon.toFixed(5);
+    textEl.innerHTML = '<strong style="font-size:0.875rem; color:var(--n-primary); display:block; margin-bottom:2px;">' +
+      '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:-1px; margin-right:4px;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>' +
+      _esc(uptName) + '</strong>' +
+      '<span style="font-size:0.75rem; color:var(--n-text-secondary); font-family:var(--n-font-mono);">' +
+      'Lat: ' + lat.toFixed(5) + ' &bull; Lon: ' + lon.toFixed(5) + '</span>';
   }
 
   if (badgeEl) {
@@ -10252,7 +10296,7 @@ function _bmnHandlePhotoFile(e) {
       var nativeGps = _bmnParseExifGpsFromArrayBuffer(buffer);
       if (nativeGps && typeof nativeGps.latitude === 'number' && typeof nativeGps.longitude === 'number') {
         _bmnApplyCoordinates(nativeGps.latitude, nativeGps.longitude, 'EXIF_FOTO');
-        _msg('bmn-form-msg', 'success', 'Koordinat GPS (' + nativeGps.latitude.toFixed(5) + ', ' + nativeGps.longitude.toFixed(5) + ') berhasil diekstraksi dari metadata EXIF foto.');
+        _msg('bmn-form-msg', 'success', 'Koordinat GPS (' + nativeGps.latitude.toFixed(5) + ', ' + nativeGps.longitude.toFixed(5) + ') dan Lokasi UPT berhasil diekstraksi dari metadata EXIF foto.');
         return;
       }
 
@@ -10263,7 +10307,7 @@ function _bmnHandlePhotoFile(e) {
             .then(function (gps) {
               if (gps && typeof gps.latitude === 'number' && typeof gps.longitude === 'number' && !isNaN(gps.latitude) && !isNaN(gps.longitude)) {
                 _bmnApplyCoordinates(gps.latitude, gps.longitude, 'EXIF_FOTO');
-                _msg('bmn-form-msg', 'success', 'Koordinat GPS (' + gps.latitude.toFixed(5) + ', ' + gps.longitude.toFixed(5) + ') berhasil diekstraksi dari metadata EXIF foto.');
+                _msg('bmn-form-msg', 'success', 'Koordinat GPS (' + gps.latitude.toFixed(5) + ', ' + gps.longitude.toFixed(5) + ') dan Lokasi UPT berhasil diekstraksi dari metadata EXIF foto.');
               } else {
                 _bmnHandleNoExifGps(file);
               }
@@ -10293,27 +10337,32 @@ function _bmnHandleNoExifGps(file) {
     return;
   }
 
-  // OPSI 1B: Fallback pemindaian visual stempel koordinat & lokasi pada foto (OCR Multi-Region)
+  // OPSI 1B: Fallback pemindaian visual stempel koordinat & lokasi pada foto (OCR Full-Image)
   if (file) {
-    _msg('bmn-form-msg', 'info', 'Metadata EXIF tidak ditemukan. Memindai visual stempel koordinat & lokasi pada foto (OCR)...');
+    _msg('bmn-form-msg', 'info', 'Metadata EXIF tidak ditemukan. Memindai visual gambar secara utuh (OCR)...');
     _bmnScanWatermarkOcr(file, function(coords) {
+      var uptList = (_BMN.masters && _BMN.masters.uptList && _BMN.masters.uptList.length) ? _BMN.masters.uptList : _BMN_DEFAULT_UPTS;
+
       if (coords && typeof coords.latitude === 'number' && typeof coords.longitude === 'number' && !isNaN(coords.latitude) && !isNaN(coords.longitude)) {
-        _bmnApplyCoordinates(coords.latitude, coords.longitude, 'OCR_STEMPEL');
-        _msg('bmn-form-msg', 'success', 'Koordinat GPS (' + coords.latitude.toFixed(5) + ', ' + coords.longitude.toFixed(5) + ') berhasil diekstraksi dari stempel visual foto (OCR).');
-      } else if (coords && coords.locationHint) {
-        var selUpt = document.getElementById('bmn-form-upt');
-        if (selUpt) {
-          for (var optIdx = 0; optIdx < selUpt.options.length; optIdx++) {
-            if (selUpt.options[optIdx].text.indexOf(coords.locationHint) !== -1 || coords.locationHint.indexOf(selUpt.options[optIdx].text) !== -1) {
-              selUpt.selectedIndex = optIdx;
-              break;
-            }
+        _bmnApplyCoordinates(coords.latitude, coords.longitude, 'OCR_STEMPEL', false, coords.locationHint);
+        _msg('bmn-form-msg', 'success', 'Koordinat GPS (' + coords.latitude.toFixed(5) + ', ' + coords.longitude.toFixed(5) + ') dan Lokasi UPT berhasil diekstraksi dari foto (OCR).');
+      } else if (coords && (coords.locationHint || coords.uptId)) {
+        // Lokasi terdeteksi dari nama/alias kota/UPT pada teks foto
+        var matchedUpt = null;
+        for (var i = 0; i < uptList.length; i++) {
+          if ((coords.uptId && uptList[i].lokasiId === coords.uptId) ||
+              (coords.locationHint && uptList[i].namaLokasi.indexOf(coords.locationHint) !== -1) ||
+              (coords.locationHint && coords.locationHint.indexOf(uptList[i].namaLokasi) !== -1)) {
+            matchedUpt = uptList[i];
+            break;
           }
         }
-        _msg('bmn-form-msg', 'info', 'Lokasi terdeteksi dari foto: ' + coords.locationHint + '. Mengambil koordinat perangkat...');
-        _bmnTriggerDeviceGeolocation(true);
+        if (!matchedUpt) matchedUpt = uptList[0];
+
+        _bmnApplyCoordinates(matchedUpt.latitude, matchedUpt.longitude, 'OCR_STEMPEL', false, coords.locationHint || matchedUpt.namaLokasi);
+        _msg('bmn-form-msg', 'success', 'Lokasi ' + (coords.locationHint || matchedUpt.namaLokasi) + ' berhasil dideteksi dari foto (OCR) dan otomatis diset.');
       } else {
-        _msg('bmn-form-msg', 'warning', 'Stempel koordinat tidak terdeteksi pada foto. Mengambil lokasi perangkat...');
+        _msg('bmn-form-msg', 'warning', 'Teks lokasi/koordinat tidak terdeteksi pada foto. Mengambil lokasi perangkat...');
         _bmnTriggerDeviceGeolocation(true);
       }
     });

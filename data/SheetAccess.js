@@ -357,6 +357,54 @@ function _autoCreateLogSheet(ss, sheetName) {
   return created;
 }
 
+function _seedLokasiUpt(ss) {
+  var sheet = ss.getSheetByName(SHEET_TU.MASTER_LOKASI_UPT);
+  if (!sheet) sheet = _autoCreateTuSheet(ss, SHEET_TU.MASTER_LOKASI_UPT);
+  if (sheet.getLastRow() > 1) return;
+
+  var uptData = [
+    ['UPT-PUSAT-POA', 'Dit. POA (Pusat KKP Jakarta)', 'PUSAT', -6.175392, 106.827153, 25, 'AKTIF'],
+    ['UPT-JKT', 'Pangkalan PSDKP Jakarta', 'PANGKALAN', -6.110214, 106.804322, 25, 'AKTIF'],
+    ['UPT-BTM', 'Pangkalan PSDKP Batam', 'PANGKALAN', 1.082828, 103.955618, 25, 'AKTIF'],
+    ['UPT-BNO', 'Pangkalan PSDKP Benoa', 'PANGKALAN', -8.751612, 115.215541, 25, 'AKTIF'],
+    ['UPT-BTG', 'Pangkalan PSDKP Bitung', 'PANGKALAN', 1.440231, 125.191244, 25, 'AKTIF'],
+    ['UPT-LMP', 'Pangkalan PSDKP Lampulo', 'PANGKALAN', 5.586912, 95.328312, 25, 'AKTIF'],
+    ['UPT-TUL', 'Pangkalan PSDKP Tual', 'PANGKALAN', -5.628912, 132.748312, 25, 'AKTIF'],
+    ['UPT-BLW', 'Stasiun PSDKP Belawan', 'STASIUN', 3.784212, 98.692812, 25, 'AKTIF'],
+    ['UPT-PTK', 'Stasiun PSDKP Pontianak', 'STASIUN', -0.026312, 109.342512, 25, 'AKTIF'],
+    ['UPT-CLP', 'Stasiun PSDKP Cilacap', 'STASIUN', -7.738112, 109.015212, 25, 'AKTIF'],
+    ['UPT-TRK', 'Stasiun PSDKP Tarakan', 'STASIUN', 3.303912, 117.591212, 25, 'AKTIF'],
+    ['UPT-KPG', 'Stasiun PSDKP Kupang', 'STASIUN', -10.177212, 123.607012, 25, 'AKTIF'],
+    ['UPT-AMB', 'Stasiun PSDKP Ambon', 'STASIUN', -3.695412, 128.181412, 25, 'AKTIF'],
+    ['UPT-BIK', 'Stasiun PSDKP Biak', 'STASIUN', -1.178912, 136.082512, 25, 'AKTIF'],
+    ['UPT-THN', 'Stasiun PSDKP Tahuna', 'STASIUN', 3.611112, 125.492512, 25, 'AKTIF'],
+    ['UPT-PDG', 'Stasiun PSDKP Padang', 'STASIUN', -0.957512, 100.368312, 25, 'AKTIF']
+  ];
+
+  sheet.getRange(2, 1, uptData.length, uptData[0].length).setValues(uptData);
+  Logger.log('[_seedLokasiUpt] Master_Lokasi_UPT (16 UPT PSDKP) berhasil di-seed.');
+}
+
+function _seedBmnKategori(ss) {
+  var sheet = ss.getSheetByName(SHEET_TU.MASTER_BMN_KATEGORI);
+  if (!sheet) sheet = _autoCreateTuSheet(ss, SHEET_TU.MASTER_BMN_KATEGORI);
+  if (sheet.getLastRow() > 1) return;
+
+  var katData = [
+    ['KAT-TIK', 'Peralatan Komputer & TIK', 'Peralatan dan Mesin', 4],
+    ['KAT-KAPAL', 'Kapal Pengawas & Motor Tempel', 'Alat Angkutan Apung Bermotor', 10],
+    ['KAT-RADAR', 'Radar, Navigasi & Komunikasi Maritim', 'Peralatan dan Mesin', 5],
+    ['KAT-SENJATA', 'Senjata Api Khusus & Perlengkapan Pengawasan', 'Senjata', 10],
+    ['KAT-KANTOR', 'Peralatan & Perlengkapan Kantor', 'Peralatan dan Mesin', 5],
+    ['KAT-MEUBEL', 'Mebel & Perabot Kantor', 'Peralatan dan Mesin', 5],
+    ['KAT-KENDARAAN', 'Kendaraan Dinas Operasional', 'Alat Angkutan Darat Bermotor', 7],
+    ['KAT-GEDUNG', 'Gedung, Bangunan & Dermaga', 'Gedung dan Bangunan', 20]
+  ];
+
+  sheet.getRange(2, 1, katData.length, katData[0].length).setValues(katData);
+  Logger.log('[_seedBmnKategori] Master_BMN_Kategori (8 Kategori) berhasil di-seed.');
+}
+
 /**
  * Memastikan akun Superadmin, Kadiv TU, dan Staf TU selalu tersedia.
  * Idempoten: jika belum ada akun berstatus APPROVED, akun default akan dibuat.
