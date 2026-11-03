@@ -52,11 +52,17 @@ function _evResolveContext(refSheet, refRowId, session) {
   if (!found) throw new Error('Baris tujuan tidak ditemukan (RowID: ' + refRowId + ').');
 
   var row = found.obj;
-  var divisiId = String(row['DivisiID'] || '');
+  var divisiId = String(row['DivisiID'] || 'DIV-TU');
   _evAssertRowScope(session, divisiId);
 
   var periode = String(row['Periode'] || '');
-  var ym = periode.length >= 7 ? periode.substring(0, 7) : '';
+  if (!periode && row['UpdatedAt']) {
+    try {
+      var d = new Date(row['UpdatedAt']);
+      periode = d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2);
+    } catch (e) {}
+  }
+  var ym = periode.length >= 7 ? periode.substring(0, 7) : new Date().toISOString().substring(0, 7);
 
   return {
     divisiId:   divisiId,
@@ -94,6 +100,12 @@ function _evKonteks(refSheet, row) {
   }
   if (refSheet === 'TX_TataUsaha' || (typeof SHEET_TU !== 'undefined' && refSheet === SHEET_TU.TATA_USAHA)) {
     return 'Anggaran-' + _evSlug(String(row['Periode'] || 'laporan'), 40);
+  }
+  if (refSheet === 'TX_TU_Pelatihan_Pegawai' || (typeof SHEET_TU !== 'undefined' && refSheet === SHEET_TU.PELATIHAN_PEGAWAI)) {
+    return 'Sertifikat-' + _evSlug(String(row['PegawaiID'] || row['NIP'] || 'pegawai'), 40);
+  }
+  if (refSheet === 'Master_Pegawai_POA' || (typeof SHEET_TU !== 'undefined' && refSheet === SHEET_TU.PEGAWAI_MASTER)) {
+    return 'Pegawai-' + _evSlug(String(row['PegawaiID'] || row['NIP'] || 'pegawai'), 40);
   }
   return _evSlug(String(refSheet), 40);
 }

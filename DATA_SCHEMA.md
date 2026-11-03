@@ -74,6 +74,62 @@ Mencatat struktur sumber daya manusia aparatur di Subbag Tata Usaha.
 
 ---
 
+### 2.3.1 `Master_Pegawai_POA` — Direktori Personel & Awak Kapal Pengawas
+Menyimpan data master profil seluruh personel aktif Direktorat Pengawasan Operasional Armada (Dit. POA) dan seluruh Awak Kapal Pengawas di armada PSDKP (serta ruang ekspansi untuk unit kerja/jabatan baru di masa depan).
+
+| # | Nama Kolom | Tipe Data | Nullable | Contoh Nilai | Aturan Bisnis & Validasi |
+|---|---|---|:---:|---|---|
+| 1 | `PegawaiID` | Text (PK) | Tidak | `PEG-0042` | Format unik `PEG-XXXX` 4 digit urut. |
+| 2 | `NIP` | Text | Tidak | `198504122010121002` | 18 digit NIP atau nomor kontrak/NRP (diisi `-` jika belum terdata). |
+| 3 | `Nama` | Text | Tidak | `Capt. Slamet Riyadi, M.Mar` | Nama lengkap beserta gelar resmi aparatur. |
+| 4 | `UnitKerja` | Text | Tidak | `Dit. POA` | Unit kerja asal: `Dit. POA` atau Pangkalan UPT Armada. |
+| 5 | `LingkupData` | Enum | Tidak | `DIT_POA` | `DIT_POA` (Kantor Pusat) atau `AWAK_KAPAL_ARMADA` atau `EKSPANSI`. |
+| 6 | `KelompokJabatan` | Text | Tidak | `Nahkoda` | Rujukan 38 kelompok jabatan standar KKP. |
+| 7 | `JabatanLengkap` | Text | Tidak | `Nakhoda Kapal Kelas II Kapal Pengawas` | Nomenklatur jabatan spesifik lengkap. |
+| 8 | `TingkatKelas` | Enum | Tidak | `KELAS_II` | `KELAS_I` s.d `KELAS_IV`, `AHLI_MADYA`, `AHLI_MUDA`, `TERAMPIL`, dll. |
+| 9 | `KategoriRumpun` | Enum | Tidak | `AWAK_DEK` | Nilai: `AWAK_DEK`, `AWAK_MESIN`, `PENGAWAS`, `MANAJEMEN`. |
+| 10 | `StatusAktif` | Enum | Tidak | `AKTIF` | Nilai: `AKTIF`, `TUGAS_BELAJAR`, `MUTASI`, `NON_AKTIF`. |
+| 11 | `UpdatedAt` | DateTime | Tidak | `2026-11-03T12:00:00Z` | Timestamp pembaruan data terakhir. |
+| 12 | `UpdatedBy` | Text | Tidak | `admin@kkp.go.id` | User atau sistem yang melakukan perubahan. |
+
+---
+
+### 2.3.2 `Master_Standar_Pelatihan` — Kurikulum Standar Kompetensi Jabatan (SKJ)
+Katalog resmi standar pelatihan, sertifikasi kepelautan (STCW-F), kompetensi teknis, fungsional, dan manajerial untuk 38 kelompok jabatan di lingkungan Dit. POA dan Pengawasan SDKP.
+
+| # | Nama Kolom | Tipe Data | Nullable | Contoh Nilai | Aturan Bisnis & Validasi |
+|---|---|---|:---:|---|---|
+| 1 | `KodePelatihan` | Text (PK) | Tidak | `TRN-NKH-01` | Format unik `TRN-[KODE_JABATAN]-[NOMOR]`. |
+| 2 | `KelompokJabatan` | Text | Tidak | `Nahkoda` | Rumpun jabatan pemilik kurikulum (38 kelompok). |
+| 3 | `TingkatKelas` | Enum | Tidak | `ALL` | `ALL`, `KELAS_I`, `KELAS_II`, `AHLI_MUDA`, dll. |
+| 4 | `Kategori` | Enum | Tidak | `SERTIFIKASI_LAUT` | `SERTIFIKASI_LAUT`, `TEKNIS`, `FUNGSIONAL`, `MANAJERIAL`. |
+| 5 | `NamaPelatihan` | Text | Tidak | `Sertifikat ANKAPIN Tingkat I / II` | Nama resmi pelatihan/sertifikat yang dipersyaratkan. |
+| 6 | `Wajib` | Boolean | Tidak | `true` | `true` jika mutlak dipersyaratkan untuk kelayakan jabatan. |
+| 7 | `Urutan` | Integer | Tidak | `1` | Urutan penomoran tampil di checklist UI. |
+
+---
+
+### 2.3.3 `TX_TU_Pelatihan_Pegawai` — Register Kelulusan & Bukti Fisik Sertifikat
+Mencatat pemenuhan sertifikat pelatihan tiap pegawai, dilengkapi nomor sertifikat, tahun, masa kedaluwarsa, dan tautan dokumen bukti fisik di Google Drive.
+
+| # | Nama Kolom | Tipe Data | Nullable | Contoh Nilai | Aturan Bisnis & Validasi |
+|---|---|---|:---:|---|---|
+| 1 | `RecordID` | Text (PK) | Tidak | `CERT-20261103-120015-842` | Format unik `CERT-YYYYMMDD-HHMMSS-XXX`. |
+| 2 | `PegawaiID` | Text (FK) | Tidak | `PEG-0042` | Ref: `Master_Pegawai_POA.PegawaiID`. |
+| 3 | `NIP` | Text | Tidak | `198504122010121002` | NIP personel pemilik sertifikat. |
+| 4 | `KodePelatihan` | Text (FK) | Tidak | `TRN-NKH-01` | Ref: `Master_Standar_Pelatihan.KodePelatihan`. |
+| 5 | `NamaPelatihan` | Text | Tidak | `Sertifikat ANKAPIN Tingkat I` | Nama pelatihan / sertifikat yang ditempuh. |
+| 6 | `StatusKelulusan`| Enum | Tidak | `SUDAH_LULUS` | `SUDAH_LULUS`, `BELUM`, `PERLU_PEMBARUAN`. |
+| 7 | `NomorSertifikat`| Text | Ya | `62.01.2023.001928` | Nomor registrasi seri sertifikat / STTPP. |
+| 8 | `TahunPelatihan` | Integer | Ya | `2023` | Tahun kelulusan diklat ($\ge 1980$). |
+| 9 | `BerlakuSampai` | Date | Ya | `2028-05-14` | Tanggal kedaluwarsa (khusus sertifikat laut berkala 5 tahun). |
+| 10 | `FileEvidenceID` | Text | Ya | `1A2B3C4D5E...` | Google Drive File ID bukti fisik dokumen/foto. |
+| 11 | `FileEvidenceURL`| Text | Ya | `https://drive.google.com/...` | Link lihat/preview file bukti di Google Drive. |
+| 12 | `UpdatedAt` | DateTime | Tidak | `2026-11-03T12:00:00Z` | Timestamp waktu rekam / pembaruan. |
+| 13 | `UpdatedBy` | Text | Tidak | `admin@kkp.go.id` | User pencatat/pengunggah dokumen. |
+
+---
+
 ### 2.4 `TX_BMN_Aset` — Register Inventaris Fisik Granular (Anti-Jebret)
 Tabel induk seluruh aset fisik individual BMN. Setiap baris mewakili 1 unit fisik nyata (1 item = 1 baris).
 

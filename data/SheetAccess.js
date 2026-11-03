@@ -181,6 +181,9 @@ function ensureTuSpreadsheet() {
 
   // Inisialisasi sheet standar TU
   _autoCreateTuSheet(ss, SHEET_TU.PEGAWAI);
+  _autoCreateTuSheet(ss, SHEET_TU.PEGAWAI_MASTER);
+  _autoCreateTuSheet(ss, SHEET_TU.STANDAR_PELATIHAN);
+  _autoCreateTuSheet(ss, SHEET_TU.PELATIHAN_PEGAWAI);
   _autoCreateTuSheet(ss, SHEET_TU.BMN_ASET);
   _autoCreateTuSheet(ss, SHEET_TU.BMN_PENGHAPUSAN);
   _autoCreateTuSheet(ss, SHEET_TU.BMN_PENGHAPUSAN_DETAIL);
@@ -216,6 +219,21 @@ function _autoCreateTuSheet(ss, sheetName) {
   var headers = [];
   if (sheetName === SHEET_TU.PEGAWAI) {
     headers = STD_COLS.concat(['Kategori', 'Jumlah', 'Keterangan']);
+  } else if (sheetName === SHEET_TU.PEGAWAI_MASTER) {
+    headers = [
+      'PegawaiID', 'NIP', 'Nama', 'UnitKerja', 'LingkupData', 'KelompokJabatan',
+      'JabatanLengkap', 'TingkatKelas', 'KategoriRumpun', 'StatusAktif', 'UpdatedAt', 'UpdatedBy'
+    ];
+  } else if (sheetName === SHEET_TU.STANDAR_PELATIHAN) {
+    headers = [
+      'KodePelatihan', 'KelompokJabatan', 'TingkatKelas', 'Kategori', 'NamaPelatihan', 'Wajib', 'Urutan'
+    ];
+  } else if (sheetName === SHEET_TU.PELATIHAN_PEGAWAI) {
+    headers = [
+      'RecordID', 'PegawaiID', 'NIP', 'KodePelatihan', 'NamaPelatihan', 'StatusKelulusan',
+      'NomorSertifikat', 'TahunPelatihan', 'BerlakuSampai', 'FileEvidenceID', 'FileEvidenceURL',
+      'UpdatedAt', 'UpdatedBy'
+    ];
   } else if (sheetName === SHEET_TU.BMN_ASET) {
     headers = STD_COLS.concat([
       'AsetID', 'KodeBarang', 'NUP', 'NamaBarang', 'MerekTipe', 'KategoriPencatatan',

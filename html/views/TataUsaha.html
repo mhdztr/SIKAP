@@ -777,58 +777,554 @@
 
 
   <!-- ══════════════════════════════════════════════════════════ -->
-  <!-- TAB 3: KEPEGAWAIAN (5 KATEGORI: PNS, P3K, P3K-PW, PJLP, MAGANG) -->
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <!-- TAB 3: KEPEGAWAIAN, STANDAR KOMPETENSI (SKJ) & AWAK KAPAL -->
   <!-- ══════════════════════════════════════════════════════════ -->
   <div id="tu-pane-pegawai" class="tu-pane n-hidden">
 
-    <!-- KPI Counters 5 Kategori -->
-    <div class="content-section">
-      <div class="tu-pegawai-kpi-grid" id="tu-pegawai-kpi-strip">
-        <!-- Rendered by _tuRenderPegawaiKPI() -->
-        <div class="n-card kpi-card">
-          <div class="kpi-label">Memuat Data Kepegawaian…</div>
-        </div>
+    <!-- Sub-Navigasi 3 Mode Kepegawaian (Apple HIG Segmented Control) -->
+    <div class="content-section" style="margin-bottom: 16px;">
+      <div class="tu-peg-subnav" style="display:flex; gap:8px; background:var(--n-card-bg); padding:6px; border-radius:10px; border:1px solid var(--n-border); width:fit-content; flex-wrap:wrap;">
+        <button type="button" class="btn-primary ctl-md tu-peg-mode-btn" id="tu-peg-btn-portal" onclick="_tuSwitchPegawaiSubTab('portal')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+          <span>Cek &amp; Upload Sertifikat Saya</span>
+        </button>
+        <button type="button" class="btn-outline ctl-md tu-peg-mode-btn" id="tu-peg-btn-direktori" onclick="_tuSwitchPegawaiSubTab('direktori')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+          </svg>
+          <span>Direktori Personel Dit. POA &amp; Awak Kapal</span>
+        </button>
+        <button type="button" class="btn-outline ctl-md tu-peg-mode-btn" id="tu-peg-btn-analitik" onclick="_tuSwitchPegawaiSubTab('analitik')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="20" x2="18" y2="10"></line>
+            <line x1="12" y1="20" x2="12" y2="4"></line>
+            <line x1="6" y1="20" x2="6" y2="14"></line>
+          </svg>
+          <span>Analitik Kesenjangan (HCDP) &amp; Rekap SDM</span>
+        </button>
       </div>
     </div>
 
-    <!-- Komposisi Personil Aktif (Full Width Chart) -->
-    <div class="content-section">
-      <div class="chart-cell">
-        <div class="chart-cell-hd">
-          <div>
-            <div class="chart-cell-title">Komposisi Personil Aktif</div>
-            <div class="chart-cell-sub">Distribusi proporsi personil berdasarkan status kepegawaian</div>
+    <!-- ───────────────────────────────────────────────────────────── -->
+    <!-- SUB-PANE 1: PORTAL MANDIRI AWAK KAPAL ("Cek & Upload Sertifikat Saya") -->
+    <!-- ───────────────────────────────────────────────────────────── -->
+    <div id="tu-subpane-peg-portal" class="tu-peg-subpane">
+      <div class="content-section">
+        <div class="form-section-card">
+          <div class="form-section-hd">
+            <span class="form-section-title">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+              <span>Pencarian Cepat Profil Personel / Awak Kapal</span>
+            </span>
+            <span class="form-section-badge">Awak Kapal &amp; Dit. POA</span>
+          </div>
+
+          <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+            <div style="flex:1; min-width:240px; position:relative;">
+              <input type="text" id="tu-peg-self-search" class="ctl-lg" style="width:100%; padding-left:36px;"
+                     placeholder="Ketik Nama atau NIP Anda untuk cek pemenuhan sertifikat..."
+                     onkeyup="if(event.key==='Enter') _tuSearchSelfPegawai();">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                   style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--n-text-muted); pointer-events:none;">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+            </div>
+            <button type="button" class="btn-primary ctl-lg" onclick="_tuSearchSelfPegawai()">
+              <span>Cari Profil Saya</span>
+            </button>
+          </div>
+
+          <!-- Quick Suggestions Dropdown / Result -->
+          <div id="tu-peg-self-results" class="n-hidden" style="margin-top:12px; max-height:220px; overflow-y:auto; border:1px solid var(--n-border); border-radius:8px; background:var(--n-card-bg);">
+            <!-- Populated via JS -->
           </div>
         </div>
-        <div class="chart-box" style="height: 240px;">
-          <canvas id="tu-chart-pegawai"></canvas>
+      </div>
+
+      <!-- Area Tampilan Profil & Checklist Pegawai Terpilih -->
+      <div id="tu-peg-self-profile-card" class="content-section n-hidden">
+        <!-- Rendered by _tuRenderSelfProfile() -->
+      </div>
+    </div>
+
+    <!-- ───────────────────────────────────────────────────────────── -->
+    <!-- SUB-PANE 2: DIREKTORI DIT. POA & AWAK KAPAL (Filter Multi-Dimensi) -->
+    <!-- ───────────────────────────────────────────────────────────── -->
+    <div id="tu-subpane-peg-direktori" class="tu-peg-subpane n-hidden">
+      <div class="content-section">
+        <div class="content-section-hd" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+          <div>
+            <div style="font-size:1.125rem; font-weight:700;">Direktori Personel Dit. POA &amp; Awak Kapal Pengawas</div>
+            <div style="font-size:.8125rem; color:var(--n-text-muted);">Pemetaan pemenuhan standar kompetensi jabatan dan sertifikasi laut</div>
+          </div>
+          <div class="ctl-row">
+            <button type="button" class="btn-primary ctl-md" onclick="_tuOpenPegawaiMasterModal()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+              <span>+ Tambah Personel / Unit</span>
+            </button>
+            <button type="button" class="btn-outline ctl-md" onclick="_tuLoadKompetensi(true)">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="23 4 23 10 17 10"></polyline>
+                <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+              </svg>
+              <span>Muat Ulang</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Filter Controls Multi-Dimensi (32px MD) -->
+        <div class="n-card" style="padding:12px 16px; margin-bottom:14px; background:var(--n-bg-subtle);">
+          <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:10px; align-items:center;">
+            <div>
+              <label for="tu-filter-peg-search" style="display:block; font-size:.75rem; font-weight:600; margin-bottom:4px; color:var(--n-text-muted);">Pencarian Nama / NIP</label>
+              <input type="text" id="tu-filter-peg-search" class="ctl-md" style="width:100%;" placeholder="Ketik kata kunci..." oninput="_tuApplyPegawaiFilters()">
+            </div>
+            <div>
+              <label for="tu-filter-peg-lingkup" style="display:block; font-size:.75rem; font-weight:600; margin-bottom:4px; color:var(--n-text-muted);">Cakupan Personel</label>
+              <select id="tu-filter-peg-lingkup" class="ctl-md" style="width:100%;" onchange="_tuApplyPegawaiFilters()">
+                <option value="">Semua (Dit. POA &amp; Awak Kapal)</option>
+                <option value="DIT_POA">Khusus Dit. POA</option>
+                <option value="AWAK_KAPAL_ARMADA">Awak Kapal Armada PSDKP</option>
+              </select>
+            </div>
+            <div>
+              <label for="tu-filter-peg-rumpun" style="display:block; font-size:.75rem; font-weight:600; margin-bottom:4px; color:var(--n-text-muted);">Rumpun Jabatan</label>
+              <select id="tu-filter-peg-rumpun" class="ctl-md" style="width:100%;" onchange="_tuApplyPegawaiFilters()">
+                <option value="">Semua Rumpun</option>
+                <option value="AWAK_DEK">Awak Kapal Dek</option>
+                <option value="AWAK_MESIN">Awak Kapal Mesin</option>
+                <option value="PENGAWAS">Pengawas &amp; Asisten</option>
+                <option value="MANAJEMEN">Staf &amp; Manajemen</option>
+              </select>
+            </div>
+            <div>
+              <label for="tu-filter-peg-unit" style="display:block; font-size:.75rem; font-weight:600; margin-bottom:4px; color:var(--n-text-muted);">Unit Kerja / Pangkalan</label>
+              <select id="tu-filter-peg-unit" class="ctl-md" style="width:100%;" onchange="_tuApplyPegawaiFilters()">
+                <option value="">Semua Unit Kerja</option>
+              </select>
+            </div>
+            <div>
+              <label for="tu-filter-peg-status" style="display:block; font-size:.75rem; font-weight:600; margin-bottom:4px; color:var(--n-text-muted);">Status Kelengkapan</label>
+              <select id="tu-filter-peg-status" class="ctl-md" style="width:100%;" onchange="_tuApplyPegawaiFilters()">
+                <option value="">Semua Status</option>
+                <option value="LENGKAP">Lengkap (100%)</option>
+                <option value="PARSIAL">Sebagian Terpenuhi (&gt;0%)</option>
+                <option value="BELUM">Belum Ada Pelatihan (0%)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div id="tu-peg-dir-msg" class="n-msg"></div>
+
+        <!-- Tabel Direktori Pegawai -->
+        <div class="n-card" style="padding:0; overflow-x:auto;">
+          <table class="n-table" id="tu-peg-dir-table" style="width:100%; border-collapse:collapse;">
+            <thead>
+              <tr>
+                <th style="width:44px; text-align:center;">No</th>
+                <th>Nama Personel &amp; NIP</th>
+                <th>Unit Kerja / Pangkalan</th>
+                <th>Jabatan &amp; Jenjang</th>
+                <th>Rumpun</th>
+                <th style="min-width:180px;">Pemenuhan Standar</th>
+                <th style="text-align:center;">Bukti File</th>
+                <th style="width:110px; text-align:center;">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="tu-peg-dir-tbody">
+              <tr>
+                <td colspan="8" style="text-align:center; padding:24px; color:var(--n-text-muted);">
+                  Memuat data personel dan kompetensi…
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
 
-    <!-- Riwayat Log Mutasi Kepegawaian -->
-    <div class="content-section">
-      <div class="content-section-hd" style="display:flex; justify-content:space-between; align-items:center;">
-        <div>Riwayat Mutasi &amp; Snapshot Kepegawaian</div>
-        <div class="ctl-row">
-          <button type="button" class="btn-primary" onclick="_tuOpenPegawaiModal()">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-              stroke-linecap="round" stroke-linejoin="round">
-              <line x1="12" y1="5" x2="12" y2="19"></line>
-              <line x1="5" y1="12" x2="19" y2="12"></line>
+    <!-- ───────────────────────────────────────────────────────────── -->
+    <!-- SUB-PANE 3: ANALITIK KESENJANGAN (HCDP) & REKAP KOMPOSISI SDM -->
+    <!-- ───────────────────────────────────────────────────────────── -->
+    <div id="tu-subpane-peg-analitik" class="tu-peg-subpane n-hidden">
+      <!-- KPI Cards Standar Kompetensi & Awak Kapal -->
+      <div class="content-section">
+        <div class="tu-pegawai-kpi-grid" id="tu-kompetensi-kpi-strip">
+          <div class="n-card kpi-card">
+            <div class="kpi-label">Memuat Analitik Kompetensi…</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabel Peringkat Kesenjangan Pelatihan (Top Training Gaps) -->
+      <div class="content-section">
+        <div class="content-section-hd" style="display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <div style="font-size:1.05rem; font-weight:700;">Peringkat Kebutuhan Pelatihan &amp; Sertifikasi (Training Gaps)</div>
+            <div style="font-size:.8125rem; color:var(--n-text-muted);">Daftar standar sertifikasi kepelautan dan teknis dengan kesenjangan tertinggi untuk usulan diklat</div>
+          </div>
+        </div>
+        <div class="n-card" style="padding:0; overflow-x:auto;">
+          <table class="n-table" style="width:100%; border-collapse:collapse;">
+            <thead>
+              <tr>
+                <th style="width:40px; text-align:center;">No</th>
+                <th>Kode &amp; Nama Pelatihan / Sertifikat</th>
+                <th>Kelompok Jabatan</th>
+                <th>Kategori</th>
+                <th style="text-align:center;">Status Wajib</th>
+                <th style="text-align:center;">Kebutuhan (Belum Memiliki)</th>
+                <th style="text-align:center;">Sudah Lulus</th>
+                <th style="min-width:140px;">Persentase Kesenjangan</th>
+              </tr>
+            </thead>
+            <tbody id="tu-peg-gaps-tbody">
+              <tr>
+                <td colspan="8" style="text-align:center; padding:20px; color:var(--n-text-muted);">
+                  Memuat peringkat kesenjangan pelatihan…
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Komposisi Headcount Personil Aktif (Existing Chart & Counters) -->
+      <div class="content-section">
+        <div class="chart-cell">
+          <div class="chart-cell-hd" style="display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <div class="chart-cell-title">Komposisi Headcount SDM Dit. POA</div>
+              <div class="chart-cell-sub">Distribusi proporsi personil berdasarkan status kepegawaian (PNS, P3K, PJLP, Magang)</div>
+            </div>
+            <button type="button" class="btn-primary ctl-md" onclick="_tuOpenPegawaiModal()">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+              </svg>
+              <span>Perbarui Headcount</span>
+            </button>
+          </div>
+          <div class="chart-box" style="height: 240px;">
+            <canvas id="tu-chart-pegawai"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Riwayat Mutasi Headcount -->
+      <div class="content-section">
+        <div class="content-section-hd" style="display:flex; justify-content:space-between; align-items:center;">
+          <div>Riwayat Mutasi &amp; Snapshot Headcount Pegawai</div>
+        </div>
+        <div id="tu-pegawai-hist-msg" class="n-msg"></div>
+        <div class="n-card" style="padding:0; overflow-x:auto;" id="tu-pegawai-history-wrap">
+          <div style="padding:20px 24px; color:var(--n-text-muted); font-size:.875rem;">Memuat riwayat kepegawaian…</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ───────────────────────────────────────────────────────────── -->
+    <!-- MODAL 1: UPLOAD BUKTI SERTIFIKAT PELATIHAN (Ramah Awak Kapal / HP) -->
+    <!-- ───────────────────────────────────────────────────────────── -->
+    <div class="n-overlay n-hidden" id="modal-tu-sertifikat">
+      <div class="n-modal n-modal-form n-modal-md">
+        <div class="modal-hd-bar">
+          <div>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <h2 id="tu-sert-modal-title">Upload Bukti Sertifikat</h2>
+              <span class="badge" style="background:var(--n-primary-light); color:var(--n-primary); font-size:.75rem;">Verifikasi Diklat</span>
+            </div>
+            <div class="modal-hd-sub" id="tu-sert-modal-subtitle">Unggah bukti file sertifikat kelulusan pelatihan atau diklat kepelautan</div>
+          </div>
+          <button type="button" class="btn-ghost" style="padding:4px;" onclick="closeModal('modal-tu-sertifikat')" aria-label="Tutup">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
             </svg>
-            Perbarui Jumlah Pegawai
           </button>
-          <button type="button" class="btn-outline" onclick="_tuLoadPegawai(true)">Muat Ulang</button>
         </div>
-      </div>
-      <div id="tu-pegawai-hist-msg" class="n-msg"></div>
-      <div class="n-card" style="padding:0; overflow-x:auto;" id="tu-pegawai-history-wrap">
-        <div style="padding:20px 24px; color:var(--n-text-muted); font-size:.875rem;">Memuat riwayat kepegawaian…</div>
+
+        <div class="n-modal-form-scroll">
+          <div id="tu-sert-modal-msg" class="n-msg"></div>
+
+          <form id="tu-sertifikat-form" onsubmit="event.preventDefault(); _tuSubmitSertifikat();">
+            <input type="hidden" id="tu-sert-pegawai-id">
+            <input type="hidden" id="tu-sert-kode">
+            <input type="hidden" id="tu-sert-nama">
+
+            <!-- Detail Sasaran Pelatihan -->
+            <div class="form-section-card" style="margin-bottom:14px;">
+              <div class="form-section-hd">
+                <span class="form-section-title">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="8" r="7"></circle>
+                    <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline>
+                  </svg>
+                  <span>Informasi Sertifikat &amp; Kelulusan</span>
+                </span>
+                <span class="form-section-badge" id="tu-sert-badge-target">Pelatihan</span>
+              </div>
+
+              <div style="background:var(--n-bg-subtle); padding:10px 14px; border-radius:8px; margin-bottom:12px;">
+                <div style="font-weight:700; font-size:.9375rem;" id="tu-sert-label-pelatihan">-</div>
+                <div style="font-size:.8125rem; color:var(--n-text-muted);" id="tu-sert-label-pegawai">-</div>
+              </div>
+
+              <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+                <div class="form-grp" style="margin-bottom:0;">
+                  <label for="tu-sert-status">Status Kelulusan <span style="color:var(--n-crit)">*</span></label>
+                  <select id="tu-sert-status" class="ctl-md" style="width:100%;" required>
+                    <option value="SUDAH_LULUS">Sudah Lulus / Memiliki Sertifikat</option>
+                    <option value="BELUM">Belum Lulus / Belum Mengikuti</option>
+                    <option value="PERLU_PEMBARUAN">Perlu Pembaruan (Revalidasi)</option>
+                  </select>
+                </div>
+                <div class="form-grp" style="margin-bottom:0;">
+                  <label for="tu-sert-tahun">Tahun Lulus Diklat</label>
+                  <input type="number" id="tu-sert-tahun" class="ctl-md tnum" style="width:100%;" min="1980" max="2035" placeholder="YYYY">
+                </div>
+              </div>
+
+              <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-top:12px;">
+                <div class="form-grp" style="margin-bottom:0;">
+                  <label for="tu-sert-nomor">Nomor Sertifikat / STTPP</label>
+                  <input type="text" id="tu-sert-nomor" class="ctl-md" style="width:100%;" placeholder="Contoh: 62.01.2023.001928">
+                </div>
+                <div class="form-grp" style="margin-bottom:0;">
+                  <label for="tu-sert-expired">Berlaku Sampai (Khusus Laut)</label>
+                  <input type="date" id="tu-sert-expired" class="ctl-md tnum" style="width:100%;">
+                </div>
+              </div>
+            </div>
+
+            <!-- Upload File Bukti (Dropzone Ramah Kamera HP) -->
+            <div class="form-section-card is-white">
+              <div class="form-section-hd">
+                <span class="form-section-title">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="17 8 12 3 7 8"></polyline>
+                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                  </svg>
+                  <span>File Bukti Fisik Sertifikat</span>
+                </span>
+                <span class="form-section-badge">PDF / Foto Maks 15MB</span>
+              </div>
+
+              <div class="file-upload-zone" id="tu-sert-dropzone" onclick="document.getElementById('tu-sert-file-input').click();">
+                <input type="file" id="tu-sert-file-input" style="display:none;" accept=".pdf,image/*" onchange="_tuHandleSertifikatFileChange(event)">
+                <div class="file-upload-icon">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                    <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                    <polyline points="21 15 16 10 5 21"></polyline>
+                  </svg>
+                </div>
+                <div class="file-upload-text" id="tu-sert-file-label">
+                  <strong>Pilih File Dokumen atau Foto Sertifikat</strong><br>
+                  Format PDF, JPG, PNG (Maks 15 MB). Di HP dapat langsung membuka kamera.
+                </div>
+              </div>
+              <div id="tu-sert-existing-link" class="n-hidden" style="margin-top:8px; font-size:.8125rem;">
+                <!-- Existing Drive Link -->
+              </div>
+            </div>
+
+            <div class="modal-foot-bar ctl-lg" style="margin-top:16px;">
+              <button type="button" class="btn-outline" onclick="closeModal('modal-tu-sertifikat')">Batal</button>
+              <button type="submit" class="btn-primary" id="tu-sert-btn-save">
+                Simpan Bukti Sertifikat
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
 
-    <!-- Modal Pembaruan Kepegawaian (STANDAR DESAIN) -->
+    <!-- ───────────────────────────────────────────────────────────── -->
+    <!-- MODAL 2: DETAIL CHECKLIST KOMPETENSI PER PERSONEL -->
+    <!-- ───────────────────────────────────────────────────────────── -->
+    <div class="n-overlay n-hidden" id="modal-tu-pegawai-detail">
+      <div class="n-modal n-modal-form n-modal-lg">
+        <div class="modal-hd-bar">
+          <div>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <h2 id="tu-det-nama">Nama Personel</h2>
+              <span class="badge" id="tu-det-badge-rumpun" style="background:var(--n-primary-light); color:var(--n-primary); font-size:.75rem;">Awak Kapal</span>
+            </div>
+            <div class="modal-hd-sub" id="tu-det-sub">Jabatan · Unit Kerja</div>
+          </div>
+          <button type="button" class="btn-ghost" style="padding:4px;" onclick="closeModal('modal-tu-pegawai-detail')" aria-label="Tutup">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+
+        <div class="n-modal-form-scroll">
+          <div id="tu-det-msg" class="n-msg"></div>
+
+          <!-- Progress Header Bar -->
+          <div style="background:var(--n-card-bg); border:1px solid var(--n-border); border-radius:10px; padding:16px; margin-bottom:16px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+              <span style="font-size:.875rem; font-weight:700;">Status Pemenuhan Standar Kompetensi</span>
+              <span id="tu-det-pct-label" style="font-weight:800; font-size:1.125rem; color:var(--n-primary);">0%</span>
+            </div>
+            <div style="height:10px; background:var(--n-border); border-radius:999px; overflow:hidden;">
+              <div id="tu-det-progress-bar" style="height:100%; width:0%; background:var(--n-primary); transition:width .3s ease;"></div>
+            </div>
+            <div style="display:flex; justify-content:space-between; font-size:.75rem; color:var(--n-text-muted); margin-top:6px;">
+              <span id="tu-det-count-label">0 dari 0 Pelatihan Terpenuhi</span>
+              <span id="tu-det-evidence-label">0 Bukti Sertifikat Terunggah</span>
+            </div>
+          </div>
+
+          <!-- Grouped Checklist Container -->
+          <div id="tu-det-checklist-wrap">
+            <!-- Populated via JS -->
+          </div>
+        </div>
+
+        <div class="modal-foot-bar ctl-lg">
+          <button type="button" class="btn-outline" onclick="closeModal('modal-tu-pegawai-detail')">Tutup</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ───────────────────────────────────────────────────────────── -->
+    <!-- MODAL 3: TAMBAH / EDIT PERSONEL MASTER (Ruang Ekspansi Masa Depan) -->
+    <!-- ───────────────────────────────────────────────────────────── -->
+    <div class="n-overlay n-hidden" id="modal-tu-pegawai-master">
+      <div class="n-modal n-modal-form n-modal-md">
+        <div class="modal-hd-bar">
+          <div>
+            <h2 id="tu-master-modal-title">Pendaftaran Personel Baru</h2>
+            <div class="modal-hd-sub">Mendaftarkan personel Dit. POA atau Awak Kapal ke dalam database SIKAP</div>
+          </div>
+          <button type="button" class="btn-ghost" style="padding:4px;" onclick="closeModal('modal-tu-pegawai-master')" aria-label="Tutup">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+
+        <div class="n-modal-form-scroll">
+          <div id="tu-master-form-msg" class="n-msg"></div>
+
+          <form id="tu-master-pegawai-form" onsubmit="event.preventDefault(); _tuSubmitPegawaiMaster();">
+            <input type="hidden" id="tu-m-pegawai-id">
+
+            <div class="form-section-card">
+              <div class="form-section-hd">
+                <span class="form-section-title">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="12" cy="7" r="4"></circle>
+                  </svg>
+                  <span>Identitas Pegawai / Personel</span>
+                </span>
+                <span class="form-section-badge">Master Data</span>
+              </div>
+
+              <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+                <div class="form-grp" style="margin-bottom:0;">
+                  <label for="tu-m-nama">Nama Lengkap &amp; Gelar <span style="color:var(--n-crit)">*</span></label>
+                  <input type="text" id="tu-m-nama" class="ctl-md" style="width:100%;" placeholder="Contoh: Capt. Slamet, M.Mar" required>
+                </div>
+                <div class="form-grp" style="margin-bottom:0;">
+                  <label for="tu-m-nip">NIP / NRP / No. Kontrak</label>
+                  <input type="text" id="tu-m-nip" class="ctl-md tnum" style="width:100%;" placeholder="18 digit NIP atau nomor identitas">
+                </div>
+              </div>
+
+              <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-top:12px;">
+                <div class="form-grp" style="margin-bottom:0;">
+                  <label for="tu-m-unit">Unit Kerja / Pangkalan <span style="color:var(--n-crit)">*</span></label>
+                  <input type="text" id="tu-m-unit" class="ctl-md" style="width:100%;" placeholder="Dit. POA / Pangkalan UPT" list="tu-m-unit-list" required>
+                  <datalist id="tu-m-unit-list"></datalist>
+                </div>
+                <div class="form-grp" style="margin-bottom:0;">
+                  <label for="tu-m-lingkup">Cakupan Lingkup Data</label>
+                  <select id="tu-m-lingkup" class="ctl-md" style="width:100%;">
+                    <option value="DIT_POA">Dit. POA (Direktorat)</option>
+                    <option value="AWAK_KAPAL_ARMADA">Awak Kapal Armada PSDKP</option>
+                    <option value="EKSPANSI">Ekspansi Unit Lain</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-section-card is-white" style="margin-top:14px;">
+              <div class="form-section-hd">
+                <span class="form-section-title">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                    <polyline points="2 17 12 22 22 17"></polyline>
+                    <polyline points="2 12 12 17 22 12"></polyline>
+                  </svg>
+                  <span>Jabatan &amp; Standar Kompetensi</span>
+                </span>
+                <span class="form-section-badge">Standar Kurikulum</span>
+              </div>
+
+              <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+                <div class="form-grp" style="margin-bottom:0;">
+                  <label for="tu-m-kelompok">Kelompok Standar Jabatan <span style="color:var(--n-crit)">*</span></label>
+                  <select id="tu-m-kelompok" class="ctl-md" style="width:100%;" required>
+                    <!-- Populated via 38 groups in JS -->
+                  </select>
+                </div>
+                <div class="form-grp" style="margin-bottom:0;">
+                  <label for="tu-m-tingkat">Tingkat / Kelas Kapal</label>
+                  <select id="tu-m-tingkat" class="ctl-md" style="width:100%;">
+                    <option value="NON_JENJANG">Non-Jenjang / Umum</option>
+                    <option value="KELAS_I">Kapal Pengawas Kelas I</option>
+                    <option value="KELAS_II">Kapal Pengawas Kelas II</option>
+                    <option value="KELAS_III">Kapal Pengawas Kelas III</option>
+                    <option value="KELAS_IV">Kapal Pengawas Kelas IV</option>
+                    <option value="AHLI_MADYA">Ahli Madya</option>
+                    <option value="AHLI_MUDA">Ahli Muda</option>
+                    <option value="AHLI_PERTAMA">Ahli Pertama</option>
+                    <option value="TERAMPIL">Terampil / Pelaksana</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-grp" style="margin-top:12px; margin-bottom:0;">
+                <label for="tu-m-jabatan-lengkap">Nama Jabatan Lengkap</label>
+                <input type="text" id="tu-m-jabatan-lengkap" class="ctl-md" style="width:100%;" placeholder="Contoh: Nakhoda Kapal Kelas II Kapal Pengawas Kelautan dan Perikanan">
+              </div>
+            </div>
+
+            <div class="modal-foot-bar ctl-lg" style="margin-top:16px;">
+              <button type="button" class="btn-outline" onclick="closeModal('modal-tu-pegawai-master')">Batal</button>
+              <button type="submit" class="btn-primary" id="tu-m-btn-save">
+                Simpan Personel
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Pembaruan Headcount Kepegawaian (Preserved) -->
     <div class="n-overlay n-hidden" id="modal-tu-pegawai-form">
       <div class="n-modal n-modal-form n-modal-lg">
         <div class="modal-hd-bar">
@@ -851,7 +1347,6 @@
           <div id="tu-pegawai-form-msg" class="n-msg"></div>
 
           <form id="tu-pegawai-form" onsubmit="event.preventDefault(); _tuSubmitPegawai();">
-            <!-- Seksi 1: Distribusi Headcount 5 Kategori -->
             <div class="form-section-card">
               <div class="form-section-hd">
                 <span class="form-section-title">
@@ -868,28 +1363,27 @@
               <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap: 14px;">
                 <div class="form-grp" style="margin-bottom:0;">
                   <label for="tu-peg-pns">PNS (Orang) <span style="color:var(--n-crit)">*</span></label>
-                  <input type="number" id="tu-peg-pns" min="0" step="1" placeholder="0" class="tnum" required>
+                  <input type="number" id="tu-peg-pns" min="0" step="1" placeholder="0" class="tnum ctl-md" required>
                 </div>
                 <div class="form-grp" style="margin-bottom:0;">
                   <label for="tu-peg-p3k">P3K Penuh Waktu <span style="color:var(--n-crit)">*</span></label>
-                  <input type="number" id="tu-peg-p3k" min="0" step="1" placeholder="0" class="tnum" required>
+                  <input type="number" id="tu-peg-p3k" min="0" step="1" placeholder="0" class="tnum ctl-md" required>
                 </div>
                 <div class="form-grp" style="margin-bottom:0;">
                   <label for="tu-peg-p3k-pw">P3K Paruh Waktu <span style="color:var(--n-crit)">*</span></label>
-                  <input type="number" id="tu-peg-p3k-pw" min="0" step="1" placeholder="0" class="tnum" required>
+                  <input type="number" id="tu-peg-p3k-pw" min="0" step="1" placeholder="0" class="tnum ctl-md" required>
                 </div>
                 <div class="form-grp" style="margin-bottom:0;">
                   <label for="tu-peg-pjlp">PJLP / Kontrak <span style="color:var(--n-crit)">*</span></label>
-                  <input type="number" id="tu-peg-pjlp" min="0" step="1" placeholder="0" class="tnum" required>
+                  <input type="number" id="tu-peg-pjlp" min="0" step="1" placeholder="0" class="tnum ctl-md" required>
                 </div>
                 <div class="form-grp" style="grid-column: span 2; margin-bottom:0;">
                   <label for="tu-peg-magang">Magang / Siswa PKL <span style="color:var(--n-crit)">*</span></label>
-                  <input type="number" id="tu-peg-magang" min="0" step="1" placeholder="0" class="tnum" required>
+                  <input type="number" id="tu-peg-magang" min="0" step="1" placeholder="0" class="tnum ctl-md" required>
                 </div>
               </div>
             </div>
 
-            <!-- Seksi 2: Keterangan / Catatan Mutasi -->
             <div class="form-section-card is-white">
               <div class="form-section-hd">
                 <span class="form-section-title">
@@ -903,7 +1397,7 @@
               </div>
               <div class="form-grp" style="margin-bottom:0;">
                 <label for="tu-peg-keterangan">Keterangan / Catatan Mutasi</label>
-                <input type="text" id="tu-peg-keterangan"
+                <input type="text" id="tu-peg-keterangan" class="ctl-md"
                   placeholder="Contoh: 2 PNS purna tugas TMT 1 Okt, 3 Magang baru dari IPB">
               </div>
             </div>
@@ -919,7 +1413,7 @@
       </div>
     </div>
 
-    <!-- Modal Anulir Kepegawaian (STANDAR DESAIN) -->
+    <!-- Modal Anulir Headcount (Preserved) -->
     <div class="n-overlay n-hidden" id="modal-tu-pegawai-anulir">
       <div class="n-modal n-modal-form n-modal-md">
         <div class="modal-hd-bar">
@@ -964,7 +1458,7 @@
             </div>
             <div class="form-grp" style="margin-bottom:0;">
               <label for="tu-peg-anulir-reason">Komentar / Alasan Anulir <span style="color:var(--n-crit)">*</span></label>
-              <input type="text" id="tu-peg-anulir-reason" placeholder="Jelaskan alasan pembatalan mutasi...">
+              <input type="text" id="tu-peg-anulir-reason" class="ctl-md" placeholder="Jelaskan alasan pembatalan mutasi...">
             </div>
           </div>
         </div>
