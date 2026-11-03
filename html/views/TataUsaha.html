@@ -69,110 +69,283 @@
 
     <!-- ── FORM INPUT MINGGUAN (Tombol terintegrasi di APBN Cockpit Header) ── -->
     <div id="tu-form-section" style="display:none;">
-      <button type="button" class="btn-primary" onclick="tuOpenForm()">Input Laporan Mingguan</button>
+      <button type="button" class="btn-outline" onclick="tuOpenPaguModal()">Kelola Pagu DIPA</button>
+      <button type="button" class="btn-primary" onclick="tuOpenForm()">Input Realisasi Mingguan</button>
     </div>
 
-    <!-- ── MODAL — INPUT LAPORAN MINGGUAN ───────────── -->
-    <div class="n-overlay n-hidden" id="modal-tu-form">
-      <div class="n-modal n-modal-form">
-        <h2>Input Laporan Mingguan</h2>
-        <div id="tu-form-context" class="modal-context">
-          <span>Pagu periode berjalan:</span>
-          <span id="tu-form-context-value">—</span>
+    <!-- ── MODAL 1 — PENETAPAN / REVISI PAGU ANGGARAN DIPA (TERPISAH) ───────────── -->
+    <div class="n-overlay n-hidden" id="modal-tu-pagu">
+      <div class="n-modal n-modal-md">
+        <div class="modal-hd-bar">
+          <div>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <h2 id="tu-pagu-modal-title">Penetapan Pagu Awal DIPA</h2>
+              <span class="badge" id="tu-pagu-modal-badge" style="background:rgba(6,78,59,0.1);color:var(--n-primary);">Pagu Awal</span>
+            </div>
+            <div class="modal-hd-sub" id="tu-pagu-modal-subtitle">
+              Tetapkan alokasi Pagu DIPA Induk (Reguler) dan Belanja Tambahan (ABT) Tahun Anggaran berjalan.
+            </div>
+          </div>
+          <button type="button" class="btn-ghost" style="padding:4px;" onclick="closeModal('modal-tu-pagu')" aria-label="Tutup">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
         </div>
+
+        <div class="n-modal-form-scroll">
+          <div id="tu-pagu-msg" class="n-msg"></div>
+
+          <!-- Dynamic Warning / Mode Banner -->
+          <div class="pagu-mode-banner is-initial" id="tu-pagu-mode-banner">
+            <div class="pagu-mode-banner-icon" id="tu-pagu-mode-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="16" x2="12" y2="12"></line>
+                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+              </svg>
+            </div>
+            <div id="tu-pagu-mode-text">
+              <strong>Penetapan Pagu Awal Tahun Anggaran:</strong> Belum ada alokasi Pagu DIPA yang tercatat. Nilai yang Anda tetapkan di sini akan menjadi batas pagu dasar (Revisi 0x) untuk perhitungan persentase serapan anggaran nasional.
+            </div>
+          </div>
+
+          <!-- Perbandingan Pagu Saat Ini vs Pagu Baru (Muncul saat mode Revisi Pagu) -->
+          <div class="pagu-compare-strip n-hidden" id="tu-pagu-compare-strip">
+            <div class="pagu-compare-col">
+              <span class="pagu-compare-lbl">Total Pagu Aktif Saat Ini</span>
+              <span class="pagu-compare-val" id="tu-pagu-cmp-old">Rp 0</span>
+              <span style="font-size:0.7rem;color:var(--n-text-muted);margin-top:2px;" id="tu-pagu-cmp-old-sub">Reg: Rp 0 · ABT: Rp 0</span>
+            </div>
+            <div class="pagu-compare-col">
+              <span class="pagu-compare-lbl">Total Pagu Baru (Usulan)</span>
+              <span class="pagu-compare-val" style="color:var(--n-primary);" id="tu-pagu-cmp-new">Rp 0</span>
+              <span style="font-size:0.7rem;color:var(--n-text-muted);margin-top:2px;" id="tu-pagu-cmp-new-sub">Reg: Rp 0 · ABT: Rp 0</span>
+            </div>
+            <div class="pagu-compare-col">
+              <span class="pagu-compare-lbl">Selisih Perubahan Pagu</span>
+              <span class="pagu-compare-val" id="tu-pagu-cmp-delta">Rp 0</span>
+              <span style="font-size:0.7rem;color:var(--n-text-muted);margin-top:2px;" id="tu-pagu-cmp-rev-next">Status: Belum berubah</span>
+            </div>
+          </div>
+
+          <!-- Input Nominal Pagu DIPA -->
+          <div class="form-section-card is-white">
+            <div class="form-section-hd">
+              <span class="form-section-title">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+                  <line x1="2" y1="10" x2="22" y2="10"></line>
+                </svg>
+                <span>Rincian Alokasi Pagu Anggaran (DIPA)</span>
+              </span>
+              <span class="form-section-badge" id="tu-pagu-total-badge">Total: Rp 0</span>
+            </div>
+
+            <div class="form-split-grid" style="margin-bottom:0;">
+              <div class="form-grp" style="margin-bottom:4px;">
+                <label for="tu-pagu-modal-reguler">Pagu DIPA Induk / Reguler (Rp) <span style="color:var(--n-crit)">*</span></label>
+                <input type="number" id="tu-pagu-modal-reguler" min="0" step="1" placeholder="0" class="tnum" oninput="_tuUpdatePaguModalPreview()">
+                <span class="n-form-hint">Alokasi belanja reguler (RM / PNBP) sesuai DIPA</span>
+              </div>
+              <div class="form-grp" style="margin-bottom:4px;">
+                <label for="tu-pagu-modal-abt">Pagu Belanja Tambahan / ABT (Rp)</label>
+                <input type="number" id="tu-pagu-modal-abt" min="0" step="1" placeholder="0" class="tnum" oninput="_tuUpdatePaguModalPreview()">
+                <span class="n-form-hint">Alokasi tambahan belanja (isi 0 jika belum ada ABT)</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Dasar Hukum / Catatan Revisi Pagu -->
+          <div class="form-grp">
+            <label for="tu-pagu-modal-catatan" id="tu-pagu-catatan-label">
+              Dasar Hukum / Catatan Penetapan Pagu
+            </label>
+            <input type="text" id="tu-pagu-modal-catatan" placeholder="Contoh: SP DIPA-032.05.1.633663/2026 atau Revisi POK Ke-1...">
+            <span class="n-form-hint" id="tu-pagu-catatan-hint">Cantumkan nomor dokumen DIPA/POK atau alasan revisi pagu sebagai jejak audit.</span>
+          </div>
+
+          <!-- Lampiran Bukti Dokumen DIPA / POK -->
+          <div id="tu-pagu-attach"></div>
+
+          <!-- Kotak Verifikasi & Konfirmasi Perubahan Pagu -->
+          <div class="pagu-verify-card" id="tu-pagu-verify-card">
+            <label class="pagu-verify-label" for="tu-pagu-verify-check">
+              <input type="checkbox" id="tu-pagu-verify-check" onchange="_tuTogglePaguVerify()">
+              <span id="tu-pagu-verify-text">
+                Saya menyatakan telah memverifikasi bahwa nominal Pagu Reguler dan ABT yang dimasukkan telah sesuai dengan dokumen DIPA / POK resmi yang sah.
+              </span>
+            </label>
+          </div>
+        </div>
+
+        <div class="modal-foot-bar ctl-lg">
+          <button type="button" class="btn-outline" onclick="closeModal('modal-tu-pagu')">Batal</button>
+          <button type="button" class="btn-primary" id="tu-btn-submit-pagu" onclick="tuSubmitPagu()" disabled>
+            Simpan Pagu DIPA
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── MODAL 2 — INPUT REALISASI MINGGUAN (WIDE, STANDAR DESAIN) ───────────── -->
+    <div class="n-overlay n-hidden" id="modal-tu-form">
+      <div class="n-modal n-modal-form n-modal-lg">
+        <div class="modal-hd-bar">
+          <div>
+            <h2>Input Laporan Realisasi Mingguan</h2>
+            <div class="modal-hd-sub">
+              Pencatatan realisasi pencairan kas negara (SP2D) dan capaian komitmen fisik (Akrual) mingguan.
+            </div>
+          </div>
+          <button type="button" class="btn-ghost" style="padding:4px;" onclick="closeModal('modal-tu-form')" aria-label="Tutup">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+
         <div class="n-modal-form-scroll">
           <div id="tu-form-msg" class="n-msg"></div>
 
-          <!-- Periode -->
-          <div class="form-grp">
-            <label for="tu-periode-tahun">Periode</label>
-            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
-              <select id="tu-periode-tahun">
-                <option value="">Tahun</option>
-              </select>
-              <select id="tu-periode-bulan">
-                <option value="">Bulan</option>
-              </select>
-              <select id="tu-periode-minggu">
-                <option value="">Minggu Ke-</option>
-              </select>
+          <!-- Read-Only Active Pagu Context Banner (Pagu di-manage di form terpisah) -->
+          <div class="pagu-context-banner" id="tu-form-context">
+            <div class="pagu-context-metrics">
+              <div class="pagu-context-item">
+                <span class="pagu-context-lbl">Pagu DIPA Reguler Aktif</span>
+                <span class="pagu-context-val" id="tu-ctx-pagu-reg">Rp 0</span>
+              </div>
+              <div class="pagu-context-item">
+                <span class="pagu-context-lbl">Pagu ABT Aktif</span>
+                <span class="pagu-context-val" id="tu-ctx-pagu-abt">Rp 0</span>
+              </div>
+              <div class="pagu-context-item">
+                <span class="pagu-context-lbl">Total Pagu Berjalan</span>
+                <span class="pagu-context-val is-total" id="tu-form-context-value">Rp 0</span>
+              </div>
             </div>
-            <div class="n-form-hint" id="tu-periode-hint">Periode: —</div>
+            <button type="button" class="btn-outline ctl-sm" onclick="closeModal('modal-tu-form'); tuOpenPaguModal();">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 20h9"></path>
+                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+              </svg>
+              <span>Kelola / Revisi Pagu</span>
+            </button>
           </div>
 
-          <!-- Pagu row (terkunci: mengikuti laporan sebelumnya) -->
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
-            <div class="form-grp">
-              <label for="tu-pagu-reguler">Pagu Reguler (Rp)</label>
-              <input type="number" id="tu-pagu-reguler" min="0" step="1" placeholder="0" readonly>
+          <!-- Hidden Pagu Carry-Forward Inputs (Diisi otomatis dari Pagu Aktif) -->
+          <input type="hidden" id="tu-pagu-reguler" value="0">
+          <input type="hidden" id="tu-pagu-abt" value="0">
+          <input type="hidden" id="tu-catatan" value="">
+          <div class="n-hidden" id="tu-pagu-bar">
+            <span id="tu-pagu-bar-txt"></span>
+            <button type="button" id="tu-btn-unlock-pagu"></button>
+            <button type="button" id="tu-btn-lock-pagu"></button>
+          </div>
+          <div class="n-hidden" id="tu-pagu-rev"></div>
+          <div class="n-hidden" id="tu-catatan-wrap"></div>
+
+          <!-- Seksi 1: Pemilihan Periode Pelaporan -->
+          <div class="form-section-card">
+            <div class="form-section-hd">
+              <span class="form-section-title">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                  <line x1="16" y1="2" x2="16" y2="6"></line>
+                  <line x1="8" y1="2" x2="8" y2="6"></line>
+                  <line x1="3" y1="10" x2="21" y2="10"></line>
+                </svg>
+                <span>Periode Laporan Mingguan</span>
+              </span>
+              <span class="form-section-badge" id="tu-periode-hint">Periode: —</span>
             </div>
-            <div class="form-grp">
-              <label for="tu-pagu-abt">Pagu ABT (Rp)</label>
-              <input type="number" id="tu-pagu-abt" min="0" step="1" placeholder="0" readonly>
+            <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:12px;">
+              <div class="form-grp" style="margin-bottom:0;">
+                <label for="tu-periode-tahun">Tahun Anggaran</label>
+                <select id="tu-periode-tahun">
+                  <option value="">Tahun</option>
+                </select>
+              </div>
+              <div class="form-grp" style="margin-bottom:0;">
+                <label for="tu-periode-bulan">Bulan</label>
+                <select id="tu-periode-bulan">
+                  <option value="">Bulan</option>
+                </select>
+              </div>
+              <div class="form-grp" style="margin-bottom:0;">
+                <label for="tu-periode-minggu">Minggu Ke-</label>
+                <select id="tu-periode-minggu">
+                  <option value="">Minggu Ke-</option>
+                </select>
+              </div>
             </div>
           </div>
 
-          <!-- Bar kunci Pagu -->
-          <div class="tu-pagu-bar n-hidden" id="tu-pagu-bar">
-            <span id="tu-pagu-bar-txt" style="font-size:.78rem;color:var(--n-text-muted);"></span>
-            <button type="button" id="tu-btn-unlock-pagu" class="btn-mini" onclick="tuUnlockPagu(true)">Ubah
-              Pagu</button>
-            <button type="button" id="tu-btn-lock-pagu" class="btn-mini n-hidden"
-              onclick="tuUnlockPagu(false)">Batalkan</button>
+          <!-- Seksi 2: Matriks 2 Kolom Realisasi SP2D (Kas) & Akrual (Fisik) -->
+          <div class="form-split-grid">
+            <!-- Kolom Kiri: Realisasi Kas Negara (SP2D) -->
+            <div class="form-section-card is-white" style="margin-bottom:0;">
+              <div class="form-section-hd">
+                <span class="form-section-title">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="1" x2="12" y2="23"></line>
+                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                  </svg>
+                  <span>Realisasi SP2D (Kas Cair)</span>
+                </span>
+                <span class="form-section-badge" id="tu-sp2d-subtotal-badge">Rp 0</span>
+              </div>
+              <div class="form-grp">
+                <label for="tu-real-sp2d-reguler">SP2D DIPA Reguler Minggu Ini (Rp)</label>
+                <input type="number" id="tu-real-sp2d-reguler" min="0" step="1" placeholder="0" class="tnum"
+                  oninput="_tuUpdateFormRealTotals()">
+              </div>
+              <div class="form-grp" style="margin-bottom:0;">
+                <label for="tu-real-sp2d-abt">SP2D Belanja Tambahan / ABT (Rp)</label>
+                <input type="number" id="tu-real-sp2d-abt" min="0" step="1" placeholder="0" class="tnum"
+                  oninput="_tuUpdateFormRealTotals()">
+              </div>
+            </div>
+
+            <!-- Kolom Kanan: Realisasi Komitmen Fisik (Akrual) -->
+            <div class="form-section-card is-white" style="margin-bottom:0;">
+              <div class="form-section-hd">
+                <span class="form-section-title">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                  </svg>
+                  <span>Realisasi Akrual (Komitmen Fisik)</span>
+                </span>
+                <span class="form-section-badge" id="tu-akrual-subtotal-badge">Rp 0</span>
+              </div>
+              <div class="form-grp">
+                <label for="tu-real-akrual-reguler">Akrual DIPA Reguler Minggu Ini (Rp)</label>
+                <input type="number" id="tu-real-akrual-reguler" min="0" step="1" placeholder="0" class="tnum"
+                  oninput="_tuUpdateFormRealTotals()">
+              </div>
+              <div class="form-grp" style="margin-bottom:0;">
+                <label for="tu-real-akrual-abt">Akrual Belanja Tambahan / ABT (Rp)</label>
+                <input type="number" id="tu-real-akrual-abt" min="0" step="1" placeholder="0" class="tnum"
+                  oninput="_tuUpdateFormRealTotals()">
+              </div>
+            </div>
           </div>
 
-          <!-- Berapa kali pagu sudah direvisi (dihitung server dari seluruh riwayat) -->
-          <div class="tu-pagu-rev" id="tu-pagu-rev">—</div>
-
-          <!-- Realisasi 2x2 Matrix: SP2D & Akrual x Reguler & ABT -->
-          <div
-            style="font-size:.8125rem;font-weight:600;color:var(--n-text-secondary);margin-top:12px;margin-bottom:6px;">
-            Realisasi SP2D Minggu Ini (Kas / Pencairan)</div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
-            <div class="form-grp">
-              <label for="tu-real-sp2d-reguler">SP2D Reguler (Rp)</label>
-              <input type="number" id="tu-real-sp2d-reguler" min="0" step="1" placeholder="0"
-                oninput="_tuUpdateFormRealTotals()">
-            </div>
-            <div class="form-grp">
-              <label for="tu-real-sp2d-abt">SP2D ABT (Rp)</label>
-              <input type="number" id="tu-real-sp2d-abt" min="0" step="1" placeholder="0"
-                oninput="_tuUpdateFormRealTotals()">
-            </div>
+          <div id="tu-real-totals-hint" class="n-form-hint" style="margin-top:-6px; margin-bottom:10px; font-weight:600; color:var(--n-text-secondary);">
+            Total Minggu Ini — SP2D: Rp 0 · Akrual: Rp 0
           </div>
 
-          <div
-            style="font-size:.8125rem;font-weight:600;color:var(--n-text-secondary);margin-top:10px;margin-bottom:6px;">
-            Realisasi Akrual Minggu Ini (Beban / Fisik)</div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
-            <div class="form-grp">
-              <label for="tu-real-akrual-reguler">Akrual Reguler (Rp)</label>
-              <input type="number" id="tu-real-akrual-reguler" min="0" step="1" placeholder="0"
-                oninput="_tuUpdateFormRealTotals()">
-            </div>
-            <div class="form-grp">
-              <label for="tu-real-akrual-abt">Akrual ABT (Rp)</label>
-              <input type="number" id="tu-real-akrual-abt" min="0" step="1" placeholder="0"
-                oninput="_tuUpdateFormRealTotals()">
-            </div>
-          </div>
-
-          <div id="tu-real-totals-hint" class="n-form-hint" style="margin-top:-4px;margin-bottom:12px;">Total Minggu Ini
-            — SP2D: Rp 0 · Akrual: Rp 0</div>
-
-          <!-- Catatan revisi pagu (muncul & wajib hanya saat "Ubah Pagu" ditekan) -->
-          <div class="form-grp n-hidden" id="tu-catatan-wrap">
-            <label for="tu-catatan">Catatan Revisi Pagu <span style="color:var(--n-crit);font-weight:500;">(wajib
-                isi)</span></label>
-            <input type="text" id="tu-catatan" placeholder="Alasan perubahan pagu...">
-          </div>
-
+          <!-- Seksi 3: Lampiran & Bukti Dukung -->
           <div id="tu-attach"></div>
         </div>
 
-        <div class="ctl-row ctl-lg ctl-fill" style="margin-top:20px;">
-          <button class="btn-primary" id="tu-btn-submit" onclick="tuSubmit()">Simpan Laporan</button>
-          <button class="btn-outline" onclick="closeModal('modal-tu-form')">Batal</button>
+        <div class="modal-foot-bar ctl-lg">
+          <button type="button" class="btn-outline" onclick="closeModal('modal-tu-form')">Batal</button>
+          <button type="button" class="btn-primary" id="tu-btn-submit" onclick="tuSubmit()">
+            Simpan Realisasi Mingguan
+          </button>
         </div>
       </div>
     </div>
@@ -186,70 +359,99 @@
       </div>
     </div>
 
-    <!-- ── MODAL REVISI ANGGARAN ─────────────────────── -->
+    <!-- ── MODAL REVISI ANGGARAN (WIDE, STANDAR DESAIN) ─────────────────────── -->
     <div class="n-overlay n-hidden" id="modal-tu-revisi">
-      <div class="n-modal">
-        <h2>Revisi Laporan</h2>
-        <div id="tu-revisi-info" style="margin-bottom:14px;font-size:.875rem;color:var(--n-text-secondary);"></div>
-        <div id="tu-revisi-msg" class="n-msg"></div>
+      <div class="n-modal n-modal-form n-modal-lg">
+        <div class="modal-hd-bar">
+          <div>
+            <h2>Koreksi / Revisi Laporan Periode</h2>
+            <div class="modal-hd-sub" id="tu-revisi-info">Merevisi data laporan periode terpilih.</div>
+          </div>
+          <button type="button" class="btn-ghost" style="padding:4px;" onclick="tuCloseRevisiModal()" aria-label="Tutup">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
 
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
-          <div class="form-grp">
-            <label for="rv-pagu-reguler">Pagu Reguler (Rp)</label>
-            <input type="number" id="rv-pagu-reguler" min="0" step="1" placeholder="0">
+        <div class="n-modal-form-scroll">
+          <div id="tu-revisi-msg" class="n-msg"></div>
+
+          <!-- Pagu Terkait Baris Ini -->
+          <div class="form-section-card">
+            <div class="form-section-hd">
+              <span class="form-section-title">Pagu Anggaran pada Periode Ini</span>
+              <span class="form-section-badge" id="rv-pagu-rev">—</span>
+            </div>
+            <div class="form-split-grid" style="margin-bottom:0;">
+              <div class="form-grp" style="margin-bottom:0;">
+                <label for="rv-pagu-reguler">Pagu Reguler (Rp)</label>
+                <input type="number" id="rv-pagu-reguler" min="0" step="1" placeholder="0" class="tnum">
+              </div>
+              <div class="form-grp" style="margin-bottom:0;">
+                <label for="rv-pagu-abt">Pagu ABT (Rp)</label>
+                <input type="number" id="rv-pagu-abt" min="0" step="1" placeholder="0" class="tnum">
+              </div>
+            </div>
           </div>
-          <div class="form-grp">
-            <label for="rv-pagu-abt">Pagu ABT (Rp)</label>
-            <input type="number" id="rv-pagu-abt" min="0" step="1" placeholder="0">
+
+          <!-- Realisasi 2x2 Matrix Revisi -->
+          <div class="form-split-grid">
+            <div class="form-section-card is-white" style="margin-bottom:0;">
+              <div class="form-section-hd">
+                <span class="form-section-title">Realisasi SP2D Minggu Ini (Kas)</span>
+              </div>
+              <div class="form-grp">
+                <label for="rv-real-sp2d-reguler">SP2D Reguler (Rp)</label>
+                <input type="number" id="rv-real-sp2d-reguler" min="0" step="1" placeholder="0" class="tnum"
+                  oninput="_tuUpdateRvRealTotals()">
+              </div>
+              <div class="form-grp" style="margin-bottom:0;">
+                <label for="rv-real-sp2d-abt">SP2D ABT (Rp)</label>
+                <input type="number" id="rv-real-sp2d-abt" min="0" step="1" placeholder="0" class="tnum"
+                  oninput="_tuUpdateRvRealTotals()">
+              </div>
+            </div>
+
+            <div class="form-section-card is-white" style="margin-bottom:0;">
+              <div class="form-section-hd">
+                <span class="form-section-title">Realisasi Akrual Minggu Ini (Fisik)</span>
+              </div>
+              <div class="form-grp">
+                <label for="rv-real-akrual-reguler">Akrual Reguler (Rp)</label>
+                <input type="number" id="rv-real-akrual-reguler" min="0" step="1" placeholder="0" class="tnum"
+                  oninput="_tuUpdateRvRealTotals()">
+              </div>
+              <div class="form-grp" style="margin-bottom:0;">
+                <label for="rv-real-akrual-abt">Akrual ABT (Rp)</label>
+                <input type="number" id="rv-real-akrual-abt" min="0" step="1" placeholder="0" class="tnum"
+                  oninput="_tuUpdateRvRealTotals()">
+              </div>
+            </div>
           </div>
+
+          <div id="rv-real-totals-hint" class="n-form-hint" style="margin-top:-6px;margin-bottom:12px;font-weight:600;">
+            Total Minggu Ini — SP2D: Rp 0 · Akrual: Rp 0
+          </div>
+
+          <div class="form-split-grid" style="margin-bottom:8px;">
+            <div class="form-grp" style="margin-bottom:0;">
+              <label for="rv-alasan">Alasan Koreksi / Revisi Laporan <span style="color:var(--n-crit)">*</span></label>
+              <input type="text" id="rv-alasan" placeholder="Jelaskan apa yang dikoreksi dan mengapa">
+            </div>
+            <div class="form-grp" style="margin-bottom:0;">
+              <label for="rv-catatan">Catatan Revisi Pagu <span style="color:var(--n-text-muted);font-weight:400;">(jika Pagu berubah)</span></label>
+              <input type="text" id="rv-catatan" placeholder="Opsional — dasar dokumen perubahan pagu">
+            </div>
+          </div>
+
+          <div id="tu-revisi-attach"></div>
         </div>
-        <div class="tu-pagu-rev" id="rv-pagu-rev">—</div>
-        <!-- Realisasi 2x2 Matrix Revisi -->
-        <div
-          style="font-size:.8125rem;font-weight:600;color:var(--n-text-secondary);margin-top:12px;margin-bottom:6px;">
-          Realisasi SP2D Minggu Ini (Kas / Pencairan)</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
-          <div class="form-grp">
-            <label for="rv-real-sp2d-reguler">SP2D Reguler (Rp)</label>
-            <input type="number" id="rv-real-sp2d-reguler" min="0" step="1" placeholder="0"
-              oninput="_tuUpdateRvRealTotals()">
-          </div>
-          <div class="form-grp">
-            <label for="rv-real-sp2d-abt">SP2D ABT (Rp)</label>
-            <input type="number" id="rv-real-sp2d-abt" min="0" step="1" placeholder="0"
-              oninput="_tuUpdateRvRealTotals()">
-          </div>
-        </div>
-        <div
-          style="font-size:.8125rem;font-weight:600;color:var(--n-text-secondary);margin-top:10px;margin-bottom:6px;">
-          Realisasi Akrual Minggu Ini (Beban / Fisik)</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
-          <div class="form-grp">
-            <label for="rv-real-akrual-reguler">Akrual Reguler (Rp)</label>
-            <input type="number" id="rv-real-akrual-reguler" min="0" step="1" placeholder="0"
-              oninput="_tuUpdateRvRealTotals()">
-          </div>
-          <div class="form-grp">
-            <label for="rv-real-akrual-abt">Akrual ABT (Rp)</label>
-            <input type="number" id="rv-real-akrual-abt" min="0" step="1" placeholder="0"
-              oninput="_tuUpdateRvRealTotals()">
-          </div>
-        </div>
-        <div id="rv-real-totals-hint" class="n-form-hint" style="margin-top:-4px;margin-bottom:12px;">Total Minggu Ini —
-          SP2D: Rp 0 · Akrual: Rp 0</div>
-        <div class="form-grp">
-          <label for="rv-alasan">Alasan Revisi <span style="color:var(--n-crit)">*</span></label>
-          <input type="text" id="rv-alasan" placeholder="Jelaskan apa yang diubah dan mengapa">
-        </div>
-        <div class="form-grp">
-          <label for="rv-catatan">Catatan Revisi Pagu <span style="color:var(--n-text-muted);font-weight:400;">(jika
-              Pagu berubah)</span></label>
-          <input type="text" id="rv-catatan" placeholder="Opsional">
-        </div>
-        <div id="tu-revisi-attach"></div>
-        <div class="ctl-stack" style="margin-top:16px;">
-          <button class="btn-primary" id="btn-confirm-revisi" onclick="tuRevisiConfirm()">Simpan Revisi</button>
-          <button class="btn-ghost" onclick="tuCloseRevisiModal()">Batal</button>
+
+        <div class="modal-foot-bar ctl-lg">
+          <button type="button" class="btn-outline" onclick="tuCloseRevisiModal()">Batal</button>
+          <button type="button" class="btn-primary" id="btn-confirm-revisi" onclick="tuRevisiConfirm()">Simpan Revisi</button>
         </div>
       </div>
     </div>
@@ -257,8 +459,18 @@
     <!-- ── MODAL ANULIR ANGGARAN ─────────────────────── -->
     <div class="n-overlay n-hidden" id="modal-tu-anulir">
       <div class="n-modal">
-        <h2>Anulir Laporan</h2>
-        <div id="tu-anulir-info" style="margin-bottom:14px;font-size:.875rem;color:var(--n-text-secondary);"></div>
+        <div class="modal-hd-bar">
+          <div>
+            <h2>Anulir Laporan Anggaran</h2>
+            <div class="modal-hd-sub" id="tu-anulir-info"></div>
+          </div>
+          <button type="button" class="btn-ghost" style="padding:4px;" onclick="tuCloseAnulirModal()" aria-label="Tutup">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
         <div class="n-info-static" style="margin-bottom:14px;">
           Komentar anulir akan terlihat oleh seluruh anggota divisi.
           Staf dapat mengunggah laporan baru setelah memperbaiki data.
@@ -268,10 +480,9 @@
           <label for="anulir-reason">Komentar Anulir <span style="color:var(--n-crit)">*</span></label>
           <input type="text" id="anulir-reason" placeholder="Jelaskan apa yang perlu diperbaiki staf">
         </div>
-        <div class="ctl-stack" style="margin-top:16px;">
-          <button class="btn-danger-solid" id="btn-confirm-anulir" onclick="tuAnulirConfirm()">Konfirmasi
-            Anulir</button>
-          <button class="btn-ghost" onclick="tuCloseAnulirModal()">Batal</button>
+        <div class="modal-foot-bar ctl-lg">
+          <button type="button" class="btn-outline" onclick="tuCloseAnulirModal()">Batal</button>
+          <button type="button" class="btn-danger-solid" id="btn-confirm-anulir" onclick="tuAnulirConfirm()">Konfirmasi Anulir</button>
         </div>
       </div>
     </div>
@@ -404,13 +615,13 @@
 
     <!-- ── MODAL INPUT PROGRES PAKET ─────────────────────── -->
     <div class="n-overlay n-hidden" id="modal-tu-paket-form">
-      <div class="n-modal n-modal-form" style="max-width: 620px;">
-        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px;">
+      <div class="n-modal n-modal-form n-modal-lg">
+        <div class="modal-hd-bar">
           <div>
-            <h2 id="tu-paket-modal-title" style="margin:0 0 4px 0;">Catat Progres Paket Pengadaan</h2>
-            <div style="font-size:0.78rem; color:var(--n-text-muted);">Siklus hidup 6 tahap pekerjaan Dit. POA</div>
+            <h2 id="tu-paket-modal-title">Catat Progres Paket Pengadaan</h2>
+            <div class="modal-hd-sub">Pencatatan siklus hidup 6 tahap pekerjaan pengadaan barang/jasa Dit. POA</div>
           </div>
-          <button class="btn-ghost" style="padding:4px;" onclick="closeModal('modal-tu-paket-form')" aria-label="Tutup">
+          <button type="button" class="btn-ghost" style="padding:4px;" onclick="closeModal('modal-tu-paket-form')" aria-label="Tutup">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <line x1="18" y1="6" x2="6" y2="18"></line>
               <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -422,7 +633,7 @@
           <div id="tu-paket-form-msg" class="n-msg"></div>
 
           <form id="tu-paket-form" onsubmit="event.preventDefault(); _tuSubmitPaket();">
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 6px;">
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 4px;">
               <div class="form-grp" style="grid-column: span 2;">
                 <label for="tu-pkt-nama">Nama Paket Pekerjaan <span style="color:var(--n-crit)">*</span></label>
                 <input type="text" id="tu-pkt-nama" placeholder="Contoh: Pengadaan Genset Pangkalan Benoa 2026" required>
@@ -480,8 +691,8 @@
               </div>
             </div>
 
-            <div class="ctl-row ctl-lg" style="justify-content:flex-end; margin-top:20px; padding-top:14px; border-top:1px solid var(--n-border-hairline);">
-              <button type="button" class="btn-ghost" onclick="closeModal('modal-tu-paket-form')">Batal</button>
+            <div class="modal-foot-bar ctl-lg">
+              <button type="button" class="btn-outline" onclick="closeModal('modal-tu-paket-form')">Batal</button>
               <button type="submit" class="btn-primary" id="tu-pkt-btn-save">
                 Simpan Progres Paket
               </button>
@@ -547,21 +758,28 @@
 
     <!-- Modal Pembaruan Kepegawaian -->
     <div class="n-overlay n-hidden" id="modal-tu-pegawai-form">
-      <div class="n-modal n-modal-form" style="max-width: 540px;">
-        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px;">
+      <div class="n-modal n-modal-form n-modal-md">
+        <div class="modal-hd-bar">
           <div>
-            <h2 style="margin:0 0 4px 0;">Pembaruan Jumlah Pegawai</h2>
-            <div style="font-size:0.78rem; color:var(--n-text-muted);">Snapshot headcount personil aktif terkini</div>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <h2>Pembaruan Jumlah Pegawai</h2>
+              <span class="badge" style="background:var(--n-primary-light);color:var(--n-primary);font-size:.75rem;">Carry-Forward</span>
+            </div>
+            <div class="modal-hd-sub">Snapshot komposisi headcount personil aktif terkini</div>
           </div>
-          <span class="badge"
-            style="background:var(--n-primary-light);color:var(--n-primary);font-size:.75rem;">Carry-Forward</span>
+          <button type="button" class="btn-ghost" style="padding:4px;" onclick="closeModal('modal-tu-pegawai-form')" aria-label="Tutup">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
         </div>
 
         <div class="n-modal-form-scroll">
           <div id="tu-pegawai-form-msg" class="n-msg"></div>
 
           <form id="tu-pegawai-form" onsubmit="event.preventDefault(); _tuSubmitPegawai();">
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 6px;">
+            <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 4px;">
               <div class="form-grp">
                 <label for="tu-peg-pns">PNS (Orang)</label>
                 <input type="number" id="tu-peg-pns" min="0" step="1" placeholder="0" class="tnum" required>
@@ -575,22 +793,22 @@
                 <input type="number" id="tu-peg-p3k-pw" min="0" step="1" placeholder="0" class="tnum" required>
               </div>
               <div class="form-grp">
-                <label for="tu-peg-pjlp">PJLP / Honorer</label>
+                <label for="tu-peg-pjlp">PJLP / Kontrak</label>
                 <input type="number" id="tu-peg-pjlp" min="0" step="1" placeholder="0" class="tnum" required>
               </div>
               <div class="form-grp" style="grid-column: span 2;">
                 <label for="tu-peg-magang">Magang / Siswa PKL</label>
                 <input type="number" id="tu-peg-magang" min="0" step="1" placeholder="0" class="tnum" required>
               </div>
-              <div class="form-grp" style="grid-column: span 2;">
+              <div class="form-grp" style="grid-column: span 3; margin-bottom:4px;">
                 <label for="tu-peg-keterangan">Keterangan / Catatan Mutasi</label>
                 <input type="text" id="tu-peg-keterangan"
                   placeholder="Contoh: 2 PNS purna tugas TMT 1 Okt, 3 Magang baru dari IPB">
               </div>
             </div>
 
-            <div class="ctl-row ctl-lg" style="justify-content:flex-end; margin-top:20px;">
-              <button type="button" class="btn-ghost" onclick="closeModal('modal-tu-pegawai-form')">Batal</button>
+            <div class="modal-foot-bar ctl-lg">
+              <button type="button" class="btn-outline" onclick="closeModal('modal-tu-pegawai-form')">Batal</button>
               <button type="submit" class="btn-primary" id="tu-peg-btn-save">
                 Simpan Pembaruan
               </button>
@@ -1052,10 +1270,17 @@
               <!-- Sub-kolom kiri: Unggah Foto Fisik -->
               <div>
                 <div style="display:flex; flex-direction:column; gap:8px;">
-                  <label for="bmn-form-foto" style="font-size:.75rem; font-weight:600; color:var(--n-text-secondary);">
+                  <span style="font-size:.75rem; font-weight:600; color:var(--n-text-secondary);">
                     Pilih / Ambil Foto Aset (Kamera / Berkas)
+                  </span>
+                  <input type="file" id="bmn-form-foto" class="n-file-input-hidden" accept="image/*" onchange="_bmnHandlePhotoFile(event)">
+                  <label for="bmn-form-foto" class="n-file-trigger-btn">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                      <circle cx="12" cy="13" r="4"></circle>
+                    </svg>
+                    <span>Pilih Foto Fisik Aset</span>
                   </label>
-                  <input type="file" id="bmn-form-foto" accept="image/*" onchange="_bmnHandlePhotoFile(event)" style="font-size:.8125rem;">
 
                   <!-- Thumbnail preview box -->
                   <div id="bmn-photo-preview-wrap" style="position:relative; width:100%; height:130px; border-radius:var(--n-radius-sm); border:1px dashed var(--n-border); background:var(--n-surface-1); display:flex; align-items:center; justify-content:center; overflow:hidden; margin-top:4px;">

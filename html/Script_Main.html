@@ -5554,6 +5554,8 @@ function _formSubmitDone(modalId, sub, onClose, ok) {
 // selama tahap unggah (bukan hanya saat simpan ke server).
 var _ATTACH_MODAL = {
   tu: 'modal-tu-form',
+  'tu-pagu': 'modal-tu-pagu',
+  'tu-revisi': 'modal-tu-revisi',
   opslaut: 'modal-ops-laut-form',
   opsudara: 'modal-ops-udara-form',
   intel: 'modal-int-form',
@@ -5949,26 +5951,45 @@ function _attachInit(key, cfg) {
     after: null
   };
   el.innerHTML =
-    '<div class="content-section">' +
-      '<div class="content-section-hd">Lampiran</div>' +
-      '<div class="attach-row">' +
-        '<label class="attach-check">' +
+    '<div class="attach-section-card">' +
+      '<div class="attach-hd-bar">' +
+        '<span class="attach-hd-title">' +
+          '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+            '<path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/>' +
+          '</svg>' +
+          '<span>Lampiran &amp; Bukti Dukung</span>' +
+        '</span>' +
+        '<label class="attach-check-pill">' +
           '<input type="checkbox" id="' + k + '-noatt" onchange="_attachToggle(\'' + k + '\')">' +
-          '<span>Pengunggahan ini tidak perlu lampiran</span>' +
+          '<span>Tanpa lampiran pada pengunggahan ini</span>' +
         '</label>' +
       '</div>' +
       '<div id="' + k + '-fields" class="attach-fields">' +
-        '<div class="form-grp">' +
-          '<label for="' + k + '-files">Unggah file (bisa lebih dari satu; maks 15MB file biasa, 50MB video)</label>' +
-          '<input type="file" id="' + k + '-files" multiple onchange="_attachPickFiles(\'' + k + '\')">' +
-        '</div>' +
-        '<div class="form-grp">' +
-          '<label for="' + k + '-link">Atau tempel link Google Drive</label>' +
-          '<input type="text" id="' + k + '-link" placeholder="https://drive.google.com/file/d/..." oninput="_attachLinkInput(\'' + k + '\')">' +
+        '<div class="attach-grid-2">' +
+          '<div>' +
+            '<input type="file" id="' + k + '-files" class="n-file-input-hidden" multiple onchange="_attachPickFiles(\'' + k + '\')">' +
+            '<label for="' + k + '-files" class="n-file-picker-card">' +
+              '<span class="n-file-picker-ico">' +
+                '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+                  '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>' +
+                  '<polyline points="17 8 12 3 7 8"/>' +
+                  '<line x1="12" y1="3" x2="12" y2="15"/>' +
+                '</svg>' +
+              '</span>' +
+              '<span class="n-file-picker-txt">' +
+                '<span class="n-file-picker-main">Pilih Berkas dari Perangkat</span>' +
+                '<span class="n-file-picker-sub">Bisa lebih dari 1 file · Maks 15MB (Video 20MB)</span>' +
+              '</span>' +
+            '</label>' +
+          '</div>' +
+          '<div class="attach-link-box">' +
+            '<label class="attach-link-lbl" for="' + k + '-link">Atau Tempel Tautan Google Drive / YouTube</label>' +
+            '<input type="text" id="' + k + '-link" placeholder="https://drive.google.com/file/d/..." oninput="_attachLinkInput(\'' + k + '\')">' +
+          '</div>' +
         '</div>' +
         '<div id="' + k + '-list"></div>' +
       '</div>' +
-      '<div id="' + k + '-attach-msg" class="n-msg"></div>' +
+      '<div id="' + k + '-attach-msg" class="n-msg" style="margin-top:8px;margin-bottom:0;"></div>' +
     '</div>';
   return _ATTACH[k];
 }
@@ -6364,19 +6385,28 @@ function _tuRenderKPI(d) {
   var progAkrual = Math.min(Math.max(d.pctAkrual || 0, 0), 100);
   var selisih    = Math.abs((d.realisasiAkrual || 0) - (d.realisasiSP2D || 0));
   var isKasLebihBesar = (d.realisasiSP2D || 0) >= (d.realisasiAkrual || 0);
+  var hasPagu    = Number(d.paguTotal || 0) > 0;
+  var paguBtnLabel = hasPagu ? 'Revisi Pagu DIPA' : 'Input Pagu Awal';
+  var paguBtnIcon  = hasPagu
+    ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>'
+    : '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg>';
 
   var html = '' +
     '<div class="sikap-treasury-cockpit">' +
-      '<!-- Top Command Bar: Title, Subtitle, Status Badges, Action Button -->' +
+      '<!-- Top Command Bar: Title, Status Badges, Separate Pagu & Realisasi Buttons -->' +
       '<div class="treasury-header">' +
         '<div class="treasury-title-group">' +
           '<h2 class="treasury-title">Dasbor Penyerapan Anggaran &amp; Kas Negara</h2>' +
         '</div>' +
         '<div class="treasury-actions">' +
           '<span class="treasury-tag-revision">Revisi Pagu: ' + (d.revisiPagu || 0) + 'x</span>' +
+          '<button type="button" class="btn-outline" onclick="tuOpenPaguModal()">' +
+            paguBtnIcon +
+            '<span>' + paguBtnLabel + '</span>' +
+          '</button>' +
           '<button type="button" class="btn-primary" onclick="tuOpenForm()">' +
             '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>' +
-            '<span>Input Laporan Mingguan</span>' +
+            '<span>Input Realisasi Mingguan</span>' +
           '</button>' +
         '</div>' +
       '</div>' +
@@ -6494,9 +6524,17 @@ function _tuUpdateFormRealTotals() {
   var sAbt = Number((document.getElementById('tu-real-sp2d-abt') || {}).value) || 0;
   var aReg = Number((document.getElementById('tu-real-akrual-reguler') || {}).value) || 0;
   var aAbt = Number((document.getElementById('tu-real-akrual-abt') || {}).value) || 0;
+  var sp2dTot = sReg + sAbt;
+  var akruTot = aReg + aAbt;
+
+  var sp2dBadge = document.getElementById('tu-sp2d-subtotal-badge');
+  if (sp2dBadge) sp2dBadge.textContent = _rupiah(sp2dTot);
+  var akruBadge = document.getElementById('tu-akrual-subtotal-badge');
+  if (akruBadge) akruBadge.textContent = _rupiah(akruTot);
+
   var hint = document.getElementById('tu-real-totals-hint');
   if (hint) {
-    hint.textContent = 'Total Minggu Ini \u2014 SP2D: ' + _rupiah(sReg + sAbt) + ' \u00B7 Akrual: ' + _rupiah(aReg + aAbt);
+    hint.textContent = 'Total Minggu Ini \u2014 SP2D: ' + _rupiah(sp2dTot) + ' \u00B7 Akrual: ' + _rupiah(akruTot);
   }
 }
 
@@ -6511,7 +6549,226 @@ function _tuUpdateRvRealTotals() {
   }
 }
 
-// ── FORM (POPUP, BACKLOG A) ──────────────────────────────
+// ── FORM DEDICATED PAGU DIPA (INPUT PAGU AWAL vs REVISI PAGU) ──────────────
+
+function tuOpenPaguModal() {
+  var k = _TU.kpi || {};
+  var oldReg = Number(k.paguReguler) || 0;
+  var oldAbt = Number(k.paguABT) || 0;
+  var oldTot = oldReg + oldAbt;
+  var revCount = parseInt(k.revisiPagu, 10) || 0;
+  var isRevisi = oldTot > 0;
+
+  _TU._paguBase = { r: oldReg, a: oldAbt };
+
+  var titleEl    = document.getElementById('tu-pagu-modal-title');
+  var subEl      = document.getElementById('tu-pagu-modal-subtitle');
+  var badgeEl    = document.getElementById('tu-pagu-modal-badge');
+  var bannerEl   = document.getElementById('tu-pagu-mode-banner');
+  var iconEl     = document.getElementById('tu-pagu-mode-icon');
+  var textEl     = document.getElementById('tu-pagu-mode-text');
+  var cmpStrip   = document.getElementById('tu-pagu-compare-strip');
+  var catLbl     = document.getElementById('tu-pagu-catatan-label');
+  var verifyTxt  = document.getElementById('tu-pagu-verify-text');
+  var submitBtn  = document.getElementById('tu-btn-submit-pagu');
+
+  if (isRevisi) {
+    if (titleEl) titleEl.textContent = 'Revisi Pagu Anggaran (DIPA)';
+    if (subEl) subEl.textContent = 'Perubahan resmi alokasi pagu anggaran berdasarkan dokumen revisi DIPA / POK yang sah.';
+    if (badgeEl) {
+      badgeEl.textContent = 'Revisi ke-' + (revCount + 1);
+      badgeEl.style.background = '#FEF3C7';
+      badgeEl.style.color = '#92400E';
+    }
+    if (bannerEl) bannerEl.className = 'pagu-mode-banner is-revisi';
+    if (iconEl) {
+      iconEl.innerHTML =
+        '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+          '<path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>' +
+          '<line x1="12" y1="9" x2="12" y2="13"></line>' +
+          '<line x1="12" y1="17" x2="12.01" y2="17"></line>' +
+        '</svg>';
+    }
+    if (textEl) {
+      textEl.innerHTML =
+        '<strong>Peringatan Perubahan Pagu DIPA:</strong> Mengubah nominal Pagu akan langsung menghitung ulang seluruh persentase serapan anggaran nasional (YTD) dan menambah riwayat penghitung menjadi <strong>Revisi Pagu ke-' + (revCount + 1) + '</strong>. Pastikan perubahan ini didasarkan pada dokumen revisi DIPA/POK resmi.';
+    }
+    if (cmpStrip) cmpStrip.classList.remove('n-hidden');
+    if (catLbl) catLbl.innerHTML = 'Dasar Hukum / Catatan Revisi Pagu DIPA <span style="color:var(--n-crit)">* (Wajib Diisi)</span>';
+    if (verifyTxt) {
+      verifyTxt.textContent = 'Saya menyatakan telah memverifikasi bahwa perubahan nominal Pagu ini telah sesuai dengan dokumen Revisi DIPA / POK resmi yang sah, dan menyetujui pencatatan Revisi Pagu ke-' + (revCount + 1) + '.';
+    }
+    if (submitBtn) submitBtn.textContent = 'Konfirmasi & Simpan Revisi Pagu';
+  } else {
+    if (titleEl) titleEl.textContent = 'Penetapan Pagu Awal DIPA';
+    if (subEl) subEl.textContent = 'Tetapkan alokasi Pagu DIPA Induk (Reguler) dan Belanja Tambahan (ABT) Tahun Anggaran berjalan.';
+    if (badgeEl) {
+      badgeEl.textContent = 'Pagu Awal';
+      badgeEl.style.background = 'rgba(6,78,59,0.1)';
+      badgeEl.style.color = 'var(--n-primary)';
+    }
+    if (bannerEl) bannerEl.className = 'pagu-mode-banner is-initial';
+    if (iconEl) {
+      iconEl.innerHTML =
+        '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+          '<circle cx="12" cy="12" r="10"></circle>' +
+          '<line x1="12" y1="16" x2="12" y2="12"></line>' +
+          '<line x1="12" y1="8" x2="12.01" y2="8"></line>' +
+        '</svg>';
+    }
+    if (textEl) {
+      textEl.innerHTML =
+        '<strong>Penetapan Pagu Awal Tahun Anggaran:</strong> Belum ada alokasi Pagu DIPA yang tercatat pada sistem. Nilai yang Anda tetapkan akan menjadi batas pagu dasar (Revisi 0x) untuk seluruh perhitungan serapan anggaran.';
+    }
+    if (cmpStrip) cmpStrip.classList.add('n-hidden');
+    if (catLbl) catLbl.innerHTML = 'Dasar Hukum / Nomor Dokumen DIPA Awal';
+    if (verifyTxt) {
+      verifyTxt.textContent = 'Saya menyatakan telah memverifikasi bahwa nominal Pagu Awal (Reguler dan ABT) di atas telah sesuai dengan dokumen DIPA resmi yang berlaku.';
+    }
+    if (submitBtn) submitBtn.textContent = 'Simpan Pagu Awal DIPA';
+  }
+
+  var regInp = document.getElementById('tu-pagu-modal-reguler');
+  var abtInp = document.getElementById('tu-pagu-modal-abt');
+  var catInp = document.getElementById('tu-pagu-modal-catatan');
+  var chkInp = document.getElementById('tu-pagu-verify-check');
+  var vCard  = document.getElementById('tu-pagu-verify-card');
+
+  if (regInp) regInp.value = isRevisi ? oldReg : '';
+  if (abtInp) abtInp.value = isRevisi ? oldAbt : '';
+  if (catInp) catInp.value = '';
+  if (chkInp) chkInp.checked = false;
+  if (vCard) vCard.classList.remove('is-checked');
+  if (submitBtn) submitBtn.disabled = true;
+
+  _tuUpdatePaguModalPreview();
+  _msg('tu-pagu-msg', null);
+  _attachInit('tu-pagu', { refSheet: 'TX_TataUsaha' });
+
+  var mEl = document.getElementById('modal-tu-pagu');
+  if (mEl) mEl.classList.remove('n-hidden');
+}
+
+function _tuUpdatePaguModalPreview() {
+  var k = _TU.kpi || {};
+  var oldReg = Number(k.paguReguler) || 0;
+  var oldAbt = Number(k.paguABT) || 0;
+  var oldTot = oldReg + oldAbt;
+  var revCount = parseInt(k.revisiPagu, 10) || 0;
+
+  var newReg = Number((document.getElementById('tu-pagu-modal-reguler') || {}).value) || 0;
+  var newAbt = Number((document.getElementById('tu-pagu-modal-abt') || {}).value) || 0;
+  var newTot = newReg + newAbt;
+  var delta  = newTot - oldTot;
+  var changed = (newReg !== oldReg) || (newAbt !== oldAbt);
+
+  var totBadge = document.getElementById('tu-pagu-total-badge');
+  if (totBadge) totBadge.textContent = 'Total: ' + _rupiah(newTot);
+
+  var cmpOld = document.getElementById('tu-pagu-cmp-old');
+  var cmpOldSub = document.getElementById('tu-pagu-cmp-old-sub');
+  var cmpNew = document.getElementById('tu-pagu-cmp-new');
+  var cmpNewSub = document.getElementById('tu-pagu-cmp-new-sub');
+  var cmpDelta = document.getElementById('tu-pagu-cmp-delta');
+  var cmpRevNext = document.getElementById('tu-pagu-cmp-rev-next');
+
+  if (cmpOld) cmpOld.textContent = _rupiah(oldTot);
+  if (cmpOldSub) cmpOldSub.textContent = 'Reg: ' + _rupiah(oldReg) + ' \u00B7 ABT: ' + _rupiah(oldAbt);
+  if (cmpNew) cmpNew.textContent = _rupiah(newTot);
+  if (cmpNewSub) cmpNewSub.textContent = 'Reg: ' + _rupiah(newReg) + ' \u00B7 ABT: ' + _rupiah(newAbt);
+
+  if (cmpDelta) {
+    var sign = delta > 0 ? '+' : (delta < 0 ? '-' : '');
+    cmpDelta.textContent = sign + _rupiah(Math.abs(delta));
+    cmpDelta.style.color = delta > 0 ? '#059669' : (delta < 0 ? 'var(--n-crit)' : 'var(--n-text-secondary)');
+  }
+  if (cmpRevNext) {
+    cmpRevNext.textContent = changed
+      ? 'Akan dicatat sebagai Revisi ke-' + (revCount + 1)
+      : 'Nominal belum berubah dari Pagu aktif';
+  }
+}
+
+function _tuTogglePaguVerify() {
+  var chk = document.getElementById('tu-pagu-verify-check');
+  var card = document.getElementById('tu-pagu-verify-card');
+  var btn = document.getElementById('tu-btn-submit-pagu');
+  var isChecked = !!(chk && chk.checked);
+  if (card) card.classList.toggle('is-checked', isChecked);
+  if (btn) btn.disabled = !isChecked;
+}
+
+function tuSubmitPagu() {
+  var btn = document.getElementById('tu-btn-submit-pagu');
+  _msg('tu-pagu-msg', null);
+
+  var chk = document.getElementById('tu-pagu-verify-check');
+  if (!chk || !chk.checked) {
+    _msg('tu-pagu-msg', 'error', 'Harap centang pernyataan verifikasi dokumen DIPA/POK terlebih dahulu.');
+    return;
+  }
+
+  var pReg = Number((document.getElementById('tu-pagu-modal-reguler') || {}).value) || 0;
+  var pAbt = Number((document.getElementById('tu-pagu-modal-abt') || {}).value) || 0;
+  var cat  = String((document.getElementById('tu-pagu-modal-catatan') || {}).value || '').trim();
+
+  if (pReg + pAbt <= 0) {
+    _msg('tu-pagu-msg', 'error', 'Total alokasi Pagu DIPA (Reguler + ABT) harus lebih besar dari Rp 0.');
+    return;
+  }
+
+  var k = _TU.kpi || {};
+  var oldReg = Number(k.paguReguler) || 0;
+  var oldAbt = Number(k.paguABT) || 0;
+  var isRevisi = (oldReg + oldAbt) > 0;
+
+  if (isRevisi) {
+    if (pReg === oldReg && pAbt === oldAbt) {
+      _msg('tu-pagu-msg', 'error', 'Nominal Pagu Reguler dan Pagu ABT belum berubah dari Pagu aktif saat ini.');
+      return;
+    }
+    if (!cat) {
+      _msg('tu-pagu-msg', 'error', 'Dasar hukum / Catatan Revisi Pagu DIPA wajib diisi saat melakukan revisi Pagu.');
+      return;
+    }
+  }
+
+  var attachErr = _attachValidate('tu-pagu');
+  if (attachErr) {
+    _msg('tu-pagu-msg', 'error', attachErr);
+    return;
+  }
+
+  _setLoading(btn, true);
+  var params = {
+    paguReguler: pReg,
+    paguABT: pAbt,
+    catatanRevisiPagu: cat,
+    verified: true
+  };
+
+  google.script.run
+    .withSuccessHandler(function (res) {
+      _setLoading(btn, false);
+      if (!res || !res.success) {
+        _msg('tu-pagu-msg', 'error', (res && res.error) || 'Gagal menyimpan data Pagu.');
+        return;
+      }
+      _msg('tu-pagu-msg', 'success', res.data.message);
+      _attachUploadAll('tu-pagu', [res.data.rowId], function (ok) {
+        _formSubmitDone('modal-tu-pagu', res.data.message, function () {
+          _tuLoadKPI();
+        }, ok);
+      });
+    })
+    .withFailureHandler(function () {
+      _setLoading(btn, false);
+      _msg('tu-pagu-msg', 'error', 'Terjadi kesalahan koneksi saat menyimpan Pagu. Coba lagi.');
+    })
+    .tataUsaha_submitPagu(APP.token, params);
+}
+
+// ── FORM REALISASI MINGGUAN (POPUP, BACKLOG A) ──────────────────────────────
 
 function tuOpenForm() {
   ['tahun', 'bulan', 'minggu'].forEach(function (k) {
@@ -6531,8 +6788,7 @@ function tuOpenForm() {
   });
   _tuUpdateFormRealTotals();
 
-  // Pagu: kunci & isi otomatis dari laporan ACTIVE terakhir (KPI punya pagu periode berjalan).
-  // Hanya berubah bila user menekan "Ubah Pagu". Bila belum ada laporan sebelumnya, Pagu bebas diisi.
+  // Pagu: otomatis diwarisi dari Pagu aktif saat ini (dikelola terpisah lewat tuOpenPaguModal)
   _TU._paguBase = { r: null, a: null };
   var k = _TU.kpi;
   var kp = (k && (Number(k.paguReguler) > 0 || Number(k.paguABT) > 0)) ? k : null;
@@ -6543,9 +6799,6 @@ function tuOpenForm() {
     if (pr) pr.value = kp.paguReguler;
     if (pa) pa.value = kp.paguABT;
   }
-  _tuSetPaguBar(kp ? 'lock' : 'none');
-  _tuShowCatatan(false);
-  _tuRenderRevisiPagu('tu-pagu-rev', false);
 
   _tuFillFormContext();
   _msg('tu-form-msg', '', '');
@@ -6668,10 +6921,13 @@ function tuUnlockPagu(enable) {
 }
 
 function _tuFillFormContext() {
-  var ctx = document.getElementById('tu-form-context-value');
-  if (!ctx) return;
   var d = _TU.kpi;
-  ctx.textContent = d ? _rupiah(d.paguReguler) + ' · ABT ' + _rupiah(d.paguABT) : '—';
+  var regEl = document.getElementById('tu-ctx-pagu-reg');
+  var abtEl = document.getElementById('tu-ctx-pagu-abt');
+  var ctx   = document.getElementById('tu-form-context-value');
+  if (regEl) regEl.textContent = d ? _rupiah(d.paguReguler || 0) : 'Rp 0';
+  if (abtEl) abtEl.textContent = d ? _rupiah(d.paguABT || 0) : 'Rp 0';
+  if (ctx)   ctx.textContent   = d ? _rupiah(d.paguTotal || ((d.paguReguler || 0) + (d.paguABT || 0))) : 'Rp 0';
 }
 
 // ── HISTORY ───────────────────────────────────────────────
@@ -12373,318 +12629,6 @@ var INTEL_LABELS = {
   PELANGGARAN_PERIZINAN:       'Pelanggaran Perizinan Berusaha',
   PELANGGARAN_TRANSMITTER:     'Pelanggaran Mematikan Transmitter',
   NOTA_DINAS:                  'Nota Dinas Data Intelijen',
-  KAWASAN_KONSERVASI:          'Pelanggaran Kawasan Konservasi',
-  KAPAL_PENGANGKUT_IKAN_HIDUP: 'Kapal Pengangkut Ikan Hidup'
-};
-
-var _INTEL = {
-  pendingRowId:  null,
-  kawasanData:   null,
-  kpiData:       null,
-  rows:          [],
-  kawasanFilter: null,
-  kawasanFilterNama: '',
-  kejadianList:  null, // _nList kejadian intelijen (form tambah)
-  revisiList:    null  // _nList kejadian intelijen (modal revisi)
-};
-
-function _renderIntelijen(el) {
-  var tpl = document.getElementById('view-tpl-intelijen');
-  if (!tpl) { el.innerHTML = _moduleStub('Intelijen'); return; }
-  el.innerHTML = tpl.innerHTML;
-  _attachInit('intel', { refSheet: 'TX_Intelijen' });
-
-  _INTEL.kawasanFilter = null;
-  _INTEL.kawasanFilterNama = '';
-
-  _opsInitPeriodeUi('int-');
-  _intelLoadKawasanOptions();
-  _intelLoadKPI();
-  _intelLoadHistory();
-
-  var pHint = document.getElementById('int-periode-hint');
-  if (pHint) {
-    google.script.run.withSuccessHandler(function(res){
-      if (res) pHint.textContent = 'Periode saat ini: ' + res;
-    }).utils_getCurrentPeriode();
-  }
-}
-
-function intelOpenForm() {
-  _intelResetForm();
-  _msg('int-form-msg', '', '');
-  _attachInit('intel', { refSheet: 'TX_Intelijen' });
-  var m = document.getElementById('modal-int-form');
-  if (m) m.classList.remove('n-hidden');
-}
-
-// ── Dropdown kawasan (relasional, bukan free-text) ──
-function _intelLoadKawasanOptions() {
-  google.script.run
-    .withSuccessHandler(function(res) {
-      if (res.success) {
-        _INTEL.kawasanData = res.data || [];
-        intelAddKawasanRow();
-      } else {
-        _msg('int-form-msg', 'error', 'Gagal memuat daftar kawasan: ' + res.error);
-      }
-    })
-    .withFailureHandler(function() {
-      _msg('int-form-msg', 'error', 'Koneksi terputus saat memuat kawasan.');
-    })
-    .master_getKawasanList(APP.token);
-}
-
-function intelAddKawasanRow() {
-  var wrap = document.getElementById('int-kawasan-rows');
-  if (!wrap) return;
-  var opts = '<option value="">(Pilih Kawasan)</option>';
-  (_INTEL.kawasanData || []).forEach(function(k) {
-    opts += '<option value="' + _esc(k.kawasanId) + '">' + _esc(k.nama) + (k.provinsi ? ' — ' + _esc(k.provinsi) : '') + '</option>';
-  });
-  var div = document.createElement('div');
-  div.className = 'int-kawasan-row';
-  div.style.cssText = 'display:grid;grid-template-columns:2fr 0.8fr 1.6fr auto;gap:10px;margin-bottom:10px;align-items:end;';
-  div.innerHTML =
-    '<div class="form-grp" style="margin:0;"><label>Kawasan</label>' +
-      '<select class="int-kw-sel">' + opts + '</select></div>' +
-    '<div class="form-grp" style="margin:0;"><label>Jumlah</label>' +
-      '<input type="number" class="int-kw-jml" min="0" step="1" placeholder="0"></div>' +
-    '<div class="form-grp" style="margin:0;"><label>Keterangan</label>' +
-      '<input type="text" class="int-kw-ket" placeholder="Opsional"></div>' +
-    '<div class="form-grp" style="margin:0;">' +
-      '<button type="button" class="n-iconbtn" title="Hapus baris kawasan" aria-label="Hapus baris kawasan" ' +
-      'onclick="this.closest(\'.int-kawasan-row\').remove()">' + _ico('trash') + '</button></div>';
-  wrap.appendChild(div);
-}
-
-// ── KPI ──
-function _intelLoadKPI(silent) {
-  var strip = document.getElementById('int-kpi-strip');
-  if (strip && !silent) strip.innerHTML = _kpiSkeleton(6);
-
-  google.script.run
-    .withSuccessHandler(function(res) {
-      if (res.success) {
-        _INTEL.kpiData = res.data;
-        _intelRenderKPI(res.data);
-        _intelRenderKawasanTable(res.data.kawasan || []);
-        _intelBuildJenisChart(res.data);
-        _intelLoadCharts();
-      } else if (strip) {
-        strip.innerHTML = '<div class="n-msg error">Gagal memuat KPI: ' + _esc(res.error) + '</div>';
-      }
-    })
-    .withFailureHandler(function() {
-      if (strip) strip.innerHTML = '<div class="n-msg error">Koneksi terputus.</div>';
-    })
-    .intelijen_getKPI(APP.token, APP.filter);
-}
-
-function _intelRenderKPI(kpi) {
-  var strip = document.getElementById('int-kpi-strip');
-  if (!strip) return;
-
-  var kawasanTotal = 0;
-  if (kpi.kawasanPeriode) {
-    Object.keys(kpi.kawasanPeriode).forEach(function(k){ kawasanTotal += (kpi.kawasanPeriode[k] || 0); });
-  }
-
-  function card(label, value) {
-    return '<div class="n-card"><div class="kpi-label">' + _esc(label) + '</div>' +
-           '<div class="kpi-val">' + (value || 0) + '</div></div>';
-  }
-
-  strip.innerHTML = '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;">' +
-    card('Dredging / Underwater Ops', kpi.dredging) +
-    card('Pelanggaran Perizinan',      kpi.pelanggaranPerizinan) +
-    card('Pelanggaran Transmitter',    kpi.pelanggaranTransmitter) +
-    card('Nota Dinas',                 kpi.notaDinas) +
-    card('Pengangkut Ikan Hidup',      kpi.kapalPengangkutIkanHidup) +
-    card('Pelanggaran Kawasan',        kawasanTotal) +
-  '</div>';
-}
-
-// ── Tabel Kawasan Konservasi (§8.2) ──
-function _intelRenderKawasanTable(rows) {
-  var wrap = document.getElementById('int-kawasan-wrap');
-  if (!wrap) return;
-
-  if (!rows || rows.length === 0) {
-    wrap.innerHTML = '<div style="padding:20px 24px;color:var(--n-text-muted);font-size:.875rem;">Belum ada data kawasan konservasi pada master.</div>';
-    return;
-  }
-
-  var t = '<table class="n-table n-table-full"><thead><tr>' +
-    '<th>Kawasan</th><th>Provinsi</th><th>Pelanggaran Periode</th><th>YTD</th><th>Tren</th><th>Laporan</th>' +
-    '</tr></thead><tbody>';
-
-  for (var i = 0; i < rows.length; i++) {
-    var r = rows[i];
-    var tren = '<span style="color:var(--n-text-muted);">—</span>';
-    if (r.tren === 'NAIK')  tren = '<span style="color:var(--n-status-critical);font-weight:600;">▲ Naik</span>';
-    else if (r.tren === 'TURUN') tren = '<span style="color:var(--n-status-success);font-weight:600;">▼ Turun</span>';
-
-    t += '<tr>';
-    t += '<td>' + _esc(r.nama) + '</td>';
-    t += '<td>' + _esc(r.provinsi) + '</td>';
-    t += '<td>' + (r.pelanggaranPeriode || 0) + '</td>';
-    t += '<td>' + (r.pelanggaranYTD || 0) + '</td>';
-    t += '<td>' + tren + '</td>';
-    t += '<td><button class="btn-mini" onclick="intelSetKawasanFilter(\'' + String(r.kawasanId).replace(/[^A-Za-z0-9_-]/g,'') + '\')">Riwayat</button></td>';
-    t += '</tr>';
-  }
-
-  t += '</tbody></table>';
-  wrap.innerHTML = t;
-}
-
-function intelSetKawasanFilter(kawasanId) {
-  _INTEL.kawasanFilter = kawasanId;
-  _INTEL.kawasanFilterNama = '';
-  (_INTEL.kpiData && _INTEL.kpiData.kawasan ? _INTEL.kpiData.kawasan : []).forEach(function(k){
-    if (String(k.kawasanId) === String(kawasanId)) _INTEL.kawasanFilterNama = k.nama;
-  });
-  _intelLoadHistory();
-  var hw = document.getElementById('int-history-wrap');
-  if (hw && hw.scrollIntoView) hw.scrollIntoView({ behavior: 'smooth', block: 'start' });
-}
-
-function intelClearKawasanFilter() {
-  _INTEL.kawasanFilter = null;
-  _INTEL.kawasanFilterNama = '';
-  _intelLoadHistory();
-}
-
-// ── Riwayat ──
-function _intelLoadHistory(silent) {
-  var wrap = document.getElementById('int-history-wrap');
-  if (!wrap) return;
-  if (!silent) wrap.innerHTML = _loadingInline('Memuat riwayat intelijen\u2026');
-
-  google.script.run
-    .withSuccessHandler(function(res) {
-      if (res.success) { _INTEL.rows = res.data; _intelRenderHistory(res.data); }
-      else wrap.innerHTML = '<div class="n-msg error">' + _esc(res.error) + '</div>';
-    })
-    .withFailureHandler(function() {
-      wrap.innerHTML = '<div class="n-msg error">Koneksi terputus.</div>';
-    })
-    .intelijen_getHistory(APP.token, APP.filter);
-}
-
-function _intelRenderHistory(data) {
-  var rows = data || [];
-  if (_INTEL.kawasanFilter) {
-    rows = rows.filter(function (r) { return String(r.KawasanID || '') === String(_INTEL.kawasanFilter); });
-  }
-
-  var chip = '';
-  if (_INTEL.kawasanFilter) {
-    chip = '<div style="padding:12px 24px;border-bottom:1px solid var(--n-border-subtle);font-size:.82rem;">' +
-      'Menampilkan kawasan: <strong>' + _esc(_INTEL.kawasanFilterNama) + '</strong> ' +
-      '<button class="btn-mini" onclick="intelClearKawasanFilter()">Tampilkan Semua</button></div>';
-  }
-
-  var isPimpinan = (APP.user && (APP.user.role === 'DIREKTUR' || APP.user.role === 'SUPERADMIN' || APP.user.role === 'KADIV'));
-  var canWrite = (APP.user && (APP.user.role === 'SUPERADMIN' || (APP.user.divisiId === 'DIV-INTEL' && (APP.user.role === 'STAF' || APP.user.role === 'KADIV'))));
-
-  _histRender('int-history-wrap', {
-    columns: ['Periode', 'Kategori', 'Jumlah', 'Detail'],
-    cells: function (r) {
-      return [_esc(r.periode), _esc(INTEL_LABELS[r.Jenis] || r.Jenis), _idNum(r.Jumlah), _esc(_intelDetail(r))];
-    },
-    refSheet: 'TX_Intelijen',
-    title: function (r) { return 'Intelijen — ' + (INTEL_LABELS[r.Jenis] || r.Jenis) + ' · Periode ' + r.periode; },
-    detail: function (r) {
-      return [
-        ['Periode', _esc(r.periode)],
-        ['Kategori', _esc(INTEL_LABELS[r.Jenis] || r.Jenis)],
-        ['Jumlah', _idNum(r.Jumlah)],
-        ['Kawasan', r.Jenis !== 'KAWASAN_KONSERVASI' ? '—' : _esc(r.kawasanNama || r.KawasanID || '—')],
-        ['Detail', _esc(_intelDetail(r))],
-        ['Dikirim', _esc(r.timestamp ? new Date(r.timestamp).toLocaleString('id-ID') : '—')],
-        ['Status', _esc(r.status)]
-      ].concat(_rncDetailFields(r.rincian));
-    },
-    revisi: canWrite  ? function (r) { return "intelOpenRevisiModal('" + _esc(r.rowId) + "')"; } : null,
-    anulir: isPimpinan ? function (r) { return "intelOpenAnulirModal('" + _esc(r.rowId) + "')"; } : null,
-    empty: 'Belum ada laporan untuk periode ini.'
-  }, rows, chip);
-}
-
-// Nilai kolom "Detail" — sama antara baris tabel dan modal Lihat.
-function _intelDetail(r) {
-  if (r.Jenis === 'KAWASAN_KONSERVASI') return r.kawasanNama || r.KawasanID || '—';
-  return r.Keterangan || '—';
-}
-
-// ── Submit ──
-function intelSubmit(e) {
-  _msg('int-form-msg', '', '');
-  var attachErr = _attachValidate('intel');
-  if (attachErr) { _msg('int-form-msg', 'error', attachErr); return; }
-  var periode = _composePeriode('int-');
-  if (!periode) { _msg('int-form-msg', 'error', 'Periode wajib dipilih.'); return; }
-
-  var items = [];
-  // Kejadian intelijen (5 jenis non-kawasan): jumlah dihitung sistem
-  // dari daftar rincian per kejadian, dikelompokkan per jenis.
-  var kejadian = _intelBindKejadianList().get();
-  var byJenis = {};
-  kejadian.forEach(function (k) {
-    var j = String(k.Jenis || '');
-    if (!j) return;
-    if (!byJenis[j]) byJenis[j] = [];
-    byJenis[j].push({ Deskripsi: String(k.Deskripsi || '') });
-  });
-  Object.keys(byJenis).forEach(function (j) {
-    items.push({ jenis: j, rincian: byJenis[j] });
-  });
-
-  var kwRows = document.querySelectorAll('#int-kawasan-rows .int-kawasan-row');
-  for (var i = 0; i < kwRows.length; i++) {
-    var sel = kwRows[i].querySelector('.int-kw-sel');
-    var jml = kwRows[i].querySelector('.int-kw-jml');
-    var ket = kwRows[i].querySelector('.int-kw-ket');
-    if (sel && sel.value) {
-      items.push({
-        jenis: 'KAWASAN_KONSERVASI',
-        kawasanId: sel.value,
-        jumlah: parseInt(jml && jml.value, 10) || 0,
-        keterangan: ket ? ket.value : ''
-      });
-    }
-  }
-
-  if (items.length === 0) { _msg('int-form-msg', 'error', 'Minimal satu kejadian atau kawasan wajib diisi.'); return; }
-
-  var btn = document.getElementById('int-btn-submit');
-  _setLoading(btn, true);
-
-  google.script.run
-    .withSuccessHandler(function(res) {
-      _setLoading(btn, false);
-      if (res.success) {
-        _msg('int-form-msg', 'success', res.data.message);
-        var rowIds = (res.data && res.data.rowIds) || [];
-        _intelResetForm();
-        _attachUploadAll('intel', rowIds, function(ok) {
-          _formSubmitDone('modal-int-form', 'Laporan intelijen tersimpan.', function () {
-            _intelLoadKPI();
-            _intelLoadHistory();
-            _msg('int-form-msg', '', '');
-          }, ok);
-        });
-      } else {
-        _msg('int-form-msg', 'error', res.error);
-      }
-    })
-    .withFailureHandler(function() {
-      _setLoading(btn, false);
-      _msg('int-form-msg', 'error', 'Koneksi terputus.');
-    })
-    .intelijen_submitMingguan(APP.token, { periode: periode, items: items });
 }
 
 function _intelKejadianColumn() {

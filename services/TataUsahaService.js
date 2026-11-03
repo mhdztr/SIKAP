@@ -345,10 +345,16 @@ function tataUsaha_submitMingguan(token, params) {
         };
       }
 
-      // Ambil Pagu terbaru (untuk cek perubahan)
+      // Ambil Pagu terbaru (untuk carry-forward atau cek perubahan)
       var activeAll = rows.filter(function (r) { return String(r['Status']) === ROW_STATUS.ACTIVE; });
       activeAll.sort(function (a, b) { return new Date(b['Timestamp']) - new Date(a['Timestamp']); });
       var prevActive = activeAll[0] || null;
+
+      // Jika laporan realisasi mingguan menggunakan pagu berjalan secara otomatis
+      if (prevActive && paguReguler === 0 && paguABT === 0 && !catatanRevisi) {
+        paguReguler = _num(prevActive['PaguReguler']);
+        paguABT     = _num(prevActive['PaguABT']);
+      }
 
       // Validasi: jika Pagu berubah dari sebelumnya, wajib isi catatan
       if (prevActive) {
@@ -391,11 +397,133 @@ function tataUsaha_submitMingguan(token, params) {
 
       return {
         success: true,
-        data: { rowId: rowId, message: 'Laporan berhasil disimpan.' }
+        data: { rowId: rowId, message: 'Laporan realisasi mingguan berhasil disimpan.' }
       };
     });
   } catch (e) {
     Logger.log('[tataUsaha_submitMingguan] ' + e.message);
+    return { success: false, error: e.message };
+  }
+}
+
+// ── PENETAPAN & REVISI PAGU ANGGARAN (DEDICATED FORM) ─────
+
+/**
+ * Menetapkan Pagu Awal DIPA atau menyimpan Revisi Pagu DIPA secara terpisah dari input realisasi mingguan.
+ *
+ * @param {string} token
+ * @param {{
+ *   paguReguler: number,
+ *   paguABT: number,
+ *   catatanRevisiPagu: string,
+ *   verified: boolean
+ * }} params
+ */
+function tataUsaha_submitPagu(token, params) {
+  try {
+    return withLock(function () {
+      var session = _tuRequireSession(token);
+      _tuAssertWrite(session);
+
+      var paguReguler   = _numParam(params.paguReguler, 'Pagu Reguler (DIPA Induk)');
+      var paguABT       = _numParam(params.paguABT,     'Pagu Belanja Tambahan (ABT)');
+      var catatanRevisi = String(params.catatanRevisiPagu || '').trim();
+      var isVerified    = !!params.verified;
+
+      if (paguReguler + paguABT <= 0) {
+        return {
+          success: false,
+          error: 'Total alokasi Pagu DIPA (Reguler + ABT) harus lebih besar dari Rp 0.'
+        };
+      }
+
+      if (!isVerified) {
+        return {
+          success: false,
+          error: 'Konfirmasi verifikasi dokumen DIPA/POK wajib dicentang sebelum menyimpan Pagu.'
+        };
+      }
+
+      var sheet = openTuSheet(SHEET_TU.TATA_USAHA);
+      var rows  = sheetToObjects(sheet);
+
+      var activeAll = rows.filter(function (r) { return String(r['Status']) === ROW_STATUS.ACTIVE; });
+      activeAll.sort(function (a, b) { return new Date(b['Timestamp']) - new Date(a['Timestamp']); });
+      var prevActive = activeAll[0] || null;
+
+      var prevReg = prevActive ? _num(prevActive['PaguReguler']) : 0;
+      var prevAbt = prevActive ? _num(prevActive['PaguABT'])     : 0;
+      var hasExistingPagu = (prevReg + prevAbt) > 0;
+
+      if (hasExistingPagu) {
+        if (paguReguler === prevReg && paguABT === prevAbt) {
+          return {
+            success: false,
+            error: 'Nominal Pagu Reguler dan Pagu ABT sama dengan Pagu aktif saat ini. Tidak ada perubahan untuk direvisi.'
+          };
+        }
+        if (!catatanRevisi) {
+          return {
+            success: false,
+            error: 'Dasar hukum / Catatan Revisi Pagu DIPA wajib diisi saat melakukan perubahan Pagu.'
+          };
+        }
+      } else {
+        if (!catatanRevisi) {
+          catatanRevisi = 'Penetapan Pagu Awal DIPA';
+        }
+      }
+
+      var revCount = _tuHitungRevisiPagu(activeAll);
+      var basePeriode = getCurrentPeriode();
+      var labelPeriode = hasExistingPagu
+        ? (basePeriode + ' (Revisi Pagu #' + (revCount + 1) + ')')
+        : (basePeriode + ' (Pagu Awal)');
+
+      var now   = new Date();
+      var rowId = 'TU-' + Utilities.getUuid().replace(/-/g, '').substring(0, 14).toUpperCase();
+
+      appendRowData(sheet, {
+        'RowID':                          rowId,
+        'DivisiID':                       _TU_DIVISI_ID,
+        'Periode':                        labelPeriode,
+        'SubmittedBy':                    session.userId,
+        'Timestamp':                      now,
+        'Status':                         ROW_STATUS.ACTIVE,
+        'SupersedesRowID':                '',
+        'VoidReason':                     '',
+        'VoidedBy':                       '',
+        'VoidedAt':                       '',
+        'PaguReguler':                    paguReguler,
+        'PaguABT':                        paguABT,
+        'RealisasiSP2D_Minggu':           0,
+        'RealisasiAkrual_Minggu':         0,
+        'RealisasiSP2D_Reguler_Minggu':   0,
+        'RealisasiSP2D_ABT_Minggu':       0,
+        'RealisasiAkrual_Reguler_Minggu': 0,
+        'RealisasiAkrual_ABT_Minggu':     0,
+        'CatatanRevisiPagu':              catatanRevisi
+      });
+
+      _tuAuditLog(
+        session.userId,
+        hasExistingPagu ? 'REVISI_PAGU' : 'SET_PAGU_AWAL',
+        rowId,
+        catatanRevisi
+      );
+
+      return {
+        success: true,
+        data: {
+          rowId: rowId,
+          message: hasExistingPagu
+            ? 'Revisi Pagu DIPA berhasil disimpan (Revisi ke-' + (revCount + 1) + ').'
+            : 'Penetapan Pagu Awal DIPA berhasil disimpan.'
+        }
+      };
+    });
+  } catch (e) {
+    Logger.log('[tataUsaha_submitPagu] ' + e.message);
     return { success: false, error: e.message };
   }
 }

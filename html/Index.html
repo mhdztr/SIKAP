@@ -13,6 +13,26 @@
 </head>
 <body>
 
+<!-- SVG Filter Contour Outline Logo PSDKP (Tanpa Kotak Latar) -->
+<svg width="0" height="0" style="position:absolute;width:0;height:0;overflow:hidden;pointer-events:none;" aria-hidden="true">
+  <defs>
+    <filter id="psdkp-crest-outline" x="-28%" y="-28%" width="156%" height="156%" color-interpolation-filters="sRGB">
+      <feMorphology in="SourceAlpha" operator="dilate" radius="2.2" result="dilated" />
+      <feGaussianBlur in="dilated" stdDeviation="0.55" result="smoothed" />
+      <feComponentTransfer in="smoothed" result="solidAlpha">
+        <feFuncA type="table" tableValues="0 0.85 1 1" />
+      </feComponentTransfer>
+      <feFlood flood-color="#FFFFFF" flood-opacity="0.96" result="whiteFill" />
+      <feComposite in="whiteFill" in2="solidAlpha" operator="in" result="whiteOutline" />
+      <feDropShadow in="whiteOutline" dx="0" dy="2" stdDeviation="2.5" flood-color="#021810" flood-opacity="0.38" result="outlinedShadow" />
+      <feMerge>
+        <feMergeNode in="outlinedShadow" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+  </defs>
+</svg>
+
 <!-- =========================================================
      LOADING — tampil saat cek sesi awal
      ========================================================= -->
