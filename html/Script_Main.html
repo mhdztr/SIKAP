@@ -7264,7 +7264,9 @@ function _tuFillPegawaiForm(counts) {
   var pjlpInput   = document.getElementById('tu-peg-pjlp');
   var magangInput = document.getElementById('tu-peg-magang');
 
-  if (pnsInput)    pnsInput.value    = counts.PNS !== undefined ? counts.PNS : '';
+  var pnsCount = counts.PNS || (_TU.kompetensiData && _TU.kompetensiData.kpi && _TU.kompetensiData.kpi.totalDitPoa) || 261;
+
+  if (pnsInput)    pnsInput.value    = pnsCount;
   if (p3kInput)    p3kInput.value    = counts.P3K !== undefined ? counts.P3K : '';
   if (p3kPwInput)  p3kPwInput.value  = counts.P3K_PARUH_WAKTU !== undefined ? counts.P3K_PARUH_WAKTU : '';
   if (pjlpInput)   pjlpInput.value   = counts.PJLP !== undefined ? counts.PJLP : '';
@@ -7272,9 +7274,7 @@ function _tuFillPegawaiForm(counts) {
 }
 
 function _tuRenderPegawaiKPI(d) {
-  var el = document.getElementById('tu-pegawai-kpi-strip');
-  if (!el) return;
-
+  d = d || {};
   var b = d.breakdown || {};
   var pns   = b.PNS || { count: 0, percentage: 0 };
   var p3k   = b.P3K || { count: 0, percentage: 0 };
@@ -7282,44 +7282,30 @@ function _tuRenderPegawaiKPI(d) {
   var pjlp  = b.PJLP || { count: 0, percentage: 0 };
   var mag   = b.MAGANG || { count: 0, percentage: 0 };
 
-  var html = '';
-  // Card 1: Total Personil
-  html += '<div class="n-card kpi-card">' +
-            '<div class="kpi-label" title="Total Personil Aktif">Total Personil</div>' +
-            '<div class="kpi-value tnum">' + (d.totalPegawai || 0) + '</div>' +
-          '</div>';
+  var pnsCount = pns.count || (_TU.kompetensiData && _TU.kompetensiData.kpi && _TU.kompetensiData.kpi.totalDitPoa) || 261;
+  var total = (d && d.totalPegawai) || (pnsCount + p3k.count + p3kPw.count + pjlp.count + mag.count);
+  var poa = (_TU.kompetensiData && _TU.kompetensiData.kpi && _TU.kompetensiData.kpi.totalDitPoa) || 261;
+  var awak = (_TU.kompetensiData && _TU.kompetensiData.kpi && _TU.kompetensiData.kpi.totalAwakArmada) || 243;
 
-  // Card 2: PNS
-  html += '<div class="n-card kpi-card">' +
-            '<div class="kpi-label" title="Pegawai Negeri Sipil">PNS</div>' +
-            '<div class="kpi-value tnum">' + pns.count + '<span class="tu-kpi-pct">' + pns.percentage + '%</span></div>' +
-          '</div>';
+  var elTotal = document.getElementById('tu-peg-kpi-total');
+  var elPoa = document.getElementById('tu-peg-kpi-poa');
+  var elAwak = document.getElementById('tu-peg-kpi-awak');
+  var elPns = document.getElementById('tu-peg-kpi-pns');
+  var elPnsSub = document.getElementById('tu-peg-kpi-pns-sub');
+  var elP3k = document.getElementById('tu-peg-kpi-p3k');
+  var elP3kSub = document.getElementById('tu-peg-kpi-p3k-sub');
+  var elKontrak = document.getElementById('tu-peg-kpi-kontrak');
+  var elKontrakSub = document.getElementById('tu-peg-kpi-kontrak-sub');
 
-  // Card 3: P3K Penuh Waktu
-  html += '<div class="n-card kpi-card">' +
-            '<div class="kpi-label" title="P3K Penuh Waktu">P3K Penuh Waktu</div>' +
-            '<div class="kpi-value tnum">' + p3k.count + '<span class="tu-kpi-pct">' + p3k.percentage + '%</span></div>' +
-          '</div>';
-
-  // Card 4: P3K Paruh Waktu
-  html += '<div class="n-card kpi-card">' +
-            '<div class="kpi-label" title="P3K Paruh Waktu">P3K Paruh Waktu</div>' +
-            '<div class="kpi-value tnum">' + p3kPw.count + '<span class="tu-kpi-pct">' + p3kPw.percentage + '%</span></div>' +
-          '</div>';
-
-  // Card 5: PJLP / Kontrak
-  html += '<div class="n-card kpi-card">' +
-            '<div class="kpi-label" title="PJLP / Tenaga Kontrak">PJLP / Kontrak</div>' +
-            '<div class="kpi-value tnum">' + pjlp.count + '<span class="tu-kpi-pct">' + pjlp.percentage + '%</span></div>' +
-          '</div>';
-
-  // Card 6: Magang / PKL
-  html += '<div class="n-card kpi-card">' +
-            '<div class="kpi-label" title="Magang / Siswa PKL">Magang / PKL</div>' +
-            '<div class="kpi-value tnum">' + mag.count + '<span class="tu-kpi-pct">' + mag.percentage + '%</span></div>' +
-          '</div>';
-
-  el.innerHTML = html;
+  if (elTotal) elTotal.textContent = total;
+  if (elPoa) elPoa.textContent = poa;
+  if (elAwak) elAwak.textContent = awak;
+  if (elPns) elPns.textContent = pnsCount;
+  if (elPnsSub) elPnsSub.textContent = (pns.percentage || 100) + '% ASN Dit. POA';
+  if (elP3k) elP3k.textContent = (p3k.count + p3kPw.count);
+  if (elP3kSub) elP3kSub.textContent = Math.round((p3k.percentage + p3kPw.percentage) * 10) / 10 + '% Penuh & Paruh';
+  if (elKontrak) elKontrak.textContent = (pjlp.count + mag.count);
+  if (elKontrakSub) elKontrakSub.textContent = Math.round((pjlp.percentage + mag.percentage) * 10) / 10 + '% Non-ASN & Magang';
 }
 
 function _tuOpenPegawaiModal() {
@@ -7511,30 +7497,7 @@ function _tuConfirmAnulirPegawai() {
     });
 }
 
-// ── STANDAR KOMPETENSI (SKJ) & SERTIFIKASI AWAK KAPAL ───────
-
-function _tuSwitchPegawaiSubTab(subTab) {
-  _TU.pegawaiSubTab = subTab || 'portal';
-
-  var modes = ['portal', 'direktori', 'analitik'];
-  modes.forEach(function (m) {
-    var btn = document.getElementById('tu-peg-btn-' + m);
-    var pane = document.getElementById('tu-subpane-peg-' + m);
-    var isActive = (m === _TU.pegawaiSubTab);
-
-    if (btn) {
-      btn.className = (isActive ? 'btn-primary' : 'btn-outline') + ' ctl-md tu-peg-mode-btn';
-    }
-    if (pane) {
-      if (isActive) pane.classList.remove('n-hidden');
-      else pane.classList.add('n-hidden');
-    }
-  });
-
-  if (_TU.pegawaiSubTab === 'analitik' && _TU.pegawaiData) {
-    setTimeout(function () { _tuRenderPegawaiChart(_TU.pegawaiData); }, 50);
-  }
-}
+// ── STANDAR KOMPETENSI (SKJ) & SERTIFIKASI AWAK KAPAL (FASE 18B.1) ─
 
 function _tuLoadKompetensi(force) {
   if (!force && _TU.kompetensiData) {
@@ -7554,12 +7517,8 @@ function _tuLoadKompetensi(force) {
       _tuPopulatePegawaiFilterOptions(res.data.filters);
       _tuApplyPegawaiFilters();
       _tuRenderKompetensiAnalytics(res.data);
-
-      if (_TU.selectedSelfPegawai) {
-        var refreshed = (res.data.pegawaiList || []).find(function (p) {
-          return p.pegawaiId === _TU.selectedSelfPegawai.pegawaiId;
-        });
-        if (refreshed) _tuSelectSelfPegawai(refreshed.pegawaiId);
+      if (_TU.pegawaiData) {
+        _tuRenderPegawaiKPI(_TU.pegawaiData);
       }
     })
     .withFailureHandler(function (err) {
@@ -7568,25 +7527,64 @@ function _tuLoadKompetensi(force) {
     .tataUsaha_getKompetensi(APP.token, APP.filter);
 }
 
+function _tuRenderKompetensiAnalytics(d) {
+  if (!d || !d.kpi) return;
+  var k = d.kpi;
+
+  var pctEl = document.getElementById('tu-kompetensi-kpi-pct');
+  var barEl = document.getElementById('tu-kompetensi-kpi-bar');
+  var filesEl = document.getElementById('tu-kompetensi-kpi-files');
+  var persEl = document.getElementById('tu-kompetensi-kpi-personel');
+  var grpEl = document.getElementById('tu-kompetensi-kpi-groups');
+
+  if (pctEl) pctEl.textContent = (k.avgKompetensiPct || 0) + '%';
+  if (barEl) barEl.style.width = (k.avgKompetensiPct || 0) + '%';
+  if (filesEl) filesEl.textContent = (k.totalEvidenceFiles || 0) + ' Berkas';
+  if (persEl) persEl.textContent = (k.totalPersonel || 504) + ' Orang';
+  if (grpEl) grpEl.textContent = Object.keys(d.standarByGroup || {}).length + ' Jabatan';
+
+  var elTotal = document.getElementById('tu-peg-kpi-total');
+  var elPoa = document.getElementById('tu-peg-kpi-poa');
+  var elAwak = document.getElementById('tu-peg-kpi-awak');
+  if (elTotal && k.totalPersonel) elTotal.textContent = k.totalPersonel;
+  if (elPoa && k.totalDitPoa) elPoa.textContent = k.totalDitPoa;
+  if (elAwak && k.totalAwakArmada) elAwak.textContent = k.totalAwakArmada;
+}
+
 function _tuPopulatePegawaiFilterOptions(filters) {
   filters = filters || {};
-  var unitSelect = document.getElementById('tu-filter-peg-unit');
+  var unitSelect = document.getElementById('tu-filter-unit');
   var unitDatalist = document.getElementById('tu-m-unit-list');
   var groupSelect = document.getElementById('tu-m-kelompok');
 
-  if (unitSelect && filters.units) {
+  // Normalisasi seluruh variasi Dit. POA ke 'Dit. POA'
+  var uniqueUnits = [];
+  var seenUnits = {};
+  (filters.units || []).forEach(function (u) {
+    var clean = String(u || '').trim();
+    if (clean.toLowerCase().indexOf('poa') !== -1 || clean.toLowerCase().indexOf('operasi armada') !== -1 || clean.toLowerCase().indexOf('pengendalian') !== -1) {
+      clean = 'Dit. POA';
+    }
+    if (clean && !seenUnits[clean]) {
+      seenUnits[clean] = true;
+      uniqueUnits.push(clean);
+    }
+  });
+  uniqueUnits.sort();
+
+  if (unitSelect) {
     var curUnit = unitSelect.value;
     var uHtml = '<option value="">Semua Unit Kerja</option>';
-    filters.units.forEach(function (u) {
+    uniqueUnits.forEach(function (u) {
       uHtml += '<option value="' + _esc(u) + '">' + _esc(u) + '</option>';
     });
     unitSelect.innerHTML = uHtml;
     if (curUnit) unitSelect.value = curUnit;
   }
 
-  if (unitDatalist && filters.units) {
+  if (unitDatalist) {
     var dHtml = '';
-    filters.units.forEach(function (u) {
+    uniqueUnits.forEach(function (u) {
       dHtml += '<option value="' + _esc(u) + '">';
     });
     unitDatalist.innerHTML = dHtml;
@@ -7604,147 +7602,341 @@ function _tuPopulatePegawaiFilterOptions(filters) {
   }
 }
 
-// ── SUB-MODE 1: PORTAL MANDIRI AWAK KAPAL ──────────────────
+function _tuSetPegawaiSeg(segKey) {
+  if (!_TU.pegawaiFilter) _TU.pegawaiFilter = {};
+  _TU.pegawaiFilter.seg = segKey || 'ALL';
+  _TU.pegawaiFilter.page = 1;
 
-function _tuSearchSelfPegawai() {
-  var inp = document.getElementById('tu-peg-self-search');
-  var q = inp ? inp.value.trim().toLowerCase() : '';
-  var resBox = document.getElementById('tu-peg-self-results');
-  if (!resBox) return;
-
-  if (!q) {
-    resBox.classList.add('n-hidden');
-    resBox.innerHTML = '';
-    return;
-  }
-
-  if (!_TU.kompetensiData || !_TU.kompetensiData.pegawaiList) {
-    _tuLoadKompetensi(true);
-    return;
-  }
-
-  var list = _TU.kompetensiData.pegawaiList;
-  var matched = list.filter(function (p) {
-    var haystack = (p.nama + ' ' + p.nip + ' ' + p.jabatanLengkap + ' ' + p.unitKerja).toLowerCase();
-    return haystack.indexOf(q) !== -1;
+  var btns = document.querySelectorAll('.tu-peg-seg-btn');
+  btns.forEach(function (b) {
+    if (b.getAttribute('data-peg-seg') === _TU.pegawaiFilter.seg) {
+      b.classList.add('active');
+    } else {
+      b.classList.remove('active');
+    }
   });
 
-  if (matched.length === 0) {
-    resBox.classList.remove('n-hidden');
-    resBox.innerHTML = '<div style="padding:14px; text-align:center; color:var(--n-text-muted); font-size:.875rem;">Personel dengan nama / NIP "' + _esc(q) + '" tidak ditemukan.</div>';
-    return;
-  }
+  _tuApplyPegawaiFilters();
 
-  if (matched.length === 1) {
-    resBox.classList.add('n-hidden');
-    _tuSelectSelfPegawai(matched[0].pegawaiId);
-    return;
-  }
-
-  // Tampilkan list saran cepat
-  var html = '<div style="padding:6px 0;">';
-  matched.slice(0, 10).forEach(function (p) {
-    html += '<div onclick="_tuSelectSelfPegawai(\'' + _esc(p.pegawaiId) + '\')" style="padding:8px 14px; border-bottom:1px solid var(--n-border); cursor:pointer; display:flex; justify-content:space-between; align-items:center;" onmouseover="this.style.background=\'var(--n-bg-subtle)\'" onmouseout="this.style.background=\'transparent\'">' +
-              '<div>' +
-                '<strong style="font-size:.875rem;">' + _esc(p.nama) + '</strong>' +
-                '<div style="font-size:.75rem; color:var(--n-text-muted);">' + _esc(p.jabatanLengkap) + ' \u00B7 ' + _esc(p.unitKerja) + '</div>' +
-              '</div>' +
-              '<div style="text-align:right;">' +
-                '<span class="badge" style="background:var(--n-primary-light); color:var(--n-primary); font-size:.6875rem;">' + (p.nip && p.nip !== '-' ? _esc(p.nip) : 'Awak Kapal') + '</span>' +
-              '</div>' +
-            '</div>';
-  });
-  html += '</div>';
-  resBox.innerHTML = html;
-  resBox.classList.remove('n-hidden');
+  var sec = document.getElementById('tu-section-pelatihan');
+  if (sec) sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
-function _tuSelectSelfPegawai(pegId) {
-  var resBox = document.getElementById('tu-peg-self-results');
-  if (resBox) resBox.classList.add('n-hidden');
+var _tuPegSearchTimer = null;
+function _tuDebouncedPegawaiSearch() {
+  clearTimeout(_tuPegSearchTimer);
+  _tuPegSearchTimer = setTimeout(function () {
+    if (!_TU.pegawaiFilter) _TU.pegawaiFilter = {};
+    var inp = document.getElementById('tu-peg-search-input');
+    _TU.pegawaiFilter.search = inp ? inp.value.trim().toLowerCase() : '';
+    _TU.pegawaiFilter.page = 1;
+    _tuApplyPegawaiFilters();
+  }, 200);
+}
 
+function _tuFilterChange() {
+  if (!_TU.pegawaiFilter) _TU.pegawaiFilter = {};
+  var uSelect = document.getElementById('tu-filter-unit');
+  var sSelect = document.getElementById('tu-filter-status');
+  var spSelect = document.getElementById('tu-filter-status-pegawai');
+  _TU.pegawaiFilter.unit = uSelect ? uSelect.value : '';
+  _TU.pegawaiFilter.status = sSelect ? sSelect.value : '';
+  _TU.pegawaiFilter.statusPegawai = spSelect ? spSelect.value : '';
+  _TU.pegawaiFilter.page = 1;
+  _tuApplyPegawaiFilters();
+}
+
+function _tuFilterByStatusPegawai(status) {
+  if (!_TU.pegawaiFilter) _TU.pegawaiFilter = {};
+  _TU.pegawaiFilter.statusPegawai = status || '';
+  _TU.pegawaiFilter.page = 1;
+  var sel = document.getElementById('tu-filter-status-pegawai');
+  if (sel) sel.value = status || '';
+
+  // Seg reset to ALL so all records matching status are included
+  _TU.pegawaiFilter.seg = 'ALL';
+  var btns = document.querySelectorAll('.tu-peg-seg-btn');
+  btns.forEach(function (b) {
+    if (b.getAttribute('data-peg-seg') === 'ALL') {
+      b.classList.add('active');
+    } else {
+      b.classList.remove('active');
+    }
+  });
+
+  _tuApplyPegawaiFilters();
+
+  var sec = document.getElementById('tu-section-pelatihan');
+  if (sec) sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function _tuApplyPegawaiFilters() {
+  if (!_TU.kompetensiData || !_TU.kompetensiData.pegawaiList) return;
+
+  if (!_TU.pegawaiFilter) {
+    _TU.pegawaiFilter = { seg: 'ALL', search: '', unit: '', status: '', statusPegawai: '', page: 1, pageSize: 20 };
+  }
+
+  var f = _TU.pegawaiFilter;
+  var list = _TU.kompetensiData.pegawaiList;
+
+  var filtered = list.filter(function (p) {
+    var pUnit = String(p.unitKerja || '').trim();
+    if (pUnit.toLowerCase().indexOf('poa') !== -1 || pUnit.toLowerCase().indexOf('operasi armada') !== -1 || pUnit.toLowerCase().indexOf('pengendalian') !== -1) {
+      pUnit = 'Dit. POA';
+    }
+
+    // Segmented filter
+    if (f.seg === 'DIT_POA') {
+      if (p.lingkupData !== 'DIT_POA' && pUnit !== 'Dit. POA') return false;
+    } else if (f.seg === 'AWAK') {
+      if (p.rumpun !== 'AWAK_DEK' && p.rumpun !== 'AWAK_MESIN') return false;
+    } else if (f.seg === 'AWAK_DEK') {
+      if (p.rumpun !== 'AWAK_DEK') return false;
+    } else if (f.seg === 'AWAK_MESIN') {
+      if (p.rumpun !== 'AWAK_MESIN') return false;
+    }
+
+    // Search filter
+    if (f.search) {
+      var haystack = ((p.nama || '') + ' ' + (p.nip || '') + ' ' + (p.jabatanLengkap || '') + ' ' + pUnit + ' ' + (p.kelompokJabatan || '') + ' ' + (p.statusKepegawaian || '')).toLowerCase();
+      if (haystack.indexOf(f.search) === -1) return false;
+    }
+
+    // Status Kepegawaian filter (PNS, P3K, PJLP, MAGANG, NON_ASN)
+    if (f.statusPegawai) {
+      var sPeg = String(p.statusKepegawaian || '').toUpperCase();
+      if (!sPeg) {
+        sPeg = (pUnit === 'Dit. POA' || p.lingkupData === 'DIT_POA') ? 'PNS' : (p.nip && p.nip !== '-' ? 'PNS' : 'NON_ASN');
+      }
+      if (f.statusPegawai === 'PNS') {
+        if (sPeg !== 'PNS') return false;
+      } else if (f.statusPegawai === 'P3K') {
+        if (sPeg !== 'P3K' && sPeg !== 'P3K_PARUH_WAKTU') return false;
+      } else if (f.statusPegawai === 'NON_ASN') {
+        if (sPeg !== 'PJLP' && sPeg !== 'MAGANG' && sPeg !== 'NON_ASN') return false;
+      } else if (f.statusPegawai === 'PJLP') {
+        if (sPeg !== 'PJLP') return false;
+      } else if (f.statusPegawai === 'MAGANG') {
+        if (sPeg !== 'MAGANG') return false;
+      } else if (sPeg !== f.statusPegawai) {
+        return false;
+      }
+    }
+
+    // Unit filter
+    if (f.unit) {
+      if (f.unit === 'Dit. POA') {
+        if (pUnit !== 'Dit. POA') return false;
+      } else if (pUnit !== f.unit) {
+        return false;
+      }
+    }
+
+    // Status filter
+    if (f.status && p.statusGap !== f.status) return false;
+
+    return true;
+  });
+
+  var badgeEl = document.getElementById('tu-peg-badge-total');
+  if (badgeEl) badgeEl.textContent = filtered.length + ' personel';
+
+  var totalItems = filtered.length;
+  var pageSize = f.pageSize || 20;
+  var totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
+  if (f.page > totalPages) f.page = totalPages;
+  if (f.page < 1) f.page = 1;
+
+  var start = (f.page - 1) * pageSize;
+  var end = Math.min(start + pageSize, totalItems);
+  var pageItems = filtered.slice(start, end);
+
+  _tuRenderPegawaiDirectoryTable(pageItems, start);
+  _tuRenderPegawaiPagination(totalItems, start, end, f.page, totalPages);
+}
+
+function _tuRenderPegawaiDirectoryTable(items, startIdx) {
+  var tbody = document.getElementById('tu-peg-dir-tbody');
+  if (!tbody) return;
+
+  if (!items || items.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:32px; color:var(--n-text-muted);">Tidak ada personel yang sesuai filter pencarian.</td></tr>';
+    return;
+  }
+
+  var html = '';
+  items.forEach(function (p, idx) {
+    var pUnit = String(p.unitKerja || '').trim();
+    if (pUnit.toLowerCase().indexOf('poa') !== -1 || pUnit.toLowerCase().indexOf('operasi armada') !== -1 || pUnit.toLowerCase().indexOf('pengendalian') !== -1) {
+      pUnit = 'Dit. POA';
+    }
+
+    var rumpunLabel = 'Staf Dit. POA';
+    var rumpunClass = 'background:var(--n-primary-light); color:var(--n-primary);';
+    if (p.rumpun === 'AWAK_DEK') {
+      rumpunLabel = 'Awak Dek';
+      rumpunClass = 'background:#E0F2FE; color:#0369A1;';
+    } else if (p.rumpun === 'AWAK_MESIN') {
+      rumpunLabel = 'Awak Mesin';
+      rumpunClass = 'background:#FEF3C7; color:#B45309;';
+    } else if (p.rumpun === 'PENGAWAS') {
+      rumpunLabel = 'Pengawas';
+      rumpunClass = 'background:#EEF2FF; color:#4338CA;';
+    }
+
+    var sPeg = String(p.statusKepegawaian || '').toUpperCase();
+    if (!sPeg) {
+      sPeg = (pUnit === 'Dit. POA' || p.lingkupData === 'DIT_POA') ? 'PNS' : (p.nip && p.nip !== '-' ? 'PNS' : 'NON_ASN');
+    }
+    var sPegBadge = '<span class="badge" style="background:#EBF5FF; color:#1E429F; font-size:.6875rem; font-weight:600;">PNS</span>';
+    if (sPeg === 'P3K' || sPeg === 'P3K_PARUH_WAKTU') {
+      sPegBadge = '<span class="badge" style="background:#FDF2F8; color:#9D174D; font-size:.6875rem; font-weight:600;">P3K</span>';
+    } else if (sPeg === 'PJLP') {
+      sPegBadge = '<span class="badge" style="background:#F3F4F6; color:#374151; font-size:.6875rem; font-weight:600;">PJLP</span>';
+    } else if (sPeg === 'MAGANG') {
+      sPegBadge = '<span class="badge" style="background:#ECFDF5; color:#065F46; font-size:.6875rem; font-weight:600;">Magang</span>';
+    } else if (sPeg === 'NON_ASN') {
+      sPegBadge = '<span class="badge" style="background:#F3F4F6; color:#4B5563; font-size:.6875rem; font-weight:600;">Non-ASN</span>';
+    }
+
+    var pct = p.pctKompetensi || 0;
+    var barColor = pct >= 80 ? '#059669' : (pct >= 40 ? '#D97706' : '#DC2626');
+
+    html += '<tr>' +
+              '<td style="text-align:center; font-size:.8125rem;" class="tnum">' + (startIdx + idx + 1) + '</td>' +
+              '<td>' +
+                '<div style="display:flex; align-items:center; gap:6px;">' +
+                  '<span style="font-weight:700; font-size:.875rem; color:var(--n-text-primary);">' + _esc(p.nama) + '</span>' +
+                  sPegBadge +
+                '</div>' +
+                '<div style="font-size:.75rem; color:var(--n-text-muted);" class="tnum">NIP: ' + (p.nip && p.nip !== '-' ? _esc(p.nip) : 'Belum Terdata') + '</div>' +
+              '</td>' +
+              '<td>' +
+                '<div style="font-size:.8125rem; font-weight:600; color:var(--n-text-primary);">' + _esc(p.jabatanLengkap) + '</div>' +
+                '<div style="display:flex; align-items:center; gap:6px; margin-top:2px;">' +
+                  '<span class="badge" style="' + rumpunClass + ' font-size:.6875rem;">' + _esc(rumpunLabel) + '</span>' +
+                  '<span style="font-size:.6875rem; color:var(--n-text-muted);">' + _esc(p.kelompokJabatan) + '</span>' +
+                '</div>' +
+              '</td>' +
+              '<td style="font-size:.8125rem; color:var(--n-text-secondary);">' +
+                _esc(pUnit) +
+              '</td>' +
+              '<td>' +
+                '<div style="display:flex; justify-content:space-between; align-items:center; font-size:.75rem; margin-bottom:3px;">' +
+                  '<span style="color:var(--n-text-muted);">' + p.totalLulus + ' dari ' + p.totalStandar + ' Diklat</span>' +
+                  '<strong class="tnum" style="color:' + barColor + '; font-weight:700;">' + pct + '%</strong>' +
+                '</div>' +
+                '<div style="height:6px; background:var(--n-border); border-radius:999px; overflow:hidden;">' +
+                  '<div style="height:100%; width:' + pct + '%; background:' + barColor + '; transition:width .3s ease;"></div>' +
+                '</div>' +
+              '</td>' +
+              '<td style="text-align:center;">' +
+                '<span class="badge" style="background:' + (p.totalEvidence > 0 ? '#DEF7EC' : 'var(--n-bg-subtle)') + '; color:' + (p.totalEvidence > 0 ? '#03543F' : 'var(--n-text-muted)') + '; font-size:.75rem; font-weight:600;">' +
+                  p.totalEvidence + ' Berkas' +
+                '</span>' +
+              '</td>' +
+              '<td style="text-align:center;">' +
+                '<button type="button" class="btn-primary ctl-sm" onclick="_tuOpenPegawaiDetailModal(\'' + _esc(p.pegawaiId) + '\')">' +
+                  '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">' +
+                    '<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>' +
+                    '<path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>' +
+                  '</svg>' +
+                  '<span>Lengkapi Pelatihan</span>' +
+                '</button>' +
+              '</td>' +
+            '</tr>';
+  });
+
+  tbody.innerHTML = html;
+}
+
+function _tuRenderPegawaiPagination(totalItems, start, end, currentPage, totalPages) {
+  var infoEl = document.getElementById('tu-peg-pagination-info');
+  var ctrlEl = document.getElementById('tu-peg-pagination-controls');
+  if (!infoEl || !ctrlEl) return;
+
+  if (totalItems === 0) {
+    infoEl.textContent = 'Menampilkan 0 dari 0 personel';
+    ctrlEl.innerHTML = '';
+    return;
+  }
+
+  infoEl.textContent = 'Menampilkan ' + (start + 1) + '-' + end + ' dari ' + totalItems + ' personel';
+
+  var prevDisabled = currentPage <= 1 ? 'disabled style="opacity:0.5; pointer-events:none;"' : '';
+  var nextDisabled = currentPage >= totalPages ? 'disabled style="opacity:0.5; pointer-events:none;"' : '';
+
+  var h = '';
+  h += '<button type="button" class="btn-outline ctl-sm" onclick="_tuChangePegawaiPage(' + (currentPage - 1) + ')" ' + prevDisabled + '>' +
+         '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+           '<polyline points="15 18 9 12 15 6"></polyline>' +
+         '</svg>' +
+         '<span>Sebelumnya</span>' +
+       '</button>';
+
+  h += '<span style="font-size:.8125rem; font-weight:600; padding:0 8px;">Hal. ' + currentPage + ' / ' + totalPages + '</span>';
+
+  h += '<button type="button" class="btn-outline ctl-sm" onclick="_tuChangePegawaiPage(' + (currentPage + 1) + ')" ' + nextDisabled + '>' +
+         '<span>Berikutnya</span>' +
+         '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+           '<polyline points="9 18 15 12 9 6"></polyline>' +
+         '</svg>' +
+       '</button>';
+
+  ctrlEl.innerHTML = h;
+}
+
+function _tuChangePegawaiPage(page) {
+  if (!_TU.pegawaiFilter) _TU.pegawaiFilter = {};
+  _TU.pegawaiFilter.page = page;
+  _tuApplyPegawaiFilters();
+}
+
+// ── MODAL DETAIL CHECKLIST PER PERSONEL ─────────────────────
+
+function _tuOpenPegawaiDetailModal(pegId) {
   if (!_TU.kompetensiData || !_TU.kompetensiData.pegawaiList) return;
   var peg = _TU.kompetensiData.pegawaiList.find(function (p) { return p.pegawaiId === pegId; });
   if (!peg) return;
 
-  _TU.selectedSelfPegawai = peg;
-  _tuRenderSelfProfile(peg);
-}
+  _TU.currentDetailPegId = pegId;
 
-function _tuRenderSelfProfile(peg) {
-  var container = document.getElementById('tu-peg-self-profile-card');
-  if (!container) return;
+  var pUnit = String(peg.unitKerja || '').trim();
+  if (pUnit.toLowerCase().indexOf('poa') !== -1 || pUnit.toLowerCase().indexOf('operasi armada') !== -1 || pUnit.toLowerCase().indexOf('pengendalian') !== -1) {
+    pUnit = 'Dit. POA';
+  }
+
+  var titleEl = document.getElementById('tu-det-nama');
+  var subEl = document.getElementById('tu-det-sub');
+  var badgeEl = document.getElementById('tu-det-badge-rumpun');
+  var pctLabel = document.getElementById('tu-det-pct-label');
+  var barEl = document.getElementById('tu-det-progress-bar');
+  var countLabel = document.getElementById('tu-det-count-label');
+  var evLabel = document.getElementById('tu-det-evidence-label');
+  var wrap = document.getElementById('tu-det-checklist-wrap');
+
+  var rumpunLabel = 'Staf Dit. POA';
+  if (peg.rumpun === 'AWAK_DEK') rumpunLabel = 'Awak Kapal Dek';
+  else if (peg.rumpun === 'AWAK_MESIN') rumpunLabel = 'Awak Kapal Mesin';
+  else if (peg.rumpun === 'PENGAWAS') rumpunLabel = 'Fungsional Pengawas';
+
+  if (titleEl) titleEl.textContent = peg.nama;
+  if (subEl) subEl.textContent = 'NIP: ' + (peg.nip && peg.nip !== '-' ? peg.nip : 'Belum Terdata') + ' · ' + peg.jabatanLengkap + ' · ' + pUnit;
+  if (badgeEl) badgeEl.textContent = rumpunLabel;
+
+  if (pctLabel) pctLabel.textContent = (peg.pctKompetensi || 0) + '%';
+  if (barEl) barEl.style.width = (peg.pctKompetensi || 0) + '%';
+  if (countLabel) countLabel.textContent = peg.totalLulus + ' dari ' + peg.totalStandar + ' Pelatihan Terpenuhi';
+  if (evLabel) evLabel.textContent = peg.totalEvidence + ' Bukti File Terunggah';
 
   var standards = (_TU.kompetensiData.standarByGroup && _TU.kompetensiData.standarByGroup[peg.kelompokJabatan]) || [];
   var certs = peg.certifications || {};
 
-  var rumpunBadgeColor = 'var(--n-primary)';
-  var rumpunBadgeBg = 'var(--n-primary-light)';
-  var rumpunLabel = 'Staf Dit. POA';
-  if (peg.rumpun === 'AWAK_DEK') {
-    rumpunLabel = 'Awak Kapal Dek';
-    rumpunBadgeColor = '#0369A1';
-    rumpunBadgeBg = '#E0F2FE';
-  } else if (peg.rumpun === 'AWAK_MESIN') {
-    rumpunLabel = 'Awak Kapal Mesin';
-    rumpunBadgeColor = '#B45309';
-    rumpunBadgeBg = '#FEF3C7';
-  } else if (peg.rumpun === 'PENGAWAS') {
-    rumpunLabel = 'Fungsional Pengawas';
-    rumpunBadgeColor = '#4338CA';
-    rumpunBadgeBg = '#EEF2FF';
-  }
-
-  var html = '';
-
-  // 1. Header Identitas Personel & Progress Bar
-  html += '<div class="n-card" style="padding:20px; margin-bottom:16px;">' +
-            '<div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:14px; margin-bottom:16px;">' +
-              '<div style="display:flex; gap:14px; align-items:center;">' +
-                '<div style="width:48px; height:48px; border-radius:50%; background:var(--n-primary-light); color:var(--n-primary); display:flex; align-items:center; justify-content:center; font-size:1.25rem; font-weight:800;">' +
-                  _esc(peg.nama.charAt(0)) +
-                '</div>' +
-                '<div>' +
-                  '<div style="display:flex; align-items:center; gap:8px;">' +
-                    '<h2 style="font-size:1.1875rem; font-weight:800; margin:0;">' + _esc(peg.nama) + '</h2>' +
-                    '<span class="badge" style="background:' + rumpunBadgeBg + '; color:' + rumpunBadgeColor + '; font-size:.75rem;">' + _esc(rumpunLabel) + '</span>' +
-                  '</div>' +
-                  '<div style="font-size:.875rem; color:var(--n-text-muted); margin-top:2px;">' +
-                    'NIP: <span class="tnum">' + (peg.nip && peg.nip !== '-' ? _esc(peg.nip) : 'Belum Terdata') + '</span> \u00B7 ' +
-                    _esc(peg.jabatanLengkap) + ' \u00B7 ' +
-                    '<strong>' + _esc(peg.unitKerja) + '</strong>' +
-                  '</div>' +
-                '</div>' +
-              '</div>' +
-              '<button type="button" class="btn-outline ctl-md" onclick="_tuOpenPegawaiMasterModal(\'' + _esc(peg.pegawaiId) + '\')">' +
-                '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
-                  '<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>' +
-                  '<path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>' +
-                '</svg>' +
-                '<span>Edit Profil / NIP</span>' +
-              '</button>' +
-            '</div>' +
-
-            '<div style="background:var(--n-bg-subtle); padding:14px 16px; border-radius:10px;">' +
-              '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">' +
-                '<span style="font-size:.875rem; font-weight:700;">Kelengkapan Standar Kompetensi Jabatan</span>' +
-                '<span class="tnum" style="font-size:1.125rem; font-weight:800; color:var(--n-primary);">' + peg.pctKompetensi + '%</span>' +
-              '</div>' +
-              '<div style="height:10px; background:var(--n-border); border-radius:999px; overflow:hidden;">' +
-                '<div style="height:100%; width:' + peg.pctKompetensi + '%; background:var(--n-primary); transition:width .3s ease;"></div>' +
-              '</div>' +
-              '<div style="display:flex; justify-content:space-between; font-size:.75rem; color:var(--n-text-muted); margin-top:6px;">' +
-                '<span>' + peg.totalLulus + ' dari ' + peg.totalStandar + ' Pelatihan Terpenuhi</span>' +
-                '<span>' + peg.totalEvidence + ' Bukti File Sertifikat Terunggah</span>' +
-              '</div>' +
-            '</div>' +
-          '</div>';
-
-  // 2. Kelompokkan Standar Pelatihan
   var grouped = {
-    'SERTIFIKASI_LAUT': { title: 'Sertifikasi Wajib Kepelautan (Keahlian & Keterampilan Laut)', items: [] },
-    'TEKNIS': { title: 'Kompetensi Teknis & Fungsional Pengawasan Armada', items: [] },
-    'FUNGSIONAL': { title: 'Diklat Fungsional Penjenjangan', items: [] },
+    'SERTIFIKASI_LAUT': { title: 'Sertifikasi Wajib Kepelautan (STCW-F)', items: [] },
+    'TEKNIS': { title: 'Kompetensi Teknis Pengawasan Armada', items: [] },
+    'FUNGSIONAL': { title: 'Diklat Penjenjangan Fungsional', items: [] },
     'MANAJERIAL': { title: 'Kompetensi Manajerial & Sosial Kultural', items: [] }
   };
 
@@ -7754,6 +7946,7 @@ function _tuRenderSelfProfile(peg) {
     grouped[kat].items.push(st);
   });
 
+  var html = '';
   for (var k in grouped) {
     var grp = grouped[k];
     if (grp.items.length === 0) continue;
@@ -7762,7 +7955,8 @@ function _tuRenderSelfProfile(peg) {
               '<div class="form-section-hd">' +
                 '<span class="form-section-title">' +
                   '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
-                    '<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>' +
+                    '<circle cx="12" cy="12" r="10"></circle>' +
+                    '<polyline points="12 6 12 12 16 14"></polyline>' +
                   '</svg>' +
                   '<span>' + _esc(grp.title) + '</span>' +
                 '</span>' +
@@ -7774,28 +7968,23 @@ function _tuRenderSelfProfile(peg) {
       var isLulus = cData && (cData.status === 'SUDAH_LULUS' || cData.status === 'LULUS');
       var hasFile = cData && (cData.fileEvidenceUrl || cData.fileEvidenceId);
 
-      var badgeHtml = '';
-      if (isLulus && hasFile) {
-        badgeHtml = '<span class="badge" style="background:#DEF7EC; color:#03543F; font-size:.75rem;">Lulus + Bukti Sertifikat</span>';
-      } else if (isLulus && !hasFile) {
-        badgeHtml = '<span class="badge" style="background:#E0F2FE; color:#0369A1; font-size:.75rem;">Terdata Lulus (Belum Ada File)</span>';
-      } else {
-        badgeHtml = '<span class="badge" style="background:#F3F4F6; color:var(--n-text-muted); font-size:.75rem;">Belum Terpenuhi</span>';
-      }
+      var badgeHtml = isLulus
+        ? (hasFile ? '<span class="badge" style="background:#DEF7EC; color:#03543F; font-size:.75rem;">Lulus + Berkas</span>' : '<span class="badge" style="background:#E0F2FE; color:#0369A1; font-size:.75rem;">Terdata Lulus</span>')
+        : '<span class="badge" style="background:var(--n-bg-subtle); color:var(--n-text-muted); font-size:.75rem;">Belum Terpenuhi</span>';
 
       var detailText = '';
       if (cData && (cData.nomorSertifikat || cData.tahun)) {
         detailText = '<div style="font-size:.75rem; color:var(--n-text-muted); margin-top:3px;">' +
-                       (cData.nomorSertifikat ? 'No: <span class="tnum">' + _esc(cData.nomorSertifikat) + '</span> \u00B7 ' : '') +
+                       (cData.nomorSertifikat ? 'No: <span class="tnum">' + _esc(cData.nomorSertifikat) + '</span> · ' : '') +
                        (cData.tahun ? 'Tahun: <span class="tnum">' + cData.tahun + '</span>' : '') +
-                       (cData.berlakuSampai ? ' \u00B7 Berlaku s.d: <span class="tnum">' + _esc(cData.berlakuSampai) + '</span>' : '') +
+                       (cData.berlakuSampai ? ' · Berlaku s.d: <span class="tnum">' + _esc(cData.berlakuSampai) + '</span>' : '') +
                      '</div>';
       }
 
-      html += '<div style="display:flex; justify-content:space-between; align-items:center; padding:12px 14px; border-bottom:1px solid var(--n-border); gap:12px; flex-wrap:wrap;">' +
-                '<div style="flex:1; min-width:240px;">' +
+      html += '<div style="display:flex; justify-content:space-between; align-items:center; padding:10px 14px; border-bottom:1px solid var(--n-border); gap:10px; flex-wrap:wrap;">' +
+                '<div style="flex:1; min-width:220px;">' +
                   '<div style="display:flex; align-items:center; gap:8px;">' +
-                    '<strong style="font-size:.875rem;">' + _esc(st.nama) + '</strong>' +
+                    '<strong style="font-size:.875rem; color:var(--n-text-primary);">' + _esc(st.nama) + '</strong>' +
                     (st.wajib ? '<span class="badge" style="background:rgba(225,29,72,0.1); color:var(--n-crit); font-size:.6875rem;">Wajib</span>' : '') +
                   '</div>' +
                   detailText +
@@ -7808,7 +7997,7 @@ function _tuRenderSelfProfile(peg) {
                           '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>' +
                           '<circle cx="12" cy="12" r="3"></circle>' +
                         '</svg>' +
-                        '<span>Lihat File</span>' +
+                        '<span>Lihat Berkas</span>' +
                       '</a>'
                     : '') +
                   '<button type="button" class="btn-primary ctl-sm" onclick="_tuOpenSertifikatModal(\'' + _esc(peg.pegawaiId) + '\', \'' + _esc(st.kode) + '\')">' +
@@ -7826,227 +8015,8 @@ function _tuRenderSelfProfile(peg) {
     html += '</div>';
   }
 
-  container.innerHTML = html;
-  container.classList.remove('n-hidden');
-}
-
-// ── SUB-MODE 2: DIREKTORI DIT. POA & AWAK KAPAL ────────────
-
-function _tuApplyPegawaiFilters() {
-  if (!_TU.kompetensiData || !_TU.kompetensiData.pegawaiList) return;
-
-  var q = (document.getElementById('tu-filter-peg-search') || {}).value || '';
-  q = q.trim().toLowerCase();
-  var lingkup = (document.getElementById('tu-filter-peg-lingkup') || {}).value || '';
-  var rumpun = (document.getElementById('tu-filter-peg-rumpun') || {}).value || '';
-  var unit = (document.getElementById('tu-filter-peg-unit') || {}).value || '';
-  var status = (document.getElementById('tu-filter-peg-status') || {}).value || '';
-
-  var list = _TU.kompetensiData.pegawaiList;
-  var filtered = list.filter(function (p) {
-    if (q) {
-      var haystack = (p.nama + ' ' + p.nip + ' ' + p.jabatanLengkap + ' ' + p.unitKerja + ' ' + p.kelompokJabatan).toLowerCase();
-      if (haystack.indexOf(q) === -1) return false;
-    }
-    if (lingkup && p.lingkupData !== lingkup) return false;
-    if (rumpun && p.rumpun !== rumpun) return false;
-    if (unit && p.unitKerja !== unit) return false;
-    if (status && p.statusGap !== status) return false;
-    return true;
-  });
-
-  _tuRenderPegawaiDirectoryTable(filtered);
-}
-
-function _tuRenderPegawaiDirectoryTable(items) {
-  var tbody = document.getElementById('tu-peg-dir-tbody');
-  if (!tbody) return;
-
-  if (!items || items.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:24px; color:var(--n-text-muted);">Tidak ada personel yang sesuai filter pencarian.</td></tr>';
-    return;
-  }
-
-  var html = '';
-  items.forEach(function (p, idx) {
-    var rumpunLabel = 'Staf Dit. POA';
-    var rumpunClass = 'background:var(--n-primary-light); color:var(--n-primary);';
-    if (p.rumpun === 'AWAK_DEK') {
-      rumpunLabel = 'Awak Dek';
-      rumpunClass = 'background:#E0F2FE; color:#0369A1;';
-    } else if (p.rumpun === 'AWAK_MESIN') {
-      rumpunLabel = 'Awak Mesin';
-      rumpunClass = 'background:#FEF3C7; color:#B45309;';
-    } else if (p.rumpun === 'PENGAWAS') {
-      rumpunLabel = 'Pengawas';
-      rumpunClass = 'background:#EEF2FF; color:#4338CA;';
-    }
-
-    var pct = p.pctKompetensi || 0;
-    var barColor = pct >= 80 ? '#059669' : (pct >= 40 ? '#D97706' : '#DC2626');
-
-    html += '<tr>' +
-              '<td style="text-align:center; font-size:.8125rem;" class="tnum">' + (idx + 1) + '</td>' +
-              '<td>' +
-                '<strong style="font-size:.875rem;">' + _esc(p.nama) + '</strong>' +
-                '<div style="font-size:.75rem; color:var(--n-text-muted);" class="tnum">NIP: ' + (p.nip && p.nip !== '-' ? _esc(p.nip) : 'Belum Terdata') + '</div>' +
-              '</td>' +
-              '<td style="font-size:.8125rem;"><strong>' + _esc(p.unitKerja) + '</strong></td>' +
-              '<td style="font-size:.8125rem;">' + _esc(p.jabatanLengkap) + '</td>' +
-              '<td><span class="badge" style="' + rumpunClass + ' font-size:.6875rem;">' + _esc(rumpunLabel) + '</span></td>' +
-              '<td>' +
-                '<div style="display:flex; justify-content:space-between; font-size:.75rem; margin-bottom:3px;">' +
-                  '<span>' + p.totalLulus + ' / ' + p.totalStandar + ' Lulus</span>' +
-                  '<strong class="tnum" style="color:' + barColor + ';">' + pct + '%</strong>' +
-                '</div>' +
-                '<div style="height:6px; background:var(--n-border); border-radius:999px; overflow:hidden;">' +
-                  '<div style="height:100%; width:' + pct + '%; background:' + barColor + ';"></div>' +
-                '</div>' +
-              '</td>' +
-              '<td style="text-align:center;">' +
-                '<span class="badge" style="background:' + (p.totalEvidence > 0 ? '#DEF7EC' : '#F3F4F6') + '; color:' + (p.totalEvidence > 0 ? '#03543F' : 'var(--n-text-muted)') + '; font-size:.75rem;">' +
-                  p.totalEvidence + ' File' +
-                '</span>' +
-              '</td>' +
-              '<td style="text-align:center;">' +
-                '<button type="button" class="btn-primary ctl-sm" onclick="_tuOpenPegawaiDetailModal(\'' + _esc(p.pegawaiId) + '\')">' +
-                  '<span>Kelola</span>' +
-                '</button>' +
-              '</td>' +
-            '</tr>';
-  });
-
-  tbody.innerHTML = html;
-}
-
-// ── SUB-MODE 3: ANALITIK KESENJANGAN (HCDP) ────────────────
-
-function _tuRenderKompetensiAnalytics(d) {
-  if (!d) return;
-
-  // 1. KPI Strip
-  var kpiStrip = document.getElementById('tu-kompetensi-kpi-strip');
-  if (kpiStrip && d.kpi) {
-    var k = d.kpi;
-    var html = '';
-    html += '<div class="n-card kpi-card">' +
-              '<div class="kpi-label">Total Personel Terdata</div>' +
-              '<div class="kpi-value tnum">' + k.totalPersonel + '<span class="tu-kpi-pct" style="color:var(--n-text-muted); font-size:.75rem;">Dit. POA &amp; Awak</span></div>' +
-            '</div>';
-
-    html += '<div class="n-card kpi-card">' +
-              '<div class="kpi-label">Pegawai Dit. POA</div>' +
-              '<div class="kpi-value tnum">' + k.totalDitPoa + '<span class="tu-kpi-pct" style="color:var(--n-primary);">Homebase</span></div>' +
-            '</div>';
-
-    html += '<div class="n-card kpi-card">' +
-              '<div class="kpi-label">Awak Kapal Armada</div>' +
-              '<div class="kpi-value tnum">' + k.totalAwakArmada + '<span class="tu-kpi-pct" style="color:#0369A1;">Pengawas</span></div>' +
-            '</div>';
-
-    html += '<div class="n-card kpi-card">' +
-              '<div class="kpi-label">Rata-Rata Kesiapan SKJ</div>' +
-              '<div class="kpi-value tnum">' + k.avgKompetensiPct + '%<span class="tu-kpi-pct" style="color:var(--n-primary);">Terpenuhi</span></div>' +
-            '</div>';
-
-    html += '<div class="n-card kpi-card">' +
-              '<div class="kpi-label">Total File Sertifikat</div>' +
-              '<div class="kpi-value tnum">' + k.totalEvidenceFiles + '<span class="tu-kpi-pct" style="color:#059669;">Drive</span></div>' +
-            '</div>';
-
-    kpiStrip.innerHTML = html;
-  }
-
-  // 2. Top Training Gaps Table
-  var gapsTbody = document.getElementById('tu-peg-gaps-tbody');
-  if (gapsTbody && d.topTrainingGaps) {
-    if (d.topTrainingGaps.length === 0) {
-      gapsTbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:20px; color:var(--n-text-muted);">Seluruh standar kompetensi terpenuhi dengan sempurna.</td></tr>';
-      return;
-    }
-
-    var gHtml = '';
-    d.topTrainingGaps.forEach(function (g, idx) {
-      var pct = g.pctGap || 0;
-      gHtml += '<tr>' +
-                 '<td style="text-align:center; font-size:.8125rem;" class="tnum">' + (idx + 1) + '</td>' +
-                 '<td><strong>' + _esc(g.nama) + '</strong><div style="font-size:.75rem; color:var(--n-text-muted);">' + _esc(g.kode) + '</div></td>' +
-                 '<td style="font-size:.8125rem;">' + _esc(g.kelompok) + '</td>' +
-                 '<td><span class="badge" style="background:var(--n-bg-subtle); font-size:.6875rem;">' + _esc(g.kategori) + '</span></td>' +
-                 '<td style="text-align:center;">' + (g.wajib ? '<span class="badge" style="background:rgba(225,29,72,0.1); color:var(--n-crit); font-size:.6875rem;">Wajib</span>' : '<span class="badge" style="background:var(--n-bg-subtle); color:var(--n-text-muted); font-size:.6875rem;">Pilihan</span>') + '</td>' +
-                 '<td style="text-align:center; font-weight:700; color:var(--n-crit);" class="tnum">' + g.gapCount + ' orang</td>' +
-                 '<td style="text-align:center; color:var(--n-primary);" class="tnum">' + g.lulusCount + ' orang</td>' +
-                 '<td>' +
-                   '<div style="display:flex; justify-content:space-between; font-size:.75rem; margin-bottom:2px;">' +
-                     '<span style="color:var(--n-crit);">' + pct + '% Belum</span>' +
-                   '</div>' +
-                   '<div style="height:6px; background:var(--n-border); border-radius:999px; overflow:hidden;">' +
-                     '<div style="height:100%; width:' + pct + '%; background:var(--n-crit);"></div>' +
-                   '</div>' +
-                 '</td>' +
-               '</tr>';
-    });
-    gapsTbody.innerHTML = gHtml;
-  }
-}
-
-// ── MODAL DETAIL CHECKLIST PER PERSONEL ─────────────────────
-
-function _tuOpenPegawaiDetailModal(pegId) {
-  if (!_TU.kompetensiData || !_TU.kompetensiData.pegawaiList) return;
-  var peg = _TU.kompetensiData.pegawaiList.find(function (p) { return p.pegawaiId === pegId; });
-  if (!peg) return;
-
-  var titleEl = document.getElementById('tu-det-nama');
-  var subEl = document.getElementById('tu-det-sub');
-  var badgeEl = document.getElementById('tu-det-badge-rumpun');
-  var pctLabel = document.getElementById('tu-det-pct-label');
-  var barEl = document.getElementById('tu-det-progress-bar');
-  var countLabel = document.getElementById('tu-det-count-label');
-  var evLabel = document.getElementById('tu-det-evidence-label');
-  var wrap = document.getElementById('tu-det-checklist-wrap');
-
-  if (titleEl) titleEl.textContent = peg.nama;
-  if (subEl) subEl.textContent = 'NIP: ' + (peg.nip || '-') + ' \u00B7 ' + peg.jabatanLengkap + ' \u00B7 ' + peg.unitKerja;
-  if (badgeEl) badgeEl.textContent = peg.rumpun === 'AWAK_DEK' ? 'Awak Dek' : (peg.rumpun === 'AWAK_MESIN' ? 'Awak Mesin' : 'Staf Dit. POA');
-
-  if (pctLabel) pctLabel.textContent = peg.pctKompetensi + '%';
-  if (barEl) barEl.style.width = peg.pctKompetensi + '%';
-  if (countLabel) countLabel.textContent = peg.totalLulus + ' dari ' + peg.totalStandar + ' Pelatihan Terpenuhi';
-  if (evLabel) evLabel.textContent = peg.totalEvidence + ' Bukti File Terunggah';
-
-  var standards = (_TU.kompetensiData.standarByGroup && _TU.kompetensiData.standarByGroup[peg.kelompokJabatan]) || [];
-  var certs = peg.certifications || {};
-
-  var html = '';
-  standards.forEach(function (st) {
-    var cData = certs[st.kode];
-    var isLulus = cData && (cData.status === 'SUDAH_LULUS' || cData.status === 'LULUS');
-    var hasFile = cData && (cData.fileEvidenceUrl || cData.fileEvidenceId);
-
-    var badgeHtml = isLulus
-      ? (hasFile ? '<span class="badge" style="background:#DEF7EC; color:#03543F; font-size:.75rem;">Lulus + File</span>' : '<span class="badge" style="background:#E0F2FE; color:#0369A1; font-size:.75rem;">Terdata Lulus</span>')
-      : '<span class="badge" style="background:#F3F4F6; color:var(--n-text-muted); font-size:.75rem;">Belum</span>';
-
-    html += '<div style="display:flex; justify-content:space-between; align-items:center; padding:10px 12px; border-bottom:1px solid var(--n-border); gap:10px; flex-wrap:wrap;">' +
-              '<div style="flex:1; min-width:220px;">' +
-                '<div style="display:flex; align-items:center; gap:6px;">' +
-                  '<strong style="font-size:.875rem;">' + _esc(st.nama) + '</strong>' +
-                  (st.wajib ? '<span class="badge" style="background:rgba(225,29,72,0.1); color:var(--n-crit); font-size:.625rem;">Wajib</span>' : '') +
-                '</div>' +
-                (cData && cData.nomorSertifikat ? '<div style="font-size:.75rem; color:var(--n-text-muted);">No: ' + _esc(cData.nomorSertifikat) + (cData.tahun ? ' (' + cData.tahun + ')' : '') + '</div>' : '') +
-              '</div>' +
-              '<div style="display:flex; align-items:center; gap:6px;">' +
-                badgeHtml +
-                (hasFile ? '<a href="' + _esc(cData.fileEvidenceUrl) + '" target="_blank" class="btn-outline ctl-sm" style="text-decoration:none;">File</a>' : '') +
-                '<button type="button" class="btn-primary ctl-sm" onclick="closeModal(\'modal-tu-pegawai-detail\'); _tuOpenSertifikatModal(\'' + _esc(peg.pegawaiId) + '\', \'' + _esc(st.kode) + '\')">' +
-                  '<span>Upload</span>' +
-                '</button>' +
-              '</div>' +
-            '</div>';
-  });
-
   if (wrap) wrap.innerHTML = html;
+  _msg('tu-det-msg', null);
   openModal('modal-tu-pegawai-detail');
 }
 
@@ -8056,6 +8026,11 @@ function _tuOpenSertifikatModal(pegId, kodePelatihan) {
   if (!_TU.kompetensiData || !_TU.kompetensiData.pegawaiList) return;
   var peg = _TU.kompetensiData.pegawaiList.find(function (p) { return p.pegawaiId === pegId; });
   if (!peg) return;
+
+  var pUnit = String(peg.unitKerja || '').trim();
+  if (pUnit.toLowerCase().indexOf('poa') !== -1 || pUnit.toLowerCase().indexOf('operasi armada') !== -1 || pUnit.toLowerCase().indexOf('pengendalian') !== -1) {
+    pUnit = 'Dit. POA';
+  }
 
   var standards = (_TU.kompetensiData.standarByGroup && _TU.kompetensiData.standarByGroup[peg.kelompokJabatan]) || [];
   var st = standards.find(function (s) { return s.kode === kodePelatihan; });
@@ -8068,13 +8043,19 @@ function _tuOpenSertifikatModal(pegId, kodePelatihan) {
   };
   _TU.sertifikatUploadFile = null;
 
-  document.getElementById('tu-sert-pegawai-id').value = pegId;
-  document.getElementById('tu-sert-kode').value = kodePelatihan;
-  document.getElementById('tu-sert-nama').value = st ? st.nama : kodePelatihan;
+  var pInput = document.getElementById('tu-sert-pegawai-id');
+  var kInput = document.getElementById('tu-sert-kode');
+  var nInput = document.getElementById('tu-sert-nama');
+  if (pInput) pInput.value = pegId;
+  if (kInput) kInput.value = kodePelatihan;
+  if (nInput) nInput.value = st ? st.nama : kodePelatihan;
 
-  document.getElementById('tu-sert-label-pelatihan').textContent = st ? st.nama : kodePelatihan;
-  document.getElementById('tu-sert-label-pegawai').textContent = peg.nama + ' \u00B7 ' + peg.jabatanLengkap + ' (' + peg.unitKerja + ')';
-  document.getElementById('tu-sert-badge-target').textContent = st ? st.kategori : 'Pelatihan';
+  var lblPel = document.getElementById('tu-sert-label-pelatihan');
+  var lblPeg = document.getElementById('tu-sert-label-pegawai');
+  var bdgTgt = document.getElementById('tu-sert-badge-target');
+  if (lblPel) lblPel.textContent = st ? st.nama : kodePelatihan;
+  if (lblPeg) lblPeg.textContent = peg.nama + ' · ' + peg.jabatanLengkap + ' (' + pUnit + ')';
+  if (bdgTgt) bdgTgt.textContent = st ? st.kategori : 'Pelatihan';
 
   var statusSelect = document.getElementById('tu-sert-status');
   var noInput = document.getElementById('tu-sert-nomor');
@@ -8121,7 +8102,7 @@ function _tuHandleSertifikatFileChange(event) {
   var label = document.getElementById('tu-sert-file-label');
   if (label) {
     var sizeKb = Math.round(file.size / 1024);
-    label.innerHTML = '<strong style="color:var(--n-primary);">' + _esc(file.name) + '</strong><br>' + sizeKb + ' KB \u00B7 Siap diunggah ke Google Drive';
+    label.innerHTML = '<strong style="color:var(--n-primary);">' + _esc(file.name) + '</strong><br>' + sizeKb + ' KB · Siap diunggah ke Google Drive';
   }
 
   var reader = new FileReader();
@@ -8183,6 +8164,11 @@ function _tuSubmitSertifikat() {
       closeModal('modal-tu-sertifikat');
       _msg('tu-peg-dir-msg', 'success', res.message || 'Bukti sertifikat berhasil disimpan.');
       _tuLoadKompetensi(true);
+      if (_TU.currentDetailPegId) {
+        setTimeout(function () {
+          _tuOpenPegawaiDetailModal(_TU.currentDetailPegId);
+        }, 500);
+      }
     })
     .withFailureHandler(function (err) {
       _setLoading(btn, false);
@@ -8199,6 +8185,7 @@ function _tuOpenPegawaiMasterModal(pegId) {
   var namaInput = document.getElementById('tu-m-nama');
   var nipInput = document.getElementById('tu-m-nip');
   var unitInput = document.getElementById('tu-m-unit');
+  var sPegSelect = document.getElementById('tu-m-status-pegawai');
   var lingkupSelect = document.getElementById('tu-m-lingkup');
   var kelompokSelect = document.getElementById('tu-m-kelompok');
   var tingkatSelect = document.getElementById('tu-m-tingkat');
@@ -8209,11 +8196,17 @@ function _tuOpenPegawaiMasterModal(pegId) {
   if (pegId && _TU.kompetensiData && _TU.kompetensiData.pegawaiList) {
     var peg = _TU.kompetensiData.pegawaiList.find(function (p) { return p.pegawaiId === pegId; });
     if (peg) {
+      var pUnit = String(peg.unitKerja || '').trim();
+      if (pUnit.toLowerCase().indexOf('poa') !== -1 || pUnit.toLowerCase().indexOf('operasi armada') !== -1 || pUnit.toLowerCase().indexOf('pengendalian') !== -1) {
+        pUnit = 'Dit. POA';
+      }
+      var sPegVal = peg.statusKepegawaian || (pUnit === 'Dit. POA' ? 'PNS' : (peg.nip && peg.nip !== '-' ? 'PNS' : 'NON_ASN'));
       if (titleEl) titleEl.textContent = 'Edit Profil Personel';
       if (pidInput) pidInput.value = peg.pegawaiId;
       if (namaInput) namaInput.value = peg.nama;
       if (nipInput) nipInput.value = (peg.nip && peg.nip !== '-') ? peg.nip : '';
-      if (unitInput) unitInput.value = peg.unitKerja;
+      if (unitInput) unitInput.value = pUnit;
+      if (sPegSelect) sPegSelect.value = sPegVal;
       if (lingkupSelect) lingkupSelect.value = peg.lingkupData || 'DIT_POA';
       if (kelompokSelect) kelompokSelect.value = peg.kelompokJabatan;
       if (tingkatSelect) tingkatSelect.value = peg.tingkatKelas || 'NON_JENJANG';
@@ -8229,6 +8222,7 @@ function _tuOpenPegawaiMasterModal(pegId) {
   if (namaInput) namaInput.value = '';
   if (nipInput) nipInput.value = '';
   if (unitInput) unitInput.value = 'Dit. POA';
+  if (sPegSelect) sPegSelect.value = 'PNS';
   if (lingkupSelect) lingkupSelect.value = 'DIT_POA';
   if (kelompokSelect) kelompokSelect.value = '';
   if (tingkatSelect) tingkatSelect.value = 'NON_JENJANG';
@@ -8246,7 +8240,12 @@ function _tuSubmitPegawaiMaster() {
   var nama = ((document.getElementById('tu-m-nama') || {}).value || '').trim();
   var nip = ((document.getElementById('tu-m-nip') || {}).value || '').trim();
   var unit = ((document.getElementById('tu-m-unit') || {}).value || '').trim();
+  if (unit.toLowerCase().indexOf('poa') !== -1 || unit.toLowerCase().indexOf('operasi armada') !== -1 || unit.toLowerCase().indexOf('pengendalian') !== -1) {
+    unit = 'Dit. POA';
+  }
+  var statusPeg = (document.getElementById('tu-m-status-pegawai') || {}).value || (unit === 'Dit. POA' ? 'PNS' : 'NON_ASN');
   var lingkup = (document.getElementById('tu-m-lingkup') || {}).value || 'DIT_POA';
+  if (unit === 'Dit. POA') lingkup = 'DIT_POA';
   var kelompok = (document.getElementById('tu-m-kelompok') || {}).value;
   var tingkat = (document.getElementById('tu-m-tingkat') || {}).value || 'NON_JENJANG';
   var jabatan = ((document.getElementById('tu-m-jabatan-lengkap') || {}).value || '').trim();
@@ -8261,6 +8260,7 @@ function _tuSubmitPegawaiMaster() {
     nama: nama,
     nip: nip || '-',
     unitKerja: unit,
+    statusKepegawaian: statusPeg,
     lingkupData: lingkup,
     kelompokJabatan: kelompok,
     tingkatKelas: tingkat,

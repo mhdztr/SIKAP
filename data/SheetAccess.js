@@ -222,7 +222,7 @@ function _autoCreateTuSheet(ss, sheetName) {
   } else if (sheetName === SHEET_TU.PEGAWAI_MASTER) {
     headers = [
       'PegawaiID', 'NIP', 'Nama', 'UnitKerja', 'LingkupData', 'KelompokJabatan',
-      'JabatanLengkap', 'TingkatKelas', 'KategoriRumpun', 'StatusAktif', 'UpdatedAt', 'UpdatedBy'
+      'JabatanLengkap', 'TingkatKelas', 'KategoriRumpun', 'StatusKepegawaian', 'StatusAktif', 'UpdatedAt', 'UpdatedBy'
     ];
   } else if (sheetName === SHEET_TU.STANDAR_PELATIHAN) {
     headers = [

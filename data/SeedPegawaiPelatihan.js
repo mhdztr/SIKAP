@@ -1,15 +1,15 @@
 /**
  * data/SeedPegawaiPelatihan.js
- * Seed data awal Manajemen Kepegawaian & Standar Pelatihan SKJ Dit. POA & Awak Kapal Pengawas.
+ * Standar Pelatihan Resmi & Seeder Personel Dit. POA & Awak Kapal Pengawas.
  * Total Personel: 504 (261 Dit. POA + 243 Awak Kapal Armada PSDKP).
- * Standar Kompetensi: 38 Kelompok Jabatan (Termasuk kurikulum resmi terverifikasi).
+ * Standar Kompetensi: 38 Kelompok Jabatan resmi sesuai regulasi KKP / Permen KP / STCW-F.
  */
 
 var STANDAR_PELATIHAN_RESMI = {
   "Nahkoda": [
     {
       "kode": "TRN-NKH-01",
-      "nama": "Sertifikat ANKAPIN Tingkat I / II (Sesuai Kelas Kapal)",
+      "nama": "Sertifikat Keahlian Pelaut Nautika (ANKAPIN Tingkat I / II / ANT)",
       "kat": "SERTIFIKASI_LAUT",
       "tingkat": "ALL",
       "wajib": true
@@ -44,55 +44,104 @@ var STANDAR_PELATIHAN_RESMI = {
     },
     {
       "kode": "TRN-NKH-06",
-      "nama": "Radar Simulator & ARPA + ECDIS",
+      "nama": "Radar Simulator & Automatic Radar Plotting Aid (ARPA)",
       "kat": "SERTIFIKASI_LAUT",
       "tingkat": "ALL",
       "wajib": true
     },
     {
       "kode": "TRN-NKH-07",
-      "nama": "Operator Radio GMDSS (ORU / GOC)",
+      "nama": "Electronic Chart Display and Information System (ECDIS)",
       "kat": "SERTIFIKASI_LAUT",
       "tingkat": "ALL",
       "wajib": true
     },
     {
       "kode": "TRN-NKH-08",
-      "nama": "Pendidikan dan Pelatihan Khusus Polsus PWP3K",
-      "kat": "TEKNIS",
+      "nama": "Sertifikat Operator Radio Umum GMDSS (ORU / GOC)",
+      "kat": "SERTIFIKASI_LAUT",
       "tingkat": "ALL",
       "wajib": true
     },
     {
       "kode": "TRN-NKH-09",
-      "nama": "Diklat PPNS Perikanan",
+      "nama": "Pendidikan dan Pelatihan Dasar Calon Awak Kapal Pengawas (AKP)",
       "kat": "TEKNIS",
       "tingkat": "ALL",
-      "wajib": false
+      "wajib": true
     },
     {
       "kode": "TRN-NKH-10",
-      "nama": "Taktik Olah Gerak & Manuver Penghentian Kapal (Tactical Boarding)",
+      "nama": "Pelatihan Pengoperasian Armada Pengawasan SDKP",
       "kat": "TEKNIS",
       "tingkat": "ALL",
       "wajib": true
     },
     {
       "kode": "TRN-NKH-11",
-      "nama": "Manajemen Operasi Armada Pengawasan SDKP",
+      "nama": "Pendidikan dan Pelatihan Khusus Polisi Khusus PWP3K",
       "kat": "TEKNIS",
       "tingkat": "ALL",
       "wajib": true
     },
     {
       "kode": "TRN-NKH-12",
+      "nama": "Diklat Penyidik Pegawai Negeri Sipil (PPNS) Perikanan",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-NKH-13",
+      "nama": "Pelatihan Pemeriksaan Fisik Kapal & Boarding Officer (VBSS)",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": true
+    },
+    {
+      "kode": "TRN-NKH-14",
+      "nama": "Pelatihan Penggunaan & Penembakan Senjata Api Kapal Pengawas",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": true
+    },
+    {
+      "kode": "TRN-NKH-15",
+      "nama": "Pelatihan Taktis Olah Gerak, Pengejaran & Penghentian Kapal",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": true
+    },
+    {
+      "kode": "TRN-NKH-16",
+      "nama": "Pelatihan Intelijen Perikanan dan Kelautan",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": true
+    },
+    {
+      "kode": "TRN-NKH-17",
+      "nama": "Pelatihan Penanganan Barang Bukti & Awak Kapal TPKP",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": true
+    },
+    {
+      "kode": "TRN-NKH-18",
       "nama": "Bridge Resource Management (BRM)",
       "kat": "MANAJERIAL",
       "tingkat": "ALL",
       "wajib": true
     },
     {
-      "kode": "TRN-NKH-13",
+      "kode": "TRN-NKH-19",
+      "nama": "Manajemen Operasi Armada Pengawasan SDKP",
+      "kat": "MANAJERIAL",
+      "tingkat": "ALL",
+      "wajib": true
+    },
+    {
+      "kode": "TRN-NKH-20",
       "nama": "Budaya Integritas & Loyalitas Institusi",
       "kat": "MANAJERIAL",
       "tingkat": "ALL",
@@ -102,7 +151,7 @@ var STANDAR_PELATIHAN_RESMI = {
   "Mualim": [
     {
       "kode": "TRN-MLM-01",
-      "nama": "Sertifikat ANKAPIN Tingkat I / II / III (Sesuai Jenjang)",
+      "nama": "Sertifikat Keahlian Pelaut Nautika (ANKAPIN Tingkat I / II / III / ANT)",
       "kat": "SERTIFIKASI_LAUT",
       "tingkat": "ALL",
       "wajib": true
@@ -144,41 +193,69 @@ var STANDAR_PELATIHAN_RESMI = {
     },
     {
       "kode": "TRN-MLM-07",
-      "nama": "Pelatihan Pemeriksaan Fisik Kapal & Boarding Officer",
-      "kat": "TEKNIS",
+      "nama": "Sertifikat Operator Radio GMDSS (ORU / ORT)",
+      "kat": "SERTIFIKASI_LAUT",
       "tingkat": "ALL",
       "wajib": true
     },
     {
       "kode": "TRN-MLM-08",
-      "nama": "Navigasi Terpadu, AIS & Sistem Pemantauan Kapal (VMS)",
+      "nama": "Pendidikan dan Pelatihan Dasar Calon Awak Kapal Pengawas (AKP)",
       "kat": "TEKNIS",
       "tingkat": "ALL",
       "wajib": true
     },
     {
       "kode": "TRN-MLM-09",
-      "nama": "Administrasi Jurnal Kapal & Logbook Pengawasan",
+      "nama": "Pelatihan Pengoperasian Armada Pengawasan SDKP",
       "kat": "TEKNIS",
       "tingkat": "ALL",
       "wajib": true
     },
     {
       "kode": "TRN-MLM-10",
-      "nama": "Diklat Dasar Asisten Pengawas / Pengawas Perikanan",
+      "nama": "Pelatihan Pemeriksaan Fisik Kapal Perikanan & Boarding Officer",
       "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": true
+    },
+    {
+      "kode": "TRN-MLM-11",
+      "nama": "Pelatihan Sistem Pemantauan Kapal Perikanan (VMS) & AIS",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": true
+    },
+    {
+      "kode": "TRN-MLM-12",
+      "nama": "Pelatihan Penggunaan & Penembakan Senjata Api Kapal Pengawas",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": true
+    },
+    {
+      "kode": "TRN-MLM-13",
+      "nama": "Administrasi Jurnal Kapal & Logbook Pengawasan",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": true
+    },
+    {
+      "kode": "TRN-MLM-14",
+      "nama": "Diklat Dasar Asisten Pengawas / Pengawas Perikanan",
+      "kat": "FUNGSIONAL",
       "tingkat": "ALL",
       "wajib": false
     },
     {
-      "kode": "TRN-MLM-11",
+      "kode": "TRN-MLM-15",
       "nama": "Bridge Team Management & Dinas Jaga Laut",
       "kat": "MANAJERIAL",
       "tingkat": "ALL",
       "wajib": true
     },
     {
-      "kode": "TRN-MLM-12",
+      "kode": "TRN-MLM-16",
       "nama": "Komunikasi Efektif & Koordinasi Tim",
       "kat": "MANAJERIAL",
       "tingkat": "ALL",
@@ -188,7 +265,7 @@ var STANDAR_PELATIHAN_RESMI = {
   "Markonis": [
     {
       "kode": "TRN-MRK-01",
-      "nama": "Sertifikat Operator Radio GMDSS (ORU / ORT)",
+      "nama": "Sertifikat Operator Radio Umum (ORU / GOC) / Operator Radio Terbatas (ORT / ROC)",
       "kat": "SERTIFIKASI_LAUT",
       "tingkat": "ALL",
       "wajib": true
@@ -209,34 +286,48 @@ var STANDAR_PELATIHAN_RESMI = {
     },
     {
       "kode": "TRN-MRK-04",
-      "nama": "Sistem Komunikasi Taktis Maritim & Sandi Pengawasan",
+      "nama": "Pendidikan dan Pelatihan Dasar Calon Awak Kapal Pengawas (AKP)",
       "kat": "TEKNIS",
       "tingkat": "ALL",
       "wajib": true
     },
     {
       "kode": "TRN-MRK-05",
-      "nama": "Pengoperasian Radar, AIS, Sounder & VMS",
+      "nama": "Pelatihan Pengoperasian Armada Pengawasan SDKP",
       "kat": "TEKNIS",
       "tingkat": "ALL",
       "wajib": true
     },
     {
       "kode": "TRN-MRK-06",
-      "nama": "Prosedur Komunikasi Darurat Maritim (SAR Laut)",
+      "nama": "Komunikasi Taktis Radio Maritim & Sandi Pengawasan",
       "kat": "TEKNIS",
       "tingkat": "ALL",
       "wajib": true
     },
     {
       "kode": "TRN-MRK-07",
-      "nama": "Pelaporan Operasi Harian & Log Komunikasi Armada",
+      "nama": "Pengoperasian Perangkat Navigasi, Radar, AIS, Sounder & VMS",
       "kat": "TEKNIS",
       "tingkat": "ALL",
       "wajib": true
     },
     {
       "kode": "TRN-MRK-08",
+      "nama": "Prosedur Komunikasi Maritim Marabahaya & SAR Laut",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": true
+    },
+    {
+      "kode": "TRN-MRK-09",
+      "nama": "Pelaporan Operasi Harian & Log Komunikasi Armada",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": true
+    },
+    {
+      "kode": "TRN-MRK-10",
       "nama": "Etika Profesi & Kerahasiaan Informasi Sandi",
       "kat": "MANAJERIAL",
       "tingkat": "ALL",
@@ -246,7 +337,7 @@ var STANDAR_PELATIHAN_RESMI = {
   "Serang": [
     {
       "kode": "TRN-SRG-01",
-      "nama": "Sertifikat ANKAPIN III / SKK 60 Mil + Rating Dinas Jaga Dek",
+      "nama": "Sertifikat Keahlian ANKAPIN Tingkat III / SKK 60 Mil + Rating Dinas Jaga Dek",
       "kat": "SERTIFIKASI_LAUT",
       "tingkat": "ALL",
       "wajib": true
@@ -260,41 +351,69 @@ var STANDAR_PELATIHAN_RESMI = {
     },
     {
       "kode": "TRN-SRG-03",
-      "nama": "AFF & Survival Craft / Rescue Boats (SCRB)",
+      "nama": "Advanced Fire Fighting (AFF)",
       "kat": "SERTIFIKASI_LAUT",
       "tingkat": "ALL",
       "wajib": true
     },
     {
       "kode": "TRN-SRG-04",
-      "nama": "Manajemen Perawatan Dek, Tali-Temali & Jangkar Kapal",
-      "kat": "TEKNIS",
+      "nama": "Survival Craft and Rescue Boats (SCRB)",
+      "kat": "SERTIFIKASI_LAUT",
       "tingkat": "ALL",
       "wajib": true
     },
     {
       "kode": "TRN-SRG-05",
-      "nama": "Pengemudian Rigid Inflatable Boat (RIB) / Sekoci Pengawas (Coxswain)",
+      "nama": "Pendidikan dan Pelatihan Dasar Calon Awak Kapal Pengawas (AKP)",
       "kat": "TEKNIS",
       "tingkat": "ALL",
       "wajib": true
     },
     {
       "kode": "TRN-SRG-06",
-      "nama": "K3 Maritim & Penanggulangan Bahaya di Laut",
+      "nama": "Pelatihan Pengoperasian Armada Pengawasan SDKP",
       "kat": "TEKNIS",
       "tingkat": "ALL",
       "wajib": true
     },
     {
       "kode": "TRN-SRG-07",
-      "nama": "Teknik Pengamanan & Penarikan Kapal Tangkapan (Towing & Securing)",
+      "nama": "Perawatan Dek, Tali-Temali & Peralatan Labuh Kapal",
       "kat": "TEKNIS",
       "tingkat": "ALL",
       "wajib": true
     },
     {
       "kode": "TRN-SRG-08",
+      "nama": "Pengemudian Rigid Inflatable Boat (RIB) / Sekoci Pengawas (Coxswain)",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": true
+    },
+    {
+      "kode": "TRN-SRG-09",
+      "nama": "Pelatihan Penggunaan Senjata Api Kapal Pengawas",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": true
+    },
+    {
+      "kode": "TRN-SRG-10",
+      "nama": "K3 Maritim & Penanggulangan Bahaya di Laut",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": true
+    },
+    {
+      "kode": "TRN-SRG-11",
+      "nama": "Teknik Pengamanan & Penarikan Kapal Tangkapan (Towing & Securing)",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": true
+    },
+    {
+      "kode": "TRN-SRG-12",
       "nama": "Kepemimpinan Regu Kerja Dek & Kerjasama Tim",
       "kat": "MANAJERIAL",
       "tingkat": "ALL",
@@ -304,7 +423,7 @@ var STANDAR_PELATIHAN_RESMI = {
   "Juru Mudi": [
     {
       "kode": "TRN-JMD-01",
-      "nama": "Sertifikat Rating Dinas Jaga Navigasi / SKK 60 Mil",
+      "nama": "Sertifikat Rating Dinas Jaga Navigasi (Rating Dek) / SKK 60 Mil",
       "kat": "SERTIFIKASI_LAUT",
       "tingkat": "ALL",
       "wajib": true
@@ -325,34 +444,48 @@ var STANDAR_PELATIHAN_RESMI = {
     },
     {
       "kode": "TRN-JMD-04",
-      "nama": "Teknik Pengemudian Kapal (Helmsman) & Kompas Navigasi",
+      "nama": "Pendidikan dan Pelatihan Dasar Calon Awak Kapal Pengawas (AKP)",
       "kat": "TEKNIS",
       "tingkat": "ALL",
       "wajib": true
     },
     {
       "kode": "TRN-JMD-05",
-      "nama": "Pengoperasian Sekoci / Speedboat Buru Sergap (RIB)",
+      "nama": "Pelatihan Pengoperasian Armada Pengawasan SDKP",
       "kat": "TEKNIS",
       "tingkat": "ALL",
       "wajib": true
     },
     {
       "kode": "TRN-JMD-06",
-      "nama": "Pemeliharaan Alat Keselamatan Dek & Perlengkapan Labuh",
+      "nama": "Teknik Pengemudian Kapal (Helmsman) & Kompas Navigasi",
       "kat": "TEKNIS",
       "tingkat": "ALL",
       "wajib": true
     },
     {
       "kode": "TRN-JMD-07",
-      "nama": "Dukungan Taktis Pemeriksaan & Pengawalan Kapal (Boarding Support)",
+      "nama": "Pengoperasian Sekoci & RIB Buru Sergap Kapal Pengawas",
       "kat": "TEKNIS",
       "tingkat": "ALL",
       "wajib": true
     },
     {
       "kode": "TRN-JMD-08",
+      "nama": "Pemeliharaan Peralatan Keselamatan Dek & Labuh",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": true
+    },
+    {
+      "kode": "TRN-JMD-09",
+      "nama": "Dukungan Taktis Boarding Officer & Pengawalan Kapal Tangkapan",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": true
+    },
+    {
+      "kode": "TRN-JMD-10",
       "nama": "Disiplin Dinas Jaga Laut & Budaya Integritas",
       "kat": "MANAJERIAL",
       "tingkat": "ALL",
@@ -376,28 +509,42 @@ var STANDAR_PELATIHAN_RESMI = {
     },
     {
       "kode": "TRN-KLS-03",
-      "nama": "Dasar-Dasar Keselamatan Pelayaran & Tali-Temali",
+      "nama": "Pendidikan dan Pelatihan Dasar Calon Awak Kapal Pengawas (AKP)",
       "kat": "TEKNIS",
       "tingkat": "ALL",
       "wajib": true
     },
     {
       "kode": "TRN-KLS-04",
-      "nama": "Pemeliharaan Lambung, Pengecatan & Kebersihan Dek",
+      "nama": "Pelatihan Pengoperasian Armada Pengawasan SDKP",
       "kat": "TEKNIS",
       "tingkat": "ALL",
       "wajib": true
     },
     {
       "kode": "TRN-KLS-05",
-      "nama": "Penanganan Tali Tambat (Mooring/Unmooring) & Penjagaan Sandar",
+      "nama": "Dasar-Dasar Keselamatan Pelayaran & Tali-Temali",
       "kat": "TEKNIS",
       "tingkat": "ALL",
       "wajib": true
     },
     {
       "kode": "TRN-KLS-06",
-      "nama": "Pengembangan Diri, Disiplin Awak Kapal & Kerjasama Tim",
+      "nama": "Pemeliharaan Lambung, Pengecatan & Kebersihan Dek Kapal",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": true
+    },
+    {
+      "kode": "TRN-KLS-07",
+      "nama": "Penanganan Tali Tambat (Mooring/Unmooring) & Penjagaan Sandar",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": true
+    },
+    {
+      "kode": "TRN-KLS-08",
+      "nama": "Disiplin Awak Kapal & Kerjasama Tim",
       "kat": "MANAJERIAL",
       "tingkat": "ALL",
       "wajib": true
@@ -406,7 +553,7 @@ var STANDAR_PELATIHAN_RESMI = {
   "Kepala Kamar Mesin Kapal": [
     {
       "kode": "TRN-KKM-01",
-      "nama": "Sertifikat ATKAPIN Tingkat I / II (Sesuai Kelas Kapal)",
+      "nama": "Sertifikat Keahlian Pelaut Teknika (ATKAPIN Tingkat I / II / ATT)",
       "kat": "SERTIFIKASI_LAUT",
       "tingkat": "ALL",
       "wajib": true
@@ -427,62 +574,83 @@ var STANDAR_PELATIHAN_RESMI = {
     },
     {
       "kode": "TRN-KKM-04",
-      "nama": "Survival Craft and Rescue Boats (SCRB) & MFA",
+      "nama": "Survival Craft and Rescue Boats (SCRB)",
       "kat": "SERTIFIKASI_LAUT",
       "tingkat": "ALL",
       "wajib": true
     },
     {
       "kode": "TRN-KKM-05",
-      "nama": "Engine Room Resource Management (ERM)",
+      "nama": "Medical First Aid (MFA)",
       "kat": "SERTIFIKASI_LAUT",
       "tingkat": "ALL",
       "wajib": true
     },
     {
       "kode": "TRN-KKM-06",
-      "nama": "Manajemen Pemeliharaan Terencana Mesin (Planned Maintenance System)",
-      "kat": "TEKNIS",
+      "nama": "Engine Room Resource Management (ERM)",
+      "kat": "SERTIFIKASI_LAUT",
       "tingkat": "ALL",
       "wajib": true
     },
     {
       "kode": "TRN-KKM-07",
-      "nama": "Overhaul & Diagnostik Mesin Induk Penggerak Utama",
+      "nama": "Pendidikan dan Pelatihan Dasar Calon Awak Kapal Pengawas (AKP)",
       "kat": "TEKNIS",
       "tingkat": "ALL",
       "wajib": true
     },
     {
       "kode": "TRN-KKM-08",
-      "nama": "Manajemen Bahan Bakar (BBM) & Pelumas Kapal Pengawas",
+      "nama": "Pelatihan Pengoperasian Armada Pengawasan SDKP",
       "kat": "TEKNIS",
       "tingkat": "ALL",
       "wajib": true
     },
     {
       "kode": "TRN-KKM-09",
-      "nama": "Sistem Otomasi, Kelistrikan & Propulsi Kapal Pengawas",
+      "nama": "Planned Maintenance System (PMS) Permesinan Kapal Pengawas",
       "kat": "TEKNIS",
       "tingkat": "ALL",
       "wajib": true
     },
     {
       "kode": "TRN-KKM-10",
-      "nama": "Penyusunan Rencana Kebutuhan Docking & Spesifikasi Teknis Perbaikan",
+      "nama": "Overhaul & Diagnostik Mesin Induk Penggerak Utama",
       "kat": "TEKNIS",
       "tingkat": "ALL",
       "wajib": true
     },
     {
       "kode": "TRN-KKM-11",
-      "nama": "Kepemimpinan Kamar Mesin & Troubleshooting Darurat",
-      "kat": "MANAJERIAL",
+      "nama": "Manajemen Bahan Bakar (BBM) & Pelumas Kapal Pengawas",
+      "kat": "TEKNIS",
       "tingkat": "ALL",
       "wajib": true
     },
     {
       "kode": "TRN-KKM-12",
+      "nama": "Sistem Otomasi, Kelistrikan & Propulsi Kapal Pengawas",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": true
+    },
+    {
+      "kode": "TRN-KKM-13",
+      "nama": "Penyusunan Rencana Kebutuhan Docking & Spesifikasi Teknis Perbaikan",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": true
+    },
+    {
+      "kode": "TRN-KKM-14",
+      "nama": "Troubleshooting Mesin & Kepemimpinan Kamar Mesin",
+      "kat": "MANAJERIAL",
+      "tingkat": "ALL",
+      "wajib": true
+    },
+    {
+      "kode": "TRN-KKM-15",
       "nama": "Budaya Integritas & Akuntabilitas Logistik BBM",
       "kat": "MANAJERIAL",
       "tingkat": "ALL",
@@ -492,7 +660,7 @@ var STANDAR_PELATIHAN_RESMI = {
   "Masinis": [
     {
       "kode": "TRN-MSN-01",
-      "nama": "Sertifikat ATKAPIN Tingkat I / II / III (Sesuai Jenjang)",
+      "nama": "Sertifikat Keahlian Pelaut Teknika (ATKAPIN Tingkat I / II / III / ATT)",
       "kat": "SERTIFIKASI_LAUT",
       "tingkat": "ALL",
       "wajib": true
@@ -520,41 +688,62 @@ var STANDAR_PELATIHAN_RESMI = {
     },
     {
       "kode": "TRN-MSN-05",
-      "nama": "Pengoperasian & Perawatan Mesin Bantu (Genset & Kompresor)",
+      "nama": "Pendidikan dan Pelatihan Dasar Calon Awak Kapal Pengawas (AKP)",
       "kat": "TEKNIS",
       "tingkat": "ALL",
       "wajib": true
     },
     {
       "kode": "TRN-MSN-06",
-      "nama": "Sistem Perpipaan, Pompa, Purifier & Sistem Pendingin Kapal",
+      "nama": "Pelatihan Pengoperasian Armada Pengawasan SDKP",
       "kat": "TEKNIS",
       "tingkat": "ALL",
       "wajib": true
     },
     {
       "kode": "TRN-MSN-07",
-      "nama": "Pemeliharaan Sistem Kemudi Hidrolik & Bow Thruster",
+      "nama": "Pengoperasian & Perawatan Mesin Bantu (Genset & Kompresor)",
       "kat": "TEKNIS",
       "tingkat": "ALL",
       "wajib": true
     },
     {
       "kode": "TRN-MSN-08",
-      "nama": "K3 Kamar Mesin & Penanggulangan Kebakaran Ruang Mesin",
+      "nama": "Sistem Perpipaan, Pompa, Purifier & Sistem Pendingin Kapal",
       "kat": "TEKNIS",
       "tingkat": "ALL",
       "wajib": true
     },
     {
       "kode": "TRN-MSN-09",
+      "nama": "Pemeliharaan Sistem Kemudi Hidrolik & Bow Thruster",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": true
+    },
+    {
+      "kode": "TRN-MSN-10",
+      "nama": "K3 Kamar Mesin & Penanggulangan Kebakaran Ruang Mesin",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": true
+    },
+    {
+      "kode": "TRN-MSN-11",
+      "nama": "Diklat Dasar Asisten Pengawas Perikanan",
+      "kat": "FUNGSIONAL",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-MSN-12",
       "nama": "Dinas Jaga Kamar Mesin (Engine Watchkeeping)",
       "kat": "MANAJERIAL",
       "tingkat": "ALL",
       "wajib": true
     },
     {
-      "kode": "TRN-MSN-10",
+      "kode": "TRN-MSN-13",
       "nama": "Kerjasama Tim & Budaya Integritas",
       "kat": "MANAJERIAL",
       "tingkat": "ALL",
@@ -564,7 +753,7 @@ var STANDAR_PELATIHAN_RESMI = {
   "Juru Minyak": [
     {
       "kode": "TRN-JMY-01",
-      "nama": "Sertifikat Rating Dinas Jaga Mesin (ATT-D / Rating Mesin)",
+      "nama": "Sertifikat Rating Dinas Jaga Mesin (Rating Mesin / ATT-D)",
       "kat": "SERTIFIKASI_LAUT",
       "tingkat": "ALL",
       "wajib": true
@@ -578,51 +767,144 @@ var STANDAR_PELATIHAN_RESMI = {
     },
     {
       "kode": "TRN-JMY-03",
-      "nama": "Fire Prevention & Fire Fighting Dasar",
+      "nama": "Fire Prevention and Fire Fighting (FPFF)",
       "kat": "SERTIFIKASI_LAUT",
       "tingkat": "ALL",
       "wajib": true
     },
     {
       "kode": "TRN-JMY-04",
-      "nama": "Pelumasan, Pengecekan Rutin Mesin & Kebersihan Bilga",
+      "nama": "Pendidikan dan Pelatihan Dasar Calon Awak Kapal Pengawas (AKP)",
       "kat": "TEKNIS",
       "tingkat": "ALL",
       "wajib": true
     },
     {
       "kode": "TRN-JMY-05",
-      "nama": "Perawatan Filter BBM, Oli & Sistem Pendingin Air Laut/Tawar",
+      "nama": "Pelatihan Pengoperasian Armada Pengawasan SDKP",
       "kat": "TEKNIS",
       "tingkat": "ALL",
       "wajib": true
     },
     {
       "kode": "TRN-JMY-06",
-      "nama": "Bantuan Teknis Bongkar Pasang Komponen Mesin (Overhaul Support)",
+      "nama": "Pelumasan, Pengecekan Rutin Mesin & Kebersihan Bilga",
       "kat": "TEKNIS",
       "tingkat": "ALL",
       "wajib": true
     },
     {
       "kode": "TRN-JMY-07",
-      "nama": "Pengelolaan Limbah Minyak (Oily Water Separator / MARPOL)",
+      "nama": "Perawatan Filter BBM, Oli & Sistem Pendingin Air Laut/Tawar",
       "kat": "TEKNIS",
       "tingkat": "ALL",
       "wajib": true
     },
     {
       "kode": "TRN-JMY-08",
+      "nama": "Bantuan Teknis Bongkar Pasang Komponen Mesin (Overhaul Support)",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": true
+    },
+    {
+      "kode": "TRN-JMY-09",
+      "nama": "Pengelolaan Limbah Minyak (Oily Water Separator / MARPOL)",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": true
+    },
+    {
+      "kode": "TRN-JMY-10",
       "nama": "Disiplin Dinas Jaga Mesin & Kepatuhan SOP",
       "kat": "MANAJERIAL",
       "tingkat": "ALL",
       "wajib": true
     }
   ],
+  "Struktural": [
+    {
+      "kode": "TRN-STR-01",
+      "nama": "Diklat Kepemimpinan Nasional TK. I",
+      "kat": "MANAJERIAL",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-STR-02",
+      "nama": "Diklat Kepemimpinan Lemhannas RI",
+      "kat": "MANAJERIAL",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-STR-03",
+      "nama": "Kebijakan Kelautan dan Perikanan",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-STR-04",
+      "nama": "Advokasi Kebijakan Kelautan dan Perikanan",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-STR-05",
+      "nama": "Perencanaan Pengawasan Kelautan dan/atau Perikanan",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": true
+    },
+    {
+      "kode": "TRN-STR-06",
+      "nama": "Pengawasan Perikanan",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": true
+    },
+    {
+      "kode": "TRN-STR-07",
+      "nama": "Pengawasan Kelautan",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": true
+    },
+    {
+      "kode": "TRN-STR-08",
+      "nama": "Penanganan Pelanggaran di bidang Kelautan dan/atau Perikanan",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-STR-09",
+      "nama": "Strategic Maritime Enforcement",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-STR-10",
+      "nama": "Integrity & Institutional Loyalty",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-STR-11",
+      "nama": "Sesuai dengan SKJ JPT dan HCDP",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    }
+  ],
   "Pengawas Perikanan": [
     {
       "kode": "TRN-PWP-01",
-      "nama": "Pelatihan Kepemimpinan Administrator / Pengawas",
+      "nama": "Pelatihan Kepemimpinan Administrator",
       "kat": "MANAJERIAL",
       "tingkat": "ALL",
       "wajib": false
@@ -637,16 +919,16 @@ var STANDAR_PELATIHAN_RESMI = {
     {
       "kode": "TRN-PWP-03",
       "nama": "Diklat Pengawas Perikanan",
-      "kat": "FUNGSIONAL",
+      "kat": "TEKNIS",
       "tingkat": "ALL",
       "wajib": true
     },
     {
       "kode": "TRN-PWP-04",
-      "nama": "Pelatihan Pemeriksaan Fisik Kapal Perikanan & Alat Tangkap",
+      "nama": "Pelatihan Pemeriksaan Fisik Kapal Perikanan dan Alat Tangkap Ikan",
       "kat": "TEKNIS",
       "tingkat": "ALL",
-      "wajib": true
+      "wajib": false
     },
     {
       "kode": "TRN-PWP-05",
@@ -660,49 +942,49 @@ var STANDAR_PELATIHAN_RESMI = {
       "nama": "Pelatihan Pengawasan Bidang Pembudidayaan Ikan",
       "kat": "TEKNIS",
       "tingkat": "ALL",
-      "wajib": false
+      "wajib": true
     },
     {
       "kode": "TRN-PWP-07",
-      "nama": "Pelatihan Pengawasan Distribusi & Pemasaran Hasil Perikanan",
+      "nama": "Pelatihan Pengawasan Bidang Distribusi dan Pemasaran Hasil Perikanan",
       "kat": "TEKNIS",
       "tingkat": "ALL",
-      "wajib": false
+      "wajib": true
     },
     {
       "kode": "TRN-PWP-08",
-      "nama": "Pelatihan Pengawasan Pengolahan Hasil Perikanan",
+      "nama": "Pelatihan Pengawasan Bidang Pengolahan Hasil Perikanan",
       "kat": "TEKNIS",
       "tingkat": "ALL",
-      "wajib": false
+      "wajib": true
     },
     {
       "kode": "TRN-PWP-09",
-      "nama": "Pelatihan Teknis Pengawasan Sumber Daya Perikanan",
+      "nama": "Pelatihan Teknis Pengawasan Bidang Sumber Daya Perikanan",
       "kat": "TEKNIS",
       "tingkat": "ALL",
       "wajib": true
     },
     {
       "kode": "TRN-PWP-10",
-      "nama": "Legal Drafting & Penanganan Pelanggaran",
+      "nama": "Legal Drafting",
       "kat": "TEKNIS",
       "tingkat": "ALL",
       "wajib": true
     },
     {
       "kode": "TRN-PWP-11",
-      "nama": "Pelatihan Perizinan Berusaha Berbasis Risiko (OSS)",
+      "nama": "Pelatihan Perizinan Berusaha",
       "kat": "TEKNIS",
       "tingkat": "ALL",
-      "wajib": true
+      "wajib": false
     },
     {
       "kode": "TRN-PWP-12",
-      "nama": "Pelatihan Intelijen Perikanan & Investigasi",
+      "nama": "Pelatihan Intelijen Perikanan",
       "kat": "TEKNIS",
       "tingkat": "ALL",
-      "wajib": true
+      "wajib": false
     },
     {
       "kode": "TRN-PWP-13",
@@ -715,49 +997,133 @@ var STANDAR_PELATIHAN_RESMI = {
   "Asisten Pengawas Perikanan": [
     {
       "kode": "TRN-APW-01",
-      "nama": "Pengembangan Diri & Integritas ASN",
+      "nama": "Pengembangan Diri",
       "kat": "MANAJERIAL",
       "tingkat": "ALL",
-      "wajib": true
+      "wajib": false
     },
     {
       "kode": "TRN-APW-02",
-      "nama": "Diklat Dasar / Lanjutan Asisten Pengawas Perikanan",
-      "kat": "FUNGSIONAL",
+      "nama": "Komunikasi",
+      "kat": "MANAJERIAL",
       "tingkat": "ALL",
-      "wajib": true
+      "wajib": false
     },
     {
       "kode": "TRN-APW-03",
-      "nama": "Pelatihan Pemeriksaan Fisik Kapal & Alat Tangkap Ikan",
-      "kat": "TEKNIS",
+      "nama": "Budaya Integritas",
+      "kat": "MANAJERIAL",
       "tingkat": "ALL",
-      "wajib": true
+      "wajib": false
     },
     {
       "kode": "TRN-APW-04",
-      "nama": "Pelatihan Pengawasan Penangkapan Ikan",
-      "kat": "TEKNIS",
+      "nama": "Manajemen Perubahan",
+      "kat": "MANAJERIAL",
       "tingkat": "ALL",
-      "wajib": true
+      "wajib": false
     },
     {
       "kode": "TRN-APW-05",
-      "nama": "Pelatihan Teknis Pengawasan Sumber Daya Perikanan",
+      "nama": "Pengambilan Keputusan",
       "kat": "TEKNIS",
       "tingkat": "ALL",
-      "wajib": true
+      "wajib": false
     },
     {
       "kode": "TRN-APW-06",
-      "nama": "Pelatihan Intelijen Perikanan Dasar",
+      "nama": "Penyusunan Kebijakan",
       "kat": "TEKNIS",
       "tingkat": "ALL",
       "wajib": false
     },
     {
       "kode": "TRN-APW-07",
-      "nama": "Diklat Teknis JF Asisten Pengawas Perikanan",
+      "nama": "Penyelesaian Masalah",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-APW-08",
+      "nama": "Pelatihan dan Pembelajaran Manjerial Lainnya",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-APW-09",
+      "nama": "Diklat Pengawas Perikanan",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": true
+    },
+    {
+      "kode": "TRN-APW-10",
+      "nama": "Pelatihan Pemeriksaan Fisik Kapal Perikanan dan Alat Tangkap Ikan",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-APW-11",
+      "nama": "Pelatihan Pengawasan BidangPenangkapan Ikan",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": true
+    },
+    {
+      "kode": "TRN-APW-12",
+      "nama": "Pelatihan Pengawasan Bidang Pembudidayaan Ikan",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": true
+    },
+    {
+      "kode": "TRN-APW-13",
+      "nama": "Pelatihan Pengawasan Bidang Distribusi dan Pemasaran Hasil Perikanan",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": true
+    },
+    {
+      "kode": "TRN-APW-14",
+      "nama": "Pelatihan Pengawasan Bidang Pengolahan Hasil Perikanan",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": true
+    },
+    {
+      "kode": "TRN-APW-15",
+      "nama": "Pelatihan Teknis Pengawasan Bidang Sumber Daya Perikanan",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": true
+    },
+    {
+      "kode": "TRN-APW-16",
+      "nama": "Legal Drafting",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": true
+    },
+    {
+      "kode": "TRN-APW-17",
+      "nama": "Pelatihan Perizinan Berusaha",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-APW-18",
+      "nama": "Pelatihan Intelejen Perikanan",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-APW-19",
+      "nama": "Diklat Teknis Jabatan Fungsional Asisten Pengawas Perikanan",
       "kat": "FUNGSIONAL",
       "tingkat": "ALL",
       "wajib": true
@@ -766,594 +1132,106 @@ var STANDAR_PELATIHAN_RESMI = {
   "Pengawas Kelautan": [
     {
       "kode": "TRN-PWK-01",
-      "nama": "Pelatihan Kepemimpinan Administrator / Pengawas",
+      "nama": "Pelatihan Kepemimpinan Administrator",
       "kat": "MANAJERIAL",
       "tingkat": "ALL",
       "wajib": false
     },
     {
       "kode": "TRN-PWK-02",
-      "nama": "Pemetaan & SIG Bidang Pengawasan Sumber Daya Kelautan",
+      "nama": "Pelatihan Pemetaan bidang Pengawasan sumber daya kelautan",
       "kat": "TEKNIS",
       "tingkat": "ALL",
       "wajib": true
     },
     {
       "kode": "TRN-PWK-03",
-      "nama": "Intelijen Pengawasan Sumber Daya Kelautan",
+      "nama": "Pelatihan Intelejen Bidang Pengawasan Sumber Daya Kelautan",
       "kat": "TEKNIS",
       "tingkat": "ALL",
       "wajib": true
     },
     {
       "kode": "TRN-PWK-04",
-      "nama": "Pelatihan Pengawasan Bidang Pencemaran Perairan",
+      "nama": "Pelatihan Pengawasan Bidang Pencemaran",
       "kat": "TEKNIS",
       "tingkat": "ALL",
       "wajib": true
     },
     {
       "kode": "TRN-PWK-05",
-      "nama": "Pelatihan Pengawasan Pemanfaatan Ruang Laut & Zonasi",
+      "nama": "Pelatihan Pengawasan Bidang Pemanfaatan Ruang Laut",
       "kat": "TEKNIS",
       "tingkat": "ALL",
       "wajib": true
     },
     {
       "kode": "TRN-PWK-06",
-      "nama": "Pelatihan Pengawasan Pengelolaan Sedimentasi di Laut",
+      "nama": "Pelatihan Pengawasan Bidang Sedimentasi",
       "kat": "TEKNIS",
       "tingkat": "ALL",
       "wajib": true
     },
     {
       "kode": "TRN-PWK-07",
-      "nama": "Pelatihan Pengawasan Kawasan Konservasi Perairan",
+      "nama": "Pelatihan Pengawasan Konservasi Perairan",
       "kat": "TEKNIS",
       "tingkat": "ALL",
       "wajib": true
     },
     {
       "kode": "TRN-PWK-08",
-      "nama": "Pelatihan Pengawasan Jenis Ikan yang Dilindungi",
+      "nama": "Pelatihan Pengawasan Jenis Ikan Dilindingi",
       "kat": "TEKNIS",
       "tingkat": "ALL",
       "wajib": true
     },
     {
       "kode": "TRN-PWK-09",
-      "nama": "Valuasi Ekonomi Kerusakan Sumber Daya Kelautan",
+      "nama": "Teknik Pengawasan Bidang sumber daya kelautan",
       "kat": "TEKNIS",
       "tingkat": "ALL",
       "wajib": true
     },
     {
       "kode": "TRN-PWK-10",
-      "nama": "Pelatihan Pengawasan Destructive Fishing",
+      "nama": "Pelatihan Legal Drafting",
       "kat": "TEKNIS",
       "tingkat": "ALL",
       "wajib": true
     },
     {
       "kode": "TRN-PWK-11",
-      "nama": "Pendidikan dan Pelatihan Khusus Polsus PWP3K PSDKP KKP",
+      "nama": "Pelatihan Valuasi Ekonomi Kerusakan SDK",
       "kat": "TEKNIS",
       "tingkat": "ALL",
-      "wajib": true
-    }
-  ],
-  "Asisten Pengawas Kelautan": [
-    {
-      "kode": "TRN-APK-01",
-      "nama": "Pengembangan Diri & Integritas ASN",
-      "kat": "MANAJERIAL",
-      "tingkat": "ALL",
-      "wajib": true
+      "wajib": false
     },
     {
-      "kode": "TRN-APK-02",
-      "nama": "Pemetaan Dasar Pengawasan Sumber Daya Kelautan",
-      "kat": "TEKNIS",
-      "tingkat": "ALL",
-      "wajib": true
-    },
-    {
-      "kode": "TRN-APK-03",
-      "nama": "Pengawasan Pemanfaatan Ruang Laut & Pesisir",
-      "kat": "TEKNIS",
-      "tingkat": "ALL",
-      "wajib": true
-    },
-    {
-      "kode": "TRN-APK-04",
-      "nama": "Pengawasan Kawasan Konservasi & Jenis Ikan Dilindungi",
-      "kat": "TEKNIS",
-      "tingkat": "ALL",
-      "wajib": true
-    },
-    {
-      "kode": "TRN-APK-05",
+      "kode": "TRN-PWK-12",
       "nama": "Pelatihan Pengawasan Destructive Fishing",
       "kat": "TEKNIS",
       "tingkat": "ALL",
       "wajib": true
     },
     {
-      "kode": "TRN-APK-06",
-      "nama": "Pendidikan dan Pelatihan Khusus Polsus PWP3K",
+      "kode": "TRN-PWK-13",
+      "nama": "Pelatihan Valuasi Nilai Investasi Reklamasi",
       "kat": "TEKNIS",
       "tingkat": "ALL",
-      "wajib": true
-    }
-  ],
-  "Struktural": [
-    {
-      "kode": "TRN-STR-01",
-      "nama": "Diklat Kepemimpinan Nasional / Administrator / Pengawas",
-      "kat": "MANAJERIAL",
-      "tingkat": "ALL",
-      "wajib": true
+      "wajib": false
     },
     {
-      "kode": "TRN-STR-02",
-      "nama": "Kebijakan Pengawasan Kelautan dan Perikanan",
+      "kode": "TRN-PWK-14",
+      "nama": "Pengantar Peraturan Perundang-undangan bidang kelautan dan perikanan",
       "kat": "TEKNIS",
       "tingkat": "ALL",
-      "wajib": true
+      "wajib": false
     },
     {
-      "kode": "TRN-STR-03",
-      "nama": "Advokasi & Perencanaan Pengawasan SDKP",
+      "kode": "TRN-PWK-15",
+      "nama": "Pendidikan dan Pelatihan Khusus Polsus PWP3K PSDKP KKP",
       "kat": "TEKNIS",
-      "tingkat": "ALL",
-      "wajib": true
-    },
-    {
-      "kode": "TRN-STR-04",
-      "nama": "Strategic Maritime Enforcement",
-      "kat": "TEKNIS",
-      "tingkat": "ALL",
-      "wajib": true
-    },
-    {
-      "kode": "TRN-STR-05",
-      "nama": "Integrity & Institutional Loyalty",
-      "kat": "MANAJERIAL",
-      "tingkat": "ALL",
-      "wajib": true
-    }
-  ],
-  "Analis Pengelolaan Keuangan APB": [
-    {
-      "kode": "TRN-APK-01",
-      "nama": "Prinsip Manajemen Keuangan Satker Pemerintah Pusat",
-      "kat": "TEKNIS",
-      "tingkat": "ALL",
-      "wajib": true
-    },
-    {
-      "kode": "TRN-APK-02",
-      "nama": "Perencanaan & Penyusunan Anggaran Berbasis Kinerja (APBN)",
-      "kat": "TEKNIS",
-      "tingkat": "ALL",
-      "wajib": true
-    },
-    {
-      "kode": "TRN-APK-03",
-      "nama": "Manajemen Komitmen & Pembayaran Tagihan Negara (SAKTI)",
-      "kat": "TEKNIS",
-      "tingkat": "ALL",
-      "wajib": true
-    },
-    {
-      "kode": "TRN-APK-04",
-      "nama": "Perpajakan Bendahara Instansi Pemerintah",
-      "kat": "TEKNIS",
-      "tingkat": "ALL",
-      "wajib": true
-    },
-    {
-      "kode": "TRN-APK-05",
-      "nama": "Pengelolaan Pengadaan Barang/Jasa Pemerintah (PBJP)",
-      "kat": "TEKNIS",
-      "tingkat": "ALL",
-      "wajib": true
-    },
-    {
-      "kode": "TRN-APK-06",
-      "nama": "Pengendalian Intern atas Pelaporan Keuangan (PIPK)",
-      "kat": "TEKNIS",
-      "tingkat": "ALL",
-      "wajib": true
-    },
-    {
-      "kode": "TRN-APK-07",
-      "nama": "Pelaporan & Penyusunan Laporan Keuangan Satker",
-      "kat": "TEKNIS",
-      "tingkat": "ALL",
-      "wajib": true
-    },
-    {
-      "kode": "TRN-APK-08",
-      "nama": "Penjenjangan Jabatan Fungsional Analis Keuangan APBN",
-      "kat": "FUNGSIONAL",
-      "tingkat": "ALL",
-      "wajib": true
-    }
-  ],
-  "Pranata Keuangan": [
-    {
-      "kode": "TRN-PKU-01",
-      "nama": "Diklat Pembentukan / Penjenjangan Pranata Keuangan APBN",
-      "kat": "FUNGSIONAL",
-      "tingkat": "ALL",
-      "wajib": true
-    },
-    {
-      "kode": "TRN-PKU-02",
-      "nama": "Sertifikasi Bendahara Pengeluaran / Penerimaan (BNT)",
-      "kat": "TEKNIS",
-      "tingkat": "ALL",
-      "wajib": true
-    },
-    {
-      "kode": "TRN-PKU-03",
-      "nama": "Pengoperasian Aplikasi SAKTI Modul Bendahara & Pembayaran",
-      "kat": "TEKNIS",
-      "tingkat": "ALL",
-      "wajib": true
-    },
-    {
-      "kode": "TRN-PKU-04",
-      "nama": "Perpajakan Instansi Pemerintah & Pengujian SPP/SPM",
-      "kat": "TEKNIS",
-      "tingkat": "ALL",
-      "wajib": true
-    },
-    {
-      "kode": "TRN-PKU-05",
-      "nama": "Pengadaan Barang dan Jasa Pemerintah Tingkat Dasar (Level 1)",
-      "kat": "TEKNIS",
-      "tingkat": "ALL",
-      "wajib": true
-    },
-    {
-      "kode": "TRN-PKU-06",
-      "nama": "Akuntansi Pemerintah & Penatausahaan Kas Satker",
-      "kat": "TEKNIS",
-      "tingkat": "ALL",
-      "wajib": true
-    },
-    {
-      "kode": "TRN-PKU-07",
-      "nama": "Budaya Integritas, Etika Keuangan & Pelayanan Publik",
-      "kat": "MANAJERIAL",
-      "tingkat": "ALL",
-      "wajib": true
-    }
-  ],
-  "Perencana": [
-    {
-      "kode": "TRN-PRC-01",
-      "nama": "Penyusunan Rencana Strategis (Renstra) K/L & Ditjen PSDKP",
-      "kat": "TEKNIS",
-      "tingkat": "ALL",
-      "wajib": true
-    },
-    {
-      "kode": "TRN-PRC-02",
-      "nama": "Perencanaan dan Penganggaran Program Pengawasan Armada",
-      "kat": "TEKNIS",
-      "tingkat": "ALL",
-      "wajib": true
-    },
-    {
-      "kode": "TRN-PRC-03",
-      "nama": "Evaluasi & Manajemen Kinerja Pembangunan Kelautan Perikanan",
-      "kat": "TEKNIS",
-      "tingkat": "ALL",
-      "wajib": true
-    },
-    {
-      "kode": "TRN-PRC-04",
-      "nama": "Aplikasi KRISNA & Kolaborasi Perencanaan Anggaran",
-      "kat": "TEKNIS",
-      "tingkat": "ALL",
-      "wajib": true
-    },
-    {
-      "kode": "TRN-PRC-05",
-      "nama": "Diklat Fungsional Perencana Ahli",
-      "kat": "FUNGSIONAL",
-      "tingkat": "ALL",
-      "wajib": true
-    }
-  ],
-  "Pranata Komputer": [
-    {
-      "kode": "TRN-PRK-01",
-      "nama": "Pengembangan & Pengelolaan Aplikasi Sistem Informasi (Web/App)",
-      "kat": "TEKNIS",
-      "tingkat": "ALL",
-      "wajib": true
-    },
-    {
-      "kode": "TRN-PRK-02",
-      "nama": "Manajemen Basis Data & Integrasi API Data Pengawasan",
-      "kat": "TEKNIS",
-      "tingkat": "ALL",
-      "wajib": true
-    },
-    {
-      "kode": "TRN-PRK-03",
-      "nama": "Pengelolaan Jaringan Komputer, Server & Keamanan Siber",
-      "kat": "TEKNIS",
-      "tingkat": "ALL",
-      "wajib": true
-    },
-    {
-      "kode": "TRN-PRK-04",
-      "nama": "Literasi Digital, Cloud Computing & Big Data Maritim",
-      "kat": "TEKNIS",
-      "tingkat": "ALL",
-      "wajib": true
-    },
-    {
-      "kode": "TRN-PRK-05",
-      "nama": "Diklat Fungsional Pranata Komputer",
-      "kat": "FUNGSIONAL",
-      "tingkat": "ALL",
-      "wajib": true
-    }
-  ],
-  "Operator Layanan Operasional": [
-    {
-      "kode": "TRN-OLO-01",
-      "nama": "Pelayanan Publik & Service Excellence Teknis",
-      "kat": "MANAJERIAL",
-      "tingkat": "ALL",
-      "wajib": true
-    },
-    {
-      "kode": "TRN-OLO-02",
-      "nama": "Pengoperasian Peralatan Teknis & Dukungan Operasi Kapal",
-      "kat": "TEKNIS",
-      "tingkat": "ALL",
-      "wajib": true
-    },
-    {
-      "kode": "TRN-OLO-03",
-      "nama": "Penginputan & Pemrosesan Data Layanan Pengawasan",
-      "kat": "TEKNIS",
-      "tingkat": "ALL",
-      "wajib": true
-    },
-    {
-      "kode": "TRN-OLO-04",
-      "nama": "Administrasi & Dokumentasi SOP Layanan",
-      "kat": "TEKNIS",
-      "tingkat": "ALL",
-      "wajib": true
-    },
-    {
-      "kode": "TRN-OLO-05",
-      "nama": "Literasi Digital & Pengoperasian Sistem Elektronik",
-      "kat": "TEKNIS",
-      "tingkat": "ALL",
-      "wajib": true
-    },
-    {
-      "kode": "TRN-OLO-06",
-      "nama": "Etika, Disiplin & Integritas Aparatur ASN",
-      "kat": "MANAJERIAL",
-      "tingkat": "ALL",
-      "wajib": true
-    }
-  ],
-  "Pengelola Layanan Operasional": [
-    {
-      "kode": "TRN-PLO-01",
-      "nama": "Tata Kelola Layanan Teknis Operasional Armada",
-      "kat": "TEKNIS",
-      "tingkat": "ALL",
-      "wajib": true
-    },
-    {
-      "kode": "TRN-PLO-02",
-      "nama": "Administrasi & Logistik Dukungan Operasi Pengawasan",
-      "kat": "TEKNIS",
-      "tingkat": "ALL",
-      "wajib": true
-    },
-    {
-      "kode": "TRN-PLO-03",
-      "nama": "Pengolahan Data Layanan & Pelaporan Kinerja Operasi",
-      "kat": "TEKNIS",
-      "tingkat": "ALL",
-      "wajib": true
-    },
-    {
-      "kode": "TRN-PLO-04",
-      "nama": "Penggunaan Aplikasi Perkantoran & E-Office Pemerintah",
-      "kat": "TEKNIS",
-      "tingkat": "ALL",
-      "wajib": true
-    },
-    {
-      "kode": "TRN-PLO-05",
-      "nama": "Pengendalian Mutu & Service Excellence Layanan",
-      "kat": "TEKNIS",
-      "tingkat": "ALL",
-      "wajib": true
-    },
-    {
-      "kode": "TRN-PLO-06",
-      "nama": "Komunikasi, Koordinasi Lintas Unit & Budaya Integritas",
-      "kat": "MANAJERIAL",
-      "tingkat": "ALL",
-      "wajib": true
-    }
-  ],
-  "Penata Layanan Operasional": [
-    {
-      "kode": "TRN-TLO-01",
-      "nama": "Komunikasi & Pelayanan Publik Teknis",
-      "kat": "MANAJERIAL",
-      "tingkat": "ALL",
-      "wajib": true
-    },
-    {
-      "kode": "TRN-TLO-02",
-      "nama": "Tata Kelola & Standar Layanan Teknis PSDKP",
-      "kat": "TEKNIS",
-      "tingkat": "ALL",
-      "wajib": true
-    },
-    {
-      "kode": "TRN-TLO-03",
-      "nama": "Administrasi & Dokumentasi Layanan Operasional",
-      "kat": "TEKNIS",
-      "tingkat": "ALL",
-      "wajib": true
-    },
-    {
-      "kode": "TRN-TLO-04",
-      "nama": "Pengoperasian Sistem Layanan Digital",
-      "kat": "TEKNIS",
-      "tingkat": "ALL",
-      "wajib": true
-    },
-    {
-      "kode": "TRN-TLO-05",
-      "nama": "Pengendalian Mutu & Monitoring Layanan",
-      "kat": "TEKNIS",
-      "tingkat": "ALL",
-      "wajib": true
-    },
-    {
-      "kode": "TRN-TLO-06",
-      "nama": "Etika Profesi & Integritas ASN",
-      "kat": "MANAJERIAL",
-      "tingkat": "ALL",
-      "wajib": true
-    }
-  ],
-  "Penata Kelola Kelautan dan Peri": [
-    {
-      "kode": "TRN-PKP-01",
-      "nama": "Tata Kelola Program & Kegiatan Pengawasan Armada",
-      "kat": "TEKNIS",
-      "tingkat": "ALL",
-      "wajib": true
-    },
-    {
-      "kode": "TRN-PKP-02",
-      "nama": "Pengkajian & Analisis Kebijakan Teknis Operasi",
-      "kat": "TEKNIS",
-      "tingkat": "ALL",
-      "wajib": true
-    },
-    {
-      "kode": "TRN-PKP-03",
-      "nama": "Pengelolaan Data & Informasi Operasional",
-      "kat": "TEKNIS",
-      "tingkat": "ALL",
-      "wajib": true
-    },
-    {
-      "kode": "TRN-PKP-04",
-      "nama": "Penyusunan Dokumen Teknis & Telaahan Kelautan Perikanan",
-      "kat": "TEKNIS",
-      "tingkat": "ALL",
-      "wajib": true
-    },
-    {
-      "kode": "TRN-PKP-05",
-      "nama": "Monitoring, Evaluasi & Integritas ASN",
-      "kat": "MANAJERIAL",
-      "tingkat": "ALL",
-      "wajib": true
-    }
-  ],
-  "Penelaah Teknis Kebijakan": [
-    {
-      "kode": "TRN-PTK-01",
-      "nama": "Analisis Kebijakan Publik Bidang Pengawasan Armada",
-      "kat": "TEKNIS",
-      "tingkat": "ALL",
-      "wajib": true
-    },
-    {
-      "kode": "TRN-PTK-02",
-      "nama": "Pengumpulan & Pengolahan Data Kebijakan Kelautan Perikanan",
-      "kat": "TEKNIS",
-      "tingkat": "ALL",
-      "wajib": true
-    },
-    {
-      "kode": "TRN-PTK-03",
-      "nama": "Penyusunan Naskah Akademik & Rekomendasi Kebijakan",
-      "kat": "TEKNIS",
-      "tingkat": "ALL",
-      "wajib": true
-    },
-    {
-      "kode": "TRN-PTK-04",
-      "nama": "Komunikasi Efektif & Penulisan Telaahan Teknis",
-      "kat": "MANAJERIAL",
-      "tingkat": "ALL",
-      "wajib": true
-    }
-  ],
-  "Pengadministrasi Perkantoran": [
-    {
-      "kode": "TRN-PAP-01",
-      "nama": "Administrasi Perkantoran & Tata Naskah Dinas KKP",
-      "kat": "TEKNIS",
-      "tingkat": "ALL",
-      "wajib": true
-    },
-    {
-      "kode": "TRN-PAP-02",
-      "nama": "Pengelolaan Dokumen, Arsip Dinamis & Persuratan Elektronik",
-      "kat": "TEKNIS",
-      "tingkat": "ALL",
-      "wajib": true
-    },
-    {
-      "kode": "TRN-PAP-03",
-      "nama": "Penggunaan Aplikasi Perkantoran & Digitalisasi Tata Usaha",
-      "kat": "TEKNIS",
-      "tingkat": "ALL",
-      "wajib": true
-    },
-    {
-      "kode": "TRN-PAP-04",
-      "nama": "Dukungan Rapat, Protokol & Komunikasi Pelayanan Birokrasi",
-      "kat": "MANAJERIAL",
-      "tingkat": "ALL",
-      "wajib": true
-    }
-  ],
-  "Pengelola Layanan Kelautan dan ": [
-    {
-      "kode": "TRN-PLK-01",
-      "nama": "Pengelolaan Operasional Layanan Pengawasan Kelautan",
-      "kat": "TEKNIS",
-      "tingkat": "ALL",
-      "wajib": true
-    },
-    {
-      "kode": "TRN-PLK-02",
-      "nama": "Pengawasan & Pengendalian Kegiatan Layanan PSDKP",
-      "kat": "TEKNIS",
-      "tingkat": "ALL",
-      "wajib": true
-    },
-    {
-      "kode": "TRN-PLK-03",
-      "nama": "Pelayanan Publik & Koordinasi Antar Unit",
-      "kat": "MANAJERIAL",
       "tingkat": "ALL",
       "wajib": true
     }
@@ -1361,21 +1239,112 @@ var STANDAR_PELATIHAN_RESMI = {
   "Arsiparis": [
     {
       "kode": "TRN-ARS-01",
-      "nama": "Pengelolaan Arsip Dinamis & Statis",
-      "kat": "TEKNIS",
+      "nama": "Pengembangan Diri",
+      "kat": "MANAJERIAL",
       "tingkat": "ALL",
-      "wajib": true
+      "wajib": false
     },
     {
       "kode": "TRN-ARS-02",
-      "nama": "Digitalisasi Arsip & Persuratan Elektronik (SRIKANDI)",
-      "kat": "TEKNIS",
+      "nama": "Komunikasi",
+      "kat": "MANAJERIAL",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-ARS-03",
+      "nama": "Budaya Integritas",
+      "kat": "MANAJERIAL",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-ARS-04",
+      "nama": "Pelayanan Publik",
+      "kat": "MANAJERIAL",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-ARS-05",
+      "nama": "Pelatihan Kepemimpinan Pengawas",
+      "kat": "MANAJERIAL",
       "tingkat": "ALL",
       "wajib": true
     },
     {
-      "kode": "TRN-ARS-03",
-      "nama": "Diklat Fungsional Arsiparis Tingkat Keahlian/Keterampilan",
+      "kode": "TRN-ARS-06",
+      "nama": "Pelatihan Sosial Kultural Level 1",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-ARS-07",
+      "nama": "Pelatihan Manajerial Lainnya",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-ARS-08",
+      "nama": "Pengelolaan Arsip Dinamis",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-ARS-09",
+      "nama": "Pengelolaan Arsip Statis",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-ARS-10",
+      "nama": "Digitalisasi Arsip",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-ARS-11",
+      "nama": "Pengoperasian Aplikasi dan Teknologi Informasi",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-ARS-12",
+      "nama": "Persuratan/Tata Naskah Dinas",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-ARS-13",
+      "nama": "Pengelolaan Arsiparis Elektronis",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-ARS-14",
+      "nama": "Fasilitator Kearsipan",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-ARS-15",
+      "nama": "Penyusutam Arsip",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-ARS-16",
+      "nama": "Pelatihan Fungsional Arsiparis Tingkat Keahlian (khusus yang pendidikan berasal dari bidang ilmu yang ditentukan instansi pembina)",
       "kat": "FUNGSIONAL",
       "tingkat": "ALL",
       "wajib": true
@@ -1384,298 +1353,2114 @@ var STANDAR_PELATIHAN_RESMI = {
   "Analisis Hukum": [
     {
       "kode": "TRN-AHK-01",
-      "nama": "Analisis dan Evaluasi Produk Hukum Kelautan dan Perikanan",
-      "kat": "TEKNIS",
+      "nama": "Pengembangan Diri",
+      "kat": "MANAJERIAL",
       "tingkat": "ALL",
-      "wajib": true
+      "wajib": false
     },
     {
       "kode": "TRN-AHK-02",
-      "nama": "Legal Drafting & Perancangan Regulasi",
-      "kat": "TEKNIS",
+      "nama": "Komunikasi",
+      "kat": "MANAJERIAL",
       "tingkat": "ALL",
-      "wajib": true
+      "wajib": false
     },
     {
       "kode": "TRN-AHK-03",
-      "nama": "Advokasi Hukum & Penanganan Sengketa Kelautan",
-      "kat": "TEKNIS",
+      "nama": "Budaya Integritas",
+      "kat": "MANAJERIAL",
       "tingkat": "ALL",
-      "wajib": true
+      "wajib": false
     },
     {
       "kode": "TRN-AHK-04",
-      "nama": "Diklat Fungsional Analis Hukum",
+      "nama": "Manajemen Perubahan",
+      "kat": "MANAJERIAL",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-AHK-05",
+      "nama": "Pengambilan Keputusan",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-AHK-06",
+      "nama": "Penyusunan Kebijakan",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-AHK-07",
+      "nama": "Problem Solving Bidang Hukum",
+      "kat": "MANAJERIAL",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-AHK-08",
+      "nama": "Pelatihan Sosial Kultural Level 1",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-AHK-09",
+      "nama": "Pelatihan dan Pembelajaran Manajemen Lainnya",
+      "kat": "MANAJERIAL",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-AHK-10",
+      "nama": "Pengawasan Sumber daya Kelautan dan Perikanan",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": true
+    },
+    {
+      "kode": "TRN-AHK-11",
+      "nama": "Teknik Penulisan Bidang Hukum",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-AHK-12",
+      "nama": "Analisis dan Evaluasi Hukum",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-AHK-13",
+      "nama": "Pemetaan Permasalahan Hukum",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-AHK-14",
+      "nama": "Perencanaan Hukum",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-AHK-15",
+      "nama": "Coaching Clinic Bidang Hukum Kelautan dan Perikanan",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-AHK-16",
+      "nama": "Pelatihan Advokasi Hukum",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-AHK-17",
+      "nama": "Pelatihan Interpol",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-AHK-18",
+      "nama": "Pelatihan Bidang Penanganan Pelanggaran Kelautan dan Perikanan",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-AHK-19",
+      "nama": "Pelatihan Bidang Penyidikan, Penanganan Barang Bukti dan Awak Kapal TPKP",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-AHK-20",
+      "nama": "Pelatihan Pengembangan Kompetensi Analis Hukum Bidang Peraturan Perundang-undangan",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-AHK-21",
+      "nama": "Pelatihan Intelejen Perikanan dan Kelautan",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-AHK-22",
+      "nama": "Public Speaking",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-AHK-23",
+      "nama": "Legal Drafting",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": true
+    },
+    {
+      "kode": "TRN-AHK-24",
+      "nama": "Penulisan Naskah Akademik",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-AHK-25",
+      "nama": "Diklat Fungsional Analis Hukum Tingkat Keahlian",
       "kat": "FUNGSIONAL",
       "tingkat": "ALL",
       "wajib": true
-    }
-  ],
-  "Penata Kelola Hukum dan Perunda": [
-    {
-      "kode": "TRN-PKH-01",
-      "nama": "Teknik Penyusunan Peraturan Perundang-undangan (Legal Drafting)",
-      "kat": "TEKNIS",
-      "tingkat": "ALL",
-      "wajib": true
     },
     {
-      "kode": "TRN-PKH-02",
-      "nama": "Analisis dan Evaluasi Produk Hukum Kelautan dan Perikanan",
+      "kode": "TRN-AHK-26",
+      "nama": "Pelatihan Dasar Intelijen bidang Penanganan Pelanggaran Kelautan dan Perikanan",
       "kat": "TEKNIS",
       "tingkat": "ALL",
-      "wajib": true
-    },
-    {
-      "kode": "TRN-PKH-03",
-      "nama": "Advokasi & Bantuan Hukum Instansi Pemerintah",
-      "kat": "TEKNIS",
-      "tingkat": "ALL",
-      "wajib": true
-    },
-    {
-      "kode": "TRN-PKH-04",
-      "nama": "Hukum Laut Internasional (UNCLOS) & Tindak Pidana Perikanan",
-      "kat": "TEKNIS",
-      "tingkat": "ALL",
-      "wajib": true
+      "wajib": false
     }
   ],
   "Analis Kebijakan Ahli Pertama": [
     {
       "kode": "TRN-AKB-01",
-      "nama": "Metodologi Kajian & Analisis Kebijakan Publik",
+      "nama": "Manjerial",
       "kat": "TEKNIS",
       "tingkat": "ALL",
-      "wajib": true
+      "wajib": false
     },
     {
       "kode": "TRN-AKB-02",
-      "nama": "Advokasi Kebijakan & Penyusunan Policy Brief/Paper",
+      "nama": "Pengembangan Diri",
+      "kat": "MANAJERIAL",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-AKB-03",
+      "nama": "Komunikasi",
+      "kat": "MANAJERIAL",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-AKB-04",
+      "nama": "Budaya Integritas",
+      "kat": "MANAJERIAL",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-AKB-05",
+      "nama": "Manajemen Perubahan",
+      "kat": "MANAJERIAL",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-AKB-06",
+      "nama": "Pengambilan Keputusan",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-AKB-07",
+      "nama": "Problem Solving",
+      "kat": "MANAJERIAL",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-AKB-08",
+      "nama": "Pelatihan Sosial Kulturan Level 1",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-AKB-09",
+      "nama": "Pelatihan dan Pembelajaran Manajerial Lainnya",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-AKB-10",
+      "nama": "Pelatihan Publik Speaking",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-AKB-11",
+      "nama": "Pelatihan Penulisan Kajian Hukum/Kebijakan",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-AKB-12",
+      "nama": "Pelayihan Teknik Advokasi",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-AKB-13",
+      "nama": "Pelatihan Teknis Penulisan, dan Presentasi",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-AKB-14",
+      "nama": "Pelatihan Teknis Penyusunan Strategi Kebijakan",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-AKB-15",
+      "nama": "Pelatihan Metodologi Kajian/Penelitian atas Kebijakan Publik",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-AKB-16",
+      "nama": "Pelatihan Advokasi dalam Kebijakan Publik",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-AKB-17",
+      "nama": "Pelatihan Penyusunan Saran Kebijakan",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-AKB-18",
+      "nama": "Pelatihan Dasar JF Analis Kebijakan Keahlian",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    }
+  ],
+  "Asisten Pengawas Kelautan": [
+    {
+      "kode": "TRN-APK-01",
+      "nama": "Pengembangan Diri",
+      "kat": "MANAJERIAL",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-APK-02",
+      "nama": "Komunikasi",
+      "kat": "MANAJERIAL",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-APK-03",
+      "nama": "Budaya Integritas",
+      "kat": "MANAJERIAL",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-APK-04",
+      "nama": "Manajemen Perubahan",
+      "kat": "MANAJERIAL",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-APK-05",
+      "nama": "Pengambilan Keputusan",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-APK-06",
+      "nama": "Problem Solving",
+      "kat": "MANAJERIAL",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-APK-07",
+      "nama": "Pelatihan dan Pembelajaran Manjerial Lainnya",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-APK-08",
+      "nama": "Pelatihan Pemetaan bidang Pengawasan Sumber Daya Kelautan",
       "kat": "TEKNIS",
       "tingkat": "ALL",
       "wajib": true
     },
     {
-      "kode": "TRN-AKB-03",
-      "nama": "Pelatihan Dasar JF Analis Kebijakan",
-      "kat": "FUNGSIONAL",
+      "kode": "TRN-APK-09",
+      "nama": "Pelatihan Intelejen Bidang Pengawasan Sumber Daya Kelautan",
+      "kat": "TEKNIS",
       "tingkat": "ALL",
       "wajib": true
+    },
+    {
+      "kode": "TRN-APK-10",
+      "nama": "Pelatihan Pengawasan Bidang Pencemaran",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": true
+    },
+    {
+      "kode": "TRN-APK-11",
+      "nama": "Pelatihan Pengawasan Bidang Pemanfaatan Ruang Laut",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": true
+    },
+    {
+      "kode": "TRN-APK-12",
+      "nama": "Pealtihan Pengawasan Bidang Sedimentasi",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": true
+    },
+    {
+      "kode": "TRN-APK-13",
+      "nama": "Pelatihan Pengawasan Konservasi Perairan",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": true
+    },
+    {
+      "kode": "TRN-APK-14",
+      "nama": "Pelatihan Pengawasan jenis Ikan Dilindungi",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": true
+    },
+    {
+      "kode": "TRN-APK-15",
+      "nama": "Teknik Pengawasan Bidang Sumber Daya Kelautan",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": true
+    },
+    {
+      "kode": "TRN-APK-16",
+      "nama": "Pelatihan Legal Drafting",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": true
+    },
+    {
+      "kode": "TRN-APK-17",
+      "nama": "Pelatihan Valuasi Ekonomi Kerusakan SDK",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-APK-18",
+      "nama": "Pelatihan Pengawasan Destructive Fishing",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": true
+    },
+    {
+      "kode": "TRN-APK-19",
+      "nama": "Pelatihan Valuasi Nilai Investasi Reklamasi",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-APK-20",
+      "nama": "Pengantar Peraturan Perundang-undangan bidang kelautan dan perikanan",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-APK-21",
+      "nama": "Pendidikan dan Pelatihan Khusus Polsus PWP3K Ditjen PSDKP",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": true
+    }
+  ],
+  "Analis Pengelolaan Keuangan APB": [
+    {
+      "kode": "TRN-APK-01",
+      "nama": "Kepemimpinan",
+      "kat": "MANAJERIAL",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-APK-02",
+      "nama": "Manajemen Konflik",
+      "kat": "MANAJERIAL",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-APK-03",
+      "nama": "Pengambilan Keputusan",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-APK-04",
+      "nama": "Penyusunan Kebijakan",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-APK-05",
+      "nama": "Komunikasi Efektif",
+      "kat": "MANAJERIAL",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-APK-06",
+      "nama": "Mengelola Perubahan",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-APK-07",
+      "nama": "Perencanaan Strategis",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-APK-08",
+      "nama": "Orientasi Pada Hasil",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-APK-09",
+      "nama": "Pembayaran Pemerintah",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-APK-10",
+      "nama": "Transaksi Keuangan",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-APK-11",
+      "nama": "Perpajakan Bagi Instansi Pemerintah",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-APK-12",
+      "nama": "Pengelolaan Pengadaan Barang/Jasa",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-APK-13",
+      "nama": "Pengendalian Intern atas Pelaporan Keuangan",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-APK-14",
+      "nama": "Laporan Keuangan",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-APK-15",
+      "nama": "Prinsip-Prinsip Manajemen Keuangan Satuan Kerja Pemerintah Pusat",
+      "kat": "MANAJERIAL",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-APK-16",
+      "nama": "Penyusunan Anggaran Berbasis Kinerja",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-APK-17",
+      "nama": "Dasar-dasar Penyusunan APBN",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-APK-18",
+      "nama": "Manajemen Komitmen",
+      "kat": "MANAJERIAL",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-APK-19",
+      "nama": "Pelaporan dan Pertanggungjawaban",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-APK-20",
+      "nama": "Penjenjangan APK APBN Madya",
+      "kat": "FUNGSIONAL",
+      "tingkat": "ALL",
+      "wajib": false
     }
   ],
   "Analis SDM Aparatur": [
     {
       "kode": "TRN-ASD-01",
-      "nama": "Manajemen ASN & Pengelolaan Jabatan Fungsional",
-      "kat": "TEKNIS",
+      "nama": "Pengembangan Diri",
+      "kat": "MANAJERIAL",
       "tingkat": "ALL",
-      "wajib": true
+      "wajib": false
     },
     {
       "kode": "TRN-ASD-02",
-      "nama": "Manajemen Kinerja ASN & Standarisasi Jabatan",
-      "kat": "TEKNIS",
+      "nama": "Komunikasi",
+      "kat": "MANAJERIAL",
       "tingkat": "ALL",
-      "wajib": true
+      "wajib": false
     },
     {
       "kode": "TRN-ASD-03",
-      "nama": "Diklat Fungsional Analis SDM Aparatur",
+      "nama": "Budaya Integritas",
+      "kat": "MANAJERIAL",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-ASD-04",
+      "nama": "Pelayanan Publik",
+      "kat": "MANAJERIAL",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-ASD-05",
+      "nama": "Problem Solving Kepegawaian",
+      "kat": "MANAJERIAL",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-ASD-06",
+      "nama": "Pelatihan Kepemimpinan Administrator",
+      "kat": "MANAJERIAL",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-ASD-07",
+      "nama": "Pelatihan Sosial Kulturan Level 1",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-ASD-08",
+      "nama": "Pelatihan dan Pembelajaran Manajerial Lainnya",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-ASD-09",
+      "nama": "Manajemen Aparatur Sipil Negara",
+      "kat": "MANAJERIAL",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-ASD-10",
+      "nama": "Pengelolaan Jabatan Fungsioanl",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-ASD-11",
+      "nama": "Penyusunan Standarisasi Jabatan",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-ASD-12",
+      "nama": "Pengelolaan Kinerja Individu",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-ASD-13",
+      "nama": "Manajemen Kinerja ASN",
+      "kat": "MANAJERIAL",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-ASD-14",
+      "nama": "Pelatihan Teknis Jabatan Fungsional Analis SDM",
       "kat": "FUNGSIONAL",
       "tingkat": "ALL",
       "wajib": true
     }
   ],
-  "Pranata SDM Aparatur Terampil": [
+  "Operator Layanan Operasional": [
     {
-      "kode": "TRN-PSD-01",
-      "nama": "Administrasi Kepegawaian & Sistem Informasi ASN (SIASN/BKN)",
-      "kat": "TEKNIS",
+      "kode": "TRN-OLO-01",
+      "nama": "Pelayanan Publik",
+      "kat": "MANAJERIAL",
       "tingkat": "ALL",
-      "wajib": true
+      "wajib": false
     },
     {
-      "kode": "TRN-PSD-02",
-      "nama": "Pengelolaan Angka Kredit & Kinerja Jabatan Fungsional",
-      "kat": "TEKNIS",
+      "kode": "TRN-OLO-02",
+      "nama": "Komunikasi dan Koordinasi Teknis",
+      "kat": "MANAJERIAL",
       "tingkat": "ALL",
-      "wajib": true
+      "wajib": false
     },
     {
-      "kode": "TRN-PSD-03",
-      "nama": "Diklat Fungsional Pranata SDM Aparatur",
-      "kat": "FUNGSIONAL",
+      "kode": "TRN-OLO-03",
+      "nama": "Etika, Disiplin, dan Integritas ASN",
+      "kat": "MANAJERIAL",
       "tingkat": "ALL",
-      "wajib": true
+      "wajib": false
+    },
+    {
+      "kode": "TRN-OLO-04",
+      "nama": "Pengoperasian Layanan Teknis",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-OLO-05",
+      "nama": "Penggunaan Peralatan dan Teknologi Teknis",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-OLO-06",
+      "nama": "Penginputan dan Pemrosesan Data Layanan",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-OLO-07",
+      "nama": "Administrasi dan Dokumentasi Layanan",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-OLO-08",
+      "nama": "Pengendalian Kualitas dan Kepatuhan SOP",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-OLO-09",
+      "nama": "Literasi Digital dan Pengoperasian Sistem Elektronik",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    }
+  ],
+  "Penata Kelola Kelautan dan Peri": [
+    {
+      "kode": "TRN-PKP-01",
+      "nama": "Tata Kelola Program dan Kegiatan",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PKP-02",
+      "nama": "Koordinasi dan Komunikasi Teknis",
+      "kat": "MANAJERIAL",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PKP-03",
+      "nama": "Monitoring dan Evaluasi",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PKP-04",
+      "nama": "Etika dan Integritas Aparatur",
+      "kat": "MANAJERIAL",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PKP-05",
+      "nama": "Problem Solving dan Adaptasi",
+      "kat": "MANAJERIAL",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PKP-06",
+      "nama": "Pengkajian dan Analis Kebijakan Teknis",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PKP-07",
+      "nama": "Pengelolaan Data dan informasi",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PKP-08",
+      "nama": "Administrasi dan Pelaporan",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PKP-09",
+      "nama": "Penggunaan Teknologi dan Aplikasi Pendukung",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PKP-10",
+      "nama": "Penyusunan Dokumen Teknis dan Kajian",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    }
+  ],
+  "Penata Kelola Hukum dan Perunda": [
+    {
+      "kode": "TRN-PKH-01",
+      "nama": "Pelayanan Publik",
+      "kat": "MANAJERIAL",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PKH-02",
+      "nama": "Komunikasi dan Koordinasi Teknis",
+      "kat": "MANAJERIAL",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PKH-03",
+      "nama": "Etika, Disiplin, dan Integritas ASN",
+      "kat": "MANAJERIAL",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PKH-04",
+      "nama": "Pengoperasian Layanan Teknis",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PKH-05",
+      "nama": "Penggunaan Peralatan dan Teknologi Teknis",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PKH-06",
+      "nama": "Penginputan dan Pemrosesan Data Layanan",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PKH-07",
+      "nama": "Administrasi dan Dokumentasi Layanan",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PKH-08",
+      "nama": "Pengendalian Kualitas dan Kepatuhan SOP",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PKH-09",
+      "nama": "Literasi Digital dan Pengoperasian Sistem Elektronik",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    }
+  ],
+  "Penata Layanan Operasional": [
+    {
+      "kode": "TRN-TLO-01",
+      "nama": "Komunikasi dan Pelayanan Publik",
+      "kat": "MANAJERIAL",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-TLO-02",
+      "nama": "Koordinasi dan Kolaborasi Teknis",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-TLO-03",
+      "nama": "Manajemen Waktu dan Prioritas Kerja",
+      "kat": "MANAJERIAL",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-TLO-04",
+      "nama": "Etika Profesi dan Integritas ASN",
+      "kat": "MANAJERIAL",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-TLO-05",
+      "nama": "Adaptasi dan Inovasi Pelayanan",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-TLO-06",
+      "nama": "Tata Kelola Layanan Teknis",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-TLO-07",
+      "nama": "Administrasi dan Dokumentasi Layanan",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-TLO-08",
+      "nama": "Pengoperasian Sistem Layanan dan Aplikasi Teknis",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-TLO-09",
+      "nama": "Pengelolaan Data dan Pelaporan Layanan",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-TLO-10",
+      "nama": "Pengendalian Mutu dan Monitoring Layanan",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
     }
   ],
   "Penata Perizinan": [
     {
       "kode": "TRN-PPR-01",
-      "nama": "Pelayanan Perizinan Berusaha & Non-Perizinan",
-      "kat": "TEKNIS",
+      "nama": "Pengembangan Diri",
+      "kat": "MANAJERIAL",
       "tingkat": "ALL",
-      "wajib": true
+      "wajib": false
     },
     {
       "kode": "TRN-PPR-02",
-      "nama": "Pengawasan Penyelenggaraan Pelayanan Perizinan",
+      "nama": "Komunikasi",
+      "kat": "MANAJERIAL",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PPR-03",
+      "nama": "Buday Integritas",
+      "kat": "MANAJERIAL",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PPR-04",
+      "nama": "Pelayanan Publik",
+      "kat": "MANAJERIAL",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PPR-05",
+      "nama": "Pelatihan Kepemimpinan Pengawas",
+      "kat": "MANAJERIAL",
+      "tingkat": "ALL",
+      "wajib": true
+    },
+    {
+      "kode": "TRN-PPR-06",
+      "nama": "Pelatihan Sosial Kultural Level 1",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PPR-07",
+      "nama": "Pelatihan Manajerial Lainnya",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PPR-08",
+      "nama": "Diklat Pimpinan Administrator",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PPR-09",
+      "nama": "Perencanaan Pelaksanaan Pelayanan Perizinan, Perizinan Berusaha. dan NonPerizinan",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PPR-10",
+      "nama": "Pelayanan Perizininan, Perizinan berusaha, dan Nonperizinan",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PPR-11",
+      "nama": "Penyuluhan Pelayanan Perizinan, perizinan berusaha. dan nonperizinan kepada masyaralkat",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PPR-12",
+      "nama": "Pengawasan penyelenggaraan [elayanan perizinan, perizinan berusaha, dan nonperizinan",
       "kat": "TEKNIS",
       "tingkat": "ALL",
       "wajib": true
     },
     {
-      "kode": "TRN-PPR-03",
-      "nama": "Diklat Fungsional Penata Perizinan",
+      "kode": "TRN-PPR-13",
+      "nama": "Pelatihan fungsional penata perizinan",
       "kat": "FUNGSIONAL",
       "tingkat": "ALL",
       "wajib": true
+    }
+  ],
+  "Penelaah Teknis Kebijakan": [
+    {
+      "kode": "TRN-PTK-01",
+      "nama": "Analisis Kebijakan Publik",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PTK-02",
+      "nama": "Komunikasi Efektif dan Penulisan Teknis ASN",
+      "kat": "MANAJERIAL",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PTK-03",
+      "nama": "Etika Profesi dan Integritas ASN",
+      "kat": "MANAJERIAL",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PTK-04",
+      "nama": "Penelaah Teknis Kebijakan Bidang Kelautan dan Perikanan",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PTK-05",
+      "nama": "Pengumpulan dan Pengolahan data Kebijakan",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PTK-06",
+      "nama": "Penyusunan naskah akademik dan rekomendasi kebijakan",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PTK-07",
+      "nama": "Pengolahan dan dokumentasi data kebijakan",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PTK-08",
+      "nama": "Literasi digital dan aplikasi E-Office Pemerintah",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
     }
   ],
   "Penata Sarana dan Prasarana Kel": [
     {
       "kode": "TRN-PSP-01",
-      "nama": "Pengelolaan Sarana dan Prasarana Pengawasan",
-      "kat": "TEKNIS",
+      "nama": "Koordinasi dan Komunikasi Teknis",
+      "kat": "MANAJERIAL",
       "tingkat": "ALL",
-      "wajib": true
+      "wajib": false
     },
     {
       "kode": "TRN-PSP-02",
-      "nama": "Administrasi Barang Milik Negara (BMN) & Inventarisasi",
-      "kat": "TEKNIS",
+      "nama": "Etika, Disiplin, dan Integritas ASN",
+      "kat": "MANAJERIAL",
       "tingkat": "ALL",
-      "wajib": true
+      "wajib": false
     },
     {
       "kode": "TRN-PSP-03",
-      "nama": "Perencanaan Pemeliharaan Fasilitas & Sarpras Pelabuhan",
+      "nama": "Perencanaan Kebutuhan dan Pemeliharaan Sarpras",
       "kat": "TEKNIS",
       "tingkat": "ALL",
-      "wajib": true
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PSP-04",
+      "nama": "Pengelolaan Sarana dan Prasarana (Sarpras)",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PSP-05",
+      "nama": "Administrasi Barang Milik Negara (BMN)",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PSP-06",
+      "nama": "Penataan Ruang dan Fasilitas Kerja",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PSP-07",
+      "nama": "Inventarisasi dan Pelaporan Sarpras",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PSP-08",
+      "nama": "Pengelolaan Logistik dan Persediaan",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PSP-09",
+      "nama": "Penggunaan Aplikasi dan Sistem Informasi Sarpras",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PSP-10",
+      "nama": "Dokumentasi dan Arsip Administrasi Sarpras",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
     }
   ],
   "Penerjemah Ahli Muda": [
     {
       "kode": "TRN-PNJ-01",
-      "nama": "Diklat Fungsional Penerjemah Tingkat Keahlian",
-      "kat": "FUNGSIONAL",
+      "nama": "Pelayanan Publik",
+      "kat": "MANAJERIAL",
       "tingkat": "ALL",
-      "wajib": true
+      "wajib": false
     },
     {
       "kode": "TRN-PNJ-02",
-      "nama": "Penerjemahan Naskah Perjanjian Internasional & Hukum Maritim",
+      "nama": "Komunikasi dan Koordinasi Teknis",
+      "kat": "MANAJERIAL",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PNJ-03",
+      "nama": "Etika, Disiplin, dan Integritas ASN",
+      "kat": "MANAJERIAL",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PNJ-04",
+      "nama": "Pengoperasian Layanan Teknis",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PNJ-05",
+      "nama": "Penggunaan Peralatan dan Teknologi Teknis",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PNJ-06",
+      "nama": "Penginputan dan Pemrosesan Data Layanan",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PNJ-07",
+      "nama": "Administrasi dan Dokumentasi Layanan",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PNJ-08",
+      "nama": "Pengendalian Kualitas dan Kepatuhan SOP",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PNJ-09",
+      "nama": "Literasi Digital dan Pengoperasian Sistem Elektronik",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    }
+  ],
+  "Pengelola Layanan Kelautan dan ": [
+    {
+      "kode": "TRN-PLK-01",
+      "nama": "Koordinasi dan Komunikasi Lintas Unit",
+      "kat": "MANAJERIAL",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PLK-02",
+      "nama": "Kepemimpinan Teknis dan Kerja Tim",
+      "kat": "MANAJERIAL",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PLK-03",
+      "nama": "Etika, Integritas, dan Tanggung Jawab ASN",
+      "kat": "MANAJERIAL",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PLK-04",
+      "nama": "Pelayanan Publik (Service Excellence)",
+      "kat": "MANAJERIAL",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PLK-05",
+      "nama": "Pengawasan dan Pengendalian Kegiatan Layanan",
       "kat": "TEKNIS",
       "tingkat": "ALL",
       "wajib": true
     },
     {
-      "kode": "TRN-PNJ-03",
-      "nama": "Penjurubahasaan (Interpreting) Konferensi Perikanan Internasional",
+      "kode": "TRN-PLK-06",
+      "nama": "Pengelolaan Operasional Layanan",
       "kat": "TEKNIS",
       "tingkat": "ALL",
-      "wajib": true
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PLK-07",
+      "nama": "Administrasi Layanan",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PLK-08",
+      "nama": "Pengelolaan Data Layanan dan Informasi",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PLK-09",
+      "nama": "Penggunaan Teknologi dan Sistem Layanan Digital",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PLK-10",
+      "nama": "Penyusunan Laporan dan Evaluasi Kinerja Layanan",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    }
+  ],
+  "Pengadministrasi Perkantoran": [
+    {
+      "kode": "TRN-PAP-01",
+      "nama": "Layanan Publik dan Costumer Service",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PAP-02",
+      "nama": "Komunikasi Efektif dan Etika Birokrasi",
+      "kat": "MANAJERIAL",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PAP-03",
+      "nama": "Manajemen Waktu dan Prioritas Pekerjaan",
+      "kat": "MANAJERIAL",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PAP-04",
+      "nama": "Etika, Integritas, dan Kerahasiaan Data",
+      "kat": "MANAJERIAL",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PAP-05",
+      "nama": "Administrasi Perkantoran",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PAP-06",
+      "nama": "Pengelolaan Dokumen dan Arsip",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PAP-07",
+      "nama": "Penggunaan Aplikasi Perkantoran dan Digitalisasi",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PAP-08",
+      "nama": "Tata Usaha Pemerintahan",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PAP-09",
+      "nama": "Pengelolaan Keuangan Sederhana dan Logistik",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PAP-10",
+      "nama": "Pengaturan Jadwal dan Dukungan Rapat/Acara",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
     }
   ],
   "Pranata Hubungan Masyarakat": [
     {
       "kode": "TRN-PHM-01",
-      "nama": "Manajemen Komunikasi Publik & Strategi Kehumasan",
-      "kat": "TEKNIS",
+      "nama": "Pelatihan Kepemimpinan Pengawas",
+      "kat": "MANAJERIAL",
       "tingkat": "ALL",
-      "wajib": true
+      "wajib": false
     },
     {
       "kode": "TRN-PHM-02",
-      "nama": "Penulisan Siaran Pers & Jurnalistik Pemerintah",
+      "nama": "Pengawasan Sumber Daya Kelautan dan Perikanan",
       "kat": "TEKNIS",
       "tingkat": "ALL",
       "wajib": true
     },
     {
       "kode": "TRN-PHM-03",
-      "nama": "Pengelolaan Media Sosial, Dokumentasi Visual & Krisis",
+      "nama": "Pelatihan Pengoperasian Armada Pengawasan SDKP",
       "kat": "TEKNIS",
       "tingkat": "ALL",
       "wajib": true
     },
     {
       "kode": "TRN-PHM-04",
-      "nama": "Diklat Fungsional Pranata Hubungan Masyarakat",
-      "kat": "FUNGSIONAL",
-      "tingkat": "ALL",
-      "wajib": true
-    }
-  ],
-  "Pengelola Umum Operasional": [
-    {
-      "kode": "TRN-PUO-01",
-      "nama": "Administrasi Umum, Ketatausahaan & Fasilitas Kerja",
+      "nama": "Pelatihan PPNS Perikanan",
       "kat": "TEKNIS",
       "tingkat": "ALL",
       "wajib": true
     },
     {
+      "kode": "TRN-PHM-05",
+      "nama": "Pelatihan Polisi Khusus PW3L",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PHM-06",
+      "nama": "Pelatihan Intelejen bidang Pengawasan Sumber Daya Kelautan dan/atau Perikanan",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": true
+    },
+    {
+      "kode": "TRN-PHM-07",
+      "nama": "Pelatihan teknis lain yang dibutuhkan Jabatan",
+      "kat": "MANAJERIAL",
+      "tingkat": "ALL",
+      "wajib": false
+    }
+  ],
+  "Perencana": [
+    {
+      "kode": "TRN-PRC-01",
+      "nama": "Pengembangan Diri",
+      "kat": "MANAJERIAL",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PRC-02",
+      "nama": "Komunikasi",
+      "kat": "MANAJERIAL",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PRC-03",
+      "nama": "Budaya Integritas",
+      "kat": "MANAJERIAL",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PRC-04",
+      "nama": "Pelayanan Publik",
+      "kat": "MANAJERIAL",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PRC-05",
+      "nama": "Pelatihan Kepemimpinan Administrator",
+      "kat": "MANAJERIAL",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PRC-06",
+      "nama": "Problem Solving",
+      "kat": "MANAJERIAL",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PRC-07",
+      "nama": "Pelatihan Sosial Kulturan Level 1",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PRC-08",
+      "nama": "Pelatihan dan Pembelajaran Manajerial Lainnya",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PRC-09",
+      "nama": "Perencanaan dan Evaluasi",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PRC-10",
+      "nama": "Manajemen Kinerja",
+      "kat": "MANAJERIAL",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PRC-11",
+      "nama": "Perencanaan dan Penganggaran",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PRC-12",
+      "nama": "Pengawasan Sumber Daya Kelautan dan Perikanan",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": true
+    },
+    {
+      "kode": "TRN-PRC-13",
+      "nama": "Penyusunan Program dan Anggaran",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PRC-14",
+      "nama": "Public Speaking",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PRC-15",
+      "nama": "Pelatihan Penyusunan Kebijakan Rencana Pembangunan",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PRC-16",
+      "nama": "Pelatihan Rencana Strategis K/L",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PRC-17",
+      "nama": "Pelatihan Pengawasan SDKP Lingkup Direktorat Jenderal PSDKP",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": true
+    },
+    {
+      "kode": "TRN-PRC-18",
+      "nama": "Pelatihan Teknis JF Pelaksana",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    }
+  ],
+  "Pengelola Umum Operasional": [
+    {
+      "kode": "TRN-PUO-01",
+      "nama": "Pengembangan Diri",
+      "kat": "MANAJERIAL",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
       "kode": "TRN-PUO-02",
-      "nama": "Dukungan Logistik & Penanganan Persediaan",
+      "nama": "Pengawasan Sumber Daya Kelautan dan Perikanan",
       "kat": "TEKNIS",
       "tingkat": "ALL",
       "wajib": true
     },
     {
       "kode": "TRN-PUO-03",
-      "nama": "K3 Perkantoran & Disiplin Aparatur",
-      "kat": "MANAJERIAL",
-      "tingkat": "ALL",
-      "wajib": true
-    }
-  ],
-  "Statisti Ahli Muda": [
-    {
-      "kode": "TRN-STA-01",
-      "nama": "Metodologi Survei & Sampling Kelautan Perikanan",
+      "nama": "Pelatihan Pengoperasian Armada Pengawasan SDKP",
       "kat": "TEKNIS",
       "tingkat": "ALL",
       "wajib": true
     },
     {
+      "kode": "TRN-PUO-04",
+      "nama": "Pelatihan PPNS Perikanan",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": true
+    },
+    {
+      "kode": "TRN-PUO-05",
+      "nama": "Pelatihan Polisi Khusus PW3L",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PUO-06",
+      "nama": "Pelatihan Intelejen bidang Pengawasan Sumber Daya Kelautan dan/atau Perikanan",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": true
+    },
+    {
+      "kode": "TRN-PUO-07",
+      "nama": "Pelatihan teknis lain yang dibutuhkan Jabatan",
+      "kat": "MANAJERIAL",
+      "tingkat": "ALL",
+      "wajib": false
+    }
+  ],
+  "Pranata Keuangan": [
+    {
+      "kode": "TRN-PKU-01",
+      "nama": "Pelatihan Kepemimpinan Pengawas",
+      "kat": "MANAJERIAL",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PKU-02",
+      "nama": "Pengawasan Sumber Daya Kelautan dan Perikanan",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": true
+    },
+    {
+      "kode": "TRN-PKU-03",
+      "nama": "Pelatihan Pengoperasian Armada Pengawasan SDKP",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": true
+    },
+    {
+      "kode": "TRN-PKU-04",
+      "nama": "Pelatihan PPNS Perikanan",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": true
+    },
+    {
+      "kode": "TRN-PKU-05",
+      "nama": "Pelatihan Polisi Khusus PW3L",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PKU-06",
+      "nama": "Pelatihan Intelejen bidang Pengawasan Sumber Daya Kelautan dan/atau Perikanan",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": true
+    },
+    {
+      "kode": "TRN-PKU-07",
+      "nama": "Pelatihan teknis lain yang dibutuhkan Jabatan",
+      "kat": "MANAJERIAL",
+      "tingkat": "ALL",
+      "wajib": false
+    }
+  ],
+  "Pengelola Layanan Operasional": [
+    {
+      "kode": "TRN-PLO-01",
+      "nama": "Pelatihan Kepemimpinan Pengawas",
+      "kat": "MANAJERIAL",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PLO-02",
+      "nama": "Pengawasan Sumber Daya Kelautan dan Perikanan",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": true
+    },
+    {
+      "kode": "TRN-PLO-03",
+      "nama": "Pelatihan Pengoperasian Armada Pengawasan SDKP",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": true
+    },
+    {
+      "kode": "TRN-PLO-04",
+      "nama": "Pelatihan PPNS Perikanan",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": true
+    },
+    {
+      "kode": "TRN-PLO-05",
+      "nama": "Pelatihan Polisi Khusus PW3L",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PLO-06",
+      "nama": "Pelatihan Intelejen bidang Pengawasan Sumber Daya Kelautan dan/atau Perikanan",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": true
+    },
+    {
+      "kode": "TRN-PLO-07",
+      "nama": "Pelatihan teknis lain yang dibutuhkan Jabatan",
+      "kat": "MANAJERIAL",
+      "tingkat": "ALL",
+      "wajib": false
+    }
+  ],
+  "Pranata SDM Aparatur Terampil": [
+    {
+      "kode": "TRN-PSD-01",
+      "nama": "Pengembangan Diri",
+      "kat": "MANAJERIAL",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PSD-02",
+      "nama": "Komunikasi",
+      "kat": "MANAJERIAL",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PSD-03",
+      "nama": "Budaya Integritas",
+      "kat": "MANAJERIAL",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PSD-04",
+      "nama": "Pelayanan Publik",
+      "kat": "MANAJERIAL",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PSD-05",
+      "nama": "Problem Solving Kepegawaian",
+      "kat": "MANAJERIAL",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PSD-06",
+      "nama": "Pelatihan Sosial Kulturan Level 1",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PSD-07",
+      "nama": "Pelatihan dan Pembelajaran Manajerial Lainnya",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PSD-08",
+      "nama": "Manajemen aparatur sipil negara",
+      "kat": "MANAJERIAL",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PSD-09",
+      "nama": "Pengelolaan jabatan fungsional",
+      "kat": "FUNGSIONAL",
+      "tingkat": "ALL",
+      "wajib": true
+    },
+    {
+      "kode": "TRN-PSD-10",
+      "nama": "Penyusunan Standardisasi Jabatan",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PSD-11",
+      "nama": "Pengelolaan kinerja individu",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PSD-12",
+      "nama": "Manajemen Kinerja ASN",
+      "kat": "MANAJERIAL",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PSD-13",
+      "nama": "Pelatihan Pengawasan SDKP Lingkup Ditjen PSDKP",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": true
+    },
+    {
+      "kode": "TRN-PSD-14",
+      "nama": "Pelatihan Dasar Jabatan Fungsional Pranata SDM",
+      "kat": "FUNGSIONAL",
+      "tingkat": "ALL",
+      "wajib": true
+    },
+    {
+      "kode": "TRN-PSD-15",
+      "nama": "Pelatihan Teknis Jabatan Fungsional Pranata SDM",
+      "kat": "FUNGSIONAL",
+      "tingkat": "ALL",
+      "wajib": true
+    }
+  ],
+  "Pranata Komputer": [
+    {
+      "kode": "TRN-PRK-01",
+      "nama": "Pengembangan Diri",
+      "kat": "MANAJERIAL",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PRK-02",
+      "nama": "Komunikasi",
+      "kat": "MANAJERIAL",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PRK-03",
+      "nama": "Budaya Integritas",
+      "kat": "MANAJERIAL",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PRK-04",
+      "nama": "Pelayanan Publik",
+      "kat": "MANAJERIAL",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PRK-05",
+      "nama": "Problem Solving",
+      "kat": "MANAJERIAL",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PRK-06",
+      "nama": "Pelatihan Sosial Kultural Level 1",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PRK-07",
+      "nama": "Pelatihan Manajerial Lainnya",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PRK-08",
+      "nama": "Pelatihan Dasar Pengawasan Sumber Daya Kelautan dan Perikanan",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": true
+    },
+    {
+      "kode": "TRN-PRK-09",
+      "nama": "Metode Pengumpulan dan Pengolahan Data",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PRK-10",
+      "nama": "Pengoperasian Aplikasi dan Teknologi Informasi",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PRK-11",
+      "nama": "Pengelolaan Aplikasi Sistem Informasi",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PRK-12",
+      "nama": "Pengelolaan Infrastruktur Teknologi Informasi",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PRK-13",
+      "nama": "Pelatihan Sistem Operasi",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PRK-14",
+      "nama": "Pelatihan Jaringan Komputer",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PRK-15",
+      "nama": "Pelatihan Front End",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PRK-16",
+      "nama": "Pelatihan Back End",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PRK-17",
+      "nama": "Literasi Digital",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PRK-18",
+      "nama": "Big Data",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PRK-19",
+      "nama": "Cloud Computing",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PRK-20",
+      "nama": "Keamanan Data",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PRK-21",
+      "nama": "Data Mining",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-PRK-22",
+      "nama": "Pelatihan Pengawasan SDKP Lingkup Direktorat Jenderal PSDKP",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": true
+    },
+    {
+      "kode": "TRN-PRK-23",
+      "nama": "Pelatihan Dasar JF Pranata Komputer",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    }
+  ],
+  "Statisti Ahli Muda": [
+    {
+      "kode": "TRN-STA-01",
+      "nama": "Pengembangan Diri",
+      "kat": "MANAJERIAL",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
       "kode": "TRN-STA-02",
-      "nama": "Pengolahan & Analisis Statistik Satu Data KKP",
+      "nama": "Pengawasan Sumber Daya Kelautan dan Perikanan",
       "kat": "TEKNIS",
       "tingkat": "ALL",
       "wajib": true
     },
     {
       "kode": "TRN-STA-03",
-      "nama": "Diklat Fungsional Statistisi",
-      "kat": "FUNGSIONAL",
-      "tingkat": "ALL",
-      "wajib": true
-    }
-  ],
-  "Surveyor Pemetaan Ahli Pertama": [
-    {
-      "kode": "TRN-SPM-01",
-      "nama": "Sistem Informasi Geografis (SIG/GIS) Lanjut Kelautan",
+      "nama": "Pelatihan Pengoperasian Armada Pengawasan SDKP",
       "kat": "TEKNIS",
       "tingkat": "ALL",
       "wajib": true
     },
     {
+      "kode": "TRN-STA-04",
+      "nama": "Pelatihan PPNS Perikanan",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": true
+    },
+    {
+      "kode": "TRN-STA-05",
+      "nama": "Pelatihan Polisi Khusus PW3L",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-STA-06",
+      "nama": "Pelatihan Intelejen bidang Pengawasan Sumber Daya Kelautan dan/atau Perikanan",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": true
+    },
+    {
+      "kode": "TRN-STA-07",
+      "nama": "Pelatihan teknis lain yang dibutuhkan Jabatan",
+      "kat": "MANAJERIAL",
+      "tingkat": "ALL",
+      "wajib": false
+    }
+  ],
+  "Surveyor Pemetaan Ahli Pertama": [
+    {
+      "kode": "TRN-SPM-01",
+      "nama": "Pelatihan Kepemimpinan Pengawas",
+      "kat": "MANAJERIAL",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
       "kode": "TRN-SPM-02",
-      "nama": "Penginderaan Jauh (Remote Sensing / Satelit AIS) Laut",
+      "nama": "Pengawasan Sumber Daya Kelautan dan Perikanan",
       "kat": "TEKNIS",
       "tingkat": "ALL",
       "wajib": true
     },
     {
       "kode": "TRN-SPM-03",
-      "nama": "Diklat Fungsional Surveyor Pemetaan",
-      "kat": "FUNGSIONAL",
+      "nama": "Pelatihan Pengoperasian Armada Pengawasan SDKP",
+      "kat": "TEKNIS",
       "tingkat": "ALL",
       "wajib": true
+    },
+    {
+      "kode": "TRN-SPM-04",
+      "nama": "Pelatihan PPNS Perikanan",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": true
+    },
+    {
+      "kode": "TRN-SPM-05",
+      "nama": "Pelatihan Polisi Khusus PW3L",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": false
+    },
+    {
+      "kode": "TRN-SPM-06",
+      "nama": "Pelatihan Intelejen bidang Pengawasan Sumber Daya Kelautan dan/atau Perikanan",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": true
+    },
+    {
+      "kode": "TRN-SPM-07",
+      "nama": "Pelatihan teknis lain yang dibutuhkan Jabatan",
+      "kat": "MANAJERIAL",
+      "tingkat": "ALL",
+      "wajib": false
     }
   ]
 };
@@ -1685,7 +3470,7 @@ var SEED_PEGAWAI_POA_AWAK = [
     "pegawaiId": "PEG-0001",
     "nip": "197612282002121002",
     "nama": "M. Ikhsan,S.St.Pi, M.Si",
-    "unit": "Direktorat Pengendalian Operasi Armada (Dit. POA)",
+    "unit": "Dit. POA",
     "lingkup": "DIT_POA",
     "kelompokJabatan": "Struktural",
     "jabatanLengkap": "Kepala Sub Direktorat Operasi Kapal Pengawas dan Pesawat Patroli",
@@ -3747,7 +5532,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0173",
-    "nip": "",
+    "nip": "-",
     "nama": "Azer Apner Pate",
     "unit": "Dit. POA",
     "lingkup": "DIT_POA",
@@ -3759,7 +5544,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0174",
-    "nip": "",
+    "nip": "-",
     "nama": "Rudi Sudarmaji",
     "unit": "Dit. POA",
     "lingkup": "DIT_POA",
@@ -3771,7 +5556,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0175",
-    "nip": "",
+    "nip": "-",
     "nama": "Agus Solihin",
     "unit": "Dit. POA",
     "lingkup": "DIT_POA",
@@ -3783,7 +5568,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0176",
-    "nip": "",
+    "nip": "-",
     "nama": "Ronny John Ferdinand Paulus",
     "unit": "Dit. POA",
     "lingkup": "DIT_POA",
@@ -3795,7 +5580,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0177",
-    "nip": "",
+    "nip": "-",
     "nama": "Totong Winarto",
     "unit": "Dit. POA",
     "lingkup": "DIT_POA",
@@ -3807,7 +5592,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0178",
-    "nip": "",
+    "nip": "-",
     "nama": "Singgih Aji Nosa",
     "unit": "Dit. POA",
     "lingkup": "DIT_POA",
@@ -3819,7 +5604,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0179",
-    "nip": "",
+    "nip": "-",
     "nama": "Syafari Ardiansyah",
     "unit": "Dit. POA",
     "lingkup": "DIT_POA",
@@ -3831,7 +5616,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0180",
-    "nip": "",
+    "nip": "-",
     "nama": "Oka Reli Purwono",
     "unit": "Dit. POA",
     "lingkup": "DIT_POA",
@@ -3843,7 +5628,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0181",
-    "nip": "",
+    "nip": "-",
     "nama": "Ary Sumaryadi",
     "unit": "PSDKP Batam",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -3855,7 +5640,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0182",
-    "nip": "",
+    "nip": "-",
     "nama": "Moh. Abdulloh",
     "unit": "PSDKP Batam",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -3867,7 +5652,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0183",
-    "nip": "",
+    "nip": "-",
     "nama": "Oky Riansyah",
     "unit": "PSDKP Benoa",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -3879,7 +5664,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0184",
-    "nip": "",
+    "nip": "-",
     "nama": "Nurkoyo",
     "unit": "PSDKP Benoa",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -3891,7 +5676,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0185",
-    "nip": "",
+    "nip": "-",
     "nama": "James Bagensa",
     "unit": "PSDKP Bitung",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -3903,7 +5688,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0186",
-    "nip": "",
+    "nip": "-",
     "nama": "Ruddy Alfianus Mamahit",
     "unit": "PSDKP Bitung",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -3915,7 +5700,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0187",
-    "nip": "",
+    "nip": "-",
     "nama": "La Mane",
     "unit": "PSDKP Bitung",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -3927,7 +5712,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0188",
-    "nip": "",
+    "nip": "-",
     "nama": "Muslih",
     "unit": "PSDKP Jakarta",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -3939,7 +5724,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0189",
-    "nip": "",
+    "nip": "-",
     "nama": "Hanudin",
     "unit": "PSDKP Lampulo",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -3951,7 +5736,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0190",
-    "nip": "",
+    "nip": "-",
     "nama": "Umar Ali Salampessy",
     "unit": "PSDKP Tual",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -3963,7 +5748,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0191",
-    "nip": "",
+    "nip": "-",
     "nama": "Tedy Umalucky",
     "unit": "Stasiun PSDKP Ambon",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -3975,7 +5760,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0192",
-    "nip": "",
+    "nip": "-",
     "nama": "Dhidit Setiawan",
     "unit": "Stasiun PSDKP Belawan",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -3987,7 +5772,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0193",
-    "nip": "",
+    "nip": "-",
     "nama": "Nurholis",
     "unit": "Stasiun PSDKP Belawan",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -3999,7 +5784,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0194",
-    "nip": "",
+    "nip": "-",
     "nama": "Puji Tri Laksono",
     "unit": "Stasiun PSDKP Biak",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -4011,7 +5796,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0195",
-    "nip": "",
+    "nip": "-",
     "nama": "Sugeng Riadi",
     "unit": "Stasiun PSDKP Kupang",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -4023,7 +5808,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0196",
-    "nip": "",
+    "nip": "-",
     "nama": "James Roberto Sihombing",
     "unit": "Stasiun PSDKP Pontianak",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -4047,7 +5832,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0198",
-    "nip": "",
+    "nip": "-",
     "nama": "Nofry Endey",
     "unit": "Stasiun PSDKP Tahuna",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -4059,7 +5844,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0199",
-    "nip": "",
+    "nip": "-",
     "nama": "Tri Hariyanto",
     "unit": "Stasiun PSDKP Tarakan",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -4071,7 +5856,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0200",
-    "nip": "",
+    "nip": "-",
     "nama": "Dedy Aryanto",
     "unit": "Dit. POA",
     "lingkup": "DIT_POA",
@@ -4083,7 +5868,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0201",
-    "nip": "",
+    "nip": "-",
     "nama": "Rizki Sutardi",
     "unit": "Dit. POA",
     "lingkup": "DIT_POA",
@@ -4095,7 +5880,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0202",
-    "nip": "",
+    "nip": "-",
     "nama": "Rusli",
     "unit": "Dit. POA",
     "lingkup": "DIT_POA",
@@ -4107,7 +5892,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0203",
-    "nip": "",
+    "nip": "-",
     "nama": "Rusli",
     "unit": "Dit. POA",
     "lingkup": "DIT_POA",
@@ -4119,7 +5904,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0204",
-    "nip": "",
+    "nip": "-",
     "nama": "Ade Subhan",
     "unit": "Dit. POA",
     "lingkup": "DIT_POA",
@@ -4131,7 +5916,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0205",
-    "nip": "",
+    "nip": "-",
     "nama": "Ismail Lubis",
     "unit": "Dit. POA",
     "lingkup": "DIT_POA",
@@ -4143,7 +5928,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0206",
-    "nip": "",
+    "nip": "-",
     "nama": "Joesuf",
     "unit": "Dit. POA",
     "lingkup": "DIT_POA",
@@ -4155,7 +5940,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0207",
-    "nip": "",
+    "nip": "-",
     "nama": "Abdul Razak Usemahu",
     "unit": "Dit. POA",
     "lingkup": "DIT_POA",
@@ -4167,7 +5952,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0208",
-    "nip": "",
+    "nip": "-",
     "nama": "Jabornok Situmorang",
     "unit": "Dit. POA",
     "lingkup": "DIT_POA",
@@ -4179,7 +5964,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0209",
-    "nip": "",
+    "nip": "-",
     "nama": "Muh. Nasrul Latulanit",
     "unit": "Dit. POA",
     "lingkup": "DIT_POA",
@@ -4191,7 +5976,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0210",
-    "nip": "",
+    "nip": "-",
     "nama": "Frangky Richard Supit",
     "unit": "Dit. POA",
     "lingkup": "DIT_POA",
@@ -4203,7 +5988,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0211",
-    "nip": "",
+    "nip": "-",
     "nama": "Dwi Nazarudin Amrullah",
     "unit": "Dit. POA",
     "lingkup": "DIT_POA",
@@ -4215,7 +6000,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0212",
-    "nip": "",
+    "nip": "-",
     "nama": "Gian Luca Vialli Pakpahan",
     "unit": "Dit. POA",
     "lingkup": "DIT_POA",
@@ -4227,7 +6012,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0213",
-    "nip": "",
+    "nip": "-",
     "nama": "Eko Prasetyo",
     "unit": "Dit. POA",
     "lingkup": "DIT_POA",
@@ -4239,7 +6024,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0214",
-    "nip": "",
+    "nip": "-",
     "nama": "Hari Rustaman",
     "unit": "Dit. POA",
     "lingkup": "DIT_POA",
@@ -4251,7 +6036,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0215",
-    "nip": "",
+    "nip": "-",
     "nama": "Rajib Ahmad",
     "unit": "Dit. POA",
     "lingkup": "DIT_POA",
@@ -4263,7 +6048,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0216",
-    "nip": "",
+    "nip": "-",
     "nama": "Triyono",
     "unit": "Dit. POA",
     "lingkup": "DIT_POA",
@@ -4275,7 +6060,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0217",
-    "nip": "",
+    "nip": "-",
     "nama": "Rama Angga Saputra",
     "unit": "Dit. POA",
     "lingkup": "DIT_POA",
@@ -4287,7 +6072,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0218",
-    "nip": "",
+    "nip": "-",
     "nama": "Apyam Mei Kabarek",
     "unit": "Dit. POA",
     "lingkup": "DIT_POA",
@@ -4299,7 +6084,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0219",
-    "nip": "",
+    "nip": "-",
     "nama": "Acep Fery Sugiarto",
     "unit": "Dit. POA",
     "lingkup": "DIT_POA",
@@ -4311,7 +6096,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0220",
-    "nip": "",
+    "nip": "-",
     "nama": "Ahmad Tholib",
     "unit": "Dit. POA",
     "lingkup": "DIT_POA",
@@ -4323,7 +6108,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0221",
-    "nip": "",
+    "nip": "-",
     "nama": "Sukriyadi Mawardi",
     "unit": "Dit. POA",
     "lingkup": "DIT_POA",
@@ -4335,7 +6120,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0222",
-    "nip": "",
+    "nip": "-",
     "nama": "Dwi Hartono Gobel",
     "unit": "Dit. POA",
     "lingkup": "DIT_POA",
@@ -4347,7 +6132,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0223",
-    "nip": "",
+    "nip": "-",
     "nama": "Arkalaus D",
     "unit": "Dit. POA",
     "lingkup": "DIT_POA",
@@ -4359,7 +6144,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0224",
-    "nip": "",
+    "nip": "-",
     "nama": "Dwi Hendarto",
     "unit": "Dit. POA",
     "lingkup": "DIT_POA",
@@ -4371,7 +6156,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0225",
-    "nip": "",
+    "nip": "-",
     "nama": "Sodik",
     "unit": "Dit. POA",
     "lingkup": "DIT_POA",
@@ -4383,7 +6168,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0226",
-    "nip": "",
+    "nip": "-",
     "nama": "Feri Supriadi",
     "unit": "Dit. POA",
     "lingkup": "DIT_POA",
@@ -4395,7 +6180,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0227",
-    "nip": "",
+    "nip": "-",
     "nama": "SETYO WIJATMIKO, A.Md",
     "unit": "PSDKP Batam",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -4407,7 +6192,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0228",
-    "nip": "",
+    "nip": "-",
     "nama": "Dwi Agus Triyanto",
     "unit": "PSDKP Batam",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -4419,7 +6204,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0229",
-    "nip": "",
+    "nip": "-",
     "nama": "WAWAN SETIAWAN, A.Md",
     "unit": "PSDKP Batam",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -4431,7 +6216,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0230",
-    "nip": "",
+    "nip": "-",
     "nama": "David Permadi Zaen",
     "unit": "PSDKP Benoa",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -4443,7 +6228,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0231",
-    "nip": "",
+    "nip": "-",
     "nama": "Muhammad Hanafi Zulfikar",
     "unit": "PSDKP Benoa",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -4455,7 +6240,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0232",
-    "nip": "",
+    "nip": "-",
     "nama": "Nehemia Bothmir",
     "unit": "PSDKP Benoa",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -4467,7 +6252,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0233",
-    "nip": "",
+    "nip": "-",
     "nama": "Febri Valentino",
     "unit": "PSDKP Benoa",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -4479,7 +6264,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0234",
-    "nip": "",
+    "nip": "-",
     "nama": "Aji Setiyawan",
     "unit": "PSDKP Bitung",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -4491,7 +6276,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0235",
-    "nip": "",
+    "nip": "-",
     "nama": "Suharyanto",
     "unit": "PSDKP Bitung",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -4503,7 +6288,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0236",
-    "nip": "",
+    "nip": "-",
     "nama": "Hazlan",
     "unit": "PSDKP Bitung",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -4515,7 +6300,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0237",
-    "nip": "",
+    "nip": "-",
     "nama": "Dedi Nofriadi",
     "unit": "PSDKP Bitung",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -4527,7 +6312,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0238",
-    "nip": "",
+    "nip": "-",
     "nama": "Dedi Irawan",
     "unit": "PSDKP Bitung",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -4539,7 +6324,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0239",
-    "nip": "",
+    "nip": "-",
     "nama": "Muryono",
     "unit": "PSDKP Jakarta",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -4551,7 +6336,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0240",
-    "nip": "",
+    "nip": "-",
     "nama": "Eman Sujarwo",
     "unit": "PSDKP Jakarta",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -4563,7 +6348,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0241",
-    "nip": "",
+    "nip": "-",
     "nama": "Mareiner S. Katiandagho",
     "unit": "PSDKP Lampulo",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -4575,7 +6360,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0242",
-    "nip": "",
+    "nip": "-",
     "nama": "Asep Satria Yudha Bhermana",
     "unit": "PSDKP Lampulo",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -4587,7 +6372,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0243",
-    "nip": "",
+    "nip": "-",
     "nama": "Jeep Usman",
     "unit": "PSDKP Lampulo",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -4599,7 +6384,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0244",
-    "nip": "",
+    "nip": "-",
     "nama": "Yeyen Nofriwan Putra",
     "unit": "PSDKP Lampulo",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -4611,7 +6396,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0245",
-    "nip": "",
+    "nip": "-",
     "nama": "Arfan Mahendra Tarigan",
     "unit": "PSDKP Lampulo",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -4635,7 +6420,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0247",
-    "nip": "",
+    "nip": "-",
     "nama": "Amrul M. Asmin",
     "unit": "PSDKP Tual",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -4647,7 +6432,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0248",
-    "nip": "",
+    "nip": "-",
     "nama": "Nurhadi",
     "unit": "PSDKP Tual",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -4659,7 +6444,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0249",
-    "nip": "",
+    "nip": "-",
     "nama": "Rolling Wattimena",
     "unit": "PSDKP Tual",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -4671,7 +6456,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0250",
-    "nip": "",
+    "nip": "-",
     "nama": "Muhammad Asri Umarella",
     "unit": "PSDKP Tual",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -4683,7 +6468,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0251",
-    "nip": "",
+    "nip": "-",
     "nama": "Fredrik Patty",
     "unit": "Stasiun PSDKP Ambon",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -4695,7 +6480,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0252",
-    "nip": "",
+    "nip": "-",
     "nama": "Eko Setiawan",
     "unit": "Stasiun PSDKP Ambon",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -4707,7 +6492,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0253",
-    "nip": "",
+    "nip": "-",
     "nama": "Nurhaidir Malik",
     "unit": "Stasiun PSDKP Belawan",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -4731,7 +6516,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0255",
-    "nip": "",
+    "nip": "-",
     "nama": "Mashuri",
     "unit": "Stasiun PSDKP Belawan",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -4743,7 +6528,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0256",
-    "nip": "",
+    "nip": "-",
     "nama": "Siswo Wijanarko",
     "unit": "Stasiun PSDKP Belawan",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -4755,7 +6540,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0257",
-    "nip": "",
+    "nip": "-",
     "nama": "Praminto",
     "unit": "Stasiun PSDKP Biak",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -4767,7 +6552,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0258",
-    "nip": "",
+    "nip": "-",
     "nama": "Hamzah Hilal Fakaubun",
     "unit": "Stasiun PSDKP Biak",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -4779,7 +6564,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0259",
-    "nip": "",
+    "nip": "-",
     "nama": "Fanly Jeiner Ilat",
     "unit": "Stasiun PSDKP Biak",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -4791,7 +6576,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0260",
-    "nip": "",
+    "nip": "-",
     "nama": "Nurhidayanto",
     "unit": "Stasiun PSDKP Cilacap",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -4803,7 +6588,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0261",
-    "nip": "",
+    "nip": "-",
     "nama": "Taufik Ikhsan",
     "unit": "Stasiun PSDKP Kupang",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -4815,7 +6600,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0262",
-    "nip": "",
+    "nip": "-",
     "nama": "Abraham Besitimur Yongkom",
     "unit": "Stasiun PSDKP Kupang",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -4827,7 +6612,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0263",
-    "nip": "",
+    "nip": "-",
     "nama": "Muh Ruslan",
     "unit": "Stasiun PSDKP Kupang",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -4839,7 +6624,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0264",
-    "nip": "",
+    "nip": "-",
     "nama": "Singgih Tri Utomo",
     "unit": "Stasiun PSDKP Pontianak",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -4851,7 +6636,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0265",
-    "nip": "",
+    "nip": "-",
     "nama": "Wijaya Lesmana",
     "unit": "Stasiun PSDKP Pontianak",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -4863,7 +6648,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0266",
-    "nip": "",
+    "nip": "-",
     "nama": "Maryoko",
     "unit": "Stasiun PSDKP Pontianak",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -4875,7 +6660,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0267",
-    "nip": "",
+    "nip": "-",
     "nama": "Justang",
     "unit": "Stasiun PSDKP Pontianak",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -4887,7 +6672,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0268",
-    "nip": "",
+    "nip": "-",
     "nama": "Edy Purwanto",
     "unit": "Stasiun PSDKP Tahuna",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -4899,7 +6684,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0269",
-    "nip": "",
+    "nip": "-",
     "nama": "Bernadus Ronny Koeswibowo Irwanto",
     "unit": "Stasiun PSDKP Tahuna",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -4911,7 +6696,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0270",
-    "nip": "",
+    "nip": "-",
     "nama": "Gazali",
     "unit": "Stasiun PSDKP Tarakan",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -4923,7 +6708,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0271",
-    "nip": "",
+    "nip": "-",
     "nama": "Marcelino Willobrordus Maturbongs",
     "unit": "Dit. POA",
     "lingkup": "DIT_POA",
@@ -4935,7 +6720,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0272",
-    "nip": "",
+    "nip": "-",
     "nama": "Heryoko",
     "unit": "Dit. POA",
     "lingkup": "DIT_POA",
@@ -4947,7 +6732,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0273",
-    "nip": "",
+    "nip": "-",
     "nama": "Franky Fian Kumesan",
     "unit": "Dit. POA",
     "lingkup": "DIT_POA",
@@ -4959,7 +6744,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0274",
-    "nip": "",
+    "nip": "-",
     "nama": "Ronald Rabung",
     "unit": "Dit. POA",
     "lingkup": "DIT_POA",
@@ -4971,7 +6756,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0275",
-    "nip": "",
+    "nip": "-",
     "nama": "Wawan Gunawan",
     "unit": "Dit. POA",
     "lingkup": "DIT_POA",
@@ -4983,7 +6768,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0276",
-    "nip": "",
+    "nip": "-",
     "nama": "Syamsuddin Syaria Kubi",
     "unit": "Dit. POA",
     "lingkup": "DIT_POA",
@@ -4995,7 +6780,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0277",
-    "nip": "",
+    "nip": "-",
     "nama": "Zulrhizki Mahardhika",
     "unit": "Dit. POA",
     "lingkup": "DIT_POA",
@@ -5007,7 +6792,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0278",
-    "nip": "",
+    "nip": "-",
     "nama": "Satria Teguh Sembada",
     "unit": "Dit. POA",
     "lingkup": "DIT_POA",
@@ -5019,7 +6804,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0279",
-    "nip": "",
+    "nip": "-",
     "nama": "Rizaldi Rahman",
     "unit": "Dit. POA",
     "lingkup": "DIT_POA",
@@ -5031,7 +6816,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0280",
-    "nip": "",
+    "nip": "-",
     "nama": "Anggy Yudha Pradana",
     "unit": "Dit. POA",
     "lingkup": "DIT_POA",
@@ -5043,7 +6828,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0281",
-    "nip": "",
+    "nip": "-",
     "nama": "Remy Raymond Rotinsulu",
     "unit": "Dit. POA",
     "lingkup": "DIT_POA",
@@ -5055,7 +6840,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0282",
-    "nip": "",
+    "nip": "-",
     "nama": "Iwan Kurniawan",
     "unit": "Dit. POA",
     "lingkup": "DIT_POA",
@@ -5067,7 +6852,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0283",
-    "nip": "",
+    "nip": "-",
     "nama": "Abdullah Budiman Firmansyah",
     "unit": "Dit. POA",
     "lingkup": "DIT_POA",
@@ -5079,7 +6864,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0284",
-    "nip": "",
+    "nip": "-",
     "nama": "Zainudin",
     "unit": "Dit. POA",
     "lingkup": "DIT_POA",
@@ -5091,7 +6876,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0285",
-    "nip": "",
+    "nip": "-",
     "nama": "Abjan Faruk",
     "unit": "Dit. POA",
     "lingkup": "DIT_POA",
@@ -5103,7 +6888,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0286",
-    "nip": "",
+    "nip": "-",
     "nama": "Golden Israel Suma",
     "unit": "Dit. POA",
     "lingkup": "DIT_POA",
@@ -5115,7 +6900,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0287",
-    "nip": "",
+    "nip": "-",
     "nama": "Berkat Niatman Gulo",
     "unit": "Dit. POA",
     "lingkup": "DIT_POA",
@@ -5127,7 +6912,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0288",
-    "nip": "",
+    "nip": "-",
     "nama": "Mickael Chimilov Tolosang",
     "unit": "Dit. POA",
     "lingkup": "DIT_POA",
@@ -5139,7 +6924,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0289",
-    "nip": "",
+    "nip": "-",
     "nama": "Sanggoro Nur Iman",
     "unit": "Dit. POA",
     "lingkup": "DIT_POA",
@@ -5151,7 +6936,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0290",
-    "nip": "",
+    "nip": "-",
     "nama": "Idil Ardiansyah",
     "unit": "Dit. POA",
     "lingkup": "DIT_POA",
@@ -5163,7 +6948,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0291",
-    "nip": "",
+    "nip": "-",
     "nama": "Noven Afrindo",
     "unit": "Dit. POA",
     "lingkup": "DIT_POA",
@@ -5175,7 +6960,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0292",
-    "nip": "",
+    "nip": "-",
     "nama": "Muhammad Nasrul",
     "unit": "Dit. POA",
     "lingkup": "DIT_POA",
@@ -5187,7 +6972,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0293",
-    "nip": "",
+    "nip": "-",
     "nama": "Eko Marsiano Putra Tangkawarouw",
     "unit": "Dit. POA",
     "lingkup": "DIT_POA",
@@ -5199,7 +6984,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0294",
-    "nip": "",
+    "nip": "-",
     "nama": "Romi Chandra",
     "unit": "Dit. POA",
     "lingkup": "DIT_POA",
@@ -5211,7 +6996,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0295",
-    "nip": "",
+    "nip": "-",
     "nama": "Ida Bagus Kade Adi Suambara",
     "unit": "Dit. POA",
     "lingkup": "DIT_POA",
@@ -5223,7 +7008,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0296",
-    "nip": "",
+    "nip": "-",
     "nama": "BENI ASBA PUTRA, S.Tr.Pi",
     "unit": "PSDKP Batam",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -5235,7 +7020,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0297",
-    "nip": "",
+    "nip": "-",
     "nama": "Deistiawan Farisi",
     "unit": "PSDKP Batam",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -5247,7 +7032,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0298",
-    "nip": "",
+    "nip": "-",
     "nama": "Rahmat Arba",
     "unit": "PSDKP Benoa",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -5259,7 +7044,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0299",
-    "nip": "",
+    "nip": "-",
     "nama": "Muhammad Leonardo",
     "unit": "PSDKP Benoa",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -5295,7 +7080,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0302",
-    "nip": "",
+    "nip": "-",
     "nama": "Putra Kusuma",
     "unit": "PSDKP Bitung",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -5307,7 +7092,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0303",
-    "nip": "",
+    "nip": "-",
     "nama": "Hery Poernama",
     "unit": "PSDKP Bitung",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -5319,7 +7104,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0304",
-    "nip": "",
+    "nip": "-",
     "nama": "Manuel Langi Runtulalo",
     "unit": "PSDKP Bitung",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -5343,7 +7128,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0306",
-    "nip": "",
+    "nip": "-",
     "nama": "Sutarjo",
     "unit": "PSDKP Jakarta",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -5367,7 +7152,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0308",
-    "nip": "",
+    "nip": "-",
     "nama": "Ariyanto Lubis",
     "unit": "PSDKP Lampulo",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -5379,7 +7164,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0309",
-    "nip": "",
+    "nip": "-",
     "nama": "Heri Ariyanto",
     "unit": "PSDKP Lampulo",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -5391,7 +7176,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0310",
-    "nip": "",
+    "nip": "-",
     "nama": "Tofik Ariyanto",
     "unit": "PSDKP Lampulo",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -5403,7 +7188,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0311",
-    "nip": "",
+    "nip": "-",
     "nama": "Hendra Tambariki",
     "unit": "PSDKP Tual",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -5415,7 +7200,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0312",
-    "nip": "",
+    "nip": "-",
     "nama": "M Marchinov Vianthas Saleh",
     "unit": "PSDKP Tual",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -5427,7 +7212,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0313",
-    "nip": "",
+    "nip": "-",
     "nama": "Semoel Siruru",
     "unit": "PSDKP Tual",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -5439,7 +7224,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0314",
-    "nip": "",
+    "nip": "-",
     "nama": "Rahman Ali Salampessy",
     "unit": "Stasiun PSDKP Ambon",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -5451,7 +7236,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0315",
-    "nip": "",
+    "nip": "-",
     "nama": "Neru Purnawan",
     "unit": "Stasiun PSDKP Belawan",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -5463,7 +7248,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0316",
-    "nip": "",
+    "nip": "-",
     "nama": "Oktafiandi Fajrin",
     "unit": "Stasiun PSDKP Belawan",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -5475,7 +7260,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0317",
-    "nip": "",
+    "nip": "-",
     "nama": "Bahrudin",
     "unit": "Stasiun PSDKP Belawan",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -5487,7 +7272,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0318",
-    "nip": "",
+    "nip": "-",
     "nama": "Novry Ronald Lukow",
     "unit": "Stasiun PSDKP Biak",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -5499,7 +7284,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0319",
-    "nip": "",
+    "nip": "-",
     "nama": "Roberth",
     "unit": "Stasiun PSDKP Biak",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -5511,7 +7296,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0320",
-    "nip": "",
+    "nip": "-",
     "nama": "Agung Yanuar Priyambodo",
     "unit": "Stasiun PSDKP Cilacap",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -5523,7 +7308,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0321",
-    "nip": "",
+    "nip": "-",
     "nama": "Dhimas Eki Septiawan",
     "unit": "Stasiun PSDKP Kupang",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -5535,7 +7320,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0322",
-    "nip": "",
+    "nip": "-",
     "nama": "Jajang Ridwan",
     "unit": "Stasiun PSDKP Kupang",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -5547,7 +7332,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0323",
-    "nip": "",
+    "nip": "-",
     "nama": "Irwan Hidayat",
     "unit": "Stasiun PSDKP Pontianak",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -5559,7 +7344,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0324",
-    "nip": "",
+    "nip": "-",
     "nama": "Adhi Susanto",
     "unit": "Stasiun PSDKP Pontianak",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -5571,7 +7356,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0325",
-    "nip": "",
+    "nip": "-",
     "nama": "Subhan Hafandy",
     "unit": "Stasiun PSDKP Pontianak",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -5583,7 +7368,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0326",
-    "nip": "",
+    "nip": "-",
     "nama": "Jonny Robby Rondonuwu",
     "unit": "Stasiun PSDKP Tahuna",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -5595,7 +7380,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0327",
-    "nip": "",
+    "nip": "-",
     "nama": "Kristanto",
     "unit": "Stasiun PSDKP Tarakan",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -5607,7 +7392,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0328",
-    "nip": "",
+    "nip": "-",
     "nama": "Ismail Marzuki",
     "unit": "Dit. POA",
     "lingkup": "DIT_POA",
@@ -5619,7 +7404,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0329",
-    "nip": "",
+    "nip": "-",
     "nama": "Ilman Rustam",
     "unit": "Dit. POA",
     "lingkup": "DIT_POA",
@@ -5631,7 +7416,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0330",
-    "nip": "",
+    "nip": "-",
     "nama": "Muhammad Ma`Ruf",
     "unit": "Dit. POA",
     "lingkup": "DIT_POA",
@@ -5643,7 +7428,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0331",
-    "nip": "",
+    "nip": "-",
     "nama": "Priyo Kurniawan",
     "unit": "Dit. POA",
     "lingkup": "DIT_POA",
@@ -5655,7 +7440,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0332",
-    "nip": "",
+    "nip": "-",
     "nama": "Sutisna Wijaya",
     "unit": "Dit. POA",
     "lingkup": "DIT_POA",
@@ -5667,7 +7452,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0333",
-    "nip": "",
+    "nip": "-",
     "nama": "Eko Priyono",
     "unit": "Dit. POA",
     "lingkup": "DIT_POA",
@@ -5679,7 +7464,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0334",
-    "nip": "",
+    "nip": "-",
     "nama": "Lathalansyah Hade",
     "unit": "Dit. POA",
     "lingkup": "DIT_POA",
@@ -5691,7 +7476,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0335",
-    "nip": "",
+    "nip": "-",
     "nama": "Lingga Budi Kusuma",
     "unit": "Dit. POA",
     "lingkup": "DIT_POA",
@@ -5703,7 +7488,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0336",
-    "nip": "",
+    "nip": "-",
     "nama": "Aldi Firmansyah",
     "unit": "Dit. POA",
     "lingkup": "DIT_POA",
@@ -5715,7 +7500,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0337",
-    "nip": "",
+    "nip": "-",
     "nama": "Manuel Auparai",
     "unit": "Dit. POA",
     "lingkup": "DIT_POA",
@@ -5727,7 +7512,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0338",
-    "nip": "",
+    "nip": "-",
     "nama": "EDUARDO DA COSTA FERNANDES, A.Md, S.P.",
     "unit": "PSDKP Batam",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -5739,7 +7524,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0339",
-    "nip": "",
+    "nip": "-",
     "nama": "ALBERT ESSING, A.Md, S.PKP",
     "unit": "PSDKP Batam",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -5751,7 +7536,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0340",
-    "nip": "",
+    "nip": "-",
     "nama": "Mohamad Slamet",
     "unit": "PSDKP Benoa",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -5763,7 +7548,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0341",
-    "nip": "",
+    "nip": "-",
     "nama": "Anggoro Corneawan Premono",
     "unit": "PSDKP Benoa",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -5787,7 +7572,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0343",
-    "nip": "",
+    "nip": "-",
     "nama": "Yusdi Ode Manangin",
     "unit": "PSDKP Bitung",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -5799,7 +7584,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0344",
-    "nip": "",
+    "nip": "-",
     "nama": "Japaruddin Lalla",
     "unit": "PSDKP Bitung",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -5811,7 +7596,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0345",
-    "nip": "",
+    "nip": "-",
     "nama": "Ruslan Saman",
     "unit": "PSDKP Bitung",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -5823,7 +7608,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0346",
-    "nip": "",
+    "nip": "-",
     "nama": "Sultan",
     "unit": "PSDKP Bitung",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -5835,7 +7620,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0347",
-    "nip": "",
+    "nip": "-",
     "nama": "Alfian Kiay Baderan",
     "unit": "PSDKP Jakarta",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -5847,7 +7632,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0348",
-    "nip": "",
+    "nip": "-",
     "nama": "Hendra Wollah",
     "unit": "PSDKP Jakarta",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -5859,7 +7644,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0349",
-    "nip": "",
+    "nip": "-",
     "nama": "Novry Sangian",
     "unit": "PSDKP Lampulo",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -5871,7 +7656,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0350",
-    "nip": "",
+    "nip": "-",
     "nama": "La Dedi",
     "unit": "PSDKP Lampulo",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -5895,7 +7680,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0352",
-    "nip": "",
+    "nip": "-",
     "nama": "Ardiansyah Pamuji",
     "unit": "PSDKP Tual",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -5907,7 +7692,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0353",
-    "nip": "",
+    "nip": "-",
     "nama": "Hendro Andaria",
     "unit": "PSDKP Tual",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -5919,7 +7704,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0354",
-    "nip": "",
+    "nip": "-",
     "nama": "Muhammad Nurdarwansyah",
     "unit": "PSDKP Tual",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -5931,7 +7716,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0355",
-    "nip": "",
+    "nip": "-",
     "nama": "Ranito",
     "unit": "PSDKP Tual",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -5943,7 +7728,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0356",
-    "nip": "",
+    "nip": "-",
     "nama": "Yohanes Lan Tielung",
     "unit": "Stasiun PSDKP Ambon",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -5955,7 +7740,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0357",
-    "nip": "",
+    "nip": "-",
     "nama": "Zulkarnain",
     "unit": "Stasiun PSDKP Ambon",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -5967,7 +7752,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0358",
-    "nip": "",
+    "nip": "-",
     "nama": "Erin Boy Rajagukguk",
     "unit": "Stasiun PSDKP Belawan",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -5979,7 +7764,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0359",
-    "nip": "",
+    "nip": "-",
     "nama": "Susanto Manggopa",
     "unit": "Stasiun PSDKP Belawan",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -5991,7 +7776,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0360",
-    "nip": "",
+    "nip": "-",
     "nama": "Mukani",
     "unit": "Stasiun PSDKP Belawan",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -6003,7 +7788,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0361",
-    "nip": "",
+    "nip": "-",
     "nama": "Rinondang Panggabean",
     "unit": "Stasiun PSDKP Belawan",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -6027,7 +7812,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0363",
-    "nip": "",
+    "nip": "-",
     "nama": "Jendri Erwin Mamahit",
     "unit": "Stasiun PSDKP Biak",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -6039,7 +7824,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0364",
-    "nip": "",
+    "nip": "-",
     "nama": "Budi Waluyo",
     "unit": "Stasiun PSDKP Biak",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -6051,7 +7836,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0365",
-    "nip": "",
+    "nip": "-",
     "nama": "Andra Aulia Pratama",
     "unit": "Stasiun PSDKP Biak",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -6063,7 +7848,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0366",
-    "nip": "",
+    "nip": "-",
     "nama": "Iswandi Wahid",
     "unit": "Stasiun PSDKP Cilacap",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -6075,7 +7860,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0367",
-    "nip": "",
+    "nip": "-",
     "nama": "Sugiyono",
     "unit": "Stasiun PSDKP Cilacap",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -6087,7 +7872,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0368",
-    "nip": "",
+    "nip": "-",
     "nama": "Jonly Jacob",
     "unit": "Stasiun PSDKP Kupang",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -6099,7 +7884,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0369",
-    "nip": "",
+    "nip": "-",
     "nama": "Samson",
     "unit": "Stasiun PSDKP Pontianak",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -6111,7 +7896,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0370",
-    "nip": "",
+    "nip": "-",
     "nama": "Fauji Nyinga Mura",
     "unit": "Stasiun PSDKP Pontianak",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -6123,7 +7908,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0371",
-    "nip": "",
+    "nip": "-",
     "nama": "Rachmat Muharyakinsyah",
     "unit": "Stasiun PSDKP Pontianak",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -6135,7 +7920,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0372",
-    "nip": "",
+    "nip": "-",
     "nama": "Nova Setiadi",
     "unit": "Stasiun PSDKP Pontianak",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -6147,7 +7932,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0373",
-    "nip": "",
+    "nip": "-",
     "nama": "Jently Martino Rembet",
     "unit": "Stasiun PSDKP Tahuna",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -6159,7 +7944,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0374",
-    "nip": "",
+    "nip": "-",
     "nama": "Donnycius Pudihang",
     "unit": "Stasiun PSDKP Tahuna",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -6171,7 +7956,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0375",
-    "nip": "",
+    "nip": "-",
     "nama": "Hasrun Paputungan",
     "unit": "Stasiun PSDKP Tarakan",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -6183,7 +7968,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0376",
-    "nip": "",
+    "nip": "-",
     "nama": "M. Nandy Hidayat",
     "unit": "Stasiun PSDKP Tarakan",
     "lingkup": "AWAK_KAPAL_ARMADA",
@@ -7191,7 +8976,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0460",
-    "nip": "",
+    "nip": "-",
     "nama": "Wine Sargian",
     "unit": "Dit. POA",
     "lingkup": "DIT_POA",
@@ -7203,7 +8988,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0461",
-    "nip": "",
+    "nip": "-",
     "nama": "Sasmito Sabdo",
     "unit": "Dit. POA",
     "lingkup": "DIT_POA",
@@ -7215,7 +9000,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0462",
-    "nip": "",
+    "nip": "-",
     "nama": "Nanang Supriyatna",
     "unit": "Dit. POA",
     "lingkup": "DIT_POA",
@@ -7227,7 +9012,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0463",
-    "nip": "",
+    "nip": "-",
     "nama": "Hamzah Abdulloh",
     "unit": "Dit. POA",
     "lingkup": "DIT_POA",
@@ -7239,7 +9024,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0464",
-    "nip": "",
+    "nip": "-",
     "nama": "Deden Maulana",
     "unit": "Dit. POA",
     "lingkup": "DIT_POA",
@@ -7263,7 +9048,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0466",
-    "nip": "",
+    "nip": "-",
     "nama": "Rivaldi Said",
     "unit": "Dit. POA",
     "lingkup": "DIT_POA",
@@ -7275,7 +9060,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0467",
-    "nip": "",
+    "nip": "-",
     "nama": "Petrus Joko Hartono",
     "unit": "Dit. POA",
     "lingkup": "DIT_POA",
@@ -7287,7 +9072,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0468",
-    "nip": "",
+    "nip": "-",
     "nama": "Al Anshory Wicaksono",
     "unit": "Dit. POA",
     "lingkup": "DIT_POA",
@@ -7299,7 +9084,7 @@ var SEED_PEGAWAI_POA_AWAK = [
   },
   {
     "pegawaiId": "PEG-0469",
-    "nip": "",
+    "nip": "-",
     "nama": "Oktavieni Ayuningrum",
     "unit": "Dit. POA",
     "lingkup": "DIT_POA",
@@ -7758,7 +9543,6 @@ function ensurePegawaiPelatihanSeeded(force) {
       sSheet.getRange(2, 1, sLast - 1, sSheet.getLastColumn()).clearContent();
     }
     var sRows = [];
-    var urut = 1;
     for (var grp in STANDAR_PELATIHAN_RESMI) {
       if (STANDAR_PELATIHAN_RESMI.hasOwnProperty(grp)) {
         var items = STANDAR_PELATIHAN_RESMI[grp];
@@ -7791,6 +9575,7 @@ function ensurePegawaiPelatihanSeeded(force) {
     var pRows = [];
     for (var p = 0; p < SEED_PEGAWAI_POA_AWAK.length; p++) {
       var peg = SEED_PEGAWAI_POA_AWAK[p];
+      var sPeg = peg.statusKepegawaian || ((peg.unit === 'Dit. POA' || peg.lingkup === 'DIT_POA') ? 'PNS' : (peg.nip && peg.nip !== '-' ? 'PNS' : 'NON_ASN'));
       pRows.push([
         peg.pegawaiId,
         peg.nip || '-',
@@ -7801,6 +9586,7 @@ function ensurePegawaiPelatihanSeeded(force) {
         peg.jabatanLengkap,
         peg.tingkatKelas,
         peg.rumpun,
+        sPeg,
         peg.statusAktif || 'AKTIF',
         nowStr,
         'SYSTEM_SEED'
