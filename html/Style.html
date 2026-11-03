@@ -562,7 +562,10 @@ a[role="button"]:active,
 
 .form-grp input,
 .form-grp select,
-.form-grp textarea {
+.form-grp textarea,
+.n-input,
+.n-select,
+.n-textarea {
   width: 100%;
   height: var(--ctl-h-lg);
   padding: 0 14px;
@@ -578,7 +581,9 @@ a[role="button"]:active,
   -webkit-appearance: none;
 }
 
-.form-grp textarea {
+.form-grp textarea,
+.n-textarea,
+textarea.n-input {
   height: auto;
   min-height: 80px;
   padding: 10px 14px;
@@ -586,13 +591,18 @@ a[role="button"]:active,
 
 .form-grp input:focus,
 .form-grp select:focus,
-.form-grp textarea:focus {
+.form-grp textarea:focus,
+.n-input:focus,
+.n-select:focus,
+.n-textarea:focus {
   border-color: var(--n-primary-accent);
   background: #FFFFFF;
   box-shadow: 0 0 0 3.5px var(--n-primary-tint);
 }
 
-.form-grp select {
+.form-grp select,
+.n-select,
+select.n-input {
   cursor: pointer;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23475569' stroke-width='2.2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
@@ -600,7 +610,8 @@ a[role="button"]:active,
   padding-right: 36px;
 }
 
-.form-grp input[readonly] {
+.form-grp input[readonly],
+.n-input[readonly] {
   background: var(--n-canvas-subtle);
   border-color: var(--n-border-hairline);
   color: var(--n-text-secondary);

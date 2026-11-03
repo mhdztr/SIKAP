@@ -456,13 +456,13 @@
       </div>
     </div>
 
-    <!-- ── MODAL ANULIR ANGGARAN ─────────────────────── -->
+    <!-- ── MODAL ANULIR ANGGARAN (STANDAR DESAIN) ─────────────────────── -->
     <div class="n-overlay n-hidden" id="modal-tu-anulir">
-      <div class="n-modal">
+      <div class="n-modal n-modal-form n-modal-md">
         <div class="modal-hd-bar">
           <div>
             <h2>Anulir Laporan Anggaran</h2>
-            <div class="modal-hd-sub" id="tu-anulir-info"></div>
+            <div class="modal-hd-sub" id="tu-anulir-info">Pembatalan entri laporan keuangan periode terpilih.</div>
           </div>
           <button type="button" class="btn-ghost" style="padding:4px;" onclick="tuCloseAnulirModal()" aria-label="Tutup">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -471,15 +471,41 @@
             </svg>
           </button>
         </div>
-        <div class="n-info-static" style="margin-bottom:14px;">
-          Komentar anulir akan terlihat oleh seluruh anggota divisi.
-          Staf dapat mengunggah laporan baru setelah memperbaiki data.
+
+        <div class="n-modal-form-scroll">
+          <div class="pagu-mode-banner is-revisi" style="margin-bottom:14px;">
+            <div class="pagu-mode-banner-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+              </svg>
+            </div>
+            <div>
+              <strong>Peringatan Pembatalan Entri</strong><br>
+              Komentar anulir akan terlihat oleh seluruh anggota divisi terkait dan dicatat permanen di Audit Log. Staf dapat mengunggah laporan baru setelah memperbaiki data.
+            </div>
+          </div>
+
+          <div id="tu-anulir-msg" class="n-msg"></div>
+
+          <div class="form-section-card">
+            <div class="form-section-hd">
+              <span class="form-section-title">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                </svg>
+                <span>Alasan / Komentar Anulir</span>
+              </span>
+              <span class="form-section-badge" style="background:rgba(225,29,72,0.1);color:var(--n-crit);">Wajib Diisi</span>
+            </div>
+            <div class="form-grp" style="margin-bottom:0;">
+              <label for="anulir-reason">Komentar Anulir <span style="color:var(--n-crit)">*</span></label>
+              <input type="text" id="anulir-reason" placeholder="Jelaskan apa yang perlu diperbaiki oleh staf penginput...">
+            </div>
+          </div>
         </div>
-        <div id="tu-anulir-msg" class="n-msg"></div>
-        <div class="form-grp">
-          <label for="anulir-reason">Komentar Anulir <span style="color:var(--n-crit)">*</span></label>
-          <input type="text" id="anulir-reason" placeholder="Jelaskan apa yang perlu diperbaiki staf">
-        </div>
+
         <div class="modal-foot-bar ctl-lg">
           <button type="button" class="btn-outline" onclick="tuCloseAnulirModal()">Batal</button>
           <button type="button" class="btn-danger-solid" id="btn-confirm-anulir" onclick="tuAnulirConfirm()">Konfirmasi Anulir</button>
@@ -613,7 +639,7 @@
       </div>
     </div>
 
-    <!-- ── MODAL INPUT PROGRES PAKET ─────────────────────── -->
+    <!-- ── MODAL INPUT PROGRES PAKET (STANDAR DESAIN) ─────────────────────── -->
     <div class="n-overlay n-hidden" id="modal-tu-paket-form">
       <div class="n-modal n-modal-form n-modal-lg">
         <div class="modal-hd-bar">
@@ -629,63 +655,109 @@
           </button>
         </div>
 
-        <div class="n-modal-scroll">
+        <div class="n-modal-form-scroll">
           <div id="tu-paket-form-msg" class="n-msg"></div>
 
           <form id="tu-paket-form" onsubmit="event.preventDefault(); _tuSubmitPaket();">
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 4px;">
-              <div class="form-grp" style="grid-column: span 2;">
+            <!-- Seksi 1: Identitas Paket & Satker Pelaksana -->
+            <div class="form-section-card">
+              <div class="form-section-hd">
+                <span class="form-section-title">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                  </svg>
+                  <span>Identitas Paket &amp; Unit Pelaksana</span>
+                </span>
+                <span class="form-section-badge">Tahap 1 - 6</span>
+              </div>
+              <div class="form-grp">
                 <label for="tu-pkt-nama">Nama Paket Pekerjaan <span style="color:var(--n-crit)">*</span></label>
                 <input type="text" id="tu-pkt-nama" placeholder="Contoh: Pengadaan Genset Pangkalan Benoa 2026" required>
               </div>
-              <div class="form-grp">
-                <label for="tu-pkt-tahap">Tahap Pekerjaan <span style="color:var(--n-crit)">*</span></label>
-                <select id="tu-pkt-tahap" required onchange="_tuOnPaketTahapChange()">
-                  <option value="PERSIAPAN">1. Persiapan</option>
-                  <option value="PEMILIHAN">2. Pemilihan</option>
-                  <option value="KONTRAK">3. Kontrak</option>
-                  <option value="PELAKSANAAN">4. Pelaksanaan</option>
-                  <option value="BAST">5. BAST</option>
-                  <option value="SELESAI">6. Selesai</option>
-                </select>
+              <div class="form-split-grid" style="margin-bottom:0;">
+                <div class="form-grp" style="margin-bottom:0;">
+                  <label for="tu-pkt-tahap">Tahap Pekerjaan <span style="color:var(--n-crit)">*</span></label>
+                  <select id="tu-pkt-tahap" required onchange="_tuOnPaketTahapChange()">
+                    <option value="PERSIAPAN">1. Persiapan</option>
+                    <option value="PEMILIHAN">2. Pemilihan</option>
+                    <option value="KONTRAK">3. Kontrak</option>
+                    <option value="PELAKSANAAN">4. Pelaksanaan</option>
+                    <option value="BAST">5. BAST</option>
+                    <option value="SELESAI">6. Selesai</option>
+                  </select>
+                </div>
+                <div class="form-grp" style="margin-bottom:0;">
+                  <label for="tu-pkt-divisi">Unit Kerja Pelaksana</label>
+                  <select id="tu-pkt-divisi">
+                    <option value="DIV-TU">Subbag Tata Usaha</option>
+                    <option value="DIV-OPS">Operasi Armada</option>
+                    <option value="DIV-RAWAT">Perawatan Armada</option>
+                    <option value="DIV-LOG">Logistik</option>
+                    <option value="DIV-PANTAU">Pemantauan</option>
+                    <option value="DIV-INTEL">Intelijen</option>
+                    <option value="DIV-AWAK">Pengawakan</option>
+                  </select>
+                </div>
               </div>
-              <div class="form-grp">
-                <label for="tu-pkt-divisi">Unit Kerja Pelaksana</label>
-                <select id="tu-pkt-divisi">
-                  <option value="DIV-TU">Subbag Tata Usaha</option>
-                  <option value="DIV-OPS">Operasi Armada</option>
-                  <option value="DIV-RAWAT">Perawatan Armada</option>
-                  <option value="DIV-LOG">Logistik</option>
-                  <option value="DIV-PANTAU">Pemantauan</option>
-                  <option value="DIV-INTEL">Intelijen</option>
-                  <option value="DIV-AWAK">Pengawakan</option>
-                </select>
+            </div>
+
+            <!-- Seksi 2: Informasi Kontrak & Nilai Finansial -->
+            <div class="form-section-card is-white">
+              <div class="form-section-hd">
+                <span class="form-section-title">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                    <polyline points="10 9 9 9 8 9"></polyline>
+                  </svg>
+                  <span>Dokumen Kontrak &amp; Rekanan Penyedia</span>
+                </span>
+                <span class="form-section-badge">Komitmen Vendor</span>
               </div>
-              <div class="form-grp">
-                <label for="tu-pkt-no-kontrak">Nomor Kontrak / SPK <span id="tu-pkt-kontrak-req" class="n-hidden" style="color:var(--n-crit)">*</span></label>
-                <input type="text" id="tu-pkt-no-kontrak" placeholder="Contoh: 042/SPK/POA/2026">
+              <div class="form-split-grid">
+                <div class="form-grp">
+                  <label for="tu-pkt-no-kontrak">Nomor Kontrak / SPK <span id="tu-pkt-kontrak-req" class="n-hidden" style="color:var(--n-crit)">*</span></label>
+                  <input type="text" id="tu-pkt-no-kontrak" placeholder="Contoh: 042/SPK/POA/2026">
+                </div>
+                <div class="form-grp">
+                  <label for="tu-pkt-rekanan">Rekanan Penyedia / Vendor <span id="tu-pkt-rekanan-req" class="n-hidden" style="color:var(--n-crit)">*</span></label>
+                  <input type="text" id="tu-pkt-rekanan" placeholder="Nama PT / CV Rekanan">
+                </div>
               </div>
-              <div class="form-grp">
-                <label for="tu-pkt-rekanan">Rekanan Penyedia / Vendor <span id="tu-pkt-rekanan-req" class="n-hidden" style="color:var(--n-crit)">*</span></label>
-                <input type="text" id="tu-pkt-rekanan" placeholder="Nama PT / CV Rekanan">
-              </div>
-              <div class="form-grp">
+              <div class="form-grp" style="margin-bottom:0;">
                 <label for="tu-pkt-nilai">Nilai Kontrak (Rp)</label>
                 <input type="number" id="tu-pkt-nilai" min="0" step="1" placeholder="0" class="tnum">
               </div>
-              <div class="form-grp">
-                <label for="tu-pkt-progres-fisik">Progres Fisik (%) <span style="color:var(--n-crit)">*</span></label>
-                <input type="number" id="tu-pkt-progres-fisik" min="0" max="100" step="0.1" placeholder="0" class="tnum" required>
+            </div>
+
+            <!-- Seksi 3: Realisasi Fisik, Keuangan & Dokumen Dukung -->
+            <div class="form-section-card">
+              <div class="form-section-hd">
+                <span class="form-section-title">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                  </svg>
+                  <span>Realisasi Lapangan &amp; Bukti Dukung</span>
+                </span>
+                <span class="form-section-badge">Progres &amp; Catatan</span>
               </div>
-              <div class="form-grp">
-                <label for="tu-pkt-realisasi-keu">Realisasi Keuangan (Rp)</label>
-                <input type="number" id="tu-pkt-realisasi-keu" min="0" step="1" placeholder="0" class="tnum">
+              <div class="form-split-grid">
+                <div class="form-grp">
+                  <label for="tu-pkt-progres-fisik">Progres Fisik (%) <span style="color:var(--n-crit)">*</span></label>
+                  <input type="number" id="tu-pkt-progres-fisik" min="0" max="100" step="0.1" placeholder="0" class="tnum" required>
+                </div>
+                <div class="form-grp">
+                  <label for="tu-pkt-realisasi-keu">Realisasi Keuangan (Rp)</label>
+                  <input type="number" id="tu-pkt-realisasi-keu" min="0" step="1" placeholder="0" class="tnum">
+                </div>
               </div>
               <div class="form-grp">
                 <label for="tu-pkt-evidence">Tautan Dokumen / Evidence (Drive URL)</label>
                 <input type="url" id="tu-pkt-evidence" placeholder="https://drive.google.com/file/d/...">
               </div>
-              <div class="form-grp" style="grid-column: span 2;">
+              <div class="form-grp" style="margin-bottom:0;">
                 <label for="tu-pkt-kendala">Kendala / Keterangan Pelaksanaan</label>
                 <textarea id="tu-pkt-kendala" rows="2" placeholder="Catatan kendala lapangan, deviasi progres, dsb..."></textarea>
               </div>
@@ -756,16 +828,16 @@
       </div>
     </div>
 
-    <!-- Modal Pembaruan Kepegawaian -->
+    <!-- Modal Pembaruan Kepegawaian (STANDAR DESAIN) -->
     <div class="n-overlay n-hidden" id="modal-tu-pegawai-form">
-      <div class="n-modal n-modal-form n-modal-md">
+      <div class="n-modal n-modal-form n-modal-lg">
         <div class="modal-hd-bar">
           <div>
             <div style="display:flex; align-items:center; gap:8px;">
               <h2>Pembaruan Jumlah Pegawai</h2>
               <span class="badge" style="background:var(--n-primary-light);color:var(--n-primary);font-size:.75rem;">Carry-Forward</span>
             </div>
-            <div class="modal-hd-sub">Snapshot komposisi headcount personil aktif terkini</div>
+            <div class="modal-hd-sub">Snapshot komposisi headcount personil aktif terkini Dit. POA</div>
           </div>
           <button type="button" class="btn-ghost" style="padding:4px;" onclick="closeModal('modal-tu-pegawai-form')" aria-label="Tutup">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -779,28 +851,57 @@
           <div id="tu-pegawai-form-msg" class="n-msg"></div>
 
           <form id="tu-pegawai-form" onsubmit="event.preventDefault(); _tuSubmitPegawai();">
-            <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 4px;">
-              <div class="form-grp">
-                <label for="tu-peg-pns">PNS (Orang)</label>
-                <input type="number" id="tu-peg-pns" min="0" step="1" placeholder="0" class="tnum" required>
+            <!-- Seksi 1: Distribusi Headcount 5 Kategori -->
+            <div class="form-section-card">
+              <div class="form-section-hd">
+                <span class="form-section-title">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="9" cy="7" r="4"></circle>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                  </svg>
+                  <span>Distribusi Headcount Pegawai Aktif</span>
+                </span>
+                <span class="form-section-badge">5 Kategori SDM</span>
               </div>
-              <div class="form-grp">
-                <label for="tu-peg-p3k">P3K Penuh Waktu</label>
-                <input type="number" id="tu-peg-p3k" min="0" step="1" placeholder="0" class="tnum" required>
+              <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap: 14px;">
+                <div class="form-grp" style="margin-bottom:0;">
+                  <label for="tu-peg-pns">PNS (Orang) <span style="color:var(--n-crit)">*</span></label>
+                  <input type="number" id="tu-peg-pns" min="0" step="1" placeholder="0" class="tnum" required>
+                </div>
+                <div class="form-grp" style="margin-bottom:0;">
+                  <label for="tu-peg-p3k">P3K Penuh Waktu <span style="color:var(--n-crit)">*</span></label>
+                  <input type="number" id="tu-peg-p3k" min="0" step="1" placeholder="0" class="tnum" required>
+                </div>
+                <div class="form-grp" style="margin-bottom:0;">
+                  <label for="tu-peg-p3k-pw">P3K Paruh Waktu <span style="color:var(--n-crit)">*</span></label>
+                  <input type="number" id="tu-peg-p3k-pw" min="0" step="1" placeholder="0" class="tnum" required>
+                </div>
+                <div class="form-grp" style="margin-bottom:0;">
+                  <label for="tu-peg-pjlp">PJLP / Kontrak <span style="color:var(--n-crit)">*</span></label>
+                  <input type="number" id="tu-peg-pjlp" min="0" step="1" placeholder="0" class="tnum" required>
+                </div>
+                <div class="form-grp" style="grid-column: span 2; margin-bottom:0;">
+                  <label for="tu-peg-magang">Magang / Siswa PKL <span style="color:var(--n-crit)">*</span></label>
+                  <input type="number" id="tu-peg-magang" min="0" step="1" placeholder="0" class="tnum" required>
+                </div>
               </div>
-              <div class="form-grp">
-                <label for="tu-peg-p3k-pw">P3K Paruh Waktu</label>
-                <input type="number" id="tu-peg-p3k-pw" min="0" step="1" placeholder="0" class="tnum" required>
+            </div>
+
+            <!-- Seksi 2: Keterangan / Catatan Mutasi -->
+            <div class="form-section-card is-white">
+              <div class="form-section-hd">
+                <span class="form-section-title">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                  </svg>
+                  <span>Keterangan Mutasi &amp; Administrasi</span>
+                </span>
+                <span class="form-section-badge">Dasar Catatan</span>
               </div>
-              <div class="form-grp">
-                <label for="tu-peg-pjlp">PJLP / Kontrak</label>
-                <input type="number" id="tu-peg-pjlp" min="0" step="1" placeholder="0" class="tnum" required>
-              </div>
-              <div class="form-grp" style="grid-column: span 2;">
-                <label for="tu-peg-magang">Magang / Siswa PKL</label>
-                <input type="number" id="tu-peg-magang" min="0" step="1" placeholder="0" class="tnum" required>
-              </div>
-              <div class="form-grp" style="grid-column: span 3; margin-bottom:4px;">
+              <div class="form-grp" style="margin-bottom:0;">
                 <label for="tu-peg-keterangan">Keterangan / Catatan Mutasi</label>
                 <input type="text" id="tu-peg-keterangan"
                   placeholder="Contoh: 2 PNS purna tugas TMT 1 Okt, 3 Magang baru dari IPB">
@@ -818,24 +919,59 @@
       </div>
     </div>
 
-    <!-- Modal Anulir Kepegawaian -->
+    <!-- Modal Anulir Kepegawaian (STANDAR DESAIN) -->
     <div class="n-overlay n-hidden" id="modal-tu-pegawai-anulir">
-      <div class="n-modal">
-        <h2>Anulir Catatan Mutasi Pegawai</h2>
-        <div id="tu-pegawai-anulir-info" style="margin-bottom:14px; font-size:.875rem; color:var(--n-text-secondary);">
+      <div class="n-modal n-modal-form n-modal-md">
+        <div class="modal-hd-bar">
+          <div>
+            <h2>Anulir Catatan Mutasi Pegawai</h2>
+            <div class="modal-hd-sub" id="tu-pegawai-anulir-info">Pembatalan entri mutasi personil terpilih.</div>
+          </div>
+          <button type="button" class="btn-ghost" style="padding:4px;" onclick="closeModal('modal-tu-pegawai-anulir')" aria-label="Tutup">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
         </div>
-        <div class="n-info-static" style="margin-bottom:14px;">
-          Entri kepegawaian yang dianulir tidak lagi dihitung dalam total aktif dan akan dicatat di log audit.
+
+        <div class="n-modal-form-scroll">
+          <div class="pagu-mode-banner is-revisi" style="margin-bottom:14px;">
+            <div class="pagu-mode-banner-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+              </svg>
+            </div>
+            <div>
+              <strong>Peringatan Anulir Entri Kepegawaian</strong><br>
+              Entri kepegawaian yang dianulir tidak lagi dihitung dalam total aktif dan akan dicatat permanen di Audit Log.
+            </div>
+          </div>
+
+          <div id="tu-pegawai-anulir-msg" class="n-msg"></div>
+
+          <div class="form-section-card">
+            <div class="form-section-hd">
+              <span class="form-section-title">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                </svg>
+                <span>Alasan / Komentar Anulir</span>
+              </span>
+              <span class="form-section-badge" style="background:rgba(225,29,72,0.1);color:var(--n-crit);">Wajib Diisi</span>
+            </div>
+            <div class="form-grp" style="margin-bottom:0;">
+              <label for="tu-peg-anulir-reason">Komentar / Alasan Anulir <span style="color:var(--n-crit)">*</span></label>
+              <input type="text" id="tu-peg-anulir-reason" placeholder="Jelaskan alasan pembatalan mutasi...">
+            </div>
+          </div>
         </div>
-        <div id="tu-pegawai-anulir-msg" class="n-msg"></div>
-        <div class="form-grp">
-          <label for="tu-peg-anulir-reason">Komentar / Alasan Anulir <span style="color:var(--n-crit)">*</span></label>
-          <input type="text" id="tu-peg-anulir-reason" placeholder="Jelaskan alasan pembatalan mutasi...">
-        </div>
-        <div class="ctl-stack" style="margin-top:16px;">
-          <button class="btn-danger-solid" id="btn-confirm-peg-anulir" onclick="_tuConfirmAnulirPegawai()">Konfirmasi
-            Anulir</button>
-          <button class="btn-ghost" onclick="closeModal('modal-tu-pegawai-anulir')">Batal</button>
+
+        <div class="modal-foot-bar ctl-lg">
+          <button type="button" class="btn-outline" onclick="closeModal('modal-tu-pegawai-anulir')">Batal</button>
+          <button type="button" class="btn-danger-solid" id="btn-confirm-peg-anulir" onclick="_tuConfirmAnulirPegawai()">Konfirmasi Anulir</button>
         </div>
       </div>
     </div>
@@ -1138,17 +1274,17 @@
   <!-- MODAL DIALOGS BMN & USULAN PENGHAPUSAN (POPUP OVERLAYS)  -->
   <!-- ======================================================== -->
 
-  <!-- MODAL FORM REGISTRASI / EDIT UNIT ASET BMN (POPUP DIALOG) -->
+  <!-- MODAL FORM REGISTRASI / EDIT UNIT ASET BMN (STANDAR DESAIN) -->
   <div class="n-overlay n-hidden" id="modal-bmn-form">
-    <div class="n-modal n-modal-form" style="max-width: 900px; max-height: 90vh; overflow-y: auto;">
-      <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:16px;">
+    <div class="n-modal n-modal-form n-modal-xl">
+      <div class="modal-hd-bar">
         <div>
-          <h2 id="bmn-form-title" style="margin:0 0 4px 0; font-size:1.25rem; font-weight:700;">Tambah Unit Aset BMN</h2>
-          <div style="font-size:0.8125rem; color:var(--n-text-muted);">
+          <h2 id="bmn-form-title">Tambah Unit Aset BMN</h2>
+          <div class="modal-hd-sub">
             Pendaftaran aset individual per-unit fisik (Prinsip BMN Anti-Jebret).
           </div>
         </div>
-        <button type="button" class="btn-ghost" onclick="closeModal('modal-bmn-form')">
+        <button type="button" class="btn-ghost" style="padding:4px;" onclick="closeModal('modal-bmn-form')" aria-label="Tutup">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <line x1="18" y1="6" x2="6" y2="18"></line>
             <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -1156,104 +1292,146 @@
         </button>
       </div>
 
-      <div id="bmn-form-msg" class="n-msg"></div>
+      <div class="n-modal-form-scroll">
+        <div id="bmn-form-msg" class="n-msg"></div>
 
-      <form id="bmn-asset-form" onsubmit="event.preventDefault(); _bmnSubmitForm();">
-        <input type="hidden" id="bmn-form-aset-id" value="">
+        <form id="bmn-asset-form" onsubmit="event.preventDefault(); _bmnSubmitForm();">
+          <input type="hidden" id="bmn-form-aset-id" value="">
 
-        <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:16px;">
-          <!-- Kolom 1: Identifikasi Barang -->
-          <div class="form-grp">
-            <label for="bmn-form-kode">Kode Barang <span style="color:var(--n-crit)">*</span></label>
-            <input type="text" id="bmn-form-kode" placeholder="Mis. 3050104001" required>
-          </div>
-          <div class="form-grp">
-            <label for="bmn-form-nup">NUP (No. Urut Pendaftaran) <span style="color:var(--n-crit)">*</span></label>
-            <input type="text" id="bmn-form-nup" placeholder="Mis. 1, 2, dst." required>
-          </div>
-          <div class="form-grp">
-            <label for="bmn-form-pencatatan">Klasifikasi Akuntansi <span style="color:var(--n-crit)">*</span></label>
-            <select id="bmn-form-pencatatan" required>
-              <option value="BUKU">BMN Buku (Intrakomptabel / Belanja Modal 53)</option>
-              <option value="REGULER">BMN Reguler (Ekstrakomptabel / Belanja Barang 52)</option>
-            </select>
-          </div>
-
-          <!-- Baris 2: Nama & Kategori -->
-          <div class="form-grp" style="grid-column: span 2;">
-            <label for="bmn-form-nama">Nama Barang <span style="color:var(--n-crit)">*</span></label>
-            <input type="text" id="bmn-form-nama" placeholder="Mis. Laptop HP EliteBook, Speedboat 12m, Drone DJI Matrice" required>
-          </div>
-          <div class="form-grp">
-            <label for="bmn-form-kategori">Kategori SIMAK / SAKTI <span style="color:var(--n-crit)">*</span></label>
-            <select id="bmn-form-kategori" required>
-              <!-- Populated from Master_BMN_Kategori -->
-            </select>
-          </div>
-
-          <!-- Baris 3: Merek & Tanggal -->
-          <div class="form-grp">
-            <label for="bmn-form-merek">Merek / Tipe / Spesifikasi</label>
-            <input type="text" id="bmn-form-merek" placeholder="Mis. Core i7 16GB, Yamaha 200HP">
-          </div>
-          <div class="form-grp">
-            <label for="bmn-form-tgl">Tanggal Perolehan</label>
-            <input type="date" id="bmn-form-tgl" required>
-          </div>
-          <div class="form-grp">
-            <label for="bmn-form-kondisi">Kondisi Fisik Terkini <span style="color:var(--n-crit)">*</span></label>
-            <select id="bmn-form-kondisi" required>
-              <option value="BAIK">Baik</option>
-              <option value="RUSAK_RINGAN">Rusak Ringan</option>
-              <option value="RUSAK_BERAT">Rusak Berat</option>
-            </select>
-          </div>
-
-          <!-- Baris 4: Valuasi Rupiah -->
-          <div class="form-grp">
-            <label for="bmn-form-np">Nilai Perolehan / Beli Kotor (Rp)</label>
-            <input type="number" id="bmn-form-np" min="0" step="1" placeholder="0" class="tnum" required>
-          </div>
-          <div class="form-grp">
-            <label for="bmn-form-nb">Nilai Buku Terkini SAKTI (Rp)</label>
-            <input type="number" id="bmn-form-nb" min="0" step="1" placeholder="0" class="tnum" required>
-          </div>
-          <div class="form-grp">
-            <label for="bmn-form-upt">Lokasi Penempatan UPT / Satker <span style="color:var(--n-crit)">*</span></label>
-            <select id="bmn-form-upt" required>
-              <!-- Populated from Master_Lokasi_UPT -->
-            </select>
-          </div>
-
-          <!-- Baris 5: Lokasi Fisik & Geotagging -->
-          <div class="form-grp" style="grid-column: span 2;">
-            <label for="bmn-form-ruangan">Detail Ruangan / Posisi Fisik</label>
-            <input type="text" id="bmn-form-ruangan" placeholder="Mis. Ruang Rapat Pangkalan Batam, Anjungan KP Hiu 01, Gudang Amunisi">
-          </div>
-          <div class="form-grp">
-            <label for="bmn-form-kapal">Inventaris Melekat Kapal (Opsional)</label>
-            <select id="bmn-form-kapal">
-              <option value="">Bukan Inventaris Kapal</option>
-              <!-- Populated from Master Kapal -->
-            </select>
-          </div>
-
-          <!-- SEKSI FOTO FISIK & GEOTAGGING OTOMATIS (SUB-FASE 18B.4) -->
-          <div class="form-grp" style="grid-column: span 3; background: var(--n-surface-2); border: 1px solid var(--n-border); border-radius: var(--n-radius-md); padding: 18px 20px; margin-top: 4px;">
-            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 14px; gap: 12px; flex-wrap: wrap;">
-              <div>
-                <label style="font-weight: 700; font-size: .875rem; color: var(--n-text-primary); margin-bottom: 2px;">
-                  Foto Fisik &amp; Geotagging Otomatis
-                </label>
-                <div style="font-size: .75rem; color: var(--n-text-secondary);">
-                  Opsi 1: Ekstraksi GPS otomatis dari metadata EXIF foto mentah. Opsi 2: Fallback geolokasi perangkat / homebase satker terdekat.
-                </div>
+          <!-- Seksi 1: Identifikasi Barang & Klasifikasi Akuntansi -->
+          <div class="form-section-card">
+            <div class="form-section-hd">
+              <span class="form-section-title">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                  <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                  <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                </svg>
+                <span>Identifikasi Barang &amp; Klasifikasi Akuntansi</span>
+              </span>
+              <span class="form-section-badge">Per-Unit Fisik</span>
+            </div>
+            <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:14px;">
+              <div class="form-grp">
+                <label for="bmn-form-kode">Kode Barang <span style="color:var(--n-crit)">*</span></label>
+                <input type="text" id="bmn-form-kode" placeholder="Mis. 3050104001" required>
               </div>
+              <div class="form-grp">
+                <label for="bmn-form-nup">NUP (No. Urut Pendaftaran) <span style="color:var(--n-crit)">*</span></label>
+                <input type="text" id="bmn-form-nup" placeholder="Mis. 1, 2, dst." required>
+              </div>
+              <div class="form-grp">
+                <label for="bmn-form-pencatatan">Klasifikasi Akuntansi <span style="color:var(--n-crit)">*</span></label>
+                <select id="bmn-form-pencatatan" required>
+                  <option value="BUKU">BMN Buku (Intrakomptabel / Belanja Modal 53)</option>
+                  <option value="REGULER">BMN Reguler (Ekstrakomptabel / Belanja Barang 52)</option>
+                </select>
+              </div>
+              <div class="form-grp" style="grid-column: span 2; margin-bottom:0;">
+                <label for="bmn-form-nama">Nama Barang <span style="color:var(--n-crit)">*</span></label>
+                <input type="text" id="bmn-form-nama" placeholder="Mis. Laptop HP EliteBook, Speedboat 12m, Drone DJI Matrice" required>
+              </div>
+              <div class="form-grp" style="margin-bottom:0;">
+                <label for="bmn-form-kategori">Kategori SIMAK / SAKTI <span style="color:var(--n-crit)">*</span></label>
+                <select id="bmn-form-kategori" required>
+                  <!-- Populated from Master_BMN_Kategori -->
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Seksi 2: Spesifikasi Teknis & Lokasi Penempatan -->
+          <div class="form-section-card">
+            <div class="form-section-hd">
+              <span class="form-section-title">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon>
+                </svg>
+                <span>Spesifikasi Teknis &amp; Lokasi Penempatan</span>
+              </span>
+              <span class="form-section-badge">Satker &amp; Ruangan</span>
+            </div>
+            <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:14px;">
+              <div class="form-grp">
+                <label for="bmn-form-merek">Merek / Tipe / Spesifikasi</label>
+                <input type="text" id="bmn-form-merek" placeholder="Mis. Core i7 16GB, Yamaha 200HP">
+              </div>
+              <div class="form-grp">
+                <label for="bmn-form-tgl">Tanggal Perolehan <span style="color:var(--n-crit)">*</span></label>
+                <input type="date" id="bmn-form-tgl" required>
+              </div>
+              <div class="form-grp">
+                <label for="bmn-form-kondisi">Kondisi Fisik Terkini <span style="color:var(--n-crit)">*</span></label>
+                <select id="bmn-form-kondisi" required>
+                  <option value="BAIK">Baik</option>
+                  <option value="RUSAK_RINGAN">Rusak Ringan</option>
+                  <option value="RUSAK_BERAT">Rusak Berat</option>
+                </select>
+              </div>
+              <div class="form-grp">
+                <label for="bmn-form-upt">Lokasi Penempatan UPT / Satker <span style="color:var(--n-crit)">*</span></label>
+                <select id="bmn-form-upt" required>
+                  <!-- Populated from Master_Lokasi_UPT -->
+                </select>
+              </div>
+              <div class="form-grp" style="grid-column: span 2;">
+                <label for="bmn-form-ruangan">Detail Ruangan / Posisi Fisik</label>
+                <input type="text" id="bmn-form-ruangan" placeholder="Mis. Ruang Rapat Pangkalan Batam, Anjungan KP Hiu 01, Gudang Amunisi">
+              </div>
+              <div class="form-grp" style="margin-bottom:0;">
+                <label for="bmn-form-kapal">Inventaris Melekat Kapal (Opsional)</label>
+                <select id="bmn-form-kapal">
+                  <option value="">Bukan Inventaris Kapal</option>
+                  <!-- Populated from Master Kapal -->
+                </select>
+              </div>
+              <div class="form-grp" style="grid-column: span 2; margin-bottom:0;">
+                <label for="bmn-form-ket">Keterangan / Catatan Inventaris</label>
+                <input type="text" id="bmn-form-ket" placeholder="Mis. Bantuan hibah JICA 2024, No. Seri S/N: 893128913">
+              </div>
+            </div>
+          </div>
+
+          <!-- Seksi 3: Valuasi Akrual Keuangan SAKTI -->
+          <div class="form-section-card is-white">
+            <div class="form-section-hd">
+              <span class="form-section-title">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="12" y1="1" x2="12" y2="23"></line>
+                  <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                </svg>
+                <span>Valuasi Finansial Terkini SAKTI</span>
+              </span>
+              <span class="form-section-badge">Akrual BMN</span>
+            </div>
+            <div class="form-split-grid" style="margin-bottom:0;">
+              <div class="form-grp" style="margin-bottom:0;">
+                <label for="bmn-form-np">Nilai Perolehan / Beli Kotor (Rp) <span style="color:var(--n-crit)">*</span></label>
+                <input type="number" id="bmn-form-np" min="0" step="1" placeholder="0" class="tnum" required>
+              </div>
+              <div class="form-grp" style="margin-bottom:0;">
+                <label for="bmn-form-nb">Nilai Buku Terkini SAKTI (Rp) <span style="color:var(--n-crit)">*</span></label>
+                <input type="number" id="bmn-form-nb" min="0" step="1" placeholder="0" class="tnum" required>
+              </div>
+            </div>
+          </div>
+
+          <!-- Seksi 4: Dokumentasi Foto Fisik & Geotagging Otomatis -->
+          <div class="form-section-card">
+            <div class="form-section-hd">
+              <span class="form-section-title">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                  <circle cx="12" cy="13" r="4"></circle>
+                </svg>
+                <span>Foto Fisik &amp; Geotagging Otomatis</span>
+              </span>
               <div class="ctl-row">
-                <button type="button" id="bmn-btn-device-gps" class="btn-outline" onclick="_bmnTriggerDeviceGeolocation(false)">
+                <button type="button" id="bmn-btn-device-gps" class="btn-outline ctl-sm" onclick="_bmnTriggerDeviceGeolocation(false)">
                   Ambil GPS Perangkat
                 </button>
-                <button type="button" id="bmn-btn-reset-gps" class="btn-outline" onclick="_bmnResetGeotag()" style="display:none;">
+                <button type="button" id="bmn-btn-reset-gps" class="btn-outline ctl-sm" onclick="_bmnResetGeotag()" style="display:none;">
                   Reset Koordinat
                 </button>
               </div>
@@ -1300,7 +1478,7 @@
 
               <!-- Sub-kolom kanan: Telemetri Koordinat & Status Haversine Match -->
               <div>
-                <div id="bmn-geotag-status-card" style="background:var(--n-surface-1); border:1px solid var(--n-border); border-radius:var(--n-radius-sm); padding:14px 16px; min-height:130px; display:flex; flex-direction:column; justify-content:center;">
+                <div id="bmn-geotag-status-card" style="background:#FFFFFF; border:1px solid var(--n-border); border-radius:var(--n-radius-sm); padding:14px 16px; min-height:130px; display:flex; flex-direction:column; justify-content:center;">
                   <div id="bmn-geotag-empty-state" style="text-align:center; color:var(--n-text-muted); font-size:.8125rem;">
                     <div style="font-weight:600; color:var(--n-text-primary);">Belum ada koordinat lokasi</div>
                     <div style="font-size:.75rem; margin-top:4px; color:var(--n-text-secondary);">Unggah foto ber-GPS (atau kamera ber-watermark lokasi) atau klik "Ambil GPS Perangkat" untuk mencocokkan UPT terdekat secara otomatis via Haversine.</div>
@@ -1329,63 +1507,99 @@
             </div>
           </div>
 
-          <!-- Baris 6: Keterangan -->
-          <div class="form-grp" style="grid-column: span 3;">
-            <label for="bmn-form-ket">Keterangan / Catatan Inventaris</label>
-            <input type="text" id="bmn-form-ket" placeholder="Mis. Bantuan hibah JICA 2024, No. Seri S/N: 893128913">
+          <div class="modal-foot-bar ctl-lg">
+            <button type="button" class="btn-outline" onclick="closeModal('modal-bmn-form')">Batal</button>
+            <button type="submit" class="btn-primary" id="bmn-btn-save">
+              Simpan Data Aset
+            </button>
           </div>
-        </div>
-
-        <div class="ctl-row ctl-lg" style="justify-content:flex-end; margin-top:24px; padding-top:16px; border-top:1px solid var(--n-border); gap:12px;">
-          <button type="button" class="btn-ghost" onclick="closeModal('modal-bmn-form')">Batal</button>
-          <button type="submit" class="btn-primary" id="bmn-btn-save">
-            Simpan Data Aset
-          </button>
-        </div>
-      </form>
+        </form>
+      </div>
     </div>
   </div>
 
-  <!-- MODAL ANULIR BMN -->
+  <!-- MODAL ANULIR BMN (STANDAR DESAIN) -->
   <div class="n-overlay n-hidden" id="modal-bmn-anulir">
-      <div class="n-modal">
-        <h2>Anulir Entri Aset BMN</h2>
-        <div id="bmn-anulir-info" style="margin-bottom:14px; font-size:.875rem; color:var(--n-text-secondary);"></div>
-        <div class="n-info-static" style="margin-bottom:14px;">
-          Entri yang dianulir tidak lagi dihitung dalam total nilai maupun fisik BMN dan dicatat permanen di Audit Log.
+    <div class="n-modal n-modal-form n-modal-md">
+      <div class="modal-hd-bar">
+        <div>
+          <h2>Anulir Entri Aset BMN</h2>
+          <div class="modal-hd-sub" id="bmn-anulir-info">Pembatalan entri aset individual dari register inventaris.</div>
         </div>
+        <button type="button" class="btn-ghost" style="padding:4px;" onclick="closeModal('modal-bmn-anulir')" aria-label="Tutup">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <div class="n-modal-form-scroll">
+        <div class="pagu-mode-banner is-revisi" style="margin-bottom:14px;">
+          <div class="pagu-mode-banner-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="8" x2="12" y2="12"></line>
+              <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+          </div>
+          <div>
+            <strong>Peringatan Anulir Aset BMN</strong><br>
+            Entri yang dianulir tidak lagi dihitung dalam total nilai maupun fisik BMN dan dicatat permanen di Audit Log.
+          </div>
+        </div>
+
         <div id="bmn-anulir-msg" class="n-msg"></div>
-        <div class="form-grp">
-          <label for="bmn-anulir-reason">Alasan / Komentar Anulir <span style="color:var(--n-crit)">*</span></label>
-          <input type="text" id="bmn-anulir-reason" placeholder="Jelaskan alasan pembatalan aset...">
-        </div>
-        <div class="ctl-stack" style="margin-top:16px;">
-          <button class="btn-danger-solid" id="btn-confirm-bmn-anulir" onclick="_bmnConfirmAnulir()">Konfirmasi
-            Anulir</button>
-          <button class="btn-ghost" onclick="closeModal('modal-bmn-anulir')">Batal</button>
+
+        <div class="form-section-card">
+          <div class="form-section-hd">
+            <span class="form-section-title">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+              </svg>
+              <span>Alasan Pembatalan Aset</span>
+            </span>
+            <span class="form-section-badge" style="background:rgba(225,29,72,0.1);color:var(--n-crit);">Wajib Diisi</span>
+          </div>
+          <div class="form-grp" style="margin-bottom:0;">
+            <label for="bmn-anulir-reason">Alasan / Komentar Anulir <span style="color:var(--n-crit)">*</span></label>
+            <input type="text" id="bmn-anulir-reason" placeholder="Jelaskan alasan pembatalan aset...">
+          </div>
         </div>
       </div>
-    </div>
 
-    <!-- MODAL SMART BULK IMPORT BMN (SAKTI / SIMAK) -->
+      <div class="modal-foot-bar ctl-lg">
+        <button type="button" class="btn-outline" onclick="closeModal('modal-bmn-anulir')">Batal</button>
+        <button type="button" class="btn-danger-solid" id="btn-confirm-bmn-anulir" onclick="_bmnConfirmAnulir()">Konfirmasi Anulir</button>
+      </div>
+    </div>
+  </div>
+
+    <!-- MODAL SMART BULK IMPORT BMN (STANDAR DESAIN) -->
     <div class="n-overlay n-hidden" id="modal-bmn-import">
-      <div class="n-modal n-modal-form" style="max-width: 780px;">
-        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:14px;">
+      <div class="n-modal n-modal-form n-modal-lg">
+        <div class="modal-hd-bar">
           <div>
-            <h2 style="margin:0 0 4px 0;">Impor Massal Aset BMN (SAKTI / SIMAK)</h2>
-            <div style="font-size:0.8125rem; color:var(--n-text-muted);">
-              Unggah berkas Excel / CSV atau salin-tempel langsung dari aplikasi SAKTI.
-            </div>
+            <h2>Impor Massal Aset BMN (SAKTI / SIMAK)</h2>
+            <div class="modal-hd-sub">Unggah berkas Excel / CSV atau salin-tempel langsung dari aplikasi SAKTI.</div>
           </div>
-          <button type="button" class="btn-outline" onclick="_bmnDownloadTemplate()">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-              stroke-linecap="round" stroke-linejoin="round">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-              <polyline points="7 10 12 15 17 10"></polyline>
-              <line x1="12" y1="15" x2="12" y2="3"></line>
-            </svg>
-            Unduh Template
-          </button>
+          <div class="ctl-row">
+            <button type="button" class="btn-outline ctl-sm" onclick="_bmnDownloadTemplate()">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+              </svg>
+              Unduh Template
+            </button>
+            <button type="button" class="btn-ghost" style="padding:4px;" onclick="closeModal('modal-bmn-import')" aria-label="Tutup">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+          </div>
         </div>
 
         <div class="n-modal-form-scroll">
@@ -1528,9 +1742,8 @@
 
         </div>
 
-        <div class="ctl-row ctl-lg"
-          style="justify-content:flex-end; margin-top:20px; padding-top:14px; border-top:1px solid var(--n-border);">
-          <button type="button" class="btn-ghost" onclick="closeModal('modal-bmn-import')">Tutup</button>
+        <div class="modal-foot-bar ctl-lg">
+          <button type="button" class="btn-outline" onclick="closeModal('modal-bmn-import')">Tutup</button>
           <button type="button" class="btn-primary" id="bmn-btn-commit-import" onclick="_bmnExecuteImportCommit()"
             disabled>
             Simpan Aset ke Database
@@ -1539,265 +1752,341 @@
       </div>
     </div>
 
-    <!-- MODAL BUAT USULAN PENGHAPUSAN BMN -->
+    <!-- MODAL BUAT USULAN PENGHAPUSAN BMN (STANDAR DESAIN) -->
     <div class="n-overlay n-hidden" id="modal-bmn-create-hapus">
-      <div class="n-modal n-modal-form" style="max-width: 880px;">
-        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:14px;">
+      <div class="n-modal n-modal-form n-modal-xl">
+        <div class="modal-hd-bar">
           <div>
-            <h2 style="margin:0 0 4px 0;">Buat Usulan Penghapusan BMN</h2>
-            <div style="font-size:0.8125rem; color:var(--n-text-muted);">
+            <h2>Buat Usulan Penghapusan BMN</h2>
+            <div class="modal-hd-sub">
               Daftarkan berkas usulan penghapusan aset BMN untuk proses verifikasi dan persetujuan DJKN/KPKNL.
             </div>
           </div>
-          <button type="button" class="btn-ghost" onclick="closeModal('modal-bmn-create-hapus')">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          <button type="button" class="btn-ghost" style="padding:4px;" onclick="closeModal('modal-bmn-create-hapus')" aria-label="Tutup">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
           </button>
         </div>
 
-        <div id="bmn-create-hps-msg" class="n-msg"></div>
+        <div class="n-modal-form-scroll">
+          <div id="bmn-create-hps-msg" class="n-msg"></div>
 
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px; margin-bottom:16px;">
-          <div class="form-grp">
-            <label for="bmn-hps-alasan">Alasan Penghapusan <span style="color:var(--n-crit)">*</span></label>
-            <select id="bmn-hps-alasan" class="n-select" style="width:100%;">
-              <option value="RUSAK_BERAT">Rusak Berat (Tidak Ekonomis Diperbaiki)</option>
-              <option value="KADALUWARSA">Kadaluwarsa / Melewati Masa Manfaat</option>
-              <option value="HILANG">Hilang / Susut Karena Sebab Kahar</option>
-              <option value="SEBAB_LAIN">Sebab Lain (Dihibahkan / Tukar Menukar)</option>
-            </select>
+          <!-- Seksi 1: Administrasi & Dokumen Surat Usulan -->
+          <div class="form-section-card">
+            <div class="form-section-hd">
+              <span class="form-section-title">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                  <polyline points="14 2 14 8 20 8"></polyline>
+                  <line x1="16" y1="13" x2="8" y2="13"></line>
+                  <line x1="16" y1="17" x2="8" y2="17"></line>
+                </svg>
+                <span>Administrasi Dokumen Usulan Penghapusan</span>
+              </span>
+              <span class="form-section-badge">DJKN / KPKNL</span>
+            </div>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:14px;">
+              <div class="form-grp">
+                <label for="bmn-hps-alasan">Alasan Penghapusan <span style="color:var(--n-crit)">*</span></label>
+                <select id="bmn-hps-alasan" class="n-select" style="width:100%;">
+                  <option value="RUSAK_BERAT">Rusak Berat (Tidak Ekonomis Diperbaiki)</option>
+                  <option value="KADALUWARSA">Kadaluwarsa / Melewati Masa Manfaat</option>
+                  <option value="HILANG">Hilang / Susut Karena Sebab Kahar</option>
+                  <option value="SEBAB_LAIN">Sebab Lain (Dihibahkan / Tukar Menukar)</option>
+                </select>
+              </div>
+              <div class="form-grp">
+                <label for="bmn-hps-no-surat">Nomor Surat Usulan Internal</label>
+                <input type="text" id="bmn-hps-no-surat" class="n-input" placeholder="Contoh: B.123/TU/BMN/X/2026">
+              </div>
+              <div class="form-grp">
+                <label for="bmn-hps-tgl-surat">Tanggal Surat Usulan</label>
+                <input type="date" id="bmn-hps-tgl-surat" class="n-input">
+              </div>
+              <div class="form-grp">
+                <label for="bmn-hps-link-surat">Link Berkas / Surat Usulan (Drive / PDF)</label>
+                <input type="text" id="bmn-hps-link-surat" class="n-input" placeholder="https://drive.google.com/...">
+              </div>
+              <div class="form-grp" style="grid-column: span 2; margin-bottom:0;">
+                <label for="bmn-hps-keterangan">Keterangan / Pertimbangan Usulan <span style="color:var(--n-crit)">*</span></label>
+                <textarea id="bmn-hps-keterangan" class="n-input" rows="2" placeholder="Uraikan kondisi aset dan pertimbangan hukum/teknis pengusulan..."></textarea>
+              </div>
+            </div>
           </div>
-          <div class="form-grp">
-            <label for="bmn-hps-no-surat">Nomor Surat Usulan Internal</label>
-            <input type="text" id="bmn-hps-no-surat" class="n-input" placeholder="Contoh: B.123/TU/BMN/X/2026">
-          </div>
-          <div class="form-grp">
-            <label for="bmn-hps-tgl-surat">Tanggal Surat Usulan</label>
-            <input type="date" id="bmn-hps-tgl-surat" class="n-input">
-          </div>
-          <div class="form-grp">
-            <label for="bmn-hps-link-surat">Link Berkas / Surat Usulan (Drive / PDF)</label>
-            <input type="text" id="bmn-hps-link-surat" class="n-input" placeholder="https://drive.google.com/...">
+
+          <!-- Seksi 2: Pemilihan Aset Eligible (Karantina) -->
+          <div class="form-section-card is-white">
+            <div class="form-section-hd">
+              <span class="form-section-title">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M9 11l3 3L22 4"></path>
+                  <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                </svg>
+                <span>Pilih Unit Aset yang Diusulkan</span>
+              </span>
+              <span class="form-section-badge"><span id="bmn-hps-sel-count">0</span> unit dipilih</span>
+            </div>
+
+            <div style="font-size:0.75rem; color:var(--n-text-muted); margin-bottom:12px;">
+              Hanya aset berstatus AKTIF (diprioritaskan kondisi Rusak Berat). Aset yang dipilih akan otomatis masuk status karantina (PENDING_HAPUS).
+            </div>
+
+            <div class="ctl-row ctl-sm" style="margin-bottom:12px; gap:8px;">
+              <div class="ctl-search" style="flex:1;">
+                <svg class="ctl-search-ico" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                <input type="text" id="bmn-hps-eligible-search" class="n-input" placeholder="Cari kode, NUP, nama barang..." oninput="_bmnFilterEligibleAsets()">
+              </div>
+              <button type="button" class="btn-outline ctl-sm" onclick="_bmnSelectAllEligible(true)">Pilih Semua</button>
+              <button type="button" class="btn-outline ctl-sm" onclick="_bmnSelectAllEligible(false)">Batalkan Semua</button>
+            </div>
+
+            <div style="max-height:220px; overflow-y:auto; border:1px solid var(--n-border); border-radius:var(--n-radius-sm);">
+              <table class="n-table" style="font-size:0.75rem;">
+                <thead>
+                  <tr>
+                    <th style="width:36px; text-align:center;">
+                      <input type="checkbox" id="bmn-hps-th-toggle" onchange="_bmnToggleAllEligibleCheckboxes(this)">
+                    </th>
+                    <th>Kode &amp; NUP</th>
+                    <th>Nama Barang</th>
+                    <th>Kondisi</th>
+                    <th>UPT Penanggung Jawab</th>
+                    <th style="text-align:right;">Nilai Buku</th>
+                  </tr>
+                </thead>
+                <tbody id="bmn-hps-eligible-tbody">
+                  <tr>
+                    <td colspan="6" style="text-align:center; padding:16px; color:var(--n-text-muted);">
+                      Memuat daftar aset eligible...
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="n-card-subtle" style="display:flex; justify-content:space-between; align-items:center; padding:10px 14px; margin-top:10px; border-radius:10px;">
+              <div style="font-size:0.75rem; color:var(--n-text-secondary); font-weight:600;">
+                Akumulasi Nilai Aset Terpilih:
+              </div>
+              <div style="font-size:0.8125rem; font-weight:700; display:flex; gap:18px;">
+                <span>Perolehan: <span id="bmn-hps-sel-perolehan" class="tnum font-bold">Rp 0</span></span>
+                <span>Nilai Buku: <span id="bmn-hps-sel-buku" class="tnum font-bold" style="color:var(--n-primary);">Rp 0</span></span>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div class="form-grp" style="margin-bottom:16px;">
-          <label for="bmn-hps-keterangan">Keterangan / Pertimbangan Usulan <span style="color:var(--n-crit)">*</span></label>
-          <textarea id="bmn-hps-keterangan" class="n-input" rows="2" placeholder="Uraikan kondisi aset dan pertimbangan hukum/teknis pengusulan..."></textarea>
-        </div>
-
-        <!-- Section Pemilihan Aset Eligible -->
-        <div style="border:1px solid var(--n-border); border-radius:var(--n-radius); padding:12px; background:var(--n-surface);">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-            <div>
-              <div style="font-size:0.875rem; font-weight:600; color:var(--n-text-primary);">Pilih Aset yang Diusulkan</div>
-              <div style="font-size:0.75rem; color:var(--n-text-muted);">Hanya aset berstatus AKTIF (diprioritaskan Rusak Berat). Aset yang dipilih akan dikarantina.</div>
-            </div>
-            <div style="font-size:0.8125rem; font-weight:600; color:var(--n-primary);">
-              <span id="bmn-hps-sel-count">0</span> unit dipilih
-            </div>
-          </div>
-
-          <div class="ctl-row ctl-sm" style="margin-bottom:10px;">
-            <input type="text" id="bmn-hps-eligible-search" class="n-input" placeholder="Cari kode, NUP, nama barang..." oninput="_bmnFilterEligibleAsets()" style="flex:1;">
-            <button type="button" class="btn-ghost" onclick="_bmnSelectAllEligible(true)">Pilih Semua</button>
-            <button type="button" class="btn-ghost" onclick="_bmnSelectAllEligible(false)">Batalkan Semua</button>
-          </div>
-
-          <div style="max-height:220px; overflow-y:auto; border:1px solid var(--n-border); border-radius:var(--n-radius-sm);">
-            <table class="n-table" style="font-size:0.75rem;">
-              <thead>
-                <tr>
-                  <th style="width:36px; text-align:center;">
-                    <input type="checkbox" id="bmn-hps-th-toggle" onchange="_bmnToggleAllEligibleCheckboxes(this)">
-                  </th>
-                  <th>Kode & NUP</th>
-                  <th>Nama Barang</th>
-                  <th>Kondisi</th>
-                  <th>UPT Penanggung Jawab</th>
-                  <th style="text-align:right;">Nilai Buku</th>
-                </tr>
-              </thead>
-              <tbody id="bmn-hps-eligible-tbody">
-                <tr>
-                  <td colspan="6" style="text-align:center; padding:16px; color:var(--n-text-muted);">
-                    Memuat daftar aset eligible...
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          <div class="n-card-subtle" style="display:flex; justify-content:space-between; align-items:center; padding:8px 12px; margin-top:8px;">
-            <div style="font-size:0.75rem; color:var(--n-text-secondary);">
-              Ringkasan Nilai Aset Terpilih:
-            </div>
-            <div style="font-size:0.8125rem; font-weight:600; display:flex; gap:16px;">
-              <span>Perolehan: <span id="bmn-hps-sel-perolehan" class="tnum">Rp 0</span></span>
-              <span>Nilai Buku: <span id="bmn-hps-sel-buku" class="tnum" style="color:var(--n-primary);">Rp 0</span></span>
-            </div>
-          </div>
-        </div>
-
-        <div class="ctl-row ctl-lg ctl-fill" style="margin-top:20px; padding-top:14px; border-top:1px solid var(--n-border);">
-          <button type="button" class="btn-ghost" onclick="closeModal('modal-bmn-create-hapus')">Batal</button>
+        <div class="modal-foot-bar ctl-lg">
+          <button type="button" class="btn-outline" onclick="closeModal('modal-bmn-create-hapus')">Batal</button>
           <button type="button" class="btn-primary" id="btn-submit-create-hapus" onclick="_bmnSubmitCreateHapus()">
-            Simpan & Ajukan Usulan
+            Simpan &amp; Ajukan Usulan
           </button>
         </div>
       </div>
     </div>
 
-    <!-- MODAL DETAIL & ADVANCE SIKLUS PENGHAPUSAN BMN -->
+    <!-- MODAL DETAIL & ADVANCE SIKLUS PENGHAPUSAN BMN (STANDAR DESAIN) -->
     <div class="n-overlay n-hidden" id="modal-bmn-detail-hapus">
-      <div class="n-modal n-modal-form" style="max-width: 920px;">
-        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:14px;">
+      <div class="n-modal n-modal-form n-modal-xl">
+        <div class="modal-hd-bar">
           <div>
             <div style="display:flex; align-items:center; gap:8px;">
-              <h2 style="margin:0;">Berkas Usulan: <span id="bmn-detail-hps-id" class="tnum font-bold"></span></h2>
+              <h2>Berkas Usulan: <span id="bmn-detail-hps-id" class="tnum font-bold"></span></h2>
               <span id="bmn-detail-hps-badge" class="n-badge n-badge-subtle"></span>
             </div>
-            <div style="font-size:0.8125rem; color:var(--n-text-muted); margin-top:2px;">
+            <div class="modal-hd-sub">
               Pelacakan alur surat dan persetujuan legal DJKN/KPKNL
             </div>
           </div>
-          <button type="button" class="btn-ghost" onclick="closeModal('modal-bmn-detail-hapus')">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          <button type="button" class="btn-ghost" style="padding:4px;" onclick="closeModal('modal-bmn-detail-hapus')" aria-label="Tutup">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
           </button>
         </div>
 
-        <!-- 5-Stage Stepper Visualizer -->
-        <div class="n-stepper" id="bmn-detail-hps-stepper" style="margin-bottom:20px;">
-          <div class="n-step-item" data-step="DRAFT_USULAN">
-            <div class="n-step-circle">1</div>
-            <div class="n-step-label">Draft Usulan</div>
-          </div>
-          <div class="n-step-item" data-step="SURAT_USULAN">
-            <div class="n-step-circle">2</div>
-            <div class="n-step-label">Surat Usulan</div>
-          </div>
-          <div class="n-step-item" data-step="PERSETUJUAN_KEMENKEU">
-            <div class="n-step-circle">3</div>
-            <div class="n-step-label">Persetujuan DJKN</div>
-          </div>
-          <div class="n-step-item" data-step="SK_PENGHAPUSAN">
-            <div class="n-step-circle">4</div>
-            <div class="n-step-label">SK Penghapusan</div>
-          </div>
-          <div class="n-step-item" data-step="BAST_SELESAI">
-            <div class="n-step-circle">5</div>
-            <div class="n-step-label">BAST Selesai</div>
-          </div>
-        </div>
-
-        <!-- Status Alert Banner (bila DITOLAK atau VOID) -->
-        <div id="bmn-detail-hps-alert" class="n-hidden" style="margin-bottom:16px;"></div>
-
-        <!-- Ringkasan Metadata Berkas -->
-        <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:12px; margin-bottom:16px;">
-          <div class="n-card-subtle" style="padding:10px 12px;">
-            <div style="font-size:0.6875rem; text-transform:uppercase; color:var(--n-text-muted); font-weight:600;">Alasan Penghapusan</div>
-            <div id="bmn-detail-hps-alasan" style="font-size:0.875rem; font-weight:600; color:var(--n-text-primary); margin-top:2px;">-</div>
-            <div id="bmn-detail-hps-keterangan" style="font-size:0.75rem; color:var(--n-text-secondary); margin-top:4px;">-</div>
-          </div>
-          <div class="n-card-subtle" style="padding:10px 12px;">
-            <div style="font-size:0.6875rem; text-transform:uppercase; color:var(--n-text-muted); font-weight:600;">Finansial Usulan</div>
-            <div style="font-size:0.8125rem; margin-top:2px; display:flex; justify-content:space-between;">
-              <span style="color:var(--n-text-secondary);">Total Unit:</span>
-              <span id="bmn-detail-hps-total-unit" class="tnum font-bold">0</span>
+        <div class="n-modal-form-scroll">
+          <!-- 5-Stage Stepper Visualizer -->
+          <div class="n-stepper" id="bmn-detail-hps-stepper" style="margin-bottom:20px;">
+            <div class="n-step-item" data-step="DRAFT_USULAN">
+              <div class="n-step-circle">1</div>
+              <div class="n-step-label">Draft Usulan</div>
             </div>
-            <div style="font-size:0.8125rem; display:flex; justify-content:space-between; margin-top:2px;">
-              <span style="color:var(--n-text-secondary);">Nilai Perolehan:</span>
-              <span id="bmn-detail-hps-total-perolehan" class="tnum font-semibold">Rp 0</span>
+            <div class="n-step-item" data-step="SURAT_USULAN">
+              <div class="n-step-circle">2</div>
+              <div class="n-step-label">Surat Usulan</div>
             </div>
-            <div style="font-size:0.8125rem; display:flex; justify-content:space-between; margin-top:2px;">
-              <span style="color:var(--n-text-secondary);">Nilai Buku:</span>
-              <span id="bmn-detail-hps-total-buku" class="tnum font-bold" style="color:var(--n-primary);">Rp 0</span>
+            <div class="n-step-item" data-step="PERSETUJUAN_KEMENKEU">
+              <div class="n-step-circle">3</div>
+              <div class="n-step-label">Persetujuan DJKN</div>
+            </div>
+            <div class="n-step-item" data-step="SK_PENGHAPUSAN">
+              <div class="n-step-circle">4</div>
+              <div class="n-step-label">SK Penghapusan</div>
+            </div>
+            <div class="n-step-item" data-step="BAST_SELESAI">
+              <div class="n-step-circle">5</div>
+              <div class="n-step-label">BAST Selesai</div>
             </div>
           </div>
-          <div class="n-card-subtle" style="padding:10px 12px;">
-            <div style="font-size:0.6875rem; text-transform:uppercase; color:var(--n-text-muted); font-weight:600;">Status Dokumen</div>
-            <div style="font-size:0.75rem; margin-top:2px;" id="bmn-detail-docs-summary">
-              <!-- Dokumen links dynamically populated -->
+
+          <!-- Status Alert Banner (bila DITOLAK atau VOID) -->
+          <div id="bmn-detail-hps-alert" class="n-hidden" style="margin-bottom:16px;"></div>
+
+          <!-- Ringkasan Metadata Berkas -->
+          <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:12px; margin-bottom:16px;">
+            <div class="n-card-subtle" style="padding:10px 12px;">
+              <div style="font-size:0.6875rem; text-transform:uppercase; color:var(--n-text-muted); font-weight:600;">Alasan Penghapusan</div>
+              <div id="bmn-detail-hps-alasan" style="font-size:0.875rem; font-weight:600; color:var(--n-text-primary); margin-top:2px;">-</div>
+              <div id="bmn-detail-hps-keterangan" style="font-size:0.75rem; color:var(--n-text-secondary); margin-top:4px;">-</div>
+            </div>
+            <div class="n-card-subtle" style="padding:10px 12px;">
+              <div style="font-size:0.6875rem; text-transform:uppercase; color:var(--n-text-muted); font-weight:600;">Finansial Usulan</div>
+              <div style="font-size:0.8125rem; margin-top:2px; display:flex; justify-content:space-between;">
+                <span style="color:var(--n-text-secondary);">Total Unit:</span>
+                <span id="bmn-detail-hps-total-unit" class="tnum font-bold">0</span>
+              </div>
+              <div style="font-size:0.8125rem; display:flex; justify-content:space-between; margin-top:2px;">
+                <span style="color:var(--n-text-secondary);">Nilai Perolehan:</span>
+                <span id="bmn-detail-hps-total-perolehan" class="tnum font-semibold">Rp 0</span>
+              </div>
+              <div style="font-size:0.8125rem; display:flex; justify-content:space-between; margin-top:2px;">
+                <span style="color:var(--n-text-secondary);">Nilai Buku:</span>
+                <span id="bmn-detail-hps-total-buku" class="tnum font-bold" style="color:var(--n-primary);">Rp 0</span>
+              </div>
+            </div>
+            <div class="n-card-subtle" style="padding:10px 12px;">
+              <div style="font-size:0.6875rem; text-transform:uppercase; color:var(--n-text-muted); font-weight:600;">Status Dokumen</div>
+              <div style="font-size:0.75rem; margin-top:2px;" id="bmn-detail-docs-summary">
+                <!-- Dokumen links dynamically populated -->
+              </div>
             </div>
           </div>
-        </div>
 
-        <!-- Daftar Aset Terdaftar -->
-        <div style="border:1px solid var(--n-border); border-radius:var(--n-radius); padding:10px 12px; margin-bottom:16px;">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-            <div style="font-size:0.8125rem; font-weight:600; color:var(--n-text-primary);">Daftar Aset Terkait Berkas</div>
-            <span id="bmn-detail-hps-items-count" class="n-badge n-badge-subtle n-badge-neutral">0 item</span>
-          </div>
-          <div style="max-height:160px; overflow-y:auto; border:1px solid var(--n-border); border-radius:var(--n-radius-sm);">
-            <table class="n-table" style="font-size:0.75rem;">
-              <thead>
-                <tr>
-                  <th>Kode & NUP</th>
-                  <th>Nama Barang</th>
-                  <th>Kondisi Saat Usulan</th>
-                  <th>UPT</th>
-                  <th style="text-align:right;">Nilai Buku</th>
-                  <th>Status Aset</th>
-                </tr>
-              </thead>
-              <tbody id="bmn-detail-hps-items-tbody"></tbody>
-            </table>
-          </div>
-        </div>
-
-        <!-- Form Advance Tahap Berikutnya -->
-        <div id="bmn-detail-advance-wrap" style="border:1px solid var(--n-primary-light); background:var(--n-surface); border-radius:var(--n-radius); padding:12px; margin-bottom:16px;">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-            <div style="font-size:0.875rem; font-weight:600; color:var(--n-text-primary);" id="bmn-detail-advance-title">
-              Lanjut ke Tahap Berikutnya
+          <!-- Daftar Aset Terdaftar -->
+          <div style="border:1px solid var(--n-border); border-radius:var(--n-radius); padding:10px 12px; margin-bottom:16px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+              <div style="font-size:0.8125rem; font-weight:600; color:var(--n-text-primary);">Daftar Aset Terkait Berkas</div>
+              <span id="bmn-detail-hps-items-count" class="n-badge n-badge-subtle n-badge-neutral">0 item</span>
             </div>
-            <span class="n-badge n-badge-subtle n-badge-primary" id="bmn-detail-next-step-badge">Tahap Selanjutnya</span>
+            <div style="max-height:160px; overflow-y:auto; border:1px solid var(--n-border); border-radius:var(--n-radius-sm);">
+              <table class="n-table" style="font-size:0.75rem;">
+                <thead>
+                  <tr>
+                    <th>Kode &amp; NUP</th>
+                    <th>Nama Barang</th>
+                    <th>Kondisi Saat Usulan</th>
+                    <th>UPT</th>
+                    <th style="text-align:right;">Nilai Buku</th>
+                    <th>Status Aset</th>
+                  </tr>
+                </thead>
+                <tbody id="bmn-detail-hps-items-tbody"></tbody>
+              </table>
+            </div>
           </div>
 
-          <div id="bmn-detail-advance-msg" class="n-msg"></div>
+          <!-- Form Advance Tahap Berikutnya -->
+          <div id="bmn-detail-advance-wrap" class="form-section-card is-white" style="margin-bottom:0;">
+            <div class="form-section-hd">
+              <span class="form-section-title">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+                <span id="bmn-detail-advance-title">Lanjut ke Tahap Berikutnya</span>
+              </span>
+              <span class="form-section-badge" id="bmn-detail-next-step-badge">Tahap Selanjutnya</span>
+            </div>
 
-          <!-- Dynamic Input Fields based on Target Stage -->
-          <div id="bmn-detail-advance-fields" style="display:grid; grid-template-columns:1fr 1fr; gap:12px;"></div>
+            <div id="bmn-detail-advance-msg" class="n-msg"></div>
 
-          <div class="ctl-row ctl-md" style="justify-content:flex-end; margin-top:12px;">
-            <button type="button" class="btn-ghost" id="btn-advance-reject" onclick="_bmnToggleRejectMode()" style="color:var(--n-crit); display:none;">
-              Tolak Usulan
-            </button>
-            <button type="button" class="btn-primary" id="btn-confirm-advance" onclick="_bmnSubmitAdvanceStage()">
-              Konfirmasi Lanjut Tahap
-            </button>
+            <!-- Dynamic Input Fields based on Target Stage -->
+            <div id="bmn-detail-advance-fields" style="display:grid; grid-template-columns:1fr 1fr; gap:12px;"></div>
+
+            <div class="ctl-row ctl-md" style="justify-content:flex-end; margin-top:14px; gap:8px;">
+              <button type="button" class="btn-ghost" id="btn-advance-reject" onclick="_bmnToggleRejectMode()" style="color:var(--n-crit); display:none;">
+                Tolak Usulan
+              </button>
+              <button type="button" class="btn-primary" id="btn-confirm-advance" onclick="_bmnSubmitAdvanceStage()">
+                Konfirmasi Lanjut Tahap
+              </button>
+            </div>
           </div>
         </div>
 
         <!-- Modal Footer -->
-        <div class="ctl-row ctl-lg" style="justify-content:space-between; padding-top:14px; border-top:1px solid var(--n-border);">
+        <div class="modal-foot-bar ctl-lg" style="justify-content:space-between;">
           <button type="button" class="btn-ghost" id="btn-open-void-hapus" onclick="_bmnOpenVoidModal()" style="color:var(--n-crit);">
             Anulir Berkas Usulan
           </button>
           <div class="ctl-row ctl-lg">
-            <button type="button" class="btn-ghost" onclick="closeModal('modal-bmn-detail-hapus')">Tutup</button>
+            <button type="button" class="btn-outline" onclick="closeModal('modal-bmn-detail-hapus')">Tutup</button>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- MODAL KONFIRMASI ANULIR USULAN PENGHAPUSAN -->
+    <!-- MODAL KONFIRMASI ANULIR USULAN PENGHAPUSAN (STANDAR DESAIN) -->
     <div class="n-overlay n-hidden" id="modal-bmn-void-hapus">
-      <div class="n-modal" style="max-width:480px;">
-        <h2 style="margin:0 0 8px 0; color:var(--n-crit);">Anulir Usulan Penghapusan</h2>
-        <div class="n-info-static" style="margin-bottom:14px; border-left:3px solid var(--n-crit);">
-          Peringatan: Berkas usulan <strong id="bmn-void-hps-target-id"></strong> akan dianulir permanen. Seluruh aset yang berada dalam karantina berkas ini akan otomatis dipulihkan kembali ke status <strong>AKTIF</strong>.
+      <div class="n-modal n-modal-form n-modal-md">
+        <div class="modal-hd-bar">
+          <div>
+            <h2 style="color:var(--n-crit);">Anulir Usulan Penghapusan</h2>
+            <div class="modal-hd-sub">Pembatalan berkas usulan dan pemulihan status aset.</div>
+          </div>
+          <button type="button" class="btn-ghost" style="padding:4px;" onclick="closeModal('modal-bmn-void-hapus')" aria-label="Tutup">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
         </div>
-        <div id="bmn-void-hps-msg" class="n-msg"></div>
-        <div class="form-grp">
-          <label for="bmn-void-hps-reason">Alasan Pembatalan / Anulir <span style="color:var(--n-crit)">*</span></label>
-          <textarea id="bmn-void-hps-reason" class="n-input" rows="3" placeholder="Jelaskan alasan resmi pembatalan usulan ini..."></textarea>
+
+        <div class="n-modal-form-scroll">
+          <div class="pagu-mode-banner is-revisi" style="margin-bottom:14px;">
+            <div class="pagu-mode-banner-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+              </svg>
+            </div>
+            <div>
+              <strong>Peringatan Pembatalan Usulan</strong><br>
+              Berkas usulan <strong id="bmn-void-hps-target-id"></strong> akan dibatalkan permanen. Seluruh aset yang berada dalam karantina berkas ini akan otomatis dipulihkan kembali ke status <strong>AKTIF</strong>.
+            </div>
+          </div>
+
+          <div id="bmn-void-hps-msg" class="n-msg"></div>
+
+          <div class="form-section-card">
+            <div class="form-section-hd">
+              <span class="form-section-title">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                </svg>
+                <span>Alasan / Catatan Pembatalan</span>
+              </span>
+              <span class="form-section-badge" style="background:rgba(225,29,72,0.1);color:var(--n-crit);">Wajib Diisi</span>
+            </div>
+            <div class="form-grp" style="margin-bottom:0;">
+              <label for="bmn-void-hps-reason">Alasan Pembatalan / Anulir <span style="color:var(--n-crit)">*</span></label>
+              <textarea id="bmn-void-hps-reason" class="n-input" rows="3" placeholder="Jelaskan alasan resmi pembatalan usulan ini..."></textarea>
+            </div>
+          </div>
         </div>
-        <div class="ctl-stack" style="margin-top:16px;">
+
+        <div class="modal-foot-bar ctl-lg">
+          <button type="button" class="btn-outline" onclick="closeModal('modal-bmn-void-hapus')">Batal</button>
           <button type="button" class="btn-danger-solid" id="btn-confirm-void-hapus" onclick="_bmnExecuteVoidHapus()">
             Konfirmasi Anulir Usulan
           </button>
-          <button type="button" class="btn-ghost" onclick="closeModal('modal-bmn-void-hapus')">Batal</button>
         </div>
       </div>
     </div>
