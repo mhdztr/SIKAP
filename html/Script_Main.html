@@ -8056,16 +8056,11 @@ function _bmnDebouncedSearch() {
 
 function _bmnSwitchView(viewName, asetObj) {
   _BMN.view = viewName;
-  var viewList = document.getElementById('bmn-view-list');
-  var viewForm = document.getElementById('bmn-view-form');
-
   if (viewName === 'form') {
-    if (viewList) viewList.classList.add('n-hidden');
-    if (viewForm) viewForm.classList.remove('n-hidden');
     _bmnSetupForm(asetObj);
+    openModal('modal-bmn-form');
   } else {
-    if (viewForm) viewForm.classList.add('n-hidden');
-    if (viewList) viewList.classList.remove('n-hidden');
+    closeModal('modal-bmn-form');
   }
 }
 
@@ -9434,13 +9429,13 @@ function _bmnGetTahapBadge(tahap) {
   } else if (tahap === 'SURAT_USULAN') {
     return '<span class="n-badge n-badge-subtle n-badge-primary">Surat Usulan</span>';
   } else if (tahap === 'PERSETUJUAN_KEMENKEU') {
-    return '<span class="n-badge n-badge-subtle n-badge-warn">Persetujuan Kemenkeu</span>';
+    return '<span class="n-badge n-badge-subtle n-badge-warn">Persetujuan DJKN</span>';
   } else if (tahap === 'SK_PENGHAPUSAN') {
     return '<span class="n-badge n-badge-subtle n-badge-primary">SK Penghapusan</span>';
   } else if (tahap === 'BAST_SELESAI') {
     return '<span class="n-badge n-badge-subtle n-badge-ok">BAST Selesai (Dihapus)</span>';
   } else if (tahap === 'DITOLAK') {
-    return '<span class="n-badge n-badge-subtle n-badge-crit">Ditolak Kemenkeu</span>';
+    return '<span class="n-badge n-badge-subtle n-badge-crit">Ditolak</span>';
   } else if (tahap === 'VOID') {
     return '<span class="n-badge n-badge-subtle n-badge-crit">Dianulir (Batal)</span>';
   }
@@ -9511,7 +9506,7 @@ function _bmnRenderPenghapusanList(list) {
   list.forEach(function (h) {
     var docInfo = [];
     if (h.nomorSuratUsulan) docInfo.push('Surat: ' + _esc(h.nomorSuratUsulan));
-    if (h.nomorSuratPersetujuan) docInfo.push('Kemenkeu: ' + _esc(h.nomorSuratPersetujuan));
+    if (h.nomorSuratPersetujuan) docInfo.push('Persetujuan: ' + _esc(h.nomorSuratPersetujuan));
     if (h.nomorSK) docInfo.push('SK: ' + _esc(h.nomorSK));
     var docSummary = docInfo.length > 0 ? docInfo.join('<br>') : '<span style="color:var(--n-text-muted); font-size:.75rem;">Belum ada surat</span>';
 
@@ -9879,7 +9874,7 @@ function _bmnRenderDetailHapus(detail) {
     if (currentTahap === 'DITOLAK') {
       elAlert.className = 'n-msg n-msg-error';
       elAlert.classList.remove('n-hidden');
-      elAlert.innerHTML = '<strong>Usulan Ditolak oleh Kemenkeu</strong><br>' + _esc(master.keteranganAlasan || '');
+      elAlert.innerHTML = '<strong>Usulan Ditolak</strong><br>' + _esc(master.keteranganAlasan || '');
     } else if (currentTahap === 'VOID') {
       elAlert.className = 'n-msg n-msg-error';
       elAlert.classList.remove('n-hidden');
@@ -9915,13 +9910,13 @@ function _bmnRenderDetailHapus(detail) {
     }
 
     if (master.nomorSuratPersetujuan) {
-      docHtml += '<div style="margin-bottom:4px;"><strong>Persetujuan Kemenkeu:</strong> ' + _esc(master.nomorSuratPersetujuan) + ' (' + _esc(master.instansiKemenkeu || 'DJKN') + ')';
+      docHtml += '<div style="margin-bottom:4px;"><strong>Persetujuan DJKN:</strong> ' + _esc(master.nomorSuratPersetujuan) + ' (' + _esc(master.instansiKemenkeu || 'DJKN') + ')';
       if (master.evidenceSuratPersetujuan) {
         docHtml += ' <a href="' + _esc(master.evidenceSuratPersetujuan) + '" target="_blank" rel="noopener" style="color:var(--n-primary); text-decoration:underline;">[Lihat Berkas]</a>';
       }
       docHtml += '</div>';
     } else {
-      docHtml += '<div style="color:var(--n-text-muted); margin-bottom:4px;">Persetujuan Kemenkeu: Belum ada</div>';
+      docHtml += '<div style="color:var(--n-text-muted); margin-bottom:4px;">Persetujuan DJKN: Belum ada</div>';
     }
 
     if (master.nomorSK) {
@@ -10028,22 +10023,22 @@ function _bmnRenderAdvanceForm(currentTahap, master) {
                  '</div>';
 
   } else if (currentTahap === 'SURAT_USULAN') {
-    if (advanceTitle) advanceTitle.textContent = 'Persetujuan / Keputusan Kemenkeu RI (DJKN/KPKNL)';
-    if (nextBadge) nextBadge.textContent = 'Lanjut ke: PERSETUJUAN_KEMENKEU';
-    if (btnAdvance) btnAdvance.textContent = 'Catat Persetujuan Kemenkeu';
+    if (advanceTitle) advanceTitle.textContent = 'Persetujuan / Keputusan DJKN/KPKNL';
+    if (nextBadge) nextBadge.textContent = 'Lanjut ke: Persetujuan DJKN';
+    if (btnAdvance) btnAdvance.textContent = 'Catat Persetujuan DJKN';
     if (btnReject) btnReject.style.display = '';
 
     fieldsHtml = '<div class="form-grp">' +
-                   '<label for="bmn-adv-no-persetujuan">Nomor Surat Persetujuan Kemenkeu <span style="color:var(--n-crit)">*</span></label>' +
+                   '<label for="bmn-adv-no-persetujuan">Nomor Surat Persetujuan DJKN <span style="color:var(--n-crit)">*</span></label>' +
                    '<input type="text" id="bmn-adv-no-persetujuan" class="n-input" placeholder="Contoh: S-456/MK.6/KNL.01/2026">' +
                  '</div>' +
                  '<div class="form-grp">' +
-                   '<label for="bmn-adv-tgl-persetujuan">Tanggal Persetujuan Kemenkeu <span style="color:var(--n-crit)">*</span></label>' +
+                   '<label for="bmn-adv-tgl-persetujuan">Tanggal Persetujuan DJKN <span style="color:var(--n-crit)">*</span></label>' +
                    '<input type="date" id="bmn-adv-tgl-persetujuan" class="n-input">' +
                  '</div>' +
                  '<div class="form-grp">' +
-                   '<label for="bmn-adv-instansi-kemenkeu">Instansi Penerbit Kemenkeu <span style="color:var(--n-crit)">*</span></label>' +
-                   '<input type="text" id="bmn-adv-instansi-kemenkeu" class="n-input" placeholder="Contoh: KPKNL Jakarta I / DJKN Kemenkeu">' +
+                   '<label for="bmn-adv-instansi-kemenkeu">Instansi Penerbit DJKN/KPKNL <span style="color:var(--n-crit)">*</span></label>' +
+                   '<input type="text" id="bmn-adv-instansi-kemenkeu" class="n-input" placeholder="Contoh: KPKNL Jakarta I / DJKN">' +
                  '</div>' +
                  '<div class="form-grp">' +
                    '<label for="bmn-adv-link-persetujuan">Salinan Surat Persetujuan (Drive / PDF) <span style="color:var(--n-crit)">*</span></label>' +
@@ -10095,7 +10090,7 @@ function _bmnToggleRejectMode() {
   var btnAdvance = document.getElementById('btn-confirm-advance');
 
   if (_BMN_HPS.isRejectMode) {
-    if (advanceTitle) advanceTitle.textContent = 'Tolak Berkas Usulan (Kemenkeu)';
+    if (advanceTitle) advanceTitle.textContent = 'Tolak Berkas Usulan';
     if (nextBadge) {
       nextBadge.textContent = 'Tahap: DITOLAK';
       nextBadge.className = 'n-badge n-badge-subtle n-badge-crit';
@@ -10108,8 +10103,8 @@ function _bmnToggleRejectMode() {
 
     if (advanceFields) {
       advanceFields.innerHTML = '<div class="form-grp" style="grid-column:1 / -1;">' +
-                                  '<label for="bmn-adv-alasan-tolak">Alasan Penolakan dari Kemenkeu <span style="color:var(--n-crit)">*</span></label>' +
-                                  '<textarea id="bmn-adv-alasan-tolak" class="n-input" rows="3" placeholder="Sebutkan pertimbangan penolakan oleh Kemenkeu/DJKN..."></textarea>' +
+                                  '<label for="bmn-adv-alasan-tolak">Alasan Penolakan <span style="color:var(--n-crit)">*</span></label>' +
+                                  '<textarea id="bmn-adv-alasan-tolak" class="n-input" rows="3" placeholder="Sebutkan pertimbangan penolakan..."></textarea>' +
                                   '<div style="font-size:.75rem; color:var(--n-text-muted); margin-top:4px;">' +
                                     'Aset yang sebelumnya dikarantina akan otomatis dipulihkan kembali ke status AKTIF di register inventaris.' +
                                   '</div>' +
@@ -10135,7 +10130,7 @@ function _bmnSubmitAdvanceStage() {
     var elAlasanTolak = document.getElementById('bmn-adv-alasan-tolak');
     var alasanTolak = elAlasanTolak ? elAlasanTolak.value.trim() : '';
     if (!alasanTolak) {
-      _msg('bmn-detail-advance-msg', 'error', 'Alasan penolakan dari Kemenkeu wajib diisi.');
+      _msg('bmn-detail-advance-msg', 'error', 'Alasan penolakan wajib diisi.');
       return;
     }
     payload.tahapTarget = 'DITOLAK';
@@ -10169,9 +10164,9 @@ function _bmnSubmitAdvanceStage() {
     var inst = elInst ? elInst.value.trim() : '';
     var linkP = elLinkP ? elLinkP.value.trim() : '';
 
-    if (!noP) { _msg('bmn-detail-advance-msg', 'error', 'Nomor Surat Persetujuan Kemenkeu wajib diisi.'); return; }
-    if (!tglP) { _msg('bmn-detail-advance-msg', 'error', 'Tanggal Surat Persetujuan Kemenkeu wajib diisi.'); return; }
-    if (!inst) { _msg('bmn-detail-advance-msg', 'error', 'Instansi Kemenkeu penerbit persetujuan wajib diisi.'); return; }
+    if (!noP) { _msg('bmn-detail-advance-msg', 'error', 'Nomor Surat Persetujuan DJKN wajib diisi.'); return; }
+    if (!tglP) { _msg('bmn-detail-advance-msg', 'error', 'Tanggal Surat Persetujuan DJKN wajib diisi.'); return; }
+    if (!inst) { _msg('bmn-detail-advance-msg', 'error', 'Instansi DJKN/KPKNL penerbit persetujuan wajib diisi.'); return; }
     if (!linkP) { _msg('bmn-detail-advance-msg', 'error', 'Link bukti berkas persetujuan wajib dilampirkan.'); return; }
 
     payload.tahapTarget = 'PERSETUJUAN_KEMENKEU';

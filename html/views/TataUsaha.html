@@ -646,7 +646,7 @@
             <polyline points="14 2 14 8 20 8"></polyline>
             <line x1="9" y1="15" x2="15" y2="15"></line>
           </svg>
-          <span>Usulan Penghapusan (Kemenkeu)</span>
+          <span>Usulan Penghapusan</span>
         </button>
       </div>
     </div>
@@ -674,7 +674,7 @@
           <div class="n-card kpi-card">
             <div class="kpi-label">Antrean Usulan Hapus</div>
             <div class="kpi-value tnum" id="bmn-kpi-hapus">— unit</div>
-            <div class="kpi-sub" id="bmn-kpi-hapus-sub">Kemenkeu / DJKN</div>
+            <div class="kpi-sub" id="bmn-kpi-hapus-sub">DJKN / Pengelola</div>
           </div>
         </div>
       </div>
@@ -822,238 +822,9 @@
 
         </div>
       </div>
-    </div><!-- /bmn-view-list -->
-
-    <!-- SUB-VIEW 2: FORM TAMBAH / EDIT ASET (IN-PAGE, FULL VIEW NO POPUP) -->
-    <div id="bmn-view-form" class="n-hidden">
-      <div class="content-section">
-        <div class="n-card" style="padding:24px 28px;">
-          <div
-            style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; border-bottom:1px solid var(--n-border); padding-bottom:14px;">
-            <div>
-              <h2 id="bmn-form-title" style="margin:0; font-size:1.25rem; font-weight:700;">Tambah Unit Aset BMN</h2>
-            </div>
-            <button type="button" class="btn-outline" onclick="_bmnSwitchView('list')">
-              ← Kembali ke Daftar Aset
-            </button>
-          </div>
-
-          <div id="bmn-form-msg" class="n-msg"></div>
-
-          <form id="bmn-asset-form" onsubmit="event.preventDefault(); _bmnSubmitForm();">
-            <input type="hidden" id="bmn-form-aset-id" value="">
-
-            <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:16px;">
-              <!-- Kolom 1: Identifikasi Barang -->
-              <div class="form-grp">
-                <label for="bmn-form-kode">Kode Barang (Kemenkeu) <span style="color:var(--n-crit)">*</span></label>
-                <input type="text" id="bmn-form-kode" placeholder="Mis. 3050104001" required>
-              </div>
-              <div class="form-grp">
-                <label for="bmn-form-nup">NUP (No. Urut Pendaftaran) <span style="color:var(--n-crit)">*</span></label>
-                <input type="text" id="bmn-form-nup" placeholder="Mis. 1, 2, dst." required>
-              </div>
-              <div class="form-grp">
-                <label for="bmn-form-pencatatan">Klasifikasi Akuntansi <span
-                    style="color:var(--n-crit)">*</span></label>
-                <select id="bmn-form-pencatatan" required>
-                  <option value="BUKU">BMN Buku (Intrakomptabel / Belanja Modal 53)</option>
-                  <option value="REGULER">BMN Reguler (Ekstrakomptabel / Belanja Barang 52)</option>
-                </select>
-              </div>
-
-              <!-- Baris 2: Nama & Kategori -->
-              <div class="form-grp" style="grid-column: span 2;">
-                <label for="bmn-form-nama">Nama Barang <span style="color:var(--n-crit)">*</span></label>
-                <input type="text" id="bmn-form-nama"
-                  placeholder="Mis. Laptop HP EliteBook, Speedboat 12m, Drone DJI Matrice" required>
-              </div>
-              <div class="form-grp">
-                <label for="bmn-form-kategori">Kategori SIMAK / SAKTI <span style="color:var(--n-crit)">*</span></label>
-                <select id="bmn-form-kategori" required>
-                  <!-- Populated from Master_BMN_Kategori -->
-                </select>
-              </div>
-
-              <!-- Baris 3: Merek & Tanggal -->
-              <div class="form-grp">
-                <label for="bmn-form-merek">Merek / Tipe / Spesifikasi</label>
-                <input type="text" id="bmn-form-merek" placeholder="Mis. Core i7 16GB, Yamaha 200HP">
-              </div>
-              <div class="form-grp">
-                <label for="bmn-form-tgl">Tanggal Perolehan</label>
-                <input type="date" id="bmn-form-tgl" required>
-              </div>
-              <div class="form-grp">
-                <label for="bmn-form-kondisi">Kondisi Fisik Terkini <span style="color:var(--n-crit)">*</span></label>
-                <select id="bmn-form-kondisi" required>
-                  <option value="BAIK">Baik</option>
-                  <option value="RUSAK_RINGAN">Rusak Ringan</option>
-                  <option value="RUSAK_BERAT">Rusak Berat</option>
-                </select>
-              </div>
-
-              <!-- Baris 4: Valuasi Rupiah -->
-              <div class="form-grp">
-                <label for="bmn-form-np">Nilai Perolehan / Beli Kotor (Rp)</label>
-                <input type="number" id="bmn-form-np" min="0" step="1" placeholder="0" class="tnum" required>
-              </div>
-              <div class="form-grp">
-                <label for="bmn-form-nb">Nilai Buku Terkini SAKTI (Rp)</label>
-                <input type="number" id="bmn-form-nb" min="0" step="1" placeholder="0" class="tnum" required>
-              </div>
-              <div class="form-grp">
-                <label for="bmn-form-upt">Lokasi Penempatan UPT / Satker <span
-                    style="color:var(--n-crit)">*</span></label>
-                <select id="bmn-form-upt" required>
-                  <!-- Populated from Master_Lokasi_UPT -->
-                </select>
-              </div>
-
-              <!-- Baris 5: Lokasi Fisik & Geotagging -->
-              <div class="form-grp" style="grid-column: span 2;">
-                <label for="bmn-form-ruangan">Detail Ruangan / Posisi Fisik</label>
-                <input type="text" id="bmn-form-ruangan"
-                  placeholder="Mis. Ruang Rapat Pangkalan Batam, Anjungan KP Hiu 01, Gudang Amunisi">
-              </div>
-              <div class="form-grp">
-                <label for="bmn-form-kapal">Inventaris Melekat Kapal (Opsional)</label>
-                <select id="bmn-form-kapal">
-                  <option value="">Bukan Inventaris Kapal</option>
-                  <!-- Populated from Master Kapal -->
-                </select>
-              </div>
-
-              <!-- SEKSI FOTO FISIK & GEOTAGGING OTOMATIS (SUB-FASE 18B.4) -->
-              <div class="form-grp"
-                style="grid-column: span 3; background: var(--n-surface-2); border: 1px solid var(--n-border); border-radius: var(--n-radius-md); padding: 18px 20px; margin-top: 4px;">
-                <div
-                  style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 14px; gap: 12px; flex-wrap: wrap;">
-                  <div>
-                    <label
-                      style="font-weight: 700; font-size: .875rem; color: var(--n-text-primary); margin-bottom: 2px;">
-                      Foto Fisik & Geotagging Otomatis
-                    </label>
-                    <div style="font-size: .75rem; color: var(--n-text-secondary);">
-                      Opsi 1: Ekstraksi GPS otomatis dari metadata EXIF foto mentah. Opsi 2: Fallback geolokasi
-                      perangkat / homebase satker terdekat.
-                    </div>
-                  </div>
-                  <div class="ctl-row">
-                    <button type="button" id="bmn-btn-device-gps" class="btn-outline"
-                      onclick="_bmnTriggerDeviceGeolocation(false)">
-                      Ambil GPS Perangkat
-                    </button>
-                    <button type="button" id="bmn-btn-reset-gps" class="btn-outline" onclick="_bmnResetGeotag()"
-                      style="display:none;">
-                      Reset Koordinat
-                    </button>
-                  </div>
-                </div>
-
-                <!-- Hidden inputs untuk koordinat & geotagging metadata -->
-                <input type="hidden" id="bmn-form-lat" value="">
-                <input type="hidden" id="bmn-form-lon" value="">
-                <input type="hidden" id="bmn-form-sumber-lokasi" value="">
-                <input type="hidden" id="bmn-form-jarak-upt" value="">
-                <input type="hidden" id="bmn-form-foto-evidence-id" value="">
-
-                <div
-                  style="display: grid; grid-template-columns: minmax(180px, 240px) 1fr; gap: 18px; align-items: start;">
-                  <!-- Sub-kolom kiri: Unggah Foto Fisik -->
-                  <div>
-                    <div style="display:flex; flex-direction:column; gap:8px;">
-                      <label for="bmn-form-foto"
-                        style="font-size:.75rem; font-weight:600; color:var(--n-text-secondary);">
-                        Pilih / Ambil Foto Aset (Kamera / Berkas)
-                      </label>
-                      <input type="file" id="bmn-form-foto" accept="image/*" onchange="_bmnHandlePhotoFile(event)"
-                        style="font-size:.8125rem;">
-
-                      <!-- Thumbnail preview box -->
-                      <div id="bmn-photo-preview-wrap"
-                        style="position:relative; width:100%; height:130px; border-radius:var(--n-radius-sm); border:1px dashed var(--n-border); background:var(--n-surface-1); display:flex; align-items:center; justify-content:center; overflow:hidden; margin-top:4px;">
-                        <img id="bmn-photo-preview-img" src="" alt="Pratinjau Foto"
-                          style="max-width:100%; max-height:100%; object-fit:contain; display:none;">
-                        <div id="bmn-photo-placeholder"
-                          style="font-size:.75rem; color:var(--n-text-muted); text-align:center; padding:12px;">
-                          Belum ada foto fisik<br><span style="font-size:.7rem;">(Format JPG/PNG, auto-kompres)</span>
-                        </div>
-                        <button type="button" id="bmn-photo-clear-btn" class="btn-danger n-iconbtn-sm"
-                          onclick="_bmnRemovePhoto()" style="position:absolute; top:6px; right:6px; display:none;"
-                          title="Hapus foto">
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                            <line x1="18" y1="6" x2="6" y2="18"></line>
-                            <line x1="6" y1="6" x2="18" y2="18"></line>
-                          </svg>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-
-                  <!-- Sub-kolom kanan: Telemetri Koordinat & Status Haversine Match -->
-                  <div>
-                    <div id="bmn-geotag-status-card"
-                      style="background:var(--n-surface-1); border:1px solid var(--n-border); border-radius:var(--n-radius-sm); padding:14px 16px; min-height:130px; display:flex; flex-direction:column; justify-content:center;">
-                      <div id="bmn-geotag-empty-state"
-                        style="text-align:center; color:var(--n-text-muted); font-size:.8125rem;">
-                        <div style="font-weight:600; color:var(--n-text-primary);">Belum ada koordinat lokasi</div>
-                        <div style="font-size:.75rem; margin-top:4px; color:var(--n-text-secondary);">Unggah foto
-                          ber-GPS (atau kamera ber-watermark lokasi) atau klik "Ambil GPS Perangkat" untuk mencocokkan
-                          UPT terdekat secara otomatis via Haversine.</div>
-                      </div>
-
-                      <div id="bmn-geotag-active-state" style="display:none; flex-direction:column; gap:10px;">
-                        <div
-                          style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
-                          <div style="display:flex; align-items:center; gap:8px;">
-                            <span id="bmn-geotag-source-badge" class="badge"
-                              style="background:#E0E7FF; color:#3730A3; font-weight:600; font-size:.7rem;">
-                              EXIF_FOTO
-                            </span>
-                            <span style="font-size:.8125rem; font-weight:600; color:var(--n-text-primary);">Koordinat
-                              Terdeteksi</span>
-                          </div>
-                          <div class="tnum" style="font-size:.8125rem; font-weight:600; color:var(--n-text-primary);"
-                            id="bmn-geotag-coords-text">
-                            Lat: — · Lon: —
-                          </div>
-                        </div>
-
-                        <!-- Banner Haversine Match -->
-                        <div id="bmn-geotag-haversine-banner"
-                          style="border-radius:var(--n-radius-xs); padding:10px 12px; font-size:.8125rem; line-height:1.4;">
-                          <!-- Diisi secara dinamis oleh _bmnRenderGeotagStatus() -->
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Baris 6: Keterangan -->
-              <div class="form-grp" style="grid-column: span 3;">
-                <label for="bmn-form-ket">Keterangan / Catatan Inventaris</label>
-                <input type="text" id="bmn-form-ket"
-                  placeholder="Mis. Bantuan hibah JICA 2024, No. Seri S/N: 893128913">
-              </div>
-            </div>
-
-            <div class="ctl-row ctl-lg"
-              style="justify-content:flex-end; margin-top:24px; padding-top:16px; border-top:1px solid var(--n-border);">
-              <button type="button" class="btn-outline" onclick="_bmnSwitchView('list')">Batal</button>
-              <button type="submit" class="btn-primary" id="bmn-btn-save">
-                Simpan Data Aset
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div><!-- /bmn-view-form -->
     </div><!-- /bmn-subview-aset -->
 
-    <!-- SUB-VIEW 2: USULAN PENGHAPUSAN BMN KEMENKEU (TERPADU DI BMN) -->
+    <!-- SUB-VIEW 2: USULAN PENGHAPUSAN BMN (TERPADU DI BMN) -->
     <div id="bmn-subview-penghapusan" class="n-hidden">
       <div id="bmn-view-penghapusan">
         <!-- 4 KPI Cards Penghapusan -->
@@ -1065,7 +836,7 @@
               <div class="kpi-sub" id="bmn-hps-kpi-total-sub">Seluruh berkas terdaftar</div>
             </div>
             <div class="n-card kpi-card">
-              <div class="kpi-label">Dalam Proses Kemenkeu</div>
+              <div class="kpi-label">Dalam Proses Persetujuan</div>
               <div class="kpi-value tnum" id="bmn-hps-kpi-proses">0 berkas</div>
               <div class="kpi-sub" id="bmn-hps-kpi-proses-sub">Tahap Usulan &amp; Izin DJKN</div>
             </div>
@@ -1112,7 +883,7 @@
                   <button type="button" class="bmn-hps-seg-btn active" data-hps-tahap="ALL" onclick="_bmnSetHpsTahap('ALL')">Semua Berkas</button>
                   <button type="button" class="bmn-hps-seg-btn" data-hps-tahap="DRAFT_USULAN" onclick="_bmnSetHpsTahap('DRAFT_USULAN')">Draft</button>
                   <button type="button" class="bmn-hps-seg-btn" data-hps-tahap="SURAT_USULAN" onclick="_bmnSetHpsTahap('SURAT_USULAN')">Surat Usulan</button>
-                  <button type="button" class="bmn-hps-seg-btn" data-hps-tahap="PERSETUJUAN_KEMENKEU" onclick="_bmnSetHpsTahap('PERSETUJUAN_KEMENKEU')">Persetujuan Kemenkeu</button>
+                  <button type="button" class="bmn-hps-seg-btn" data-hps-tahap="PERSETUJUAN_KEMENKEU" onclick="_bmnSetHpsTahap('PERSETUJUAN_KEMENKEU')">Persetujuan DJKN</button>
                   <button type="button" class="bmn-hps-seg-btn" data-hps-tahap="SK_PENGHAPUSAN" onclick="_bmnSetHpsTahap('SK_PENGHAPUSAN')">SK Penghapusan</button>
                   <button type="button" class="bmn-hps-seg-btn" data-hps-tahap="BAST_SELESAI" onclick="_bmnSetHpsTahap('BAST_SELESAI')">Selesai (BAST)</button>
                   <button type="button" class="bmn-hps-seg-btn" data-hps-tahap="DITOLAK" onclick="_bmnSetHpsTahap('DITOLAK')">Ditolak</button>
@@ -1145,8 +916,213 @@
   <!-- Wadah Kompatibilitas Linter & Legacy Handler -->
   <div id="tu-pane-penghapusan" style="display:none;"></div>
 
-    <!-- MODAL ANULIR BMN -->
-    <div class="n-overlay n-hidden" id="modal-bmn-anulir">
+  <!-- ======================================================== -->
+  <!-- MODAL DIALOGS BMN & USULAN PENGHAPUSAN (POPUP OVERLAYS)  -->
+  <!-- ======================================================== -->
+
+  <!-- MODAL FORM REGISTRASI / EDIT UNIT ASET BMN (POPUP DIALOG) -->
+  <div class="n-overlay n-hidden" id="modal-bmn-form">
+    <div class="n-modal n-modal-form" style="max-width: 900px; max-height: 90vh; overflow-y: auto;">
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:16px;">
+        <div>
+          <h2 id="bmn-form-title" style="margin:0 0 4px 0; font-size:1.25rem; font-weight:700;">Tambah Unit Aset BMN</h2>
+          <div style="font-size:0.8125rem; color:var(--n-text-muted);">
+            Pendaftaran aset individual per-unit fisik (Prinsip BMN Anti-Jebret).
+          </div>
+        </div>
+        <button type="button" class="btn-ghost" onclick="closeModal('modal-bmn-form')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <div id="bmn-form-msg" class="n-msg"></div>
+
+      <form id="bmn-asset-form" onsubmit="event.preventDefault(); _bmnSubmitForm();">
+        <input type="hidden" id="bmn-form-aset-id" value="">
+
+        <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:16px;">
+          <!-- Kolom 1: Identifikasi Barang -->
+          <div class="form-grp">
+            <label for="bmn-form-kode">Kode Barang <span style="color:var(--n-crit)">*</span></label>
+            <input type="text" id="bmn-form-kode" placeholder="Mis. 3050104001" required>
+          </div>
+          <div class="form-grp">
+            <label for="bmn-form-nup">NUP (No. Urut Pendaftaran) <span style="color:var(--n-crit)">*</span></label>
+            <input type="text" id="bmn-form-nup" placeholder="Mis. 1, 2, dst." required>
+          </div>
+          <div class="form-grp">
+            <label for="bmn-form-pencatatan">Klasifikasi Akuntansi <span style="color:var(--n-crit)">*</span></label>
+            <select id="bmn-form-pencatatan" required>
+              <option value="BUKU">BMN Buku (Intrakomptabel / Belanja Modal 53)</option>
+              <option value="REGULER">BMN Reguler (Ekstrakomptabel / Belanja Barang 52)</option>
+            </select>
+          </div>
+
+          <!-- Baris 2: Nama & Kategori -->
+          <div class="form-grp" style="grid-column: span 2;">
+            <label for="bmn-form-nama">Nama Barang <span style="color:var(--n-crit)">*</span></label>
+            <input type="text" id="bmn-form-nama" placeholder="Mis. Laptop HP EliteBook, Speedboat 12m, Drone DJI Matrice" required>
+          </div>
+          <div class="form-grp">
+            <label for="bmn-form-kategori">Kategori SIMAK / SAKTI <span style="color:var(--n-crit)">*</span></label>
+            <select id="bmn-form-kategori" required>
+              <!-- Populated from Master_BMN_Kategori -->
+            </select>
+          </div>
+
+          <!-- Baris 3: Merek & Tanggal -->
+          <div class="form-grp">
+            <label for="bmn-form-merek">Merek / Tipe / Spesifikasi</label>
+            <input type="text" id="bmn-form-merek" placeholder="Mis. Core i7 16GB, Yamaha 200HP">
+          </div>
+          <div class="form-grp">
+            <label for="bmn-form-tgl">Tanggal Perolehan</label>
+            <input type="date" id="bmn-form-tgl" required>
+          </div>
+          <div class="form-grp">
+            <label for="bmn-form-kondisi">Kondisi Fisik Terkini <span style="color:var(--n-crit)">*</span></label>
+            <select id="bmn-form-kondisi" required>
+              <option value="BAIK">Baik</option>
+              <option value="RUSAK_RINGAN">Rusak Ringan</option>
+              <option value="RUSAK_BERAT">Rusak Berat</option>
+            </select>
+          </div>
+
+          <!-- Baris 4: Valuasi Rupiah -->
+          <div class="form-grp">
+            <label for="bmn-form-np">Nilai Perolehan / Beli Kotor (Rp)</label>
+            <input type="number" id="bmn-form-np" min="0" step="1" placeholder="0" class="tnum" required>
+          </div>
+          <div class="form-grp">
+            <label for="bmn-form-nb">Nilai Buku Terkini SAKTI (Rp)</label>
+            <input type="number" id="bmn-form-nb" min="0" step="1" placeholder="0" class="tnum" required>
+          </div>
+          <div class="form-grp">
+            <label for="bmn-form-upt">Lokasi Penempatan UPT / Satker <span style="color:var(--n-crit)">*</span></label>
+            <select id="bmn-form-upt" required>
+              <!-- Populated from Master_Lokasi_UPT -->
+            </select>
+          </div>
+
+          <!-- Baris 5: Lokasi Fisik & Geotagging -->
+          <div class="form-grp" style="grid-column: span 2;">
+            <label for="bmn-form-ruangan">Detail Ruangan / Posisi Fisik</label>
+            <input type="text" id="bmn-form-ruangan" placeholder="Mis. Ruang Rapat Pangkalan Batam, Anjungan KP Hiu 01, Gudang Amunisi">
+          </div>
+          <div class="form-grp">
+            <label for="bmn-form-kapal">Inventaris Melekat Kapal (Opsional)</label>
+            <select id="bmn-form-kapal">
+              <option value="">Bukan Inventaris Kapal</option>
+              <!-- Populated from Master Kapal -->
+            </select>
+          </div>
+
+          <!-- SEKSI FOTO FISIK & GEOTAGGING OTOMATIS (SUB-FASE 18B.4) -->
+          <div class="form-grp" style="grid-column: span 3; background: var(--n-surface-2); border: 1px solid var(--n-border); border-radius: var(--n-radius-md); padding: 18px 20px; margin-top: 4px;">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 14px; gap: 12px; flex-wrap: wrap;">
+              <div>
+                <label style="font-weight: 700; font-size: .875rem; color: var(--n-text-primary); margin-bottom: 2px;">
+                  Foto Fisik &amp; Geotagging Otomatis
+                </label>
+                <div style="font-size: .75rem; color: var(--n-text-secondary);">
+                  Opsi 1: Ekstraksi GPS otomatis dari metadata EXIF foto mentah. Opsi 2: Fallback geolokasi perangkat / homebase satker terdekat.
+                </div>
+              </div>
+              <div class="ctl-row">
+                <button type="button" id="bmn-btn-device-gps" class="btn-outline" onclick="_bmnTriggerDeviceGeolocation(false)">
+                  Ambil GPS Perangkat
+                </button>
+                <button type="button" id="bmn-btn-reset-gps" class="btn-outline" onclick="_bmnResetGeotag()" style="display:none;">
+                  Reset Koordinat
+                </button>
+              </div>
+            </div>
+
+            <!-- Hidden inputs untuk koordinat & geotagging metadata -->
+            <input type="hidden" id="bmn-form-lat" value="">
+            <input type="hidden" id="bmn-form-lon" value="">
+            <input type="hidden" id="bmn-form-sumber-lokasi" value="">
+            <input type="hidden" id="bmn-form-jarak-upt" value="">
+            <input type="hidden" id="bmn-form-foto-evidence-id" value="">
+
+            <div style="display: grid; grid-template-columns: minmax(180px, 240px) 1fr; gap: 18px; align-items: start;">
+              <!-- Sub-kolom kiri: Unggah Foto Fisik -->
+              <div>
+                <div style="display:flex; flex-direction:column; gap:8px;">
+                  <label for="bmn-form-foto" style="font-size:.75rem; font-weight:600; color:var(--n-text-secondary);">
+                    Pilih / Ambil Foto Aset (Kamera / Berkas)
+                  </label>
+                  <input type="file" id="bmn-form-foto" accept="image/*" onchange="_bmnHandlePhotoFile(event)" style="font-size:.8125rem;">
+
+                  <!-- Thumbnail preview box -->
+                  <div id="bmn-photo-preview-wrap" style="position:relative; width:100%; height:130px; border-radius:var(--n-radius-sm); border:1px dashed var(--n-border); background:var(--n-surface-1); display:flex; align-items:center; justify-content:center; overflow:hidden; margin-top:4px;">
+                    <img id="bmn-photo-preview-img" src="" alt="Pratinjau Foto" style="max-width:100%; max-height:100%; object-fit:contain; display:none;">
+                    <div id="bmn-photo-placeholder" style="font-size:.75rem; color:var(--n-text-muted); text-align:center; padding:12px;">
+                      Belum ada foto fisik<br><span style="font-size:.7rem;">(Format JPG/PNG, auto-kompres)</span>
+                    </div>
+                    <button type="button" id="bmn-photo-clear-btn" class="btn-danger n-iconbtn-sm" onclick="_bmnRemovePhoto()" style="position:absolute; top:6px; right:6px; display:none;" title="Hapus foto">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Sub-kolom kanan: Telemetri Koordinat & Status Haversine Match -->
+              <div>
+                <div id="bmn-geotag-status-card" style="background:var(--n-surface-1); border:1px solid var(--n-border); border-radius:var(--n-radius-sm); padding:14px 16px; min-height:130px; display:flex; flex-direction:column; justify-content:center;">
+                  <div id="bmn-geotag-empty-state" style="text-align:center; color:var(--n-text-muted); font-size:.8125rem;">
+                    <div style="font-weight:600; color:var(--n-text-primary);">Belum ada koordinat lokasi</div>
+                    <div style="font-size:.75rem; margin-top:4px; color:var(--n-text-secondary);">Unggah foto ber-GPS (atau kamera ber-watermark lokasi) atau klik "Ambil GPS Perangkat" untuk mencocokkan UPT terdekat secara otomatis via Haversine.</div>
+                  </div>
+
+                  <div id="bmn-geotag-active-state" style="display:none; flex-direction:column; gap:10px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+                      <div style="display:flex; align-items:center; gap:8px;">
+                        <span id="bmn-geotag-source-badge" class="badge" style="background:#E0E7FF; color:#3730A3; font-weight:600; font-size:.7rem;">
+                          EXIF_FOTO
+                        </span>
+                        <span style="font-size:.8125rem; font-weight:600; color:var(--n-text-primary);">Koordinat Terdeteksi</span>
+                      </div>
+                      <div class="tnum" style="font-size:.8125rem; font-weight:600; color:var(--n-text-primary);" id="bmn-geotag-coords-text">
+                        Lat: — · Lon: —
+                      </div>
+                    </div>
+
+                    <!-- Banner Haversine Match -->
+                    <div id="bmn-geotag-haversine-banner" style="border-radius:var(--n-radius-xs); padding:10px 12px; font-size:.8125rem; line-height:1.4;">
+                      <!-- Diisi secara dinamis oleh _bmnRenderGeotagStatus() -->
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Baris 6: Keterangan -->
+          <div class="form-grp" style="grid-column: span 3;">
+            <label for="bmn-form-ket">Keterangan / Catatan Inventaris</label>
+            <input type="text" id="bmn-form-ket" placeholder="Mis. Bantuan hibah JICA 2024, No. Seri S/N: 893128913">
+          </div>
+        </div>
+
+        <div class="ctl-row ctl-lg" style="justify-content:flex-end; margin-top:24px; padding-top:16px; border-top:1px solid var(--n-border); gap:12px;">
+          <button type="button" class="btn-ghost" onclick="closeModal('modal-bmn-form')">Batal</button>
+          <button type="submit" class="btn-primary" id="bmn-btn-save">
+            Simpan Data Aset
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL ANULIR BMN -->
+  <div class="n-overlay n-hidden" id="modal-bmn-anulir">
       <div class="n-modal">
         <h2>Anulir Entri Aset BMN</h2>
         <div id="bmn-anulir-info" style="margin-bottom:14px; font-size:.875rem; color:var(--n-text-secondary);"></div>
@@ -1173,7 +1149,7 @@
           <div>
             <h2 style="margin:0 0 4px 0;">Impor Massal Aset BMN (SAKTI / SIMAK)</h2>
             <div style="font-size:0.8125rem; color:var(--n-text-muted);">
-              Unggah berkas Excel / CSV atau salin-tempel langsung dari aplikasi SAKTI Kemenkeu.
+              Unggah berkas Excel / CSV atau salin-tempel langsung dari aplikasi SAKTI.
             </div>
           </div>
           <button type="button" class="btn-outline" onclick="_bmnDownloadTemplate()">
@@ -1345,7 +1321,7 @@
           <div>
             <h2 style="margin:0 0 4px 0;">Buat Usulan Penghapusan BMN</h2>
             <div style="font-size:0.8125rem; color:var(--n-text-muted);">
-              Daftarkan berkas usulan penghapusan aset BMN untuk proses verifikasi dan persetujuan Kemenkeu (DJKN/KPKNL).
+              Daftarkan berkas usulan penghapusan aset BMN untuk proses verifikasi dan persetujuan DJKN/KPKNL.
             </div>
           </div>
           <button type="button" class="btn-ghost" onclick="closeModal('modal-bmn-create-hapus')">
@@ -1456,7 +1432,7 @@
               <span id="bmn-detail-hps-badge" class="n-badge n-badge-subtle"></span>
             </div>
             <div style="font-size:0.8125rem; color:var(--n-text-muted); margin-top:2px;">
-              Pelacakan alur surat dan persetujuan legal Kemenkeu RI (DJKN/KPKNL)
+              Pelacakan alur surat dan persetujuan legal DJKN/KPKNL
             </div>
           </div>
           <button type="button" class="btn-ghost" onclick="closeModal('modal-bmn-detail-hapus')">
@@ -1476,7 +1452,7 @@
           </div>
           <div class="n-step-item" data-step="PERSETUJUAN_KEMENKEU">
             <div class="n-step-circle">3</div>
-            <div class="n-step-label">Persetujuan Kemenkeu</div>
+            <div class="n-step-label">Persetujuan DJKN</div>
           </div>
           <div class="n-step-item" data-step="SK_PENGHAPUSAN">
             <div class="n-step-circle">4</div>
@@ -1560,7 +1536,7 @@
 
           <div class="ctl-row ctl-md" style="justify-content:flex-end; margin-top:12px;">
             <button type="button" class="btn-ghost" id="btn-advance-reject" onclick="_bmnToggleRejectMode()" style="color:var(--n-crit); display:none;">
-              Tolak Usulan (Kemenkeu)
+              Tolak Usulan
             </button>
             <button type="button" class="btn-primary" id="btn-confirm-advance" onclick="_bmnSubmitAdvanceStage()">
               Konfirmasi Lanjut Tahap
@@ -1599,5 +1575,6 @@
           <button type="button" class="btn-ghost" onclick="closeModal('modal-bmn-void-hapus')">Batal</button>
         </div>
       </div>
+    </div>
 
 </div><!-- /view-tpl-tata-usaha -->
