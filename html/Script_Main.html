@@ -5586,9 +5586,20 @@ var _ATTACH_MODAL = {
 };
 function _attachModalId(key) { return _ATTACH_MODAL[key] || null; }
 
+var _MODAL_STACK = [];
+var _BASE_MODAL_Z = 99999;
+
 function openModal(id) {
   var el = document.getElementById(id);
-  if (el) el.classList.remove('n-hidden');
+  if (!el) return;
+  el.classList.remove('n-hidden');
+
+  // Dynamic z-index stacking: Modal yang baru dibuka selalu berada di atas modal sebelumnya
+  var idx = _MODAL_STACK.indexOf(id);
+  if (idx !== -1) _MODAL_STACK.splice(idx, 1);
+  _MODAL_STACK.push(id);
+
+  el.style.zIndex = _BASE_MODAL_Z + (_MODAL_STACK.length * 20);
 }
 
 function closeModal(id) {
@@ -5596,7 +5607,12 @@ function closeModal(id) {
   // supaya form bisa dipakai lagi saat dibuka berikutnya.
   _formRestore(id);
   var el = document.getElementById(id);
-  if (el) el.classList.add('n-hidden');
+  if (el) {
+    el.classList.add('n-hidden');
+    el.style.zIndex = '';
+  }
+  var idx = _MODAL_STACK.indexOf(id);
+  if (idx !== -1) _MODAL_STACK.splice(idx, 1);
   _syncCheckDeferred();
 }
 
@@ -7233,11 +7249,6 @@ function _tuSwitchTab(tabName) {
 // ── SUB-MODUL KEPEGAWAIAN ────────────────────────────────
 
 function _tuLoadPegawai(force) {
-  var strip = document.getElementById('tu-pegawai-kpi-strip');
-  if (strip && (force || !_TU.pegawaiData)) {
-    strip.innerHTML = '<div class="n-card kpi-card"><div class="kpi-label">Memuat Ringkasan Kepegawaian...</div></div>';
-  }
-
   google.script.run
     .withSuccessHandler(function (res) {
       if (!res || !res.success) {
@@ -7246,31 +7257,12 @@ function _tuLoadPegawai(force) {
       }
       _TU.pegawaiData = res.data;
       _tuRenderPegawaiKPI(res.data);
-      _tuFillPegawaiForm(res.data.counts || {});
       _tuRenderPegawaiChart(res.data);
-      _tuRenderPegawaiHistory(res.data.history || []);
     })
     .withFailureHandler(function (err) {
       _msg('tu-pegawai-hist-msg', 'error', 'Koneksi gagal saat memuat data kepegawaian.');
     })
     .tataUsaha_getPegawai(APP.token, APP.filter);
-}
-
-function _tuFillPegawaiForm(counts) {
-  counts = counts || {};
-  var pnsInput    = document.getElementById('tu-peg-pns');
-  var p3kInput    = document.getElementById('tu-peg-p3k');
-  var p3kPwInput  = document.getElementById('tu-peg-p3k-pw');
-  var pjlpInput   = document.getElementById('tu-peg-pjlp');
-  var magangInput = document.getElementById('tu-peg-magang');
-
-  var pnsCount = counts.PNS || (_TU.kompetensiData && _TU.kompetensiData.kpi && _TU.kompetensiData.kpi.totalDitPoa) || 261;
-
-  if (pnsInput)    pnsInput.value    = pnsCount;
-  if (p3kInput)    p3kInput.value    = counts.P3K !== undefined ? counts.P3K : '';
-  if (p3kPwInput)  p3kPwInput.value  = counts.P3K_PARUH_WAKTU !== undefined ? counts.P3K_PARUH_WAKTU : '';
-  if (pjlpInput)   pjlpInput.value   = counts.PJLP !== undefined ? counts.PJLP : '';
-  if (magangInput) magangInput.value = counts.MAGANG !== undefined ? counts.MAGANG : '';
 }
 
 function _tuRenderPegawaiKPI(d) {
@@ -7282,39 +7274,26 @@ function _tuRenderPegawaiKPI(d) {
   var pjlp  = b.PJLP || { count: 0, percentage: 0 };
   var mag   = b.MAGANG || { count: 0, percentage: 0 };
 
-  var pnsCount = pns.count || (_TU.kompetensiData && _TU.kompetensiData.kpi && _TU.kompetensiData.kpi.totalDitPoa) || 261;
-  var total = (d && d.totalPegawai) || (pnsCount + p3k.count + p3kPw.count + pjlp.count + mag.count);
-  var poa = (_TU.kompetensiData && _TU.kompetensiData.kpi && _TU.kompetensiData.kpi.totalDitPoa) || 261;
-  var awak = (_TU.kompetensiData && _TU.kompetensiData.kpi && _TU.kompetensiData.kpi.totalAwakArmada) || 243;
+  var poa = (_TU.kompetensiData && _TU.kompetensiData.kpi && _TU.kompetensiData.kpi.totalDitPoa) || (d && d.totalDitPoa) || 108;
+  var awak = (_TU.kompetensiData && _TU.kompetensiData.kpi && _TU.kompetensiData.kpi.totalAwakArmada) || (d && d.totalAwakArmada) || 396;
+  var nonAsnCount = (p3k.count || 0) + (p3kPw.count || 0) + (pjlp.count || 0) + (mag.count || 0);
+  var total = (poa + awak + nonAsnCount);
 
-  var elTotal = document.getElementById('tu-peg-kpi-total');
-  var elPoa = document.getElementById('tu-peg-kpi-poa');
-  var elAwak = document.getElementById('tu-peg-kpi-awak');
-  var elPns = document.getElementById('tu-peg-kpi-pns');
-  var elPnsSub = document.getElementById('tu-peg-kpi-pns-sub');
-  var elP3k = document.getElementById('tu-peg-kpi-p3k');
-  var elP3kSub = document.getElementById('tu-peg-kpi-p3k-sub');
-  var elKontrak = document.getElementById('tu-peg-kpi-kontrak');
-  var elKontrakSub = document.getElementById('tu-peg-kpi-kontrak-sub');
+  var elTotal  = document.getElementById('tu-peg-kpi-total');
+  var elPoa    = document.getElementById('tu-peg-kpi-poa');
+  var elAwak   = document.getElementById('tu-peg-kpi-awak');
+  var elP3k    = document.getElementById('tu-peg-kpi-p3k');
+  var elP3kPw  = document.getElementById('tu-peg-kpi-p3kpw');
+  var elPjlp   = document.getElementById('tu-peg-kpi-pjlp');
+  var elMagang = document.getElementById('tu-peg-kpi-magang');
 
-  if (elTotal) elTotal.textContent = total;
-  if (elPoa) elPoa.textContent = poa;
-  if (elAwak) elAwak.textContent = awak;
-  if (elPns) elPns.textContent = pnsCount;
-  if (elPnsSub) elPnsSub.textContent = (pns.percentage || 100) + '% ASN Dit. POA';
-  if (elP3k) elP3k.textContent = (p3k.count + p3kPw.count);
-  if (elP3kSub) elP3kSub.textContent = Math.round((p3k.percentage + p3kPw.percentage) * 10) / 10 + '% Penuh & Paruh';
-  if (elKontrak) elKontrak.textContent = (pjlp.count + mag.count);
-  if (elKontrakSub) elKontrakSub.textContent = Math.round((pjlp.percentage + mag.percentage) * 10) / 10 + '% Non-ASN & Magang';
-}
-
-function _tuOpenPegawaiModal() {
-  var counts = (_TU.pegawaiData && _TU.pegawaiData.counts) || {};
-  _tuFillPegawaiForm(counts);
-  var ketEl = document.getElementById('tu-peg-keterangan');
-  if (ketEl) ketEl.value = '';
-  _msg('tu-pegawai-form-msg', null);
-  openModal('modal-tu-pegawai-form');
+  if (elTotal)  elTotal.textContent  = total;
+  if (elPoa)    elPoa.textContent    = poa;
+  if (elAwak)   elAwak.textContent   = awak;
+  if (elP3k)    elP3k.textContent    = p3k.count || 0;
+  if (elP3kPw)  elP3kPw.textContent  = p3kPw.count || 0;
+  if (elPjlp)   elPjlp.textContent   = pjlp.count || 0;
+  if (elMagang) elMagang.textContent = mag.count || 0;
 }
 
 function _tuRenderPegawaiChart(d) {
@@ -7554,7 +7533,6 @@ function _tuRenderKompetensiAnalytics(d) {
 function _tuPopulatePegawaiFilterOptions(filters) {
   filters = filters || {};
   var unitSelect = document.getElementById('tu-filter-unit');
-  var unitDatalist = document.getElementById('tu-m-unit-list');
   var groupSelect = document.getElementById('tu-m-kelompok');
 
   // Normalisasi seluruh variasi Dit. POA ke 'Dit. POA'
@@ -7582,15 +7560,7 @@ function _tuPopulatePegawaiFilterOptions(filters) {
     if (curUnit) unitSelect.value = curUnit;
   }
 
-  if (unitDatalist) {
-    var dHtml = '';
-    uniqueUnits.forEach(function (u) {
-      dHtml += '<option value="' + _esc(u) + '">';
-    });
-    unitDatalist.innerHTML = dHtml;
-  }
-
-  if (groupSelect) {
+  if (groupSelect && (!groupSelect.options || groupSelect.options.length <= 1)) {
     var groups = filters.kelompokJabatanList || (typeof STANDAR_PELATIHAN_RESMI !== 'undefined' ? Object.keys(STANDAR_PELATIHAN_RESMI) : []);
     if (groups && groups.length > 0) {
       var gHtml = '<option value="">-- Pilih Kelompok Jabatan --</option>';
@@ -7682,15 +7652,16 @@ function _tuApplyPegawaiFilters() {
 
   var filtered = list.filter(function (p) {
     var pUnit = String(p.unitKerja || '').trim();
-    if (pUnit.toLowerCase().indexOf('poa') !== -1 || pUnit.toLowerCase().indexOf('operasi armada') !== -1 || pUnit.toLowerCase().indexOf('pengendalian') !== -1) {
+    var uLow = pUnit.toLowerCase();
+    if (uLow === 'dit. poa' || uLow === 'dit poa' || uLow.indexOf('pengendalian operasi armada') !== -1 || (uLow.indexOf('poa') !== -1 && uLow.indexOf('armada') === -1)) {
       pUnit = 'Dit. POA';
     }
 
     // Segmented filter
     if (f.seg === 'DIT_POA') {
-      if (p.lingkupData !== 'DIT_POA' && pUnit !== 'Dit. POA') return false;
+      if (pUnit !== 'Dit. POA' || p.rumpun === 'AWAK_DEK' || p.rumpun === 'AWAK_MESIN') return false;
     } else if (f.seg === 'AWAK') {
-      if (p.rumpun !== 'AWAK_DEK' && p.rumpun !== 'AWAK_MESIN') return false;
+      if (p.rumpun !== 'AWAK_DEK' && p.rumpun !== 'AWAK_MESIN' && p.lingkupData !== 'AWAK_KAPAL_ARMADA') return false;
     } else if (f.seg === 'AWAK_DEK') {
       if (p.rumpun !== 'AWAK_DEK') return false;
     } else if (f.seg === 'AWAK_MESIN') {
@@ -7699,7 +7670,7 @@ function _tuApplyPegawaiFilters() {
 
     // Search filter
     if (f.search) {
-      var haystack = ((p.nama || '') + ' ' + (p.nip || '') + ' ' + (p.jabatanLengkap || '') + ' ' + pUnit + ' ' + (p.kelompokJabatan || '') + ' ' + (p.statusKepegawaian || '')).toLowerCase();
+      var haystack = ((p.nama || '') + ' ' + (p.nip || '') + ' ' + (p.jabatanLengkap || '') + ' ' + pUnit + ' ' + (p.kelompokJabatan || '') + ' ' + (p.statusKepegawaian || '') + ' ' + (p.institusiAsal || '') + ' ' + (p.subJenisSDM || '')).toLowerCase();
       if (haystack.indexOf(f.search) === -1) return false;
     }
 
@@ -7707,12 +7678,14 @@ function _tuApplyPegawaiFilters() {
     if (f.statusPegawai) {
       var sPeg = String(p.statusKepegawaian || '').toUpperCase();
       if (!sPeg) {
-        sPeg = (pUnit === 'Dit. POA' || p.lingkupData === 'DIT_POA') ? 'PNS' : (p.nip && p.nip !== '-' ? 'PNS' : 'NON_ASN');
+        sPeg = (pUnit === 'Dit. POA' && p.rumpun !== 'AWAK_DEK' && p.rumpun !== 'AWAK_MESIN') ? 'PNS' : (p.nip && p.nip !== '-' ? 'PNS' : 'NON_ASN');
       }
       if (f.statusPegawai === 'PNS') {
         if (sPeg !== 'PNS') return false;
       } else if (f.statusPegawai === 'P3K') {
-        if (sPeg !== 'P3K' && sPeg !== 'P3K_PARUH_WAKTU') return false;
+        if (sPeg !== 'P3K') return false;
+      } else if (f.statusPegawai === 'P3K_PARUH_WAKTU') {
+        if (sPeg !== 'P3K_PARUH_WAKTU') return false;
       } else if (f.statusPegawai === 'NON_ASN') {
         if (sPeg !== 'PJLP' && sPeg !== 'MAGANG' && sPeg !== 'NON_ASN') return false;
       } else if (f.statusPegawai === 'PJLP') {
@@ -7727,7 +7700,7 @@ function _tuApplyPegawaiFilters() {
     // Unit filter
     if (f.unit) {
       if (f.unit === 'Dit. POA') {
-        if (pUnit !== 'Dit. POA') return false;
+        if (pUnit !== 'Dit. POA' || p.rumpun === 'AWAK_DEK' || p.rumpun === 'AWAK_MESIN') return false;
       } else if (pUnit !== f.unit) {
         return false;
       }
@@ -7768,7 +7741,8 @@ function _tuRenderPegawaiDirectoryTable(items, startIdx) {
   var html = '';
   items.forEach(function (p, idx) {
     var pUnit = String(p.unitKerja || '').trim();
-    if (pUnit.toLowerCase().indexOf('poa') !== -1 || pUnit.toLowerCase().indexOf('operasi armada') !== -1 || pUnit.toLowerCase().indexOf('pengendalian') !== -1) {
+    var uLow = pUnit.toLowerCase();
+    if (uLow === 'dit. poa' || uLow === 'dit poa' || uLow.indexOf('pengendalian operasi armada') !== -1 || (uLow.indexOf('poa') !== -1 && uLow.indexOf('armada') === -1)) {
       pUnit = 'Dit. POA';
     }
 
@@ -7787,7 +7761,7 @@ function _tuRenderPegawaiDirectoryTable(items, startIdx) {
 
     var sPeg = String(p.statusKepegawaian || '').toUpperCase();
     if (!sPeg) {
-      sPeg = (pUnit === 'Dit. POA' || p.lingkupData === 'DIT_POA') ? 'PNS' : (p.nip && p.nip !== '-' ? 'PNS' : 'NON_ASN');
+      sPeg = (pUnit === 'Dit. POA' && p.rumpun !== 'AWAK_DEK' && p.rumpun !== 'AWAK_MESIN') ? 'PNS' : (p.nip && p.nip !== '-' ? 'PNS' : 'NON_ASN');
     }
     var sPegBadge = '<span class="badge" style="background:#EBF5FF; color:#1E429F; font-size:.6875rem; font-weight:600;">PNS</span>';
     if (sPeg === 'P3K' || sPeg === 'P3K_PARUH_WAKTU') {
@@ -7795,13 +7769,105 @@ function _tuRenderPegawaiDirectoryTable(items, startIdx) {
     } else if (sPeg === 'PJLP') {
       sPegBadge = '<span class="badge" style="background:#F3F4F6; color:#374151; font-size:.6875rem; font-weight:600;">PJLP</span>';
     } else if (sPeg === 'MAGANG') {
-      sPegBadge = '<span class="badge" style="background:#ECFDF5; color:#065F46; font-size:.6875rem; font-weight:600;">Magang</span>';
+      if (p.isExpired || p.statusDisplay === 'SELESAI') {
+        sPegBadge = '<span class="badge" style="background:#FEF2F2; color:#991B1B; font-size:.6875rem; font-weight:600;">Magang Selesai</span>';
+      } else {
+        sPegBadge = '<span class="badge" style="background:#ECFDF5; color:#065F46; font-size:.6875rem; font-weight:600;">Magang Aktif</span>';
+      }
     } else if (sPeg === 'NON_ASN') {
       sPegBadge = '<span class="badge" style="background:#F3F4F6; color:#4B5563; font-size:.6875rem; font-weight:600;">Non-ASN</span>';
     }
 
+    // Detail tambahan di bawah nama (NIP / Asal Kampus / Durasi)
+    var subDetailHtml = '';
+    if (sPeg === 'MAGANG') {
+      var institusiText = p.institusiAsal ? _esc(p.institusiAsal) : 'Mahasiswa/Siswa';
+      var durasiText = (p.tanggalMulai && p.tanggalSelesai) ? (' · <span class="tnum">' + _esc(p.tanggalMulai) + ' s.d ' + _esc(p.tanggalSelesai) + '</span>') : '';
+      subDetailHtml = '<div style="font-size:.75rem; color:var(--n-text-muted); margin-top:2px;">' +
+                        (p.nomorIdentitas ? 'NIM: <span class="tnum">' + _esc(p.nomorIdentitas) + '</span> · ' : '') +
+                        institusiText + durasiText +
+                      '</div>';
+    } else if (sPeg === 'PJLP') {
+      var subTugas = p.subJenisSDM ? _esc(p.subJenisSDM) : 'Tenaga Kontrak';
+      var durasiSpk = (p.tanggalMulai && p.tanggalSelesai) ? (' · <span class="tnum">' + _esc(p.tanggalMulai) + ' s.d ' + _esc(p.tanggalSelesai) + '</span>') : '';
+      subDetailHtml = '<div style="font-size:.75rem; color:var(--n-text-muted); margin-top:2px;">' +
+                        (p.nomorIdentitas ? 'KTP: <span class="tnum">' + _esc(p.nomorIdentitas) + '</span> · ' : '') +
+                        subTugas + durasiSpk +
+                      '</div>';
+    } else {
+      subDetailHtml = '<div style="font-size:.75rem; color:var(--n-text-muted);" class="tnum">NIP: ' + (p.nip && p.nip !== '-' ? _esc(p.nip) : 'Belum Terdata') + '</div>';
+    }
+
     var pct = p.pctKompetensi || 0;
     var barColor = pct >= 80 ? '#059669' : (pct >= 40 ? '#D97706' : '#DC2626');
+
+    var isNonSkj = (p.isNonSkj || sPeg === 'MAGANG' || sPeg === 'PJLP');
+    var stdCellHtml = '';
+    var certCellHtml = '';
+    var actionBtnHtml = '';
+
+    if (isNonSkj) {
+      var nonSkjSub = sPeg === 'MAGANG' ? (p.subJenisSDM || 'Program Magang / PKL') : 'Tenaga Kontrak Non-ASN';
+      stdCellHtml = '<span class="badge" style="background:#F1F5F9; color:#64748B; font-size:.6875rem; font-weight:600;">Non-Standar SKJ</span>' +
+                    '<div style="font-size:.72rem; color:var(--n-text-muted); margin-top:2px;">' + _esc(nonSkjSub) + '</div>';
+
+      if (p.dokumenSkUrl) {
+        certCellHtml = '<a href="' + _esc(p.dokumenSkUrl) + '" target="_blank" rel="noopener noreferrer" class="badge" style="background:#EBF5FF; color:#1E429F; font-size:.6875rem; font-weight:600; text-decoration:none; display:inline-flex; align-items:center; gap:4px;" title="Buka Dokumen SK/SPK">' +
+                         '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>' +
+                         '<span>Dokumen</span>' +
+                       '</a>';
+      } else {
+        certCellHtml = '<span style="color:var(--n-text-muted); font-size:.75rem;">—</span>';
+      }
+
+      actionBtnHtml = '<button type="button" class="btn-outline ctl-sm" onclick="_tuOpenPegawaiMasterModal(\'' + _esc(p.pegawaiId) + '\')">' +
+                        '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">' +
+                          '<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>' +
+                          '<path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>' +
+                        '</svg>' +
+                        '<span>Edit Profil</span>' +
+                      '</button>';
+    } else {
+      stdCellHtml = '<div style="display:flex; justify-content:space-between; align-items:center; font-size:.75rem; margin-bottom:3px;">' +
+                      '<span style="color:var(--n-text-muted);">' + p.totalLulus + ' dari ' + p.totalStandar + ' Diklat</span>' +
+                      '<strong class="tnum" style="color:' + barColor + '; font-weight:700;">' + pct + '%</strong>' +
+                    '</div>' +
+                    '<div style="height:6px; background:var(--n-border); border-radius:999px; overflow:hidden;">' +
+                      '<div style="height:100%; width:' + pct + '%; background:' + barColor + '; transition:width .3s ease;"></div>' +
+                    '</div>';
+
+      certCellHtml = '<span class="badge" style="background:' + (p.totalEvidence > 0 ? '#DEF7EC' : 'var(--n-bg-subtle)') + '; color:' + (p.totalEvidence > 0 ? '#03543F' : 'var(--n-text-muted)') + '; font-size:.75rem; font-weight:600;">' +
+                       p.totalEvidence + ' Berkas' +
+                     '</span>';
+
+      actionBtnHtml = '<button type="button" class="btn-primary ctl-sm" onclick="_tuOpenPegawaiDetailModal(\'' + _esc(p.pegawaiId) + '\')">' +
+                        '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">' +
+                          '<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>' +
+                          '<path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>' +
+                        '</svg>' +
+                        '<span>Lengkapi Pelatihan</span>' +
+                      '</button>';
+    }
+
+    var jabatanCellHtml = '';
+    if (sPeg === 'MAGANG') {
+      jabatanCellHtml = '<div style="font-size:.8125rem; font-weight:600; color:var(--n-text-primary);">' + _esc(p.subJenisSDM || p.jabatanLengkap || 'Peserta Magang') + '</div>' +
+                        '<div style="font-size:.72rem; color:var(--n-text-muted); margin-top:2px;">' +
+                          _esc(p.institusiAsal || 'Mahasiswa / Siswa SMK') +
+                        '</div>';
+    } else if (sPeg === 'PJLP') {
+      jabatanCellHtml = '<div style="font-size:.8125rem; font-weight:600; color:var(--n-text-primary);">' + _esc(p.subJenisSDM || p.jabatanLengkap || 'Tenaga Pendukung') + '</div>' +
+                        '<div style="font-size:.72rem; color:var(--n-text-muted); margin-top:2px;">Tenaga Kontrak Non-ASN</div>';
+    } else if (sPeg === 'P3K_PARUH_WAKTU') {
+      jabatanCellHtml = '<div style="font-size:.8125rem; font-weight:600; color:var(--n-text-primary);">' + _esc(p.jabatanLengkap || 'P3K Paruh Waktu') + '</div>' +
+                        '<div style="font-size:.72rem; color:var(--n-text-muted); margin-top:2px;">Aparatur Sipil Negara (Paruh Waktu)</div>';
+    } else {
+      jabatanCellHtml = '<div style="font-size:.8125rem; font-weight:600; color:var(--n-text-primary);">' + _esc(p.jabatanLengkap) + '</div>' +
+                        '<div style="display:flex; align-items:center; gap:6px; margin-top:2px;">' +
+                          '<span class="badge" style="' + rumpunClass + ' font-size:.6875rem;">' + _esc(rumpunLabel) + '</span>' +
+                          '<span style="font-size:.6875rem; color:var(--n-text-muted);">' + _esc(p.kelompokJabatan) + '</span>' +
+                        '</div>';
+    }
 
     html += '<tr>' +
               '<td style="text-align:center; font-size:.8125rem;" class="tnum">' + (startIdx + idx + 1) + '</td>' +
@@ -7810,40 +7876,30 @@ function _tuRenderPegawaiDirectoryTable(items, startIdx) {
                   '<span style="font-weight:700; font-size:.875rem; color:var(--n-text-primary);">' + _esc(p.nama) + '</span>' +
                   sPegBadge +
                 '</div>' +
-                '<div style="font-size:.75rem; color:var(--n-text-muted);" class="tnum">NIP: ' + (p.nip && p.nip !== '-' ? _esc(p.nip) : 'Belum Terdata') + '</div>' +
+                subDetailHtml +
               '</td>' +
               '<td>' +
-                '<div style="font-size:.8125rem; font-weight:600; color:var(--n-text-primary);">' + _esc(p.jabatanLengkap) + '</div>' +
-                '<div style="display:flex; align-items:center; gap:6px; margin-top:2px;">' +
-                  '<span class="badge" style="' + rumpunClass + ' font-size:.6875rem;">' + _esc(rumpunLabel) + '</span>' +
-                  '<span style="font-size:.6875rem; color:var(--n-text-muted);">' + _esc(p.kelompokJabatan) + '</span>' +
-                '</div>' +
+                jabatanCellHtml +
               '</td>' +
               '<td style="font-size:.8125rem; color:var(--n-text-secondary);">' +
                 _esc(pUnit) +
               '</td>' +
               '<td>' +
-                '<div style="display:flex; justify-content:space-between; align-items:center; font-size:.75rem; margin-bottom:3px;">' +
-                  '<span style="color:var(--n-text-muted);">' + p.totalLulus + ' dari ' + p.totalStandar + ' Diklat</span>' +
-                  '<strong class="tnum" style="color:' + barColor + '; font-weight:700;">' + pct + '%</strong>' +
-                '</div>' +
-                '<div style="height:6px; background:var(--n-border); border-radius:999px; overflow:hidden;">' +
-                  '<div style="height:100%; width:' + pct + '%; background:' + barColor + '; transition:width .3s ease;"></div>' +
-                '</div>' +
+                stdCellHtml +
               '</td>' +
               '<td style="text-align:center;">' +
-                '<span class="badge" style="background:' + (p.totalEvidence > 0 ? '#DEF7EC' : 'var(--n-bg-subtle)') + '; color:' + (p.totalEvidence > 0 ? '#03543F' : 'var(--n-text-muted)') + '; font-size:.75rem; font-weight:600;">' +
-                  p.totalEvidence + ' Berkas' +
-                '</span>' +
+                certCellHtml +
               '</td>' +
               '<td style="text-align:center;">' +
-                '<button type="button" class="btn-primary ctl-sm" onclick="_tuOpenPegawaiDetailModal(\'' + _esc(p.pegawaiId) + '\')">' +
-                  '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">' +
-                    '<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>' +
-                    '<path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>' +
-                  '</svg>' +
-                  '<span>Lengkapi Pelatihan</span>' +
-                '</button>' +
+                '<div style="display:flex; align-items:center; justify-content:center; gap:6px;">' +
+                  actionBtnHtml +
+                  '<button type="button" class="btn-outline ctl-sm" style="color:var(--n-crit); border-color:rgba(225,29,72,0.3); padding:0 6px;" title="Nonaktifkan Personel (Soft Delete)" onclick="_tuOpenDeleteModal(\'' + _esc(p.pegawaiId) + '\', \'' + _esc(p.nama).replace(/'/g, "\\'") + '\')">' +
+                    '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">' +
+                      '<polyline points="3 6 5 6 21 6"></polyline>' +
+                      '<path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>' +
+                    '</svg>' +
+                  '</button>' +
+                '</div>' +
               '</td>' +
             '</tr>';
   });
@@ -8177,40 +8233,306 @@ function _tuSubmitSertifikat() {
     .tataUsaha_saveSertifikat(APP.token, payload);
 }
 
-// ── MODAL MASTER PERSONEL (Ruang Ekspansi Masa Depan) ──────
+// ── MODAL MASTER PERSONEL & DIFERENSIASI STATUS SDM ───────
+
+var _TU_PNS_GROUPS = [
+  'Pengawas Perikanan', 'Struktural', 'Analis Kebijakan', 'Perencana',
+  'Pengelola Pengadaan Barang/Jasa', 'Pranata Hubungan Masyarakat', 'Pranata Komputer',
+  'Statistisi', 'Arsiparis', 'Analis Keuangan APBN', 'Penyusun Laporan Keuangan',
+  'Bendahara', 'Pengadministrasi Perkantoran', 'Operator Layanan Operasional',
+  'Teknisi Sarana dan Prasarana'
+];
+var _TU_AWAK_GROUPS = [
+  'Nahkoda', 'Mualim I', 'Mualim II', 'Mualim III', 'Kepala Kamar Mesin (KKM)',
+  'Masinis I', 'Masinis II', 'Masinis III', 'Juru Mudi', 'Juru Minyak (Oiler)',
+  'Juru Mesin', 'Kelasi', 'Operator Radio (Markonis)', 'Juru Masak'
+];
+
+function _tuOnStatusPegawaiChange() {
+  var sel = document.getElementById('tu-m-status-pegawai');
+  var st = sel ? sel.value : 'PNS';
+
+  var secPns = document.getElementById('tu-form-sec-pns');
+  var secP3k = document.getElementById('tu-form-sec-p3k');
+  var secP3kPw = document.getElementById('tu-form-sec-p3k-pw');
+  var secPjlp = document.getElementById('tu-form-sec-pjlp');
+  var secMagang = document.getElementById('tu-form-sec-magang');
+  var secJabatan = document.getElementById('tu-form-sec-jabatan-kompetensi');
+
+  if (secPns) secPns.style.display = (st === 'PNS') ? 'block' : 'none';
+  if (secP3k) secP3k.style.display = (st === 'P3K') ? 'block' : 'none';
+  if (secP3kPw) secP3kPw.style.display = (st === 'P3K_PARUH_WAKTU') ? 'block' : 'none';
+  if (secPjlp) secPjlp.style.display = (st === 'PJLP') ? 'block' : 'none';
+  if (secMagang) secMagang.style.display = (st === 'MAGANG') ? 'block' : 'none';
+
+  // Magang, PJLP, dan P3K Paruh Waktu sama sekali TIDAK memerlukan Kelompok Standar Jabatan / Jenjang PNS
+  if (secJabatan) {
+    secJabatan.style.display = (st === 'MAGANG' || st === 'PJLP' || st === 'P3K_PARUH_WAKTU') ? 'none' : 'block';
+  }
+
+  var tingkatSelect = document.getElementById('tu-m-tingkat');
+  var kelompokSelect = document.getElementById('tu-m-kelompok');
+
+  if (st === 'MAGANG' || st === 'PJLP' || st === 'P3K_PARUH_WAKTU') {
+    if (kelompokSelect) kelompokSelect.value = '';
+    return;
+  }
+
+  if (st === 'PNS') {
+    if (tingkatSelect) {
+      tingkatSelect.innerHTML =
+        '<option value="NON_JENJANG">Non-Jenjang / Struktural / Pelaksana</option>' +
+        '<option value="AHLI_MADYA">Ahli Madya</option>' +
+        '<option value="AHLI_MUDA">Ahli Muda</option>' +
+        '<option value="AHLI_PERTAMA">Ahli Pertama</option>' +
+        '<option value="TERAMPIL">Terampil / Pelaksana</option>';
+    }
+    if (kelompokSelect) {
+      var pnsHtml = '<option value="">-- Pilih Kelompok Jabatan PNS --</option>';
+      _TU_PNS_GROUPS.forEach(function (g) { pnsHtml += '<option value="' + _esc(g) + '">' + _esc(g) + '</option>'; });
+      kelompokSelect.innerHTML = pnsHtml;
+    }
+  } else if (st === 'P3K') {
+    if (tingkatSelect) {
+      tingkatSelect.innerHTML =
+        '<option value="NON_JENJANG">Non-Jenjang (Sesuai SK P3K)</option>' +
+        '<option value="AHLI_PERTAMA">Ahli Pertama</option>' +
+        '<option value="TERAMPIL">Terampil / Pelaksana</option>';
+    }
+    if (kelompokSelect) {
+      var p3kHtml = '<option value="">-- Pilih Jabatan Fungsional P3K --</option>';
+      _TU_PNS_GROUPS.forEach(function (g) { p3kHtml += '<option value="' + _esc(g) + '">' + _esc(g) + '</option>'; });
+      kelompokSelect.innerHTML = p3kHtml;
+    }
+  }
+}
+
+function _tuOnDocUpload(type, file) {
+  if (!file) return;
+
+  var pickerLblId = type === 'P3K' ? 'tu-p3k-picker-lbl' : (type === 'P3K_PW' ? 'tu-p3kpw-picker-lbl' : (type === 'PJLP' ? 'tu-pjlp-picker-lbl' : 'tu-magang-picker-lbl'));
+  var pickerSubId = type === 'P3K' ? 'tu-p3k-picker-sub' : (type === 'P3K_PW' ? 'tu-p3kpw-picker-sub' : (type === 'PJLP' ? 'tu-pjlp-picker-sub' : 'tu-magang-picker-sub'));
+  var ocrResId    = type === 'P3K' ? 'tu-p3k-ocr-result' : (type === 'P3K_PW' ? 'tu-p3kpw-ocr-result' : (type === 'PJLP' ? 'tu-pjlp-ocr-result' : 'tu-magang-ocr-result'));
+
+  var lblEl = document.getElementById(pickerLblId);
+  var subEl = document.getElementById(pickerSubId);
+  var resEl = document.getElementById(ocrResId);
+
+  var fSizeKb = Math.round(file.size / 1024);
+  if (lblEl) lblEl.textContent = file.name + ' (' + fSizeKb + ' KB)';
+  if (subEl) subEl.textContent = 'Membaca dokumen secara sistematis...';
+  if (resEl) {
+    resEl.style.display = 'block';
+    resEl.innerHTML = '<span style="color:var(--n-primary); font-size:.75rem;">Sedang membaca teks dokumen secara otomatis…</span>';
+  }
+
+  var reader = new FileReader();
+  reader.onload = function (ev) {
+    var base64 = ev.target.result;
+    if (!_TU) _TU = {};
+    _TU.pendingDoc = {
+      type: type,
+      fileName: file.name,
+      mimeType: file.type || 'application/pdf',
+      base64: base64
+    };
+
+    // Jika scan gambar, jalankan OCR client-side untuk membaca teks secara penuh
+    if (file.type && file.type.indexOf('image/') === 0) {
+      var img = new Image();
+      img.onload = function () {
+        var origW = img.naturalWidth || img.width;
+        var origH = img.naturalHeight || img.height;
+        var scale = Math.min(1, 1600 / Math.max(origW, origH));
+        var canvas = document.createElement('canvas');
+        canvas.width = Math.round(origW * scale);
+        canvas.height = Math.round(origH * scale);
+        var ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, origW, origH, 0, 0, canvas.width, canvas.height);
+
+        _loadTesseract(function () {
+          if (!window.Tesseract || typeof window.Tesseract.recognize !== 'function') {
+            if (subEl) subEl.textContent = 'Berkas tersimpan & siap diunggah ke cloud.';
+            if (resEl) resEl.innerHTML = '<span style="color:var(--n-text-muted); font-size:.75rem;">Berkas berhasil dilampirkan.</span>';
+            return;
+          }
+          window.Tesseract.recognize(canvas, 'eng')
+            .then(function (result) {
+              var text = (result && result.data && result.data.text) || '';
+              _tuApplyOcrExtractedData(type, text, resEl, subEl);
+            })
+            .catch(function (err) {
+              console.warn('[Doc OCR] Gagal recognize:', err);
+              if (subEl) subEl.textContent = 'Berkas tersimpan & siap diunggah ke cloud.';
+              if (resEl) resEl.innerHTML = '<span style="color:var(--n-text-muted); font-size:.75rem;">Berkas berhasil dilampirkan.</span>';
+            });
+        });
+      };
+      img.src = base64;
+    } else {
+      // Berkas PDF
+      if (subEl) subEl.textContent = 'Berkas PDF terlampir & siap diunggah ke cloud.';
+      if (resEl) {
+        resEl.innerHTML = '<div style="background:#ECFDF5; border:1px solid #A7F3D0; border-radius:6px; padding:6px 10px; font-size:.75rem; color:#065F46; display:flex; align-items:center; gap:6px;">' +
+          '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>' +
+          '<span>Berkas <strong>' + _esc(file.name) + '</strong> berhasil terlampir (akan diunggah ke Google Drive).</span>' +
+        '</div>';
+      }
+    }
+  };
+  reader.readAsDataURL(file);
+}
+
+function _tuApplyOcrExtractedData(type, text, resEl, subEl) {
+  if (!text) return;
+
+  var noMatch = text.match(/(?:Nomor|No\.?|SPK|Keputusan|SK)[\s:.]*([A-Za-z0-9\/\-\.]+)/i);
+  var extractedNo = noMatch ? noMatch[1].replace(/^[^\w]+|[^\w]+$/g, '') : '';
+
+  var dateMatches = text.match(/\b(\d{1,2}[\s\-\/](?:Jan(?:uari)?|Feb(?:ruari)?|Mar(?:et)?|Apr(?:il)?|Mei|Jun(?:i)?|Jul(?:i)?|Agu(?:stus)?|Sep(?:tember)?|Okt(?:ober)?|Nov(?:ember)?|Des(?:ember)|\d{1,2})[\s\-\/]\d{4})\b/gi) || [];
+
+  var infoList = [];
+  if (extractedNo) infoList.push('No: ' + extractedNo);
+  if (dateMatches.length > 0) infoList.push('Tgl: ' + dateMatches[0] + (dateMatches.length > 1 ? ' s.d ' + dateMatches[1] : ''));
+
+  if (type === 'P3K') {
+    var skInput = document.getElementById('tu-m-sk-p3k');
+    if (skInput && extractedNo) skInput.value = extractedNo;
+  } else if (type === 'P3K_PW') {
+    var skpwInput = document.getElementById('tu-m-sk-p3kpw');
+    if (skpwInput && extractedNo) skpwInput.value = extractedNo;
+  } else if (type === 'PJLP') {
+    var spkInput = document.getElementById('tu-m-spk-pjlp');
+    if (spkInput && extractedNo) spkInput.value = extractedNo;
+  } else if (type === 'MAGANG') {
+    var docnoInput = document.getElementById('tu-m-docno-magang');
+    if (docnoInput && extractedNo) docnoInput.value = extractedNo;
+  }
+
+  if (subEl) subEl.textContent = 'Sistem berhasil membaca isi dokumen.';
+  if (resEl) {
+    resEl.innerHTML = '<div style="background:#ECFDF5; border:1px solid #A7F3D0; border-radius:6px; padding:6px 10px; font-size:.75rem; color:#065F46; display:flex; align-items:center; gap:6px;">' +
+      '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>' +
+      '<span>Dokumen terbaca sistem: <strong>' + _esc(infoList.join(' · ') || 'Teks terdeteksi') + '</strong></span>' +
+    '</div>';
+  }
+}
 
 function _tuOpenPegawaiMasterModal(pegId) {
   var titleEl = document.getElementById('tu-master-modal-title');
   var pidInput = document.getElementById('tu-m-pegawai-id');
   var namaInput = document.getElementById('tu-m-nama');
-  var nipInput = document.getElementById('tu-m-nip');
   var unitInput = document.getElementById('tu-m-unit');
   var sPegSelect = document.getElementById('tu-m-status-pegawai');
   var lingkupSelect = document.getElementById('tu-m-lingkup');
   var kelompokSelect = document.getElementById('tu-m-kelompok');
   var tingkatSelect = document.getElementById('tu-m-tingkat');
   var jabatanInput = document.getElementById('tu-m-jabatan-lengkap');
+  var catatanInput = document.getElementById('tu-m-catatan');
+
+  var nipPns = document.getElementById('tu-m-nip-pns');
+  var golPns = document.getElementById('tu-m-golongan-pns');
+
+  var nipP3k = document.getElementById('tu-m-nip-p3k');
+  var skP3k = document.getElementById('tu-m-sk-p3k');
+  var golP3k = document.getElementById('tu-m-gol-p3k');
+  var mulaiP3k = document.getElementById('tu-m-mulai-p3k');
+  var selesaiP3k = document.getElementById('tu-m-selesai-p3k');
+
+  var nikP3kPw = document.getElementById('tu-m-nik-p3k-pw');
+  var jamP3kPw = document.getElementById('tu-m-jam-p3k-pw');
+  var mulaiP3kPw = document.getElementById('tu-m-mulai-p3k-pw');
+  var selesaiP3kPw = document.getElementById('tu-m-selesai-p3k-pw');
+
+  var nikPjlp = document.getElementById('tu-m-nik-pjlp');
+  var bidangPjlp = document.getElementById('tu-m-bidang-pjlp');
+  var spkPjlp = document.getElementById('tu-m-spk-pjlp');
+  var mulaiPjlp = document.getElementById('tu-m-mulai-pjlp');
+  var selesaiPjlp = document.getElementById('tu-m-selesai-pjlp');
+
+  var jenisMagang = document.getElementById('tu-m-jenis-magang');
+  var nimMagang = document.getElementById('tu-m-nim-magang');
+  var instMagang = document.getElementById('tu-m-institusi-magang');
+  var jurMagang = document.getElementById('tu-m-jurusan-magang');
+  var mentorMagang = document.getElementById('tu-m-mentor-magang');
+  var mulaiMagang = document.getElementById('tu-m-mulai-magang');
+  var selesaiMagang = document.getElementById('tu-m-selesai-magang');
 
   _msg('tu-master-form-msg', null);
+  if (!_TU) _TU = {};
+  _TU.pendingDoc = null;
+
+  // Reset tampilan picker
+  ['tu-p3k', 'tu-p3kpw', 'tu-pjlp', 'tu-magang'].forEach(function(prefix) {
+    var lbl = document.getElementById(prefix + '-picker-lbl');
+    var sub = document.getElementById(prefix + '-picker-sub');
+    var res = document.getElementById(prefix + '-ocr-result');
+    if (lbl) lbl.textContent = 'Pilih Berkas Dokumen (PDF / Scan)';
+    if (sub) sub.textContent = 'Sistem otomatis membaca nomor & masa berlaku';
+    if (res) { res.style.display = 'none'; res.innerHTML = ''; }
+  });
 
   if (pegId && _TU.kompetensiData && _TU.kompetensiData.pegawaiList) {
     var peg = _TU.kompetensiData.pegawaiList.find(function (p) { return p.pegawaiId === pegId; });
     if (peg) {
       var pUnit = String(peg.unitKerja || '').trim();
-      if (pUnit.toLowerCase().indexOf('poa') !== -1 || pUnit.toLowerCase().indexOf('operasi armada') !== -1 || pUnit.toLowerCase().indexOf('pengendalian') !== -1) {
+      var uLow = pUnit.toLowerCase();
+      if (uLow === 'dit. poa' || uLow === 'dit poa' || uLow.indexOf('pengendalian operasi armada') !== -1 || (uLow.indexOf('poa') !== -1 && uLow.indexOf('armada') === -1)) {
         pUnit = 'Dit. POA';
       }
-      var sPegVal = peg.statusKepegawaian || (pUnit === 'Dit. POA' ? 'PNS' : (peg.nip && peg.nip !== '-' ? 'PNS' : 'NON_ASN'));
+      var sPegVal = peg.statusKepegawaian || (pUnit === 'Dit. POA' && peg.rumpun !== 'AWAK_DEK' && peg.rumpun !== 'AWAK_MESIN' ? 'PNS' : 'NON_ASN');
+
       if (titleEl) titleEl.textContent = 'Edit Profil Personel';
       if (pidInput) pidInput.value = peg.pegawaiId;
       if (namaInput) namaInput.value = peg.nama;
-      if (nipInput) nipInput.value = (peg.nip && peg.nip !== '-') ? peg.nip : '';
       if (unitInput) unitInput.value = pUnit;
       if (sPegSelect) sPegSelect.value = sPegVal;
       if (lingkupSelect) lingkupSelect.value = peg.lingkupData || 'DIT_POA';
       if (kelompokSelect) kelompokSelect.value = peg.kelompokJabatan;
       if (tingkatSelect) tingkatSelect.value = peg.tingkatKelas || 'NON_JENJANG';
       if (jabatanInput) jabatanInput.value = peg.jabatanLengkap;
+      if (catatanInput) catatanInput.value = peg.catatanTambahan || '';
+
+      if (nipPns) nipPns.value = (peg.nip && peg.nip !== '-') ? peg.nip : '';
+      if (golPns) golPns.value = peg.tingkatKelas || '';
+
+      if (nipP3k) nipP3k.value = (peg.nip && peg.nip !== '-') ? peg.nip : '';
+      if (skP3k) skP3k.value = peg.nomorIdentitas || '';
+      if (golP3k) golP3k.value = peg.tingkatKelas || 'Golongan IX';
+      if (mulaiP3k) mulaiP3k.value = peg.tanggalMulai || '';
+      if (selesaiP3k) selesaiP3k.value = peg.tanggalSelesai || '';
+
+      if (nikP3kPw) nikP3kPw.value = peg.nomorIdentitas || (peg.nip && peg.nip !== '-' ? peg.nip : '');
+      if (jamP3kPw) jamP3kPw.value = peg.catatanTambahan || '';
+      if (mulaiP3kPw) mulaiP3kPw.value = peg.tanggalMulai || '';
+      if (selesaiP3kPw) selesaiP3kPw.value = peg.tanggalSelesai || '';
+
+      if (nikPjlp) nikPjlp.value = peg.nomorIdentitas || '';
+      if (bidangPjlp) bidangPjlp.value = peg.subJenisSDM || 'Tenaga Administrasi Perkantoran';
+      if (spkPjlp) spkPjlp.value = peg.catatanTambahan || '';
+      if (mulaiPjlp) mulaiPjlp.value = peg.tanggalMulai || '';
+      if (selesaiPjlp) selesaiPjlp.value = peg.tanggalSelesai || '';
+
+      if (jenisMagang) jenisMagang.value = peg.subJenisSDM || 'Magang Mandiri (Mahasiswa)';
+      if (nimMagang) nimMagang.value = peg.nomorIdentitas || '';
+      if (instMagang) instMagang.value = peg.institusiAsal || '';
+      if (jurMagang) jurMagang.value = peg.jabatanLengkap || '';
+      if (mentorMagang) mentorMagang.value = peg.mentorPembimbing || '';
+      if (mulaiMagang) mulaiMagang.value = peg.tanggalMulai || '';
+      if (selesaiMagang) selesaiMagang.value = peg.tanggalSelesai || '';
+
+      if (peg.dokumenSkUrl) {
+        var pref = sPegVal === 'P3K' ? 'tu-p3k' : (sPegVal === 'P3K_PARUH_WAKTU' ? 'tu-p3kpw' : (sPegVal === 'PJLP' ? 'tu-pjlp' : 'tu-magang'));
+        var res = document.getElementById(pref + '-ocr-result');
+        if (res) {
+          res.style.display = 'block';
+          res.innerHTML = '<a href="' + _esc(peg.dokumenSkUrl) + '" target="_blank" rel="noopener noreferrer" style="color:var(--n-primary); font-size:.75rem; text-decoration:none; font-weight:600; display:inline-flex; align-items:center; gap:4px;">' +
+            '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>' +
+            '<span>Lihat Berkas Dokumen Tersimpan</span></a>';
+        }
+      }
+
+      _tuOnStatusPegawaiChange();
       openModal('modal-tu-pegawai-master');
       return;
     }
@@ -8220,14 +8542,36 @@ function _tuOpenPegawaiMasterModal(pegId) {
   if (titleEl) titleEl.textContent = 'Pendaftaran Personel Baru';
   if (pidInput) pidInput.value = '';
   if (namaInput) namaInput.value = '';
-  if (nipInput) nipInput.value = '';
   if (unitInput) unitInput.value = 'Dit. POA';
   if (sPegSelect) sPegSelect.value = 'PNS';
   if (lingkupSelect) lingkupSelect.value = 'DIT_POA';
   if (kelompokSelect) kelompokSelect.value = '';
   if (tingkatSelect) tingkatSelect.value = 'NON_JENJANG';
   if (jabatanInput) jabatanInput.value = '';
+  if (catatanInput) catatanInput.value = '';
 
+  if (nipPns) nipPns.value = '';
+  if (golPns) golPns.value = '';
+  if (nipP3k) nipP3k.value = '';
+  if (skP3k) skP3k.value = '';
+  if (mulaiP3k) mulaiP3k.value = '';
+  if (selesaiP3k) selesaiP3k.value = '';
+  if (nikP3kPw) nikP3kPw.value = '';
+  if (jamP3kPw) jamP3kPw.value = '';
+  if (mulaiP3kPw) mulaiP3kPw.value = '';
+  if (selesaiP3kPw) selesaiP3kPw.value = '';
+  if (nikPjlp) nikPjlp.value = '';
+  if (spkPjlp) spkPjlp.value = '';
+  if (mulaiPjlp) mulaiPjlp.value = '';
+  if (selesaiPjlp) selesaiPjlp.value = '';
+  if (nimMagang) nimMagang.value = '';
+  if (instMagang) instMagang.value = '';
+  if (jurMagang) jurMagang.value = '';
+  if (mentorMagang) mentorMagang.value = '';
+  if (mulaiMagang) mulaiMagang.value = '';
+  if (selesaiMagang) selesaiMagang.value = '';
+
+  _tuOnStatusPegawaiChange();
   openModal('modal-tu-pegawai-master');
 }
 
@@ -8238,20 +8582,84 @@ function _tuSubmitPegawaiMaster() {
 
   var pid = (document.getElementById('tu-m-pegawai-id') || {}).value;
   var nama = ((document.getElementById('tu-m-nama') || {}).value || '').trim();
-  var nip = ((document.getElementById('tu-m-nip') || {}).value || '').trim();
   var unit = ((document.getElementById('tu-m-unit') || {}).value || '').trim();
-  if (unit.toLowerCase().indexOf('poa') !== -1 || unit.toLowerCase().indexOf('operasi armada') !== -1 || unit.toLowerCase().indexOf('pengendalian') !== -1) {
+  var uLow = unit.toLowerCase();
+  if (uLow === 'dit. poa' || uLow === 'dit poa' || uLow.indexOf('pengendalian operasi armada') !== -1 || (uLow.indexOf('poa') !== -1 && uLow.indexOf('armada') === -1)) {
     unit = 'Dit. POA';
   }
-  var statusPeg = (document.getElementById('tu-m-status-pegawai') || {}).value || (unit === 'Dit. POA' ? 'PNS' : 'NON_ASN');
+  var statusPeg = (document.getElementById('tu-m-status-pegawai') || {}).value || 'PNS';
   var lingkup = (document.getElementById('tu-m-lingkup') || {}).value || 'DIT_POA';
   if (unit === 'Dit. POA') lingkup = 'DIT_POA';
   var kelompok = (document.getElementById('tu-m-kelompok') || {}).value;
   var tingkat = (document.getElementById('tu-m-tingkat') || {}).value || 'NON_JENJANG';
   var jabatan = ((document.getElementById('tu-m-jabatan-lengkap') || {}).value || '').trim();
+  var catatan = ((document.getElementById('tu-m-catatan') || {}).value || '').trim();
 
-  if (!nama || !unit || !kelompok) {
-    _msg(msgElId, 'error', 'Nama, Unit Kerja, dan Kelompok Jabatan wajib diisi.');
+  var nip = '-';
+  var subJenis = '';
+  var noIdentitas = '';
+  var asalKampus = '';
+  var tglMulai = '';
+  var tglSelesai = '';
+  var mentor = '';
+
+  if (statusPeg === 'PNS') {
+    nip = ((document.getElementById('tu-m-nip-pns') || {}).value || '').trim();
+    tingkat = (document.getElementById('tu-m-golongan-pns') || {}).value || tingkat;
+    if (!nip) {
+      _msg(msgElId, 'error', 'NIP wajib diisi untuk pegawai PNS.');
+      return;
+    }
+  } else if (statusPeg === 'P3K') {
+    nip = ((document.getElementById('tu-m-nip-p3k') || {}).value || '').trim();
+    noIdentitas = ((document.getElementById('tu-m-sk-p3k') || {}).value || '').trim();
+    tingkat = (document.getElementById('tu-m-gol-p3k') || {}).value || tingkat;
+    tglMulai = (document.getElementById('tu-m-mulai-p3k') || {}).value || '';
+    tglSelesai = (document.getElementById('tu-m-selesai-p3k') || {}).value || '';
+  } else if (statusPeg === 'P3K_PARUH_WAKTU') {
+    noIdentitas = ((document.getElementById('tu-m-nik-p3k-pw') || {}).value || '').trim();
+    var alokasiJam = ((document.getElementById('tu-m-jam-p3k-pw') || {}).value || '').trim();
+    if (alokasiJam) catatan = (catatan ? catatan + ' | ' : '') + 'Alokasi: ' + alokasiJam;
+    tglMulai = (document.getElementById('tu-m-mulai-p3k-pw') || {}).value || '';
+    tglSelesai = (document.getElementById('tu-m-selesai-p3k-pw') || {}).value || '';
+  } else if (statusPeg === 'PJLP') {
+    noIdentitas = ((document.getElementById('tu-m-nik-pjlp') || {}).value || '').trim();
+    subJenis = (document.getElementById('tu-m-bidang-pjlp') || {}).value || '';
+    var noSpk = ((document.getElementById('tu-m-spk-pjlp') || {}).value || '').trim();
+    if (noSpk) catatan = (catatan ? catatan + ' | ' : '') + 'No SPK: ' + noSpk;
+    tglMulai = (document.getElementById('tu-m-mulai-pjlp') || {}).value || '';
+    tglSelesai = (document.getElementById('tu-m-selesai-pjlp') || {}).value || '';
+    if (!noIdentitas) {
+      _msg(msgElId, 'error', 'NIK KTP wajib diisi untuk PJLP.');
+      return;
+    }
+    kelompok = 'PJLP';
+    tingkat = 'NON_JENJANG';
+    if (!jabatan) jabatan = 'PJLP - ' + subJenis;
+  } else if (statusPeg === 'MAGANG') {
+    subJenis = (document.getElementById('tu-m-jenis-magang') || {}).value || 'Magang Mandiri (Mahasiswa)';
+    noIdentitas = ((document.getElementById('tu-m-nim-magang') || {}).value || '').trim();
+    asalKampus = ((document.getElementById('tu-m-institusi-magang') || {}).value || '').trim();
+    var prodi = ((document.getElementById('tu-m-jurusan-magang') || {}).value || '').trim();
+    mentor = ((document.getElementById('tu-m-mentor-magang') || {}).value || '').trim();
+    tglMulai = (document.getElementById('tu-m-mulai-magang') || {}).value || '';
+    tglSelesai = (document.getElementById('tu-m-selesai-magang') || {}).value || '';
+
+    if (!asalKampus || !tglMulai || !tglSelesai) {
+      _msg(msgElId, 'error', 'Asal Universitas/SMK, Tanggal Mulai, dan Tanggal Selesai Magang wajib diisi.');
+      return;
+    }
+    kelompok = 'Non-Kompetensi';
+    tingkat = 'NON_JENJANG';
+    if (!jabatan) jabatan = 'Peserta ' + subJenis + ' (' + asalKampus + (prodi ? ' - ' + prodi : '') + ')';
+  }
+
+  if (!nama || !unit) {
+    _msg(msgElId, 'error', 'Nama dan Unit Kerja wajib diisi.');
+    return;
+  }
+  if (!kelompok && statusPeg !== 'MAGANG' && statusPeg !== 'PJLP') {
+    _msg(msgElId, 'error', 'Kelompok Jabatan wajib dipilih.');
     return;
   }
 
@@ -8262,10 +8670,25 @@ function _tuSubmitPegawaiMaster() {
     unitKerja: unit,
     statusKepegawaian: statusPeg,
     lingkupData: lingkup,
-    kelompokJabatan: kelompok,
-    tingkatKelas: tingkat,
-    jabatanLengkap: jabatan || kelompok
+    kelompokJabatan: kelompok || (statusPeg === 'MAGANG' ? 'Non-Kompetensi' : 'PJLP'),
+    tingkatKelas: tingkat || 'NON_JENJANG',
+    jabatanLengkap: jabatan || kelompok,
+    subJenisSDM: subJenis,
+    nomorIdentitas: noIdentitas,
+    institusiAsal: asalKampus,
+    tanggalMulai: tglMulai,
+    tanggalSelesai: tglSelesai,
+    mentorPembimbing: mentor,
+    catatanTambahan: catatan
   };
+
+  if (_TU && _TU.pendingDoc && _TU.pendingDoc.base64) {
+    payload.docFile = {
+      fileName: _TU.pendingDoc.fileName,
+      mimeType: _TU.pendingDoc.mimeType,
+      base64: _TU.pendingDoc.base64
+    };
+  }
 
   _setLoading(btn, true);
 
@@ -8279,12 +8702,51 @@ function _tuSubmitPegawaiMaster() {
       closeModal('modal-tu-pegawai-master');
       _msg('tu-peg-dir-msg', 'success', res.message || 'Profil personel berhasil disimpan.');
       _tuLoadKompetensi(true);
+      _tuLoadPegawai(true);
     })
     .withFailureHandler(function (err) {
       _setLoading(btn, false);
       _msg(msgElId, 'error', 'Terjadi kesalahan sistem.');
     })
     .tataUsaha_savePegawaiMaster(APP.token, payload);
+}
+
+// ── SOFT DELETE PERSONEL ───────────────────────────────────
+
+function _tuOpenDeleteModal(pegId, nama) {
+  var idEl = document.getElementById('tu-del-pegawai-id');
+  var nameEl = document.getElementById('tu-del-nama');
+  if (idEl) idEl.value = pegId || '';
+  if (nameEl) nameEl.textContent = nama || '-';
+  _msg('tu-delete-msg', null);
+  openModal('modal-tu-pegawai-delete');
+}
+
+function _tuExecuteDeletePegawai() {
+  var pid = (document.getElementById('tu-del-pegawai-id') || {}).value;
+  var btn = document.getElementById('tu-del-btn-confirm');
+  if (!pid) return;
+
+  _setLoading(btn, true);
+  _msg('tu-delete-msg', null);
+
+  google.script.run
+    .withSuccessHandler(function (res) {
+      _setLoading(btn, false);
+      if (!res || !res.success) {
+        _msg('tu-delete-msg', 'error', (res && res.error) || 'Gagal menonaktifkan personel.');
+        return;
+      }
+      closeModal('modal-tu-pegawai-delete');
+      _msg('tu-peg-dir-msg', 'success', res.message || 'Personel berhasil dinonaktifkan.');
+      _tuLoadKompetensi(true);
+      _tuLoadPegawai(true);
+    })
+    .withFailureHandler(function (err) {
+      _setLoading(btn, false);
+      _msg('tu-delete-msg', 'error', 'Koneksi gagal saat menghubungi server.');
+    })
+    .tataUsaha_deletePegawaiMaster(APP.token, pid);
 }
 
 // ============================================================
@@ -9131,6 +9593,127 @@ function _bmnSwitchView(viewName, asetObj) {
 
 // ── GEOTAGGING & HAVERSINE NEAREST MATCH (SUB-FASE 18B.4) ───
 
+/**
+ * Ekstraktor EXIF GPS JPEG native (Zero-Dependency & Murni Pure-JS)
+ * Menjamin ekstraksi koordinat GPS kamera fisik / smartphone berjalan instan ( <5ms )
+ * tanpa bergantung CDN external, network, atau script blocking.
+ */
+function _bmnParseExifGpsFromArrayBuffer(buffer) {
+  try {
+    var view = new DataView(buffer);
+    if (view.byteLength < 12 || view.getUint16(0, false) !== 0xFFD8) return null; // Bukan JPEG
+
+    var length = view.byteLength;
+    var offset = 2;
+
+    while (offset + 4 < length) {
+      if (view.getUint8(offset) !== 0xFF) return null;
+      var marker = view.getUint8(offset + 1);
+
+      // APP1 Marker (0xFFE1) menyimpan metadata EXIF
+      if (marker === 0xE1) {
+        var app1Len = view.getUint16(offset + 2, false);
+        var exifStart = offset + 4;
+        if (view.getUint32(exifStart, false) === 0x45786966 && view.getUint16(exifStart + 4, false) === 0x0000) {
+          return _bmnParseTiffGps(view, exifStart + 6);
+        }
+        offset += 2 + app1Len;
+      } else if ((marker >= 0xE0 && marker <= 0xEF) || marker === 0xFE || marker === 0xDB || marker === 0xC0 || marker === 0xC4) {
+        var segLen = view.getUint16(offset + 2, false);
+        offset += 2 + segLen;
+      } else if (marker === 0xD9 || marker === 0xDA) {
+        break; // End of image atau start of scan
+      } else {
+        offset += 2;
+      }
+    }
+  } catch (e) {
+    return null;
+  }
+  return null;
+
+  function _bmnParseTiffGps(v, tiffStart) {
+    var littleEndian = false;
+    var endianMarker = v.getUint16(tiffStart, false);
+    if (endianMarker === 0x4949) {
+      littleEndian = true;
+    } else if (endianMarker === 0x4D4D) {
+      littleEndian = false;
+    } else {
+      return null;
+    }
+
+    if (v.getUint16(tiffStart + 2, littleEndian) !== 0x002A) return null;
+
+    var ifd0Offset = v.getUint32(tiffStart + 4, littleEndian);
+    var ifd0Start = tiffStart + ifd0Offset;
+    if (ifd0Start + 2 > v.byteLength) return null;
+    var numEntries = v.getUint16(ifd0Start, littleEndian);
+
+    var gpsIfdOffset = null;
+    for (var i = 0; i < numEntries; i++) {
+      var entryStart = ifd0Start + 2 + (i * 12);
+      if (entryStart + 12 > v.byteLength) break;
+      var tag = v.getUint16(entryStart, littleEndian);
+      if (tag === 0x8825) { // GPS Info IFD Pointer
+        gpsIfdOffset = v.getUint32(entryStart + 8, littleEndian);
+        break;
+      }
+    }
+
+    if (!gpsIfdOffset) return null;
+
+    var gpsStart = tiffStart + gpsIfdOffset;
+    if (gpsStart + 2 > v.byteLength) return null;
+    var numGpsEntries = v.getUint16(gpsStart, littleEndian);
+
+    var latRef = 'N', lonRef = 'E';
+    var latDeg = null, latMin = null, latSec = null;
+    var lonDeg = null, lonMin = null, lonSec = null;
+
+    function readRational(off) {
+      var actualOff = tiffStart + off;
+      if (actualOff + 8 > v.byteLength) return 0;
+      var num = v.getUint32(actualOff, littleEndian);
+      var den = v.getUint32(actualOff + 4, littleEndian);
+      return den === 0 ? 0 : num / den;
+    }
+
+    for (var j = 0; j < numGpsEntries; j++) {
+      var gEntry = gpsStart + 2 + (j * 12);
+      if (gEntry + 12 > v.byteLength) break;
+      var gTag = v.getUint16(gEntry, littleEndian);
+
+      if (gTag === 0x0001) { // GPSLatitudeRef
+        latRef = String.fromCharCode(v.getUint8(gEntry + 8));
+      } else if (gTag === 0x0002) { // GPSLatitude
+        var vOff = v.getUint32(gEntry + 8, littleEndian);
+        latDeg = readRational(vOff);
+        latMin = readRational(vOff + 8);
+        latSec = readRational(vOff + 16);
+      } else if (gTag === 0x0003) { // GPSLongitudeRef
+        lonRef = String.fromCharCode(v.getUint8(gEntry + 8));
+      } else if (gTag === 0x0004) { // GPSLongitude
+        var lOff = v.getUint32(gEntry + 8, littleEndian);
+        lonDeg = readRational(lOff);
+        lonMin = readRational(lOff + 8);
+        lonSec = readRational(lOff + 16);
+      }
+    }
+
+    if (latDeg !== null && lonDeg !== null) {
+      var lat = latDeg + (latMin / 60) + (latSec / 3600);
+      var lon = lonDeg + (lonMin / 60) + (lonSec / 3600);
+      if (latRef.toUpperCase() === 'S') lat = -lat;
+      if (lonRef.toUpperCase() === 'W') lon = -lon;
+      if (!isNaN(lat) && !isNaN(lon) && lat >= -90 && lat <= 90 && lon >= -180 && lon <= 180) {
+        return { latitude: lat, longitude: lon };
+      }
+    }
+    return null;
+  }
+}
+
 var _EXIFR_LOADED = false;
 var _exifrQueue = [];
 
@@ -9224,53 +9807,122 @@ function _loadTesseract(cb) {
   document.head.appendChild(script);
 }
 
-function _bmnParseCoordinatesFromText(text) {
-  if (!text || typeof text !== 'string') return null;
+function _bmnParseCoordinatesFromText(rawText) {
+  if (!rawText || typeof rawText !== 'string') return null;
 
-  // 1. Format desimal dengan label Lat & Long / Lon / LS / LU / BT / BB
-  // Mis. "Lat -6.178949° Long 106.834359°" atau "Latitude: -6.178949, Longitude: 106.834359"
-  var latMatch = text.match(/(?:Lat(?:itude)?|LS|LU)\s*[:\s]*([+-]?\d+(?:\.\d+)?)/i);
-  var lonMatch = text.match(/(?:Long?(?:itude)?|BT|BB)\s*[:\s]*([+-]?\d+(?:\.\d+)?)/i);
-
-  if (latMatch && lonMatch) {
-    var lat = parseFloat(latMatch[1]);
-    var lon = parseFloat(lonMatch[1]);
-    if (/LS/i.test(latMatch[0]) && lat > 0) lat = -lat;
-    if (!isNaN(lat) && !isNaN(lon) && lat >= -90 && lat <= 90 && lon >= -180 && lon <= 180) {
-      return { latitude: lat, longitude: lon, raw: latMatch[0] + ' ' + lonMatch[0] };
+  // Deteksi kata kunci nama UPT / Pangkalan / Stasiun PSDKP di seluruh teks gambar
+  var uptKeywords = [
+    { name: 'Pangkalan PSDKP Batam', match: /Batam/i },
+    { name: 'Pangkalan PSDKP Benoa', match: /Benoa/i },
+    { name: 'Pangkalan PSDKP Bitung', match: /Bitung/i },
+    { name: 'Pangkalan PSDKP Lampulo', match: /Lampulo/i },
+    { name: 'Pangkalan PSDKP Tual', match: /Tual/i },
+    { name: 'Pangkalan PSDKP Jakarta', match: /Jakarta|Muara Baru/i },
+    { name: 'Stasiun PSDKP Belawan', match: /Belawan/i },
+    { name: 'Stasiun PSDKP Pontianak', match: /Pontianak/i },
+    { name: 'Stasiun PSDKP Cilacap', match: /Cilacap/i },
+    { name: 'Stasiun PSDKP Tarakan', match: /Tarakan/i },
+    { name: 'Stasiun PSDKP Kupang', match: /Kupang/i },
+    { name: 'Stasiun PSDKP Ambon', match: /Ambon/i },
+    { name: 'Stasiun PSDKP Biak', match: /Biak/i },
+    { name: 'Stasiun PSDKP Tahuna', match: /Tahuna/i },
+    { name: 'Stasiun PSDKP Padang', match: /Padang/i }
+  ];
+  var locationHint = null;
+  for (var u = 0; u < uptKeywords.length; u++) {
+    if (uptKeywords[u].match.test(rawText)) {
+      locationHint = uptKeywords[u].name;
+      break;
     }
   }
 
-  // 2. Format DMS (Degrees Minutes Seconds): mis. 6°10'44.2"S 106°50'03.7"E
-  var dmsRegex = /(\d+)[°\s]+(\d+)['`\s]+([\d.]+)?["\s]*([NSEW])/gi;
-  var dmsMatches = [];
-  var m;
-  while ((m = dmsRegex.exec(text)) !== null) {
-    var deg = parseFloat(m[1]) || 0;
-    var min = parseFloat(m[2]) || 0;
-    var sec = parseFloat(m[3]) || 0;
-    var dir = m[4].toUpperCase();
-    var dd = deg + (min / 60) + (sec / 3600);
-    if (dir === 'S' || dir === 'W') dd = -dd;
-    dmsMatches.push({ dd: dd, dir: dir });
+  var text = rawText
+    .replace(/[\r\n]+/g, ' ')
+    .replace(/([0-9])([oO])([0-9])/g, '$10$3')
+    .replace(/([0-9])([lI])([0-9])/g, '$11$3')
+    .replace(/(\d+),(\d{3,})/g, '$1.$2');
+
+  function parsePart(str, isLon) {
+    if (!str) return null;
+    str = str.trim();
+    var isNeg = /([SW]|LS|BB)/i.test(str) || /^\s*-/.test(str);
+
+    if (/[°\x27\x22`\*o]/.test(str)) {
+      var dms = str.match(/(\d{1,3})[°\s\*\.oO]+(\d{1,2}(?:\.\d+)?)(?:[\x27\x60\s]+(\d{1,2}(?:\.\d+)?))?/);
+      if (dms) {
+        var d = parseFloat(dms[1]);
+        var m = parseFloat(dms[2]) || 0;
+        var s = parseFloat(dms[3]) || 0;
+        var val = d + (m / 60) + (s / 3600);
+        if (isNeg && val > 0) val = -val;
+        return val;
+      }
+    }
+
+    var dec = str.match(/([+-]?\d{1,3}(?:\.\d+)?)/);
+    if (dec) {
+      var val = parseFloat(dec[1]);
+      if (isNeg && val > 0) val = -val;
+      return val;
+    }
+    return null;
   }
-  if (dmsMatches.length >= 2) {
-    var latObj = dmsMatches.find(function(x) { return x.dir === 'N' || x.dir === 'S'; });
-    var lonObj = dmsMatches.find(function(x) { return x.dir === 'E' || x.dir === 'W'; });
-    if (latObj && lonObj) {
-      return { latitude: latObj.dd, longitude: lonObj.dd, raw: 'DMS' };
+
+  // 1. Explicit Labels (Lat / Long / LS / LU / BT / BB)
+  var latLabelM = text.match(/(?:Lat(?:itude)?|LS|LU)\s*[:\s]*([+-]?[0-9NSEW°\x27\x22\.\s]+?)(?=(?:Long?(?:itude)?|BT|BB|$))/i);
+  var lonLabelM = text.match(/(?:Long?(?:itude)?|BT|BB)\s*[:\s]*([+-]?[0-9NSEW°\x27\x22\.\s]+)/i);
+
+  if (latLabelM && lonLabelM) {
+    var latA = parsePart(latLabelM[1], false);
+    var lonA = parsePart(lonLabelM[1], true);
+    if (latA !== null && lonA !== null && !isNaN(latA) && !isNaN(lonA) && latA >= -90 && latA <= 90 && lonA >= -180 && lonA <= 180) {
+      if (/LS/i.test(latLabelM[0]) && latA > 0) latA = -latA;
+      return { latitude: latA, longitude: lonA, raw: 'LABELED', locationHint: locationHint };
     }
   }
 
-  // 3. Fallback pasangan angka desimal koordinat Indonesia (Lat berkisar -15 s.d. 10, Lon 90 s.d. 145)
-  var genericRegex = /([+-]?\d{1,2}\.\d{4,8})[^\d\w\r\n]+([+-]?\d{2,3}\.\d{4,8})/;
-  var genMatch = text.match(genericRegex);
-  if (genMatch) {
-    var gLat = parseFloat(genMatch[1]);
-    var gLon = parseFloat(genMatch[2]);
-    if (!isNaN(gLat) && !isNaN(gLon) && gLat >= -15 && gLat <= 10 && gLon >= 90 && gLon <= 145) {
-      return { latitude: gLat, longitude: gLon, raw: genMatch[0] };
+  // 2. Full DMS / DDM pattern: [S/N] DD° MM[.mmm]' [SS"]? [S/N]?, [E/W] DDD° MM[.mmm]' [SS"]? [E/W]?
+  var fullDmsRegex = /(?:([NS]|LS|LU)\s*)?(\d{1,2})[°\s\*\.oO]+(\d{1,2}(?:\.\d+)?)(?:[\x27\x60\s]+(\d{1,2}(?:\.\d+)?))?[\x22\x27\s]*([NS]|LS|LU)?[^\w\d]+(?:([EW]|BT|BB)\s*)?(\d{2,3})[°\s\*\.oO]+(\d{1,2}(?:\.\d+)?)(?:[\x27\x60\s]+(\d{1,2}(?:\.\d+)?))?[\x22\x27\s]*([EW]|BT|BB)?/i;
+  var fMatch = text.match(fullDmsRegex);
+  if (fMatch) {
+    var latDeg = parseFloat(fMatch[2]);
+    var latMin = parseFloat(fMatch[3]) || 0;
+    var latSec = parseFloat(fMatch[4]) || 0;
+    var latDir = (fMatch[1] || fMatch[5] || '').toUpperCase();
+
+    var lonDeg = parseFloat(fMatch[7]);
+    var lonMin = parseFloat(fMatch[8]) || 0;
+    var lonSec = parseFloat(fMatch[9]) || 0;
+    var lonDir = (fMatch[6] || fMatch[10] || '').toUpperCase();
+
+    var latVal = latDeg + (latMin / 60) + (latSec / 3600);
+    var lonVal = lonDeg + (lonMin / 60) + (lonSec / 3600);
+
+    if (latDir === 'S' || latDir === 'LS' || (!latDir && latDeg <= 12)) latVal = -latVal;
+    if (lonDir === 'W' || lonDir === 'BB') lonVal = -lonVal;
+
+    if (latVal >= -15 && latVal <= 10 && lonVal >= 90 && lonVal <= 145) {
+      return { latitude: latVal, longitude: lonVal, raw: 'DMS_DDM', locationHint: locationHint };
     }
+  }
+
+  // 3. Decimal Coordinates Pair: "-6.178949, 106.834359"
+  var decRegex = /([+-]?\d{1,2}\.\d{4,8})\s*([°\s]*([NS]|LS|LU))?[^\d\w+-]+([+-]?\d{2,3}\.\d{4,8})\s*([°\s]*([EW]|BT|BB))?/i;
+  var dMatch = text.match(decRegex);
+  if (dMatch) {
+    var dLat = parseFloat(dMatch[1]);
+    var dLon = parseFloat(dMatch[4]);
+    var dLatDir = (dMatch[3] || '').toUpperCase();
+    var dLonDir = (dMatch[6] || '').toUpperCase();
+    if ((dLatDir === 'S' || dLatDir === 'LS') && dLat > 0) dLat = -dLat;
+    if ((dLonDir === 'W' || dLonDir === 'BB') && dLon > 0) dLon = -dLon;
+    if (dLat >= -15 && dLat <= 10 && dLon >= 90 && dLon <= 145) {
+      return { latitude: dLat, longitude: dLon, raw: 'DEC_PAIR', locationHint: locationHint };
+    }
+  }
+
+  if (locationHint) {
+    return { latitude: null, longitude: null, raw: 'LOCATION_NAME', locationHint: locationHint };
   }
 
   return null;
@@ -9290,48 +9942,100 @@ function _bmnScanWatermarkOcr(file, cb) {
         var origW = img.naturalWidth || img.width;
         var origH = img.naturalHeight || img.height;
 
-        // Potong hanya 35% area bawah tempat watermark GPS Map Camera berada untuk efisiensi komputasi
-        var cropHeightRatio = 0.35;
-        var srcY = Math.round(origH * (1 - cropHeightRatio));
-        var srcH = Math.round(origH * cropHeightRatio);
-
-        var scale = Math.min(1, 1400 / origW);
-        var canvas = document.createElement('canvas');
-        canvas.width = Math.round(origW * scale);
-        canvas.height = Math.round(srcH * scale);
-
-        var ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, srcY, origW, srcH, 0, 0, canvas.width, canvas.height);
-
         _loadTesseract(function() {
           if (!window.Tesseract || typeof window.Tesseract.recognize !== 'function') {
             if (cb) cb(null);
             return;
           }
-          window.Tesseract.recognize(canvas, 'eng')
-            .then(function(result) {
-              var text = (result && result.data && result.data.text) || '';
-              var coords = _bmnParseCoordinatesFromText(text);
-              if (cb) cb(coords, text);
+
+          function createRegionCanvas(sy, sh, targetW) {
+            var rCanvas = document.createElement('canvas');
+            var scale = targetW / origW;
+            rCanvas.width = targetW;
+            rCanvas.height = Math.round(sh * scale);
+            var rCtx = rCanvas.getContext('2d');
+            rCtx.drawImage(img, 0, sy, origW, sh, 0, 0, rCanvas.width, rCanvas.height);
+
+            // Binarization & peningkatan kontras untuk teks watermark putih/kuning
+            try {
+              var imgData = rCtx.getImageData(0, 0, rCanvas.width, rCanvas.height);
+              var data = imgData.data;
+              for (var i = 0; i < data.length; i += 4) {
+                var r = data[i], g = data[i+1], b = data[i+2];
+                var lum = 0.299 * r + 0.587 * g + 0.114 * b;
+                var val = lum > 140 ? 255 : (lum < 90 ? 0 : lum);
+                data[i] = val;
+                data[i+1] = val;
+                data[i+2] = val;
+              }
+              rCtx.putImageData(imgData, 0, 0);
+            } catch (eFilter) {}
+            return rCanvas;
+          }
+
+          // Step 1: Scan Bottom 35% banner (letak utama watermark kamera timestamp & GPS)
+          var bottomH = Math.round(origH * 0.35);
+          var bottomY = origH - bottomH;
+          var bottomCanvas = createRegionCanvas(bottomY, bottomH, Math.min(origW, 1200));
+
+          window.Tesseract.recognize(bottomCanvas, 'eng')
+            .then(function(bRes) {
+              var bText = (bRes && bRes.data && bRes.data.text) || '';
+              var coords = _bmnParseCoordinatesFromText(bText);
+              if (coords) {
+                if (cb) cb(coords, bText);
+                return;
+              }
+
+              // Step 2: Scan Top 30% banner
+              var topH = Math.round(origH * 0.30);
+              var topCanvas = createRegionCanvas(0, topH, Math.min(origW, 1200));
+
+              window.Tesseract.recognize(topCanvas, 'eng')
+                .then(function(tRes) {
+                  var tText = (tRes && tRes.data && tRes.data.text) || '';
+                  var tCoords = _bmnParseCoordinatesFromText(tText);
+                  if (tCoords) {
+                    if (cb) cb(tCoords, tText);
+                    return;
+                  }
+
+                  // Step 3: Scan Full Canvas fallback (skala max 1000px agar cepat & tidak crash)
+                  var fullCanvas = document.createElement('canvas');
+                  var fScale = Math.min(1, 1000 / Math.max(origW, origH));
+                  fullCanvas.width = Math.round(origW * fScale);
+                  fullCanvas.height = Math.round(origH * fScale);
+                  var fCtx = fullCanvas.getContext('2d');
+                  fCtx.drawImage(img, 0, 0, origW, origH, 0, 0, fullCanvas.width, fullCanvas.height);
+
+                  window.Tesseract.recognize(fullCanvas, 'eng')
+                    .then(function(fRes) {
+                      var fText = (fRes && fRes.data && fRes.data.text) || '';
+                      var fCoords = _bmnParseCoordinatesFromText(fText);
+                      if (cb) cb(fCoords, fText);
+                    })
+                    .catch(function() {
+                      if (cb) cb(null);
+                    });
+                })
+                .catch(function() {
+                  if (cb) cb(null);
+                });
             })
             .catch(function(err) {
-              console.warn('[OCR Watermark] Gagal proses recognize:', err);
+              console.warn('[OCR Watermark] Gagal proses:', err);
               if (cb) cb(null);
             });
         });
       } catch (err) {
-        console.warn('[OCR Watermark] Gagal crop canvas:', err);
+        console.warn('[OCR Watermark] Gagal render canvas:', err);
         if (cb) cb(null);
       }
     };
-    img.onerror = function() {
-      if (cb) cb(null);
-    };
+    img.onerror = function() { if (cb) cb(null); };
     img.src = ev.target.result;
   };
-  reader.onerror = function() {
-    if (cb) cb(null);
-  };
+  reader.onerror = function() { if (cb) cb(null); };
   reader.readAsDataURL(file);
 }
 
@@ -9540,26 +10244,46 @@ function _bmnHandlePhotoFile(e) {
     }
   });
 
-  // OPSI 1: Ekstraksi koordinat GPS dari raw file via exifr sebelum kompresi kanvas
-  _loadExifr(function () {
-    if (window.exifr && typeof window.exifr.gps === 'function') {
-      window.exifr.gps(file)
-        .then(function (gps) {
-          if (gps && typeof gps.latitude === 'number' && typeof gps.longitude === 'number' && !isNaN(gps.latitude) && !isNaN(gps.longitude)) {
-            _bmnApplyCoordinates(gps.latitude, gps.longitude, 'EXIF_FOTO');
-            _msg('bmn-form-msg', 'success', 'Koordinat GPS (' + gps.latitude.toFixed(5) + ', ' + gps.longitude.toFixed(5) + ') berhasil diekstraksi dari metadata EXIF foto.');
-          } else {
-            _bmnHandleNoExifGps(file);
-          }
-        })
-        .catch(function (err) {
-          console.warn('[exifr.gps] Gagal membaca EXIF:', err);
+  // TAHAP 1: Ekstraksi koordinat GPS murni native dari raw file (Zero-Dependency)
+  if (window.FileReader) {
+    var rawReader = new FileReader();
+    rawReader.onload = function (ev) {
+      var buffer = ev.target.result;
+      var nativeGps = _bmnParseExifGpsFromArrayBuffer(buffer);
+      if (nativeGps && typeof nativeGps.latitude === 'number' && typeof nativeGps.longitude === 'number') {
+        _bmnApplyCoordinates(nativeGps.latitude, nativeGps.longitude, 'EXIF_FOTO');
+        _msg('bmn-form-msg', 'success', 'Koordinat GPS (' + nativeGps.latitude.toFixed(5) + ', ' + nativeGps.longitude.toFixed(5) + ') berhasil diekstraksi dari metadata EXIF foto.');
+        return;
+      }
+
+      // TAHAP 2: Jika native belum menemukan, coba library exifr
+      _loadExifr(function () {
+        if (window.exifr && typeof window.exifr.gps === 'function') {
+          window.exifr.gps(file)
+            .then(function (gps) {
+              if (gps && typeof gps.latitude === 'number' && typeof gps.longitude === 'number' && !isNaN(gps.latitude) && !isNaN(gps.longitude)) {
+                _bmnApplyCoordinates(gps.latitude, gps.longitude, 'EXIF_FOTO');
+                _msg('bmn-form-msg', 'success', 'Koordinat GPS (' + gps.latitude.toFixed(5) + ', ' + gps.longitude.toFixed(5) + ') berhasil diekstraksi dari metadata EXIF foto.');
+              } else {
+                _bmnHandleNoExifGps(file);
+              }
+            })
+            .catch(function (err) {
+              console.warn('[exifr.gps] Gagal membaca EXIF:', err);
+              _bmnHandleNoExifGps(file);
+            });
+        } else {
           _bmnHandleNoExifGps(file);
-        });
-    } else {
+        }
+      });
+    };
+    rawReader.onerror = function () {
       _bmnHandleNoExifGps(file);
-    }
-  });
+    };
+    rawReader.readAsArrayBuffer(file);
+  } else {
+    _bmnHandleNoExifGps(file);
+  }
 }
 
 function _bmnHandleNoExifGps(file) {
@@ -9569,13 +10293,25 @@ function _bmnHandleNoExifGps(file) {
     return;
   }
 
-  // OPSI 1B: Fallback pemindaian visual watermark koordinat (OCR) jika EXIF GPS tidak tersedia
+  // OPSI 1B: Fallback pemindaian visual stempel koordinat & lokasi pada foto (OCR Multi-Region)
   if (file) {
-    _msg('bmn-form-msg', 'info', 'Metadata EXIF tidak ditemukan. Memindai stempel visual koordinat pada foto (OCR)...');
+    _msg('bmn-form-msg', 'info', 'Metadata EXIF tidak ditemukan. Memindai visual stempel koordinat & lokasi pada foto (OCR)...');
     _bmnScanWatermarkOcr(file, function(coords) {
       if (coords && typeof coords.latitude === 'number' && typeof coords.longitude === 'number' && !isNaN(coords.latitude) && !isNaN(coords.longitude)) {
         _bmnApplyCoordinates(coords.latitude, coords.longitude, 'OCR_STEMPEL');
-        _msg('bmn-form-msg', 'success', 'Koordinat GPS (' + coords.latitude.toFixed(5) + ', ' + coords.longitude.toFixed(5) + ') berhasil diekstraksi dari stempel visual kamera (OCR).');
+        _msg('bmn-form-msg', 'success', 'Koordinat GPS (' + coords.latitude.toFixed(5) + ', ' + coords.longitude.toFixed(5) + ') berhasil diekstraksi dari stempel visual foto (OCR).');
+      } else if (coords && coords.locationHint) {
+        var selUpt = document.getElementById('bmn-form-upt');
+        if (selUpt) {
+          for (var optIdx = 0; optIdx < selUpt.options.length; optIdx++) {
+            if (selUpt.options[optIdx].text.indexOf(coords.locationHint) !== -1 || coords.locationHint.indexOf(selUpt.options[optIdx].text) !== -1) {
+              selUpt.selectedIndex = optIdx;
+              break;
+            }
+          }
+        }
+        _msg('bmn-form-msg', 'info', 'Lokasi terdeteksi dari foto: ' + coords.locationHint + '. Mengambil koordinat perangkat...');
+        _bmnTriggerDeviceGeolocation(true);
       } else {
         _msg('bmn-form-msg', 'warning', 'Stempel koordinat tidak terdeteksi pada foto. Mengambil lokasi perangkat...');
         _bmnTriggerDeviceGeolocation(true);

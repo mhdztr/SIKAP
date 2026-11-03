@@ -1821,6 +1821,20 @@ select.n-input {
   gap: 12px;
 }
 
+.tu-pegawai-kpi-grid-7 {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 10px;
+}
+
+@media (max-width: 1400px) {
+  .tu-pegawai-kpi-grid-7 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+
+@media (max-width: 860px) {
+  .tu-pegawai-kpi-grid-7 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
 @media (max-width: 1280px) {
   .tu-pegawai-kpi-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .ov-kpi-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }

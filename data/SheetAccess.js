@@ -222,7 +222,10 @@ function _autoCreateTuSheet(ss, sheetName) {
   } else if (sheetName === SHEET_TU.PEGAWAI_MASTER) {
     headers = [
       'PegawaiID', 'NIP', 'Nama', 'UnitKerja', 'LingkupData', 'KelompokJabatan',
-      'JabatanLengkap', 'TingkatKelas', 'KategoriRumpun', 'StatusKepegawaian', 'StatusAktif', 'UpdatedAt', 'UpdatedBy'
+      'JabatanLengkap', 'TingkatKelas', 'KategoriRumpun', 'StatusKepegawaian', 'StatusAktif',
+      'SubJenisSDM', 'NomorIdentitas', 'InstitusiAsal', 'TanggalMulai', 'TanggalSelesai',
+      'MentorPembimbing', 'CatatanTambahan', 'DokumenSK_URL', 'DokumenSK_EvidenceID',
+      'UpdatedAt', 'UpdatedBy'
     ];
   } else if (sheetName === SHEET_TU.STANDAR_PELATIHAN) {
     headers = [
@@ -476,6 +479,14 @@ function ensureTuColumn(sheetName, colName) {
   cell.setFontWeight('bold');
   cell.setBackground('#E8EAF6');
   Logger.log('[ensureTuColumn] Kolom ' + colName + ' ditambahkan ke ' + sheetName + ' (kolom ' + newCol + ').');
+}
+
+/**
+ * Pastikan kolom DokumenSK_URL dan DokumenSK_EvidenceID ada di Master_Pegawai_POA.
+ */
+function ensurePegawaiMasterColumns() {
+  ensureTuColumn(SHEET_TU.PEGAWAI_MASTER, 'DokumenSK_URL');
+  ensureTuColumn(SHEET_TU.PEGAWAI_MASTER, 'DokumenSK_EvidenceID');
 }
 
 /**

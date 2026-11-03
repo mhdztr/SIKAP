@@ -919,29 +919,70 @@ function tataUsaha_getPegawai(token, filter) {
       }
     }
 
-    // Hitung jumlah pegawai PNS otomatis dari Master Data Dit. POA
-    var countPnsDitPoa = 0;
+    // Hitung jumlah pegawai per status kepegawaian otomatis dari Master Data Pegawai
+    var masterCounts = {
+      PNS: 0,
+      P3K: 0,
+      P3K_PARUH_WAKTU: 0,
+      PJLP: 0,
+      MAGANG: 0
+    };
+    var totalMasterAktif = 0;
+    var totalDitPoaMaster = 0;
+    var totalAwakArmadaMaster = 0;
+
     try {
       var pSheet = openTuSheet(SHEET_TU.PEGAWAI_MASTER);
       var pRows = sheetToObjects(pSheet);
+      var todayStr = new Date().toISOString().slice(0, 10);
+
       for (var p = 0; p < pRows.length; p++) {
         var rPeg = pRows[p];
-        var u = String(rPeg['UnitKerja'] || '').trim().toLowerCase();
         var sAktif = String(rPeg['StatusAktif'] || 'AKTIF').trim().toUpperCase();
-        var sPeg = String(rPeg['StatusKepegawaian'] || 'PNS').trim().toUpperCase();
-        if (sAktif === 'AKTIF' && (u.indexOf('poa') !== -1 || u.indexOf('operasi armada') !== -1 || u.indexOf('pengendalian') !== -1 || sPeg === 'PNS')) {
-          if (u.indexOf('poa') !== -1 || u.indexOf('operasi armada') !== -1 || u.indexOf('pengendalian') !== -1) {
-            countPnsDitPoa++;
+        if (sAktif === 'NON_AKTIF') continue;
+
+        var u = String(rPeg['UnitKerja'] || '').trim().toLowerCase();
+        var isPoa = (u === 'dit. poa' || u === 'dit poa' || u.indexOf('pengendalian operasi armada') !== -1 || (u.indexOf('poa') !== -1 && u.indexOf('armada') === -1));
+        var sPeg = String(rPeg['StatusKepegawaian'] || '').trim().toUpperCase();
+        if (!sPeg) {
+          sPeg = isPoa ? 'PNS' : (rPeg['NIP'] && rPeg['NIP'] !== '-' ? 'PNS' : 'NON_ASN');
+        }
+
+        // Cek kedaluwarsa magang / kontrak
+        var tglSelesai = String(rPeg['TanggalSelesai'] || '').trim();
+        var isExpired = tglSelesai && tglSelesai < todayStr;
+
+        var rmp = String(rPeg['KategoriRumpun'] || '').toUpperCase();
+        var lkp = String(rPeg['LingkupData'] || '').toUpperCase();
+        var isAwak = (rmp === 'AWAK_DEK' || rmp === 'AWAK_MESIN' || lkp === 'AWAK_KAPAL_ARMADA');
+        if (isAwak) {
+          totalAwakArmadaMaster++;
+        } else if (isPoa) {
+          totalDitPoaMaster++;
+        }
+
+        if (sPeg === 'PNS') {
+          masterCounts.PNS++;
+        } else if (sPeg === 'P3K') {
+          masterCounts.P3K++;
+        } else if (sPeg === 'P3K_PARUH_WAKTU') {
+          masterCounts.P3K_PARUH_WAKTU++;
+        } else if (sPeg === 'PJLP') {
+          masterCounts.PJLP++;
+        } else if (sPeg === 'MAGANG') {
+          if (!isExpired) {
+            masterCounts.MAGANG++;
           }
         }
+        totalMasterAktif++;
       }
     } catch (eMaster) {
       Logger.log('[tataUsaha_getPegawai] Master count notice: ' + eMaster.message);
     }
 
-    // Default PNS otomatis dari seluruh personil aktif Dit. POA
-    if (countPnsDitPoa > 0) {
-      latestCounts.PNS = countPnsDitPoa;
+    // Gunakan master data sebagai single source of truth
+    if (masterCounts.PNS > 0 || masterCounts.P3K > 0 || masterCounts.PJLP > 0 || masterCounts.MAGANG > 0) {
+      latestCounts = masterCounts;
     }
 
     var totalPegawai = 0;
@@ -1448,88 +1489,121 @@ function tataUsaha_getKompetensi(token, filter) {
     var countDitPoa = 0;
     var countAwakArmada = 0;
     var countAwakDek = 0;
+    var countAwakDek = 0;
     var countAwakMesin = 0;
+    var todayStr = new Date().toISOString().slice(0, 10);
 
     for (var p = 0; p < pRows.length; p++) {
       var peg = pRows[p];
       var pid = String(peg['PegawaiID'] || '').trim();
       if (!pid) continue;
 
+      var statusAktif = String(peg['StatusAktif'] || 'AKTIF').trim();
+      // Lewatkan jika NON_AKTIF dan tidak diminta secara eksplisit
+      if (statusAktif === 'NON_AKTIF' && (!params || !params.includeNonAktif)) continue;
+
       var nama = String(peg['Nama'] || '').trim();
       var nip = String(peg['NIP'] || '-').trim();
       var unit = String(peg['UnitKerja'] || '').trim();
-      if (unit.toLowerCase().indexOf('operasi armada') !== -1 || unit.toLowerCase().indexOf('poa') !== -1 || unit.toLowerCase().indexOf('pengendalian') !== -1) {
+      var uLow = unit.toLowerCase();
+      if (uLow === 'dit. poa' || uLow === 'dit poa' || uLow.indexOf('pengendalian operasi armada') !== -1 || (uLow.indexOf('poa') !== -1 && uLow.indexOf('armada') === -1)) {
         unit = 'Dit. POA';
       }
       var rumpun = String(peg['KategoriRumpun'] || 'MANAJEMEN').trim();
       var grp = String(peg['KelompokJabatan'] || '').trim();
       var jabatan = String(peg['JabatanLengkap'] || grp).trim();
       var tingkat = String(peg['TingkatKelas'] || 'NON_JENJANG').trim();
-      var lingkup = String(peg['LingkupData'] || 'DIT_POA').trim();
-      if (unit === 'Dit. POA') lingkup = 'DIT_POA';
-      var statusAktif = String(peg['StatusAktif'] || 'AKTIF').trim();
+      var lingkup = String(peg['LingkupData'] || '').trim();
+      if (!lingkup) {
+        lingkup = (unit === 'Dit. POA') ? 'DIT_POA' : 'AWAK_KAPAL_ARMADA';
+      }
       var statusPeg = String(peg['StatusKepegawaian'] || '').trim().toUpperCase();
       if (!statusPeg) {
-        statusPeg = (unit === 'Dit. POA' || lingkup === 'DIT_POA') ? 'PNS' : (nip && nip !== '-' ? 'PNS' : 'NON_ASN');
+        statusPeg = (unit === 'Dit. POA') ? 'PNS' : (nip && nip !== '-' ? 'PNS' : 'NON_ASN');
+      }
+
+      var subJenis = String(peg['SubJenisSDM'] || '').trim();
+      var noIdentitas = String(peg['NomorIdentitas'] || '').trim();
+      var asalKampus = String(peg['InstitusiAsal'] || '').trim();
+      var tglMulai = String(peg['TanggalMulai'] || '').trim();
+      var tglSelesai = String(peg['TanggalSelesai'] || '').trim();
+      var mentor = String(peg['MentorPembimbing'] || '').trim();
+      var catatan = String(peg['CatatanTambahan'] || '').trim();
+      var docSkUrl = String(peg['DokumenSK_URL'] || '').trim();
+      var docSkEvId = String(peg['DokumenSK_EvidenceID'] || '').trim();
+
+      var isNonSkj = (statusPeg === 'MAGANG' || statusPeg === 'PJLP');
+      var isExpired = tglSelesai && tglSelesai < todayStr;
+      var statusDisplay = statusAktif;
+      if (statusAktif === 'AKTIF' && statusPeg === 'MAGANG' && isExpired) {
+        statusDisplay = 'SELESAI';
       }
 
       if (unit) unitSet[unit] = true;
       if (grp) groupSet[grp] = true;
       if (rumpun) rumpunSet[rumpun] = true;
 
-      if (lingkup === 'DIT_POA' || unit.toLowerCase().indexOf('poa') !== -1) countDitPoa++;
-      if (lingkup === 'AWAK_KAPAL_ARMADA') countAwakArmada++;
-      if (rumpun === 'AWAK_DEK') countAwakDek++;
-      if (rumpun === 'AWAK_MESIN') countAwakMesin++;
+      if (statusAktif === 'AKTIF') {
+        var isAwak = (rumpun === 'AWAK_DEK' || rumpun === 'AWAK_MESIN' || lingkup === 'AWAK_KAPAL_ARMADA');
+        if (isAwak) {
+          countAwakArmada++;
+          if (rumpun === 'AWAK_DEK') countAwakDek++;
+          if (rumpun === 'AWAK_MESIN') countAwakMesin++;
+        } else if (unit === 'Dit. POA') {
+          countDitPoa++;
+        }
+      }
 
-      // Standar kurikulum untuk jabatan ini
-      var standards = standarByGroup[grp] || [];
+      // Standar kurikulum untuk jabatan ini (Magang & PJLP tidak memerlukan SKJ)
+      var standards = isNonSkj ? [] : (standarByGroup[grp] || []);
       var pCerts = certByPegawai[pid] || {};
 
       var totalStandar = standards.length;
       var totalLulus = 0;
       var totalEvidence = 0;
 
-      for (var sIdx = 0; sIdx < standards.length; sIdx++) {
-        var st = standards[sIdx];
-        var cData = pCerts[st.kode];
-        var isLulus = cData && (cData.status === 'SUDAH_LULUS' || cData.status === 'LULUS');
-        if (isLulus) {
-          totalLulus++;
-          if (cData.fileEvidenceUrl || cData.fileEvidenceId) totalEvidence++;
+      if (!isNonSkj) {
+        for (var sIdx = 0; sIdx < standards.length; sIdx++) {
+          var st = standards[sIdx];
+          var cData = pCerts[st.kode];
+          var isLulus = cData && (cData.status === 'SUDAH_LULUS' || cData.status === 'LULUS');
+          if (isLulus) {
+            totalLulus++;
+            if (cData.fileEvidenceUrl || cData.fileEvidenceId) totalEvidence++;
+          }
+
+          // Akumulasi statistik Gap
+          if (!gapCounter[st.kode]) {
+            gapCounter[st.kode] = {
+              kode: st.kode,
+              nama: st.nama,
+              kelompok: grp,
+              kategori: st.kategori,
+              wajib: st.wajib,
+              gapCount: 0,
+              lulusCount: 0,
+              targetCount: 0
+            };
+          }
+          gapCounter[st.kode].targetCount++;
+          if (isLulus) {
+            gapCounter[st.kode].lulusCount++;
+          } else {
+            gapCounter[st.kode].gapCount++;
+          }
         }
 
-        // Akumulasi statistik Gap
-        if (!gapCounter[st.kode]) {
-          gapCounter[st.kode] = {
-            kode: st.kode,
-            nama: st.nama,
-            kelompok: grp,
-            kategori: st.kategori,
-            wajib: st.wajib,
-            gapCount: 0,
-            lulusCount: 0,
-            targetCount: 0
-          };
-        }
-        gapCounter[st.kode].targetCount++;
-        if (isLulus) {
-          gapCounter[st.kode].lulusCount++;
-        } else {
-          gapCounter[st.kode].gapCount++;
-        }
+        totalStandarGlobal += totalStandar;
+        totalLulusGlobal += totalLulus;
       }
 
-      totalStandarGlobal += totalStandar;
-      totalLulusGlobal += totalLulus;
-
-      var pctKompetensi = totalStandar > 0 ? Math.round((totalLulus / totalStandar) * 100) : 0;
-      var statusGap = pctKompetensi === 100 ? 'LENGKAP' : (pctKompetensi > 0 ? 'PARSIAL' : 'BELUM');
+      var pctKompetensi = totalStandar > 0 ? Math.round((totalLulus / totalStandar) * 100) : (isNonSkj ? null : 0);
+      var statusGap = isNonSkj ? 'NON_SKJ' : (pctKompetensi === 100 ? 'LENGKAP' : (pctKompetensi > 0 ? 'PARSIAL' : 'BELUM'));
 
       // Filter pengecekan
       var pass = true;
       if (fSearch) {
-        var haystack = (nama + ' ' + nip + ' ' + jabatan + ' ' + unit + ' ' + grp).toLowerCase();
+        var haystack = (nama + ' ' + nip + ' ' + jabatan + ' ' + unit + ' ' + grp + ' ' + asalKampus + ' ' + subJenis).toLowerCase();
         if (haystack.indexOf(fSearch) === -1) pass = false;
       }
       if (pass && fRumpun && rumpun !== fRumpun) pass = false;
@@ -1550,6 +1624,18 @@ function tataUsaha_getKompetensi(token, filter) {
           rumpun: rumpun,
           statusKepegawaian: statusPeg,
           statusAktif: statusAktif,
+          statusDisplay: statusDisplay,
+          subJenisSDM: subJenis,
+          nomorIdentitas: noIdentitas,
+          institusiAsal: asalKampus,
+          tanggalMulai: tglMulai,
+          tanggalSelesai: tglSelesai,
+          mentorPembimbing: mentor,
+          catatanTambahan: catatan,
+          isExpired: isExpired,
+          isNonSkj: isNonSkj,
+          dokumenSkUrl: docSkUrl,
+          dokumenSkEvidenceId: docSkEvId,
           totalStandar: totalStandar,
           totalLulus: totalLulus,
           totalEvidence: totalEvidence,
@@ -1781,6 +1867,7 @@ function tataUsaha_savePegawaiMaster(token, params) {
     lock.waitLock(20000);
 
     try {
+      ensurePegawaiMasterColumns();
       var sheet = openTuSheet(SHEET_TU.PEGAWAI_MASTER);
       var rows = sheetToObjects(sheet);
       var nowStr = new Date().toISOString();
@@ -1798,24 +1885,49 @@ function tataUsaha_savePegawaiMaster(token, params) {
         if (targetIdx === -1) throw new Error('Pegawai dengan ID ' + params.pegawaiId + ' tidak ditemukan.');
       }
 
-      var rumpun = params.rumpun;
-      if (!rumpun) {
-        var kLower = params.kelompokJabatan.toLowerCase();
-        if (kLower.indexOf('kamar mesin') !== -1 || kLower.indexOf('masinis') !== -1 || kLower.indexOf('minyak') !== -1) {
-          rumpun = 'AWAK_MESIN';
-        } else if (kLower.indexOf('nahkoda') !== -1 || kLower.indexOf('mualim') !== -1 || kLower.indexOf('markonis') !== -1 ||
-                   kLower.indexOf('serang') !== -1 || kLower.indexOf('juru mudi') !== -1 || kLower.indexOf('kelasi') !== -1) {
-          rumpun = 'AWAK_DEK';
-        } else if (kLower.indexOf('pengawas') !== -1) {
-          rumpun = 'PENGAWAS';
-        } else {
-          rumpun = 'MANAJEMEN';
+      var cleanUnit = String(params.unitKerja || '').trim();
+      var uCleanLow = cleanUnit.toLowerCase();
+      if (uCleanLow === 'dit. poa' || uCleanLow === 'dit poa' || uCleanLow.indexOf('pengendalian operasi armada') !== -1 || (uCleanLow.indexOf('poa') !== -1 && uCleanLow.indexOf('armada') === -1)) {
+        cleanUnit = 'Dit. POA';
+      }
+
+      var pid = isEdit ? params.pegawaiId : ('PEG-' + ('0000' + (rows.length + 1)).slice(-4));
+      var statusPeg = params.statusKepegawaian || (cleanUnit === 'Dit. POA' ? 'PNS' : (params.nip && params.nip !== '-' ? 'PNS' : 'NON_ASN'));
+
+      // Filter ketat: Magang & PJLP tidak memerlukan kelompok standar jabatan PNS/SKJ
+      if (statusPeg === 'MAGANG') {
+        params.kelompokJabatan = 'Non-Kompetensi';
+        params.tingkatKelas = 'NON_JENJANG';
+        if (!params.jabatanLengkap) {
+          params.jabatanLengkap = 'Peserta ' + (params.subJenisSDM || 'Magang');
+        }
+      } else if (statusPeg === 'PJLP') {
+        params.kelompokJabatan = 'PJLP';
+        params.tingkatKelas = 'NON_JENJANG';
+        if (!params.jabatanLengkap) {
+          params.jabatanLengkap = 'PJLP - ' + (params.subJenisSDM || 'Tenaga Kontrak');
         }
       }
 
-      var cleanUnit = String(params.unitKerja || '').trim();
-      if (cleanUnit.toLowerCase().indexOf('operasi armada') !== -1 || cleanUnit.toLowerCase().indexOf('poa') !== -1 || cleanUnit.toLowerCase().indexOf('pengendalian') !== -1) {
-        cleanUnit = 'Dit. POA';
+      var rumpun = params.rumpun;
+      if (!rumpun) {
+        if (statusPeg === 'MAGANG') {
+          rumpun = 'MAGANG';
+        } else if (statusPeg === 'PJLP') {
+          rumpun = 'PJLP';
+        } else {
+          var kLower = (params.kelompokJabatan || '').toLowerCase();
+          if (kLower.indexOf('kamar mesin') !== -1 || kLower.indexOf('masinis') !== -1 || kLower.indexOf('minyak') !== -1) {
+            rumpun = 'AWAK_MESIN';
+          } else if (kLower.indexOf('nahkoda') !== -1 || kLower.indexOf('mualim') !== -1 || kLower.indexOf('markonis') !== -1 ||
+                     kLower.indexOf('serang') !== -1 || kLower.indexOf('juru mudi') !== -1 || kLower.indexOf('kelasi') !== -1) {
+            rumpun = 'AWAK_DEK';
+          } else if (kLower.indexOf('pengawas') !== -1) {
+            rumpun = 'PENGAWAS';
+          } else {
+            rumpun = 'MANAJEMEN';
+          }
+        }
       }
 
       var lingkup = params.lingkupData;
@@ -1825,9 +1937,26 @@ function tataUsaha_savePegawaiMaster(token, params) {
         lingkup = 'DIT_POA';
       }
 
-      var pid = isEdit ? params.pegawaiId : ('PEG-' + ('0000' + (rows.length + 1)).slice(-4));
-
-      var statusPeg = params.statusKepegawaian || (cleanUnit === 'Dit. POA' ? 'PNS' : (params.nip && params.nip !== '-' ? 'PNS' : 'NON_ASN'));
+      // Proses upload berkas dokumen SPK / Keputusan / Surat Magang
+      var docUrl = params.dokumenSkUrl || '';
+      var docEvId = params.dokumenSkEvidenceId || '';
+      if (params.docFile && params.docFile.base64) {
+        try {
+          var evRes = evidence_upload(token, {
+            refSheet: SHEET_TU.PEGAWAI_MASTER,
+            refRowId: pid,
+            fileName: params.docFile.fileName || ('Dokumen_' + pid + '.pdf'),
+            mimeType: params.docFile.mimeType || 'application/pdf',
+            dataBase64: params.docFile.base64
+          });
+          if (evRes && evRes.success && evRes.data) {
+            docEvId = evRes.data.evidenceId;
+            docUrl = 'https://drive.google.com/file/d/' + evRes.data.driveFileId + '/view';
+          }
+        } catch (eEv) {
+          Logger.log('[tataUsaha_savePegawaiMaster] evidence err: ' + eEv.message);
+        }
+      }
 
       if (isEdit) {
         var headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
@@ -1841,6 +1970,33 @@ function tataUsaha_savePegawaiMaster(token, params) {
         sheet.getRange(targetIdx, headers.indexOf('KategoriRumpun') + 1).setValue(rumpun);
         if (headers.indexOf('StatusKepegawaian') !== -1) {
           sheet.getRange(targetIdx, headers.indexOf('StatusKepegawaian') + 1).setValue(statusPeg);
+        }
+        if (headers.indexOf('SubJenisSDM') !== -1) {
+          sheet.getRange(targetIdx, headers.indexOf('SubJenisSDM') + 1).setValue(params.subJenisSDM || '');
+        }
+        if (headers.indexOf('NomorIdentitas') !== -1) {
+          sheet.getRange(targetIdx, headers.indexOf('NomorIdentitas') + 1).setValue(params.nomorIdentitas || '');
+        }
+        if (headers.indexOf('InstitusiAsal') !== -1) {
+          sheet.getRange(targetIdx, headers.indexOf('InstitusiAsal') + 1).setValue(params.institusiAsal || '');
+        }
+        if (headers.indexOf('TanggalMulai') !== -1) {
+          sheet.getRange(targetIdx, headers.indexOf('TanggalMulai') + 1).setValue(params.tanggalMulai || '');
+        }
+        if (headers.indexOf('TanggalSelesai') !== -1) {
+          sheet.getRange(targetIdx, headers.indexOf('TanggalSelesai') + 1).setValue(params.tanggalSelesai || '');
+        }
+        if (headers.indexOf('MentorPembimbing') !== -1) {
+          sheet.getRange(targetIdx, headers.indexOf('MentorPembimbing') + 1).setValue(params.mentorPembimbing || '');
+        }
+        if (headers.indexOf('CatatanTambahan') !== -1) {
+          sheet.getRange(targetIdx, headers.indexOf('CatatanTambahan') + 1).setValue(params.catatanTambahan || '');
+        }
+        if (docUrl && headers.indexOf('DokumenSK_URL') !== -1) {
+          sheet.getRange(targetIdx, headers.indexOf('DokumenSK_URL') + 1).setValue(docUrl);
+        }
+        if (docEvId && headers.indexOf('DokumenSK_EvidenceID') !== -1) {
+          sheet.getRange(targetIdx, headers.indexOf('DokumenSK_EvidenceID') + 1).setValue(docEvId);
         }
         sheet.getRange(targetIdx, headers.indexOf('StatusAktif') + 1).setValue(params.statusAktif || 'AKTIF');
         sheet.getRange(targetIdx, headers.indexOf('UpdatedAt') + 1).setValue(nowStr);
@@ -1858,6 +2014,15 @@ function tataUsaha_savePegawaiMaster(token, params) {
           rumpun,
           statusPeg,
           params.statusAktif || 'AKTIF',
+          params.subJenisSDM || '',
+          params.nomorIdentitas || '',
+          params.institusiAsal || '',
+          params.tanggalMulai || '',
+          params.tanggalSelesai || '',
+          params.mentorPembimbing || '',
+          params.catatanTambahan || '',
+          docUrl,
+          docEvId,
           nowStr,
           session.userId
         ]);
@@ -1865,7 +2030,8 @@ function tataUsaha_savePegawaiMaster(token, params) {
 
       logAudit(session.userId, isEdit ? 'UPDATE_PEGAWAI' : 'ADD_PEGAWAI', 'Master_Pegawai_POA', pid, {
         nama: params.nama,
-        unit: params.unitKerja,
+        unit: cleanUnit,
+        status: statusPeg,
         jabatan: params.kelompokJabatan
       });
 
@@ -1878,8 +2044,74 @@ function tataUsaha_savePegawaiMaster(token, params) {
       lock.releaseLock();
     }
   } catch (e) {
-    Logger.log('[tataUsaha_savePegawaiMaster] ' + e.message);
-    return { success: false, error: e.message };
+    Logger.log('[tataUsaha_savePegawaiMaster] Error: ' + e.message);
+    return { success: false, error: 'Gagal menyimpan profil personel: ' + e.message };
+  }
+}
+
+/**
+ * tataUsaha_deletePegawaiMaster
+ * Soft delete personel Master Pegawai POA (StatusAktif: NON_AKTIF).
+ */
+function tataUsaha_deletePegawaiMaster(token, pegawaiId) {
+  try {
+    var session = _tuRequireSession(token);
+    _tuAssertWrite(session);
+
+    if (!pegawaiId) {
+      return { success: false, error: 'ID Personel tidak valid.' };
+    }
+
+    var lock = LockService.getScriptLock();
+    lock.waitLock(10000);
+
+    try {
+      var sheet = openTuSheet(SHEET_TU.PEGAWAI_MASTER);
+      var rows = sheetToObjects(sheet);
+      var targetIdx = -1;
+      var currentPeg = null;
+
+      for (var i = 0; i < rows.length; i++) {
+        if (String(rows[i]['PegawaiID'] || '').trim() === String(pegawaiId).trim()) {
+          targetIdx = i + 2;
+          currentPeg = rows[i];
+          break;
+        }
+      }
+
+      if (targetIdx === -1) {
+        return { success: false, error: 'Data personel tidak ditemukan.' };
+      }
+
+      var headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+      var nowStr = new Date().toISOString();
+
+      if (headers.indexOf('StatusAktif') !== -1) {
+        sheet.getRange(targetIdx, headers.indexOf('StatusAktif') + 1).setValue('NON_AKTIF');
+      }
+      if (headers.indexOf('UpdatedAt') !== -1) {
+        sheet.getRange(targetIdx, headers.indexOf('UpdatedAt') + 1).setValue(nowStr);
+      }
+      if (headers.indexOf('UpdatedBy') !== -1) {
+        sheet.getRange(targetIdx, headers.indexOf('UpdatedBy') + 1).setValue(session.userId);
+      }
+
+      logAudit(session.userId, 'SOFT_DELETE_PEGAWAI', 'Master_Pegawai_POA', pegawaiId, {
+        nama: currentPeg ? currentPeg['Nama'] : '',
+        statusSebelum: currentPeg ? currentPeg['StatusAktif'] : 'AKTIF',
+        statusSesudah: 'NON_AKTIF'
+      });
+
+      return {
+        success: true,
+        message: 'Personel ' + (currentPeg ? currentPeg['Nama'] : pegawaiId) + ' berhasil dinonaktifkan (soft delete).'
+      };
+    } finally {
+      lock.releaseLock();
+    }
+  } catch (e) {
+    Logger.log('[tataUsaha_deletePegawaiMaster] Error: ' + e.message);
+    return { success: false, error: 'Gagal menonaktifkan personel: ' + e.message };
   }
 }
 
