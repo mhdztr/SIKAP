@@ -1010,8 +1010,29 @@ function _asyncRenderFail(key, wrap, e) {
     _esc(e && e.message ? e.message : String(e)) + '</div>';
 }
 
-// ── APP INIT ──────────────────────────────────────────────
+// ── APP INIT & HASH ROUTING ──────────────────────────────
+var _APP_INIT_DONE = false;
+
+function _onHashChange() {
+  var h = (window.location.hash || '').replace('#', '');
+  if (!h || h === APP.currentView) {
+    return;
+  }
+  if (h === 'bmn-penghapusan') {
+    if (APP.currentView !== 'tata-usaha') _routeTo('tata-usaha');
+    _tuSwitchTab('bmn');
+    _bmnSelectSubTab('penghapusan');
+  } else if (h === 'bmn') {
+    if (APP.currentView !== 'tata-usaha') _routeTo('tata-usaha');
+    _tuSwitchTab('bmn');
+    _bmnSelectSubTab('aset');
+  } else {
+    _routeTo(h);
+  }
+}
+
 function _initApp() {
+  _hideLoading();
   document.getElementById('auth-wrapper').classList.add('n-hidden');
   document.getElementById('app-wrapper').classList.remove('n-hidden');
   _renderSidebar();
@@ -1030,18 +1051,11 @@ function _initApp() {
   _applyShellStatus(); // badge notifikasi + strip "divisi belum melapor" (Fase 13)
   _startAppHeartbeat();
   _runSyncTick(true); // inisialisasi versi live-sync server (Fase 15a)
-  window.addEventListener('hashchange', function () {
-    var h = (window.location.hash || '').replace('#', '');
-    if (h === 'bmn-penghapusan') {
-      _tuSwitchTab('bmn');
-      _bmnSelectSubTab('penghapusan');
-    } else if (h === 'bmn') {
-      _tuSwitchTab('bmn');
-      _bmnSelectSubTab('aset');
-    } else {
-      _routeTo(h);
-    }
-  });
+
+  if (!_APP_INIT_DONE) {
+    _APP_INIT_DONE = true;
+    window.addEventListener('hashchange', _onHashChange);
+  }
 }
 
 // ── SIDEBAR & TOPBAR NAVIGATION ───────────────────────────
@@ -3205,7 +3219,7 @@ function doApprove(queueId) {
 function openRejectModal(queueId) {
   APP.pendingQueueId = queueId;
   document.getElementById('reject-reason').value = '';
-  document.getElementById('modal-reject').classList.remove('n-hidden');
+  openModal('modal-reject');
 }
 function closeRejectModal() {
   APP.pendingQueueId = null;
@@ -3461,7 +3475,7 @@ function _adnOpenEdit(userId) {
   // Dropdown unit kerja butuh daftar divisi; kalau belum tiba, placeholder dulu.
   _adnFillDivisi(userId);
   _adnLoadDivisi();
-  document.getElementById('modal-admin-user').classList.remove('n-hidden');
+  openModal('modal-admin-user');
   _adnOnRoleChange();
 }
 
@@ -5572,6 +5586,11 @@ var _ATTACH_MODAL = {
 };
 function _attachModalId(key) { return _ATTACH_MODAL[key] || null; }
 
+function openModal(id) {
+  var el = document.getElementById(id);
+  if (el) el.classList.remove('n-hidden');
+}
+
 function closeModal(id) {
   // Kalau sedang menampilkan panel sukses, pulihkan markup modal asli dulu
   // supaya form bisa dipakai lagi saat dibuka berikutnya.
@@ -6644,9 +6663,7 @@ function tuOpenPaguModal() {
   _tuUpdatePaguModalPreview();
   _msg('tu-pagu-msg', null);
   _attachInit('tu-pagu', { refSheet: 'TX_TataUsaha' });
-
-  var mEl = document.getElementById('modal-tu-pagu');
-  if (mEl) mEl.classList.remove('n-hidden');
+  openModal('modal-tu-pagu');
 }
 
 function _tuUpdatePaguModalPreview() {
@@ -6803,8 +6820,7 @@ function tuOpenForm() {
   _tuFillFormContext();
   _msg('tu-form-msg', '', '');
   _attachInit('tu', { refSheet: 'TX_TataUsaha' });
-  var mEl = document.getElementById('modal-tu-form');
-  if (mEl) mEl.classList.remove('n-hidden');
+  openModal('modal-tu-form');
 }
 
 // Status bar kunci Pagu: 'lock' (terkunci, ikut laporan sebelumnya), 'unlock' (bisa diubah), 'none' (belum ada laporan sebelumnya).
@@ -7054,7 +7070,7 @@ function tuOpenRevisiModal(rowId) {
   }
   _attachInit('tu-revisi', { refSheet: 'TX_TataUsaha' });
   _msg('tu-revisi-msg', null);
-  document.getElementById('modal-tu-revisi').classList.remove('n-hidden');
+  openModal('modal-tu-revisi');
 }
 
 function tuCloseRevisiModal() {
@@ -7115,7 +7131,7 @@ function tuOpenAnulirModal(rowId, periode) {
   var inp = document.getElementById('anulir-reason');
   if (inp) inp.value = '';
   _msg('tu-anulir-msg', null);
-  document.getElementById('modal-tu-anulir').classList.remove('n-hidden');
+  openModal('modal-tu-anulir');
 }
 
 function tuCloseAnulirModal() {
@@ -7179,11 +7195,30 @@ function _tuSwitchTab(tabName) {
 
   // Load data for selected tab
   if (_TU.activeTab === 'anggaran') {
-    if (!_TU.kpi) _tuLoadKPI();
+    if (_TU.kpi) {
+      _tuRenderKPI(_TU.kpi);
+      if (_TU.history) _tuRenderHistory(_TU.history);
+      _tuLoadKPI(true);
+    } else {
+      _tuLoadKPI();
+    }
   } else if (_TU.activeTab === 'paket') {
-    _tuLoadPaket();
+    if (_TU.paketData) {
+      _tuRenderPaketKPI(_TU.paketData);
+      if (typeof _tuFilterPaket === 'function') _tuFilterPaket();
+      _tuLoadPaket(true);
+    } else {
+      _tuLoadPaket();
+    }
   } else if (_TU.activeTab === 'pegawai') {
-    _tuLoadPegawai();
+    if (_TU.pegawaiData) {
+      _tuRenderPegawaiKPI(_TU.pegawaiData);
+      if (typeof _tuRenderPegawaiTable === 'function') _tuRenderPegawaiTable(_TU.pegawaiData.pegawaiList || []);
+      if (typeof _tuRenderPegawaiChart === 'function') _tuRenderPegawaiChart(_TU.pegawaiData);
+      _tuLoadPegawai(true);
+    } else {
+      _tuLoadPegawai();
+    }
   } else if (_TU.activeTab === 'bmn') {
     _bmnSelectSubTab(isHapusTarget ? 'penghapusan' : (_BMN.subTab || 'aset'), true);
     _tuLoadBMN();
@@ -7288,8 +7323,7 @@ function _tuOpenPegawaiModal() {
   var ketEl = document.getElementById('tu-peg-keterangan');
   if (ketEl) ketEl.value = '';
   _msg('tu-pegawai-form-msg', null);
-  var m = document.getElementById('modal-tu-pegawai-form');
-  if (m) m.classList.remove('n-hidden');
+  openModal('modal-tu-pegawai-form');
 }
 
 function _tuRenderPegawaiChart(d) {
@@ -7436,8 +7470,7 @@ function _tuOpenAnulirPegawaiModal(rowId, kat, jml) {
   if (reasonEl) reasonEl.value = '';
 
   _msg('tu-pegawai-anulir-msg', null);
-  var modal = document.getElementById('modal-tu-pegawai-anulir');
-  if (modal) modal.classList.remove('n-hidden');
+  openModal('modal-tu-pegawai-anulir');
 }
 
 function _tuConfirmAnulirPegawai() {
@@ -7479,11 +7512,6 @@ function _tuConfirmAnulirPegawai() {
 
 function _formatRupiah(n) {
   return typeof _rupiah === 'function' ? _rupiah(n) : 'Rp ' + (n || 0);
-}
-
-function openModal(id) {
-  var el = document.getElementById(id);
-  if (el) el.classList.remove('n-hidden');
 }
 
 function _tuLoadPaket(force) {
@@ -8992,8 +9020,7 @@ function _bmnOpenAnulirModal(rowId, kode, nup, nama) {
   if (reasonEl) reasonEl.value = '';
 
   _msg('bmn-anulir-msg', null);
-  var modal = document.getElementById('modal-bmn-anulir');
-  if (modal) modal.classList.remove('n-hidden');
+  openModal('modal-bmn-anulir');
 }
 
 function _bmnConfirmAnulir() {
@@ -9112,9 +9139,7 @@ function _bmnOpenImportModal() {
   }
 
   _bmnSwitchImportMode('file');
-
-  var modal = document.getElementById('modal-bmn-import');
-  if (modal) modal.classList.remove('n-hidden');
+  openModal('modal-bmn-import');
 
   // Bind drag & drop handlers if not yet bound
   var dropzone = document.getElementById('bmn-import-dropzone');
