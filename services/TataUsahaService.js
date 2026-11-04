@@ -949,11 +949,18 @@ function tataUsaha_getPegawai(token, filter) {
       for (var p = 0; p < pRows.length; p++) {
         var rPeg = pRows[p];
         var sAktif = String(rPeg['StatusAktif'] || 'AKTIF').trim().toUpperCase();
+        var sPeg = String(rPeg['StatusKepegawaian'] || '').trim().toUpperCase();
+
+        if (sAktif === 'MAGANG' || sAktif === 'PJLP' || sAktif === 'P3K' || sAktif === 'P3K_PARUH_WAKTU') {
+          if (!sPeg || sPeg === 'PNS' || sPeg === 'NON_ASN') {
+            sPeg = sAktif;
+          }
+          sAktif = 'AKTIF';
+        }
         if (sAktif === 'NON_AKTIF') continue;
 
         var u = String(rPeg['UnitKerja'] || '').trim().toLowerCase();
         var isPoa = (u === 'dit. poa' || u === 'dit poa' || u.indexOf('pengendalian operasi armada') !== -1 || (u.indexOf('poa') !== -1 && u.indexOf('armada') === -1));
-        var sPeg = String(rPeg['StatusKepegawaian'] || '').trim().toUpperCase();
         if (!sPeg) {
           sPeg = isPoa ? 'PNS' : (rPeg['NIP'] && rPeg['NIP'] !== '-' ? 'PNS' : 'NON_ASN');
         }
@@ -1508,9 +1515,18 @@ function tataUsaha_getKompetensi(token, filter) {
       var pid = String(peg['PegawaiID'] || '').trim();
       if (!pid) continue;
 
-      var statusAktif = String(peg['StatusAktif'] || 'AKTIF').trim();
+      var statusAktif = String(peg['StatusAktif'] || 'AKTIF').trim().toUpperCase();
+      var statusPeg = String(peg['StatusKepegawaian'] || '').trim().toUpperCase();
+
+      if (statusAktif === 'MAGANG' || statusAktif === 'PJLP' || statusAktif === 'P3K' || statusAktif === 'P3K_PARUH_WAKTU') {
+        if (!statusPeg || statusPeg === 'PNS' || statusPeg === 'NON_ASN') {
+          statusPeg = statusAktif;
+        }
+        statusAktif = 'AKTIF';
+      }
+
       // Lewatkan jika NON_AKTIF dan tidak diminta secara eksplisit
-      if (statusAktif === 'NON_AKTIF' && (!params || !params.includeNonAktif)) continue;
+      if (statusAktif === 'NON_AKTIF' && (!filter || !filter.includeNonAktif)) continue;
 
       var nama = String(peg['Nama'] || '').trim();
       var nip = String(peg['NIP'] || '-').trim();
@@ -1527,7 +1543,6 @@ function tataUsaha_getKompetensi(token, filter) {
       if (!lingkup) {
         lingkup = (unit === 'Dit. POA') ? 'DIT_POA' : 'AWAK_KAPAL_ARMADA';
       }
-      var statusPeg = String(peg['StatusKepegawaian'] || '').trim().toUpperCase();
       if (!statusPeg) {
         statusPeg = (unit === 'Dit. POA') ? 'PNS' : (nip && nip !== '-' ? 'PNS' : 'NON_ASN');
       }
@@ -2012,30 +2027,35 @@ function tataUsaha_savePegawaiMaster(token, params) {
         sheet.getRange(targetIdx, headers.indexOf('UpdatedAt') + 1).setValue(nowStr);
         sheet.getRange(targetIdx, headers.indexOf('UpdatedBy') + 1).setValue(session.userId);
       } else {
-        sheet.appendRow([
-          pid,
-          params.nip || '-',
-          params.nama,
-          cleanUnit,
-          lingkup,
-          params.kelompokJabatan,
-          params.jabatanLengkap || params.kelompokJabatan,
-          params.tingkatKelas || 'NON_JENJANG',
-          rumpun,
-          statusPeg,
-          params.statusAktif || 'AKTIF',
-          params.subJenisSDM || '',
-          params.nomorIdentitas || '',
-          params.institusiAsal || '',
-          params.tanggalMulai || '',
-          params.tanggalSelesai || '',
-          params.mentorPembimbing || '',
-          params.catatanTambahan || '',
-          docUrl,
-          docEvId,
-          nowStr,
-          session.userId
-        ]);
+        var headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+        var rowObj = {
+          'PegawaiID': pid,
+          'NIP': params.nip || '-',
+          'Nama': params.nama,
+          'UnitKerja': cleanUnit,
+          'LingkupData': lingkup,
+          'KelompokJabatan': params.kelompokJabatan,
+          'JabatanLengkap': params.jabatanLengkap || params.kelompokJabatan,
+          'TingkatKelas': params.tingkatKelas || 'NON_JENJANG',
+          'KategoriRumpun': rumpun,
+          'StatusKepegawaian': statusPeg,
+          'StatusAktif': params.statusAktif || 'AKTIF',
+          'SubJenisSDM': params.subJenisSDM || '',
+          'NomorIdentitas': params.nomorIdentitas || '',
+          'InstitusiAsal': params.institusiAsal || '',
+          'TanggalMulai': params.tanggalMulai || '',
+          'TanggalSelesai': params.tanggalSelesai || '',
+          'MentorPembimbing': params.mentorPembimbing || '',
+          'CatatanTambahan': params.catatanTambahan || '',
+          'DokumenSK_URL': docUrl,
+          'DokumenSK_EvidenceID': docEvId,
+          'UpdatedAt': nowStr,
+          'UpdatedBy': session.userId
+        };
+        var rowArr = headers.map(function (h) {
+          return rowObj.hasOwnProperty(h) ? rowObj[h] : '';
+        });
+        sheet.appendRow(rowArr);
       }
 
       logAudit(session.userId, isEdit ? 'UPDATE_PEGAWAI' : 'ADD_PEGAWAI', 'Master_Pegawai_POA', pid, {

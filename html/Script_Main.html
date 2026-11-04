@@ -7598,6 +7598,15 @@ function _tuRenderKompetensiAnalytics(d) {
   if (elTotal && k.totalPersonel) elTotal.textContent = k.totalPersonel;
   if (elPoa && k.totalDitPoa) elPoa.textContent = k.totalDitPoa;
   if (elAwak && k.totalAwakArmada) elAwak.textContent = k.totalAwakArmada;
+
+  var segBtns = document.querySelectorAll('.tu-peg-seg-btn');
+  segBtns.forEach(function (b) {
+    var seg = b.getAttribute('data-peg-seg');
+    if (seg === 'ALL' && k.totalPersonel) b.textContent = 'Semua (' + k.totalPersonel + ')';
+    else if (seg === 'DIT_POA' && k.totalDitPoa) b.textContent = 'Dit. POA (' + k.totalDitPoa + ')';
+    else if (seg === 'AWAK_DEK' && k.totalAwakDek) b.textContent = 'Awak Dek (' + k.totalAwakDek + ')';
+    else if (seg === 'AWAK_MESIN' && k.totalAwakMesin) b.textContent = 'Awak Mesin (' + k.totalAwakMesin + ')';
+  });
 }
 
 function _tuPopulatePegawaiFilterOptions(filters) {
@@ -8777,6 +8786,13 @@ function _tuSubmitPegawaiMaster() {
       }
       closeModal('modal-tu-pegawai-master');
       _msg('tu-peg-dir-msg', 'success', res.message || 'Profil personel berhasil disimpan.');
+      if (!_TU.pegawaiFilter) _TU.pegawaiFilter = {};
+      if (payload && payload.nama) {
+        var inpSearch = document.getElementById('tu-peg-search-input');
+        if (inpSearch) inpSearch.value = payload.nama;
+        _TU.pegawaiFilter.search = payload.nama.toLowerCase();
+        _TU.pegawaiFilter.page = 1;
+      }
       _tuLoadKompetensi(true);
       _tuLoadPegawai(true);
     })

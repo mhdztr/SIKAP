@@ -534,11 +534,57 @@ function ensureTuColumn(sheetName, colName) {
 }
 
 /**
- * Pastikan kolom DokumenSK_URL dan DokumenSK_EvidenceID ada di Master_Pegawai_POA.
+ * Pastikan seluruh kolom master pegawai ada di Master_Pegawai_POA (Self-Healing).
  */
 function ensurePegawaiMasterColumns() {
-  ensureTuColumn(SHEET_TU.PEGAWAI_MASTER, 'DokumenSK_URL');
-  ensureTuColumn(SHEET_TU.PEGAWAI_MASTER, 'DokumenSK_EvidenceID');
+  var requiredCols = [
+    'PegawaiID', 'NIP', 'Nama', 'UnitKerja', 'LingkupData', 'KelompokJabatan',
+    'JabatanLengkap', 'TingkatKelas', 'KategoriRumpun', 'StatusKepegawaian', 'StatusAktif',
+    'SubJenisSDM', 'NomorIdentitas', 'InstitusiAsal', 'TanggalMulai', 'TanggalSelesai',
+    'MentorPembimbing', 'CatatanTambahan', 'DokumenSK_URL', 'DokumenSK_EvidenceID',
+    'UpdatedAt', 'UpdatedBy'
+  ];
+  for (var i = 0; i < requiredCols.length; i++) {
+    ensureTuColumn(SHEET_TU.PEGAWAI_MASTER, requiredCols[i]);
+  }
+
+  // Self-healing pergeseran kolom baris lama (jika status kepegawaian bergeser ke kolom StatusAktif)
+  try {
+    var sheet = openTuSheet(SHEET_TU.PEGAWAI_MASTER);
+    if (!sheet) return;
+    var lastRow = sheet.getLastRow();
+    var lastCol = sheet.getLastColumn();
+    if (lastRow < 2 || lastCol < 1) return;
+
+    var headers = sheet.getRange(1, 1, 1, lastCol).getValues()[0];
+    var colStatusAktif = headers.indexOf('StatusAktif') + 1;
+    var colStatusPeg   = headers.indexOf('StatusKepegawaian') + 1;
+
+    if (colStatusAktif > 0 && colStatusPeg > 0) {
+      var range = sheet.getRange(2, 1, lastRow - 1, lastCol);
+      var values = range.getValues();
+      var changed = false;
+
+      for (var r = 0; r < values.length; r++) {
+        var row = values[r];
+        var saVal = String(row[colStatusAktif - 1] || '').trim().toUpperCase();
+        var spVal = String(row[colStatusPeg - 1] || '').trim().toUpperCase();
+
+        if (saVal === 'MAGANG' || saVal === 'PJLP' || saVal === 'P3K' || saVal === 'P3K_PARUH_WAKTU') {
+          row[colStatusPeg - 1] = saVal;
+          row[colStatusAktif - 1] = 'AKTIF';
+          changed = true;
+        }
+      }
+
+      if (changed) {
+        range.setValues(values);
+        Logger.log('[ensurePegawaiMasterColumns] Berhasil memperbaiki pergeseran kolom status pada Master_Pegawai_POA.');
+      }
+    }
+  } catch (errRepair) {
+    Logger.log('[ensurePegawaiMasterColumns] Notice repair: ' + errRepair.message);
+  }
 }
 
 /**
