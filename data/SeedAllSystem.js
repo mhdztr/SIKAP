@@ -6,7 +6,7 @@
  * Mengisi seluruh modul dan sheet secara menyeluruh, kredibel, formal, dan berintegritas relasional:
  * 1. Users (Akun resmi Superadmin, Direktur, Kadiv TU, Staf Anggaran, Staf BMN, Staf SDM, Staf TU)
  * 2. Master Lokasi UPT (16 Pangkalan/Stasiun/Pusat KKP) & Master BMN Kategori (8 Kategori Kemenkeu)
- * 3. Master Standar Pelatihan & Master Pegawai POA (504 aparatur, via SeedPegawaiPelatihan.js)
+ * 3. Master Standar Pelatihan (38 kelompok jabatan resmi STCW-F)
  * 4. Master Paket & TX_Paket_Progres (12 Paket Pengadaan TA 2026 lintas 6 tahap: PERSIAPAN s.d. SELESAI)
  * 5. TX_TataUsaha (44 minggu realisasi anggaran TA 2026 lengkap: Revisi DIPA ke-1 & ke-2, SP2D vs Akrual)
  * 6. TX_TU_Pegawai (Headcount bulanan 5 kategori aparatur Subbag TU: PNS, P3K, P3K Paruh Waktu, PJLP, Magang)
@@ -14,23 +14,30 @@
  * 8. TX_BMN_Aset (44 unit inventaris fisik granular anti-jebret dengan geotagging presisi & Haversine distance)
  * 9. TX_BMN_Penghapusan & TX_BMN_Penghapusan_Detail (3 berkas usulan legal Kemenkeu: BAST, SK, Draft)
  * 10. TX_Evidence (Metadata berkas bukti digital: SK, Surat Usulan, Foto Fisik, Kontrak di Google Drive)
+ *
+ * CATATAN INTEGRITAS KEPEGAWAIAN:
+ * Master_Pegawai_POA DILINDUNGI PENUH (READ-ONLY) dan TIDAK DIHAPUS / DI-OVERWRITE agar data autentik
+ * aparatur KKP yang sudah ada tetap murni dan tidak tercemar.
  */
 
 /**
  * Runner Utama: Menjalankan seluruh proses seeding sistem secara sekuensial.
  *
- * @param {boolean} [force=false] Jika true, membersihkan data transaksi lama sebelum men-seed ulang.
+ * @param {boolean} [force=true] Default true: membersihkan data transaksi lama dan men-seed ulang.
  * @returns {Object} Ringkasan hasil seeding setiap modul.
  */
 function seedAllSikapSystem(force) {
+  if (force === undefined || force === null) force = true;
+
   var results = {
     startedAt: new Date().toISOString(),
+    forceMode: force,
     steps: {},
     success: true
   };
 
   try {
-    Logger.log('[seedAllSikapSystem] Memulai proses seeding komprehensif SIKAP (force=' + !!force + ')...');
+    Logger.log('[seedAllSikapSystem] Memulai proses seeding komprehensif SIKAP (force=' + force + ')...');
 
     // 1. Seed Master Users
     results.steps.users = seedUsers(force);
@@ -38,32 +45,35 @@ function seedAllSikapSystem(force) {
     // 2. Seed Master UPT & BMN Kategori
     results.steps.masterUptKat = seedMasterUptDanKategori(force);
 
-    // 3. Seed Master Pegawai POA & Standar Pelatihan (504 personel Dit. POA & Awak Kapal Armada)
-    if (typeof ensurePegawaiPelatihanSeeded === 'function') {
-      results.steps.pegawaiMaster = ensurePegawaiPelatihanSeeded(force);
-    } else {
-      results.steps.pegawaiMaster = { skipped: true, reason: 'SeedPegawaiPelatihan.js tidak terdeteksi' };
-    }
+    // 3. Master Standar Pelatihan Kurikulum SKJ
+    results.steps.standarPelatihan = seedStandarPelatihan(force);
 
-    // 4. Seed Master Paket & TX_Paket_Progres
-    results.steps.paketPengadaan = seedPaketPengadaan(force);
+    // 4. Master Pegawai POA (PROTEKSI PENUH: TIDAK DISENTUH SAMA SEKALI)
+    results.steps.pegawaiMaster = {
+      status: 'PROTECTED',
+      action: 'NONE',
+      message: 'Master_Pegawai_POA dilindungi penuh (read-only) untuk menjaga keaslian data personel yang sudah ada.'
+    };
 
     // 5. Seed Realisasi Anggaran TX_TataUsaha (44 Minggu TA 2026)
     results.steps.anggaran = seedTataUsahaAnggaran(force);
 
-    // 6. Seed Headcount Kepegawaian TX_TU_Pegawai (5 Kategori)
+    // 6. Seed Master Paket & TX_Paket_Progres (12 Paket 6 Tahap)
+    results.steps.paketPengadaan = seedPaketPengadaan(force);
+
+    // 7. Seed Headcount Kepegawaian TX_TU_Pegawai (5 Kategori)
     results.steps.kepegawaian = seedKepegawaianHeadcount(force);
 
-    // 7. Seed Kelulusan Sertifikat Pelatihan TX_TU_Pelatihan_Pegawai
+    // 8. Seed Kelulusan Sertifikat Pelatihan TX_TU_Pelatihan_Pegawai
     results.steps.pelatihanPegawai = seedPelatihanPegawai(force);
 
-    // 8. Seed Inventaris BMN Fisik Granular TX_BMN_Aset (Anti-Jebret)
+    // 9. Seed Inventaris BMN Fisik Granular TX_BMN_Aset (Anti-Jebret: 44 unit)
     results.steps.bmnAset = seedBMNAset(force);
 
-    // 9. Seed Berkas Usulan Penghapusan Kemenkeu TX_BMN_Penghapusan & Detail
+    // 10. Seed Berkas Usulan Penghapusan Kemenkeu TX_BMN_Penghapusan & Detail
     results.steps.bmnPenghapusan = seedBMNPenghapusan(force);
 
-    // 10. Seed Metadata Lampiran TX_Evidence
+    // 11. Seed Metadata Lampiran TX_Evidence
     results.steps.evidence = seedEvidence(force);
 
     results.completedAt = new Date().toISOString();
@@ -75,6 +85,18 @@ function seedAllSikapSystem(force) {
     results.stack = err.stack || '';
     Logger.log('[seedAllSikapSystem] ERROR: ' + err.message);
     return results;
+  }
+}
+
+/**
+ * Helper membersihkan data transaksi (baris 2 ke bawah) tanpa menghapus baris header.
+ */
+function _clearSheetData(sheet) {
+  if (!sheet) return;
+  var lastRow = sheet.getLastRow();
+  var lastCol = sheet.getLastColumn();
+  if (lastRow > 1 && lastCol > 0) {
+    sheet.getRange(2, 1, lastRow - 1, lastCol).clearContent();
   }
 }
 
@@ -90,7 +112,7 @@ function seedUsers(force) {
   }
 
   if (force && lastRow > 1) {
-    sheet.getRange(2, 1, lastRow - 1, sheet.getLastColumn()).clearContent();
+    _clearSheetData(sheet);
   }
 
   var now = new Date();
@@ -199,19 +221,19 @@ function seedMasterUptDanKategori(force) {
   var tuId = ensureTuSpreadsheet();
   var ss = SpreadsheetApp.openById(tuId);
 
+  var uSheet = ss.getSheetByName(SHEET_TU.MASTER_LOKASI_UPT);
+  if (force && uSheet && uSheet.getLastRow() > 1) {
+    _clearSheetData(uSheet);
+  }
   if (typeof _seedLokasiUpt === 'function') {
-    var uSheet = ss.getSheetByName(SHEET_TU.MASTER_LOKASI_UPT);
-    if (force && uSheet && uSheet.getLastRow() > 1) {
-      uSheet.getRange(2, 1, uSheet.getLastRow() - 1, uSheet.getLastColumn()).clearContent();
-    }
     _seedLokasiUpt(ss);
   }
 
+  var kSheet = ss.getSheetByName(SHEET_TU.MASTER_BMN_KATEGORI);
+  if (force && kSheet && kSheet.getLastRow() > 1) {
+    _clearSheetData(kSheet);
+  }
   if (typeof _seedBmnKategori === 'function') {
-    var kSheet = ss.getSheetByName(SHEET_TU.MASTER_BMN_KATEGORI);
-    if (force && kSheet && kSheet.getLastRow() > 1) {
-      kSheet.getRange(2, 1, kSheet.getLastRow() - 1, kSheet.getLastColumn()).clearContent();
-    }
     _seedBmnKategori(ss);
   }
 
@@ -219,7 +241,159 @@ function seedMasterUptDanKategori(force) {
 }
 
 // ===========================================================================
-// 3. SEED MASTER PAKET & TX_PAKET_PROGRES (12 PAKET LINTAS 6 TAHAP)
+// 3. SEED MASTER STANDAR PELATIHAN (KURIKULUM SKJ STCW-F)
+// ===========================================================================
+function seedStandarPelatihan(force) {
+  var sSheet = openTuSheet(SHEET_TU.STANDAR_PELATIHAN);
+  var sLast = sSheet.getLastRow();
+
+  if (!force && sLast > 1) {
+    return { status: 'SKIPPED', count: sLast - 1 };
+  }
+
+  if (typeof STANDAR_PELATIHAN_RESMI === 'object') {
+    if (force && sLast > 1) {
+      _clearSheetData(sSheet);
+    }
+    var sRows = [];
+    for (var kj in STANDAR_PELATIHAN_RESMI) {
+      var arr = STANDAR_PELATIHAN_RESMI[kj];
+      if (Array.isArray(arr)) {
+        for (var i = 0; i < arr.length; i++) {
+          var itm = arr[i];
+          sRows.push([
+            itm.kode,
+            kj,
+            itm.tingkat || 'ALL',
+            itm.kat || 'TEKNIS',
+            itm.nama,
+            itm.wajib ? true : false,
+            i + 1
+          ]);
+        }
+      }
+    }
+    if (sRows.length > 0) {
+      sSheet.getRange(2, 1, sRows.length, sRows[0].length).setValues(sRows);
+      return { status: 'SEEDED', count: sRows.length };
+    }
+  }
+  return { status: 'UNCHANGED', count: sLast - 1 };
+}
+
+// ===========================================================================
+// 4. SEED REALISASI ANGGARAN TX_TATAUSAHA (44 MINGGU TA 2026)
+// ===========================================================================
+function seedTataUsahaAnggaran(force) {
+  var sheet = openTuSheet(SHEET_TU.TATA_USAHA);
+  var lastRow = sheet.getLastRow();
+
+  if (!force && lastRow > 1) {
+    return { status: 'SKIPPED', count: lastRow - 1 };
+  }
+
+  if (force && lastRow > 1) {
+    _clearSheetData(sheet);
+  }
+
+  var rows = [];
+  var dStart = new Date(2026, 0, 5, 9, 30, 0); // Senin, 5 Januari 2026
+
+  // Evolusi Pagu DIPA TA 2026:
+  // - Awal: Reguler Rp 16,5 M | ABT Rp 0
+  // - Revisi 1 (Minggu 19 / Mei 2026): ABT +Rp 1,5 M
+  // - Revisi 2 (Minggu 36 / September 2026): Reguler Rp 18,5 M | ABT Rp 3,2 M (Total Rp 21,7 M)
+  var paguReguler = 16500000000;
+  var paguABT = 0;
+
+  for (var w = 1; w <= 44; w++) {
+    var curDate = new Date(dStart.getTime() + (w - 1) * 7 * 24 * 60 * 60 * 1000);
+    var y = curDate.getFullYear();
+    var m = curDate.getMonth() + 1;
+    var mm = (m < 10 ? '0' : '') + m;
+    var weekOfMonth = Math.ceil(curDate.getDate() / 7);
+    var ww = (weekOfMonth < 10 ? '0' : '') + weekOfMonth;
+    var periode = y + '-' + mm + '-W' + ww;
+
+    var catatanRevisi = '';
+
+    // Minggu ke-19 (Mei): Revisi DIPA Ke-1
+    if (w === 19) {
+      paguABT = 1500000000; // +1.5 M ABT
+      catatanRevisi = 'Revisi DIPA Ke-1: Alokasi ABT Dukungan Logistik Operasi Armada Pengawasan Terpadu';
+    }
+
+    // Minggu ke-36 (September): Revisi DIPA Ke-2
+    if (w === 36) {
+      paguReguler = 18500000000; // +2 M Reguler
+      paguABT = 3200000000;     // +1.7 M ABT
+      catatanRevisi = 'Revisi DIPA Ke-2: Optimalisasi Belanja Barang Operasional & BBM Kapal Pengawas Semester II';
+    }
+
+    // Hitung realisasi mingguan yang dikalibrasi realistis:
+    // Kumulatif akhir (Week 44 - Awal November):
+    // - Total SP2D: ~Rp 16,58 M (76,4% dari Pagu Rp 21,7 M)
+    // - Total Akrual: ~Rp 17,63 M (81,3% dari Pagu Rp 21,7 M)
+    var sp2dReg = 0;
+    var sp2dAbt = 0;
+    var akruReg = 0;
+    var akruAbt = 0;
+
+    if (w <= 8) {
+      // Q1 Awal: UP/TUP dan Gaji Pokok
+      sp2dReg = Math.round((70000000 + (w * 10000000)) / 1000) * 1000;
+      akruReg = Math.round(sp2dReg * 1.12 / 1000) * 1000;
+    } else if (w <= 18) {
+      // Q1 Akhir - Q2 Awal: Kontrak belanja barang & pemeliharaan termin 1
+      sp2dReg = Math.round((180000000 + ((w - 8) * 15000000)) / 1000) * 1000;
+      akruReg = Math.round(sp2dReg * 1.10 / 1000) * 1000;
+    } else if (w <= 35) {
+      // Q2 - Q3: Patroli laut puncak & pengadaan barang
+      sp2dReg = Math.round((280000000 + ((w - 18) * 12000000)) / 1000) * 1000;
+      sp2dAbt = Math.round((50000000 + ((w - 18) * 4500000)) / 1000) * 1000;
+      akruReg = Math.round(sp2dReg * 1.06 / 1000) * 1000;
+      akruAbt = Math.round(sp2dAbt * 1.08 / 1000) * 1000;
+    } else {
+      // Q4: Percepatan penyerapan akhir tahun
+      sp2dReg = Math.round((360000000 + ((w - 35) * 14000000)) / 1000) * 1000;
+      sp2dAbt = Math.round((85000000 + ((w - 35) * 6000000)) / 1000) * 1000;
+      akruReg = Math.round(sp2dReg * 1.03 / 1000) * 1000;
+      akruAbt = Math.round(sp2dAbt * 1.04 / 1000) * 1000;
+    }
+
+    var totalSP2D = sp2dReg + sp2dAbt;
+    var totalAkrual = akruReg + akruAbt;
+    var rowId = 'TU-2026-' + (w < 10 ? '000' : '00') + w;
+
+    rows.push([
+      rowId,
+      'DIV-TU',
+      periode,
+      'USR-STAF-ANGG-001',
+      curDate,
+      ROW_STATUS.ACTIVE,
+      '',
+      '',
+      '',
+      '',
+      paguReguler,
+      paguABT,
+      totalSP2D,
+      totalAkrual,
+      sp2dReg,
+      sp2dAbt,
+      akruReg,
+      akruAbt,
+      catatanRevisi
+    ]);
+  }
+
+  sheet.getRange(2, 1, rows.length, rows[0].length).setValues(rows);
+  return { status: 'SEEDED', count: rows.length };
+}
+
+// ===========================================================================
+// 5. SEED MASTER PAKET & TX_PAKET_PROGRES (12 PAKET LINTAS 6 TAHAP)
 // ===========================================================================
 function seedPaketPengadaan(force) {
   var masterSheet = openTuSheet(SHEET_TU.MASTER_PAKET);
@@ -233,10 +407,10 @@ function seedPaketPengadaan(force) {
   }
 
   if (force && mLast > 1) {
-    masterSheet.getRange(2, 1, mLast - 1, masterSheet.getLastColumn()).clearContent();
+    _clearSheetData(masterSheet);
   }
   if (force && pLast > 1) {
-    progresSheet.getRange(2, 1, pLast - 1, progresSheet.getLastColumn()).clearContent();
+    _clearSheetData(progresSheet);
   }
 
   // 12 Master Paket Resmi TA 2026
@@ -374,111 +548,7 @@ function seedPaketPengadaan(force) {
 }
 
 // ===========================================================================
-// 4. SEED REALISASI ANGGARAN TX_TATAUSAHA (44 MINGGU TA 2026)
-// ===========================================================================
-function seedTataUsahaAnggaran(force) {
-  var sheet = openTuSheet(SHEET_TU.TATA_USAHA);
-  var lastRow = sheet.getLastRow();
-
-  if (!force && lastRow > 1) {
-    return { status: 'SKIPPED', count: lastRow - 1 };
-  }
-
-  if (force && lastRow > 1) {
-    sheet.getRange(2, 1, lastRow - 1, sheet.getLastColumn()).clearContent();
-  }
-
-  var rows = [];
-  var dStart = new Date(2026, 0, 5, 9, 30, 0); // Senin, 5 Januari 2026
-
-  // Pagu Awal TA 2026
-  var paguReguler = 16500000000; // Rp 16,5 M
-  var paguABT = 0;
-
-  for (var w = 1; w <= 44; w++) {
-    var curDate = new Date(dStart.getTime() + (w - 1) * 7 * 24 * 60 * 60 * 1000);
-    var y = curDate.getFullYear();
-    var m = curDate.getMonth() + 1;
-    var mm = (m < 10 ? '0' : '') + m;
-    var ww = (w < 10 ? '0' : '') + w;
-    var periode = y + '-' + mm + '-W' + (Math.ceil(curDate.getDate() / 7));
-
-    var catatanRevisi = '';
-
-    // Minggu ke-19 (Mei): Revisi DIPA Ke-1
-    if (w === 19) {
-      paguABT = 1500000000; // +1.5 M ABT
-      catatanRevisi = 'Revisi DIPA Ke-1: Alokasi ABT Dukungan Logistik Operasi Armada Pengawasan Terpadu';
-    }
-
-    // Minggu ke-36 (September): Revisi DIPA Ke-2
-    if (w === 36) {
-      paguReguler = 18500000000; // +2 M Reguler
-      paguABT = 3200000000;     // +1.7 M ABT
-      catatanRevisi = 'Revisi DIPA Ke-2: Optimalisasi Belanja Barang Operasional & BBM Kapal Pengawas Semester II';
-    }
-
-    // Hitung realisasi mingguan dengan dinamika anggaran negara yang realistis
-    var sp2dReguler = 0;
-    var sp2dABT = 0;
-    var akrualReguler = 0;
-    var akrualABT = 0;
-
-    if (w <= 8) {
-      // Q1 Awal: UP/TUP dan Gaji Pokok
-      sp2dReguler = Math.round((120000000 + (w * 15000000)) / 1000) * 1000;
-      akrualReguler = Math.round(sp2dReguler * 1.15 / 1000) * 1000;
-    } else if (w <= 18) {
-      // Q1 Akhir - Q2 Awal: Kontrak belanja barang & pemeliharaan termin 1
-      sp2dReguler = Math.round((280000000 + ((w - 8) * 22000000)) / 1000) * 1000;
-      akrualReguler = Math.round(sp2dReguler * 1.12 / 1000) * 1000;
-    } else if (w <= 35) {
-      // Q2 - Q3: Patroli laut puncak & pengadaan barang
-      sp2dReguler = Math.round((420000000 + ((w - 18) * 18000000)) / 1000) * 1000;
-      sp2dABT = Math.round((85000000 + ((w - 18) * 6000000)) / 1000) * 1000;
-      akrualReguler = Math.round(sp2dReguler * 1.08 / 1000) * 1000;
-      akrualABT = Math.round(sp2dABT * 1.10 / 1000) * 1000;
-    } else {
-      // Q4: Percepatan penyerapan akhir tahun
-      sp2dReguler = Math.round((550000000 + ((w - 35) * 25000000)) / 1000) * 1000;
-      sp2dABT = Math.round((140000000 + ((w - 35) * 12000000)) / 1000) * 1000;
-      akrualReguler = Math.round(sp2dReguler * 1.04 / 1000) * 1000;
-      akrualABT = Math.round(sp2dABT * 1.06 / 1000) * 1000;
-    }
-
-    var totalSP2D = sp2dReguler + sp2dABT;
-    var totalAkrual = akrualReguler + akrualABT;
-    var rowId = 'TU-2026-' + (w < 10 ? '000' : '00') + w;
-
-    rows.push([
-      rowId,
-      'DIV-TU',
-      periode,
-      'USR-STAF-ANGG-001',
-      curDate,
-      ROW_STATUS.ACTIVE,
-      '',
-      '',
-      '',
-      '',
-      paguReguler,
-      paguABT,
-      totalSP2D,
-      totalAkrual,
-      sp2dReguler,
-      sp2dABT,
-      akrualReguler,
-      akrualABT,
-      catatanRevisi
-    ]);
-  }
-
-  sheet.getRange(2, 1, rows.length, rows[0].length).setValues(rows);
-  return { status: 'SEEDED', count: rows.length };
-}
-
-// ===========================================================================
-// 5. SEED HEADCOUNT KEPEGAWAIAN TX_TU_PEGAWAI (5 KATEGORI)
+// 6. SEED HEADCOUNT KEPEGAWAIAN TX_TU_PEGAWAI (5 KATEGORI)
 // ===========================================================================
 function seedKepegawaianHeadcount(force) {
   var sheet = openTuSheet(SHEET_TU.PEGAWAI);
@@ -489,7 +559,7 @@ function seedKepegawaianHeadcount(force) {
   }
 
   if (force && lastRow > 1) {
-    sheet.getRange(2, 1, lastRow - 1, sheet.getLastColumn()).clearContent();
+    _clearSheetData(sheet);
   }
 
   var rows = [];
@@ -548,7 +618,7 @@ function seedKepegawaianHeadcount(force) {
 }
 
 // ===========================================================================
-// 6. SEED SERTIFIKASI PELATIHAN PEGAWAI TX_TU_PELATIHAN_PEGAWAI
+// 7. SEED SERTIFIKASI PELATIHAN PEGAWAI TX_TU_PELATIHAN_PEGAWAI
 // ===========================================================================
 function seedPelatihanPegawai(force) {
   var sheet = openTuSheet(SHEET_TU.PELATIHAN_PEGAWAI);
@@ -559,10 +629,10 @@ function seedPelatihanPegawai(force) {
   }
 
   if (force && lastRow > 1) {
-    sheet.getRange(2, 1, lastRow - 1, sheet.getLastColumn()).clearContent();
+    _clearSheetData(sheet);
   }
 
-  // Ambil referensi pegawai dari Master_Pegawai_POA
+  // Ambil referensi pegawai dari Master_Pegawai_POA (READ-ONLY, TIDAK DIUBAH)
   var pSheet = openTuSheet(SHEET_TU.PEGAWAI_MASTER);
   var pRows = sheetToObjects(pSheet);
   if (pRows.length === 0) {
@@ -585,7 +655,7 @@ function seedPelatihanPegawai(force) {
     { kode: 'TRN-PENG-01', nama: 'Diklat Dasar Jabatan Fungsional Pengawas Perikanan', masaTh: 0 }
   ];
 
-  var samplePegawai = pRows.slice(0, 20); // Ambil 20 personel pertama
+  var samplePegawai = pRows.slice(0, 20); // Ambil 20 personel pertama dari master riil
   var certCounter = 1;
 
   for (var p = 0; p < samplePegawai.length; p++) {
@@ -594,7 +664,6 @@ function seedPelatihanPegawai(force) {
     var nip = String(peg['NIP'] || '19850101201001100' + p);
     var kel = String(peg['KelompokJabatan'] || '');
 
-    // Berikan 2 s.d. 3 sertifikat per pegawai sesuai kelompok jabatannya
     var assignedCerts = [];
     if (kel.indexOf('Nahkoda') !== -1 || kel.indexOf('Mualim') !== -1) {
       assignedCerts = [certTemplates[0], certTemplates[1], certTemplates[2], certTemplates[3]];
@@ -606,7 +675,7 @@ function seedPelatihanPegawai(force) {
 
     for (var c = 0; c < assignedCerts.length; c++) {
       var cert = assignedCerts[c];
-      var thLulus = 2021 + ((p + c) % 4); // 2021 s.d. 2024
+      var thLulus = 2021 + ((p + c) % 4);
       var expDate = '';
       var statusLulus = 'SUDAH_LULUS';
 
@@ -645,7 +714,7 @@ function seedPelatihanPegawai(force) {
 }
 
 // ===========================================================================
-// 7. SEED INVENTARIS BMN FISIK GRANULAR TX_BMN_ASET (ANTI-JEBRET: 44 ITEM)
+// 8. SEED INVENTARIS BMN FISIK GRANULAR TX_BMN_ASET (ANTI-JEBRET: 44 ITEM)
 // ===========================================================================
 function seedBMNAset(force) {
   var sheet = openTuSheet(SHEET_TU.BMN_ASET);
@@ -656,7 +725,7 @@ function seedBMNAset(force) {
   }
 
   if (force && lastRow > 1) {
-    sheet.getRange(2, 1, lastRow - 1, sheet.getLastColumn()).clearContent();
+    _clearSheetData(sheet);
   }
 
   var tsBase = new Date(2026, 9, 25, 11, 0, 0);
@@ -810,7 +879,7 @@ function seedBMNAset(force) {
 }
 
 // ===========================================================================
-// 8. SEED BERKAS USULAN PENGHAPUSAN KEMENKEU & DETAIL
+// 9. SEED BERKAS USULAN PENGHAPUSAN KEMENKEU & DETAIL
 // ===========================================================================
 function seedBMNPenghapusan(force) {
   var hpsSheet = openTuSheet(SHEET_TU.BMN_PENGHAPUSAN);
@@ -824,10 +893,10 @@ function seedBMNPenghapusan(force) {
   }
 
   if (force && hLast > 1) {
-    hpsSheet.getRange(2, 1, hLast - 1, hpsSheet.getLastColumn()).clearContent();
+    _clearSheetData(hpsSheet);
   }
   if (force && dLast > 1) {
-    dtlSheet.getRange(2, 1, dLast - 1, dtlSheet.getLastColumn()).clearContent();
+    _clearSheetData(dtlSheet);
   }
 
   var ts1 = new Date(2026, 6, 20, 14, 0, 0); // 20 Juli 2026 (BAST_SELESAI)
@@ -896,7 +965,7 @@ function seedBMNPenghapusan(force) {
 }
 
 // ===========================================================================
-// 9. SEED EVIDENCE METADATA TX_EVIDENCE
+// 10. SEED EVIDENCE METADATA TX_EVIDENCE
 // ===========================================================================
 function seedEvidence(force) {
   var sheet = openTuSheet(SHEET_TU.EVIDENCE);
@@ -907,7 +976,7 @@ function seedEvidence(force) {
   }
 
   if (force && lastRow > 1) {
-    sheet.getRange(2, 1, lastRow - 1, sheet.getLastColumn()).clearContent();
+    _clearSheetData(sheet);
   }
 
   var now = new Date();
@@ -923,4 +992,3 @@ function seedEvidence(force) {
   sheet.getRange(2, 1, evRows.length, evRows[0].length).setValues(evRows);
   return { status: 'SEEDED', count: evRows.length };
 }
-

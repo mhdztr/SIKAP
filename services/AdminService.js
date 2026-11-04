@@ -558,7 +558,7 @@ function admin_seedAllSystem(token, params) {
     assertScope(session, [ROLE.SUPERADMIN], null);
 
     params = params || {};
-    var force = !!params.force;
+    var force = (params.force !== undefined) ? !!params.force : true;
 
     if (typeof seedAllSikapSystem !== 'function') {
       throw new Error('Fungsi seedAllSikapSystem belum tersedia di backend.');
