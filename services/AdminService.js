@@ -544,3 +544,39 @@ function app_getSyncState(token) {
     return { success: false, error: e.message };
   }
 }
+
+/**
+ * SUPERADMIN ONLY: Menjalankan script seeding seluruh sistem SIKAP dari antarmuka admin.
+ *
+ * @param {string} token - Session token
+ * @param {Object} [params] - { force: boolean }
+ * @returns {Object} { success: boolean, data: Object }
+ */
+function admin_seedAllSystem(token, params) {
+  try {
+    var session = _requireSession(token);
+    assertScope(session, [ROLE.SUPERADMIN], null);
+
+    params = params || {};
+    var force = !!params.force;
+
+    if (typeof seedAllSikapSystem !== 'function') {
+      throw new Error('Fungsi seedAllSikapSystem belum tersedia di backend.');
+    }
+
+    var result = seedAllSikapSystem(force);
+    logAudit(session.userId, 'SEED_ALL_SYSTEM', 'ALL_SHEETS', 'SEED-' + new Date().getTime(), {
+      force: force,
+      steps: result.steps
+    });
+
+    return {
+      success: result.success,
+      message: result.success ? 'Seluruh data sistem SIKAP berhasil di-seed secara komprehensif.' : ('Gagal seed: ' + result.error),
+      data: result
+    };
+  } catch (e) {
+    Logger.log('[admin_seedAllSystem] Error: ' + e.message);
+    return { success: false, error: e.message };
+  }
+}

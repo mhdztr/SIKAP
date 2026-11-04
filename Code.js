@@ -184,4 +184,15 @@ function setup_seedSuperadmin() {
 function auth_checkStatusByEmail(email){ return auth_checkStatusByEmail_global(email); }
 function auth_checkStatusByEmail_global(email){ return auth_checkStatusByEmail_global_fn ? auth_checkStatusByEmail_global_fn(email) : null; }
 
+/**
+ * Runner Seeding Komprehensif Seluruh Sistem SIKAP.
+ * Dapat dipanggil langsung dari editor GAS (pilih fungsi setup_seedAllSystem lalu klik Run)
+ * atau via terminal clasp: clasp run setup_seedAllSystem
+ *
+ * @param {boolean} [force=false] Jika true, menghapus data transaksi lama dan men-seed ulang.
+ */
+function setup_seedAllSystem(force) {
+  return seedAllSikapSystem(force);
+}
+
 

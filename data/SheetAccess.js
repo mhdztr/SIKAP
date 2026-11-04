@@ -189,8 +189,10 @@ function ensureTuSpreadsheet() {
   _autoCreateTuSheet(ss, SHEET_TU.BMN_PENGHAPUSAN_DETAIL);
   _autoCreateTuSheet(ss, SHEET_TU.MASTER_LOKASI_UPT);
   _autoCreateTuSheet(ss, SHEET_TU.MASTER_BMN_KATEGORI);
+  _autoCreateTuSheet(ss, SHEET_TU.MASTER_PAKET);
   _autoCreateTuSheet(ss, SHEET_TU.TATA_USAHA);
   _autoCreateTuSheet(ss, SHEET_TU.PAKET_PROGRES);
+  _autoCreateTuSheet(ss, SHEET_TU.EVIDENCE);
 
   // Hapus Sheet1 default
   var sheets = ss.getSheets();
@@ -270,6 +272,8 @@ function _autoCreateTuSheet(ss, sheetName) {
       'PaketID', 'TahapPekerjaan', 'NilaiKontrak', 'RekananPenyedia', 'NomorKontrak',
       'ProgresFisikPct', 'RealisasiKeuangan', 'KendalaKeterangan', 'EvidenceUrl'
     ]);
+  } else if (sheetName === SHEET_TU.MASTER_PAKET) {
+    headers = ['PaketID', 'NamaPaket', 'DivisiID', 'TahunAnggaran', 'PaguAnggaran', 'JenisPengadaan'];
   } else if (sheetName === SHEET_TU.EVIDENCE) {
     headers = [
       'EvidenceID', 'RefSheet', 'RefRowID', 'DriveFileID', 'FileName',
