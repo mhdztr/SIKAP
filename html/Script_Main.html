@@ -145,12 +145,22 @@ function _updateTelemetryTimestampUI() {
 
   var meta = APP_SYNC.lastTxMetadata;
   if (!meta || !meta.timestamp) {
-    if (popData) popData.textContent = 'Data per: Memuat\u2026';
+    if (txt && !syncEl.classList.contains('is-syncing') && !syncEl.classList.contains('is-deferred')) {
+      txt.textContent = 'Tersinkron';
+    }
+    if (popStatus) popStatus.textContent = 'Sistem Tersinkron';
+    if (popData) popData.textContent = 'Data per: Terbaru';
+    syncEl.title = 'Sistem Tersinkron. Klik untuk memeriksa pembaruan.';
     return;
   }
   var d = new Date(meta.timestamp);
   if (isNaN(d.getTime())) {
+    if (txt && !syncEl.classList.contains('is-syncing') && !syncEl.classList.contains('is-deferred')) {
+      txt.textContent = 'Tersinkron';
+    }
+    if (popStatus) popStatus.textContent = 'Sistem Tersinkron';
     if (popData) popData.textContent = 'Data per: Belum tersedia';
+    syncEl.title = 'Sistem Tersinkron. Klik untuk memeriksa pembaruan.';
     return;
   }
   var monthsShort = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
@@ -203,6 +213,8 @@ function _syncUpdateIndicator(state, detailText) {
     el.title = 'Data baru tersedia di server. Ditunda selama formulir aktif.';
   } else {
     // synced
+    if (txt) txt.textContent = 'Tersinkron';
+    if (popStatus) popStatus.textContent = 'Sistem Tersinkron';
     _updateTelemetryTimestampUI();
   }
 }

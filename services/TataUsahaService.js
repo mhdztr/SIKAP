@@ -739,6 +739,11 @@ function _tuAssertWrite(session) {
   assertScope(session, [ROLE.SUPERADMIN, ROLE.KADIV, ROLE.STAF], _TU_DIVISI_ID);
 }
 
+/** Submit profil pegawai / sertifikat / data operasional TU (alias _tuAssertWrite). */
+function _tuAssertSubmit(session) {
+  _tuAssertWrite(session);
+}
+
 /**
  * Anulir: SUPERADMIN + DIREKTUR + KADIV(DIV-TU).
  * DIREKTUR diizinkan cross-divisi; Staf tidak bisa anulir.
@@ -750,6 +755,11 @@ function _tuAssertAnulir(session) {
   if (session.role === ROLE.SUPERADMIN || session.role === ROLE.DIREKTUR) return;
   if (session.role === ROLE.KADIV && session.divisiId === _TU_DIVISI_ID) return;
   throw new Error('UNAUTHORIZED: Anda tidak memiliki izin untuk menganulir laporan ini.');
+}
+
+/** Alias _tuAssertVoid untuk pembatalan/anulir paket & transaksi. */
+function _tuAssertVoid(session) {
+  _tuAssertAnulir(session);
 }
 
 // ── LOG & NOTIFIKASI ──────────────────────────────────────

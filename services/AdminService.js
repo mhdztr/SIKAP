@@ -524,11 +524,19 @@ function app_getSyncState(token) {
       } catch (errQ) {}
     }
 
-    // Hitung versi transaksi dari baris terakhir TX_TataUsaha
+    // Hitung versi transaksi dari baris terakhir TX_TataUsaha & telemetri waktu
     var txVersion = 1;
+    var lastTs = new Date().toISOString();
     try {
       var tuSheet = openTuSheet(SHEET_TU.TATA_USAHA);
       txVersion = tuSheet.getLastRow();
+      if (txVersion > 1) {
+        var rowData = tuSheet.getRange(txVersion, 1, 1, 10).getValues()[0];
+        var tsVal = rowData[4]; // Kolom 5 = Timestamp (audit relational)
+        if (tsVal) {
+          lastTs = (tsVal instanceof Date) ? tsVal.toISOString() : new Date(tsVal).toISOString();
+        }
+      }
     } catch (errTx) {}
 
     return {
@@ -537,7 +545,10 @@ function app_getSyncState(token) {
         txVersion: String(txVersion),
         unreadNotif: unread,
         queueCount: queueCount,
-        lastTxMetadata: null
+        lastTxMetadata: {
+          timestamp: lastTs,
+          sheet: 'TX_TataUsaha'
+        }
       }
     };
   } catch (e) {
