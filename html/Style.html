@@ -854,10 +854,28 @@ select.n-input {
   background: linear-gradient(135deg, #064E3B 0%, #065F46 50%, #047857 100%);
   border-bottom: 1px solid rgba(0, 0, 0, 0.12);
   box-shadow: 0 2px 8px rgba(6, 78, 59, 0.2);
+  position: relative;
+}
+
+/* Subtle Batik Watermark with Gradient Fade (Parang & Ceplok Truntum) */
+.topbar-inner::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96' viewBox='0 0 96 96'%3E%3Cg fill='none' stroke='%23FFFFFF' stroke-opacity='0.08' stroke-width='0.9'%3E%3Cpath d='M48 4 L92 48 L48 92 L4 48 Z' fill='%23FFFFFF' fill-opacity='0.015'/%3E%3Cpath d='M48 14 L82 48 L48 82 L14 48 Z' stroke-dasharray='3 2' stroke-opacity='0.06'/%3E%3Cpath d='M0 24 Q12 12 24 0 M72 0 Q84 12 96 24 M0 72 Q12 84 24 96 M72 96 Q84 84 96 72' stroke-width='1.05' stroke-opacity='0.07'/%3E%3Cpath d='M0 34 Q17 17 34 0 M62 0 Q79 17 96 34 M0 62 Q17 79 34 96 M62 96 Q79 79 96 62' stroke-width='0.75' stroke-opacity='0.05'/%3E%3Cpath d='M48 34 C51 42 54 45 62 48 C54 51 51 54 48 62 C45 54 42 51 34 48 C42 45 45 42 48 34 Z' fill='%23FFFFFF' fill-opacity='0.02' stroke-opacity='0.08'/%3E%3Cpath d='M39 39 C44 44 45 45 48 48 C45 51 44 52 39 57 M57 39 C52 44 51 45 48 48 C51 51 52 52 57 57' stroke-opacity='0.06' stroke-width='0.75'/%3E%3C/g%3E%3Cg fill='%23FFFFFF' fill-opacity='0.07'%3E%3Ccircle cx='48' cy='48' r='1.6'/%3E%3Ccircle cx='48' cy='29' r='1'/%3E%3Ccircle cx='48' cy='67' r='1'/%3E%3Ccircle cx='29' cy='48' r='1'/%3E%3Ccircle cx='67' cy='48' r='1'/%3E%3Ccircle cx='0' cy='0' r='1.5'/%3E%3Ccircle cx='96' cy='0' r='1.5'/%3E%3Ccircle cx='0' cy='96' r='1.5'/%3E%3Ccircle cx='96' cy='96' r='1.5'/%3E%3Ccircle cx='48' cy='0' r='1.2'/%3E%3Ccircle cx='0' cy='48' r='1.2'/%3E%3Ccircle cx='96' cy='48' r='1.2'/%3E%3Ccircle cx='48' cy='96' r='1.2'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 80px 80px;
+  background-position: right 60px center;
+  opacity: 0.65;
+  mask-image: linear-gradient(90deg, transparent 0%, rgba(0, 0, 0, 0.04) 20%, rgba(0, 0, 0, 0.65) 55%, rgba(0, 0, 0, 0.45) 85%, transparent 100%);
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, rgba(0, 0, 0, 0.04) 20%, rgba(0, 0, 0, 0.65) 55%, rgba(0, 0, 0, 0.45) 85%, transparent 100%);
 }
 
 /* Institutional Crest & Brand Titles */
 .topbar-brand {
+  position: relative;
+  z-index: 1;
   display: flex;
   align-items: center;
   gap: 14px;
@@ -1136,6 +1154,7 @@ select.n-input {
 /* User Profile Pill & Dropdown */
 .user-menu-container {
   position: relative;
+  z-index: 1;
 }
 
 .sb-user-card {
@@ -2421,6 +2440,172 @@ select.n-input {
 .stepper-step.active .stepper-label {
   color: var(--n-text-primary);
   font-weight: 700;
+}
+
+/* ============================================================
+   INTERACTIVE WORKFLOW PIPELINE (Paket Pengadaan [TU-B])
+   ============================================================ */
+.pipeline-card {
+  padding: 16px 20px;
+  background: #FFFFFF;
+  border: 1px solid var(--n-border-hairline);
+  border-radius: var(--n-radius-lg, 16px);
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+  margin-bottom: 20px;
+}
+
+.pipeline-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--n-border-hairline);
+}
+
+.pipeline-stepper-container {
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  gap: 8px;
+  position: relative;
+  overflow-x: auto;
+  padding: 4px 2px;
+}
+
+.pipeline-divider {
+  width: 1px;
+  background: var(--n-border-hairline);
+  margin: 6px 2px;
+  flex-shrink: 0;
+}
+
+.pipeline-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1 1 0;
+  min-width: 95px;
+  padding: 10px 8px;
+  border-radius: 12px;
+  background: transparent;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 180ms cubic-bezier(0.16, 1, 0.3, 1);
+  text-align: center;
+  user-select: none;
+  position: relative;
+}
+
+.pipeline-step:hover {
+  background: rgba(6, 78, 59, 0.04);
+  border-color: rgba(6, 78, 59, 0.12);
+  transform: translateY(-2px);
+}
+
+.pipeline-step:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.pipeline-dot {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--n-canvas-subtle);
+  border: 2px solid var(--n-border);
+  color: var(--n-text-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+  transition: all 180ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.pipeline-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--n-text-secondary);
+  line-height: 1.25;
+  margin-bottom: 4px;
+  transition: color 180ms ease;
+}
+
+.pipeline-count {
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 10px;
+  background: rgba(15, 23, 42, 0.05);
+  color: var(--n-text-muted);
+  transition: all 180ms ease;
+  white-space: nowrap;
+}
+
+/* Active Highlight */
+.pipeline-step.active {
+  background: rgba(6, 78, 59, 0.06);
+  border-color: rgba(6, 78, 59, 0.22);
+  box-shadow: 0 2px 6px rgba(6, 78, 59, 0.08);
+}
+
+.pipeline-step.active .pipeline-dot {
+  background: var(--n-primary, #064E3B);
+  border-color: var(--n-primary, #064E3B);
+  color: #FFFFFF;
+  box-shadow: 0 0 0 4px rgba(6, 78, 59, 0.16);
+}
+
+.pipeline-step.active .pipeline-label {
+  color: var(--n-primary, #064E3B);
+  font-weight: 700;
+}
+
+.pipeline-step.active .pipeline-count {
+  background: var(--n-primary, #064E3B);
+  color: #FFFFFF;
+}
+
+/* Specific stage color accents when active */
+.pipeline-step.active[data-tahap="SELESAI"] .pipeline-dot,
+.pipeline-step.active[data-tahap="SELESAI"] .pipeline-count {
+  background: #059669;
+  border-color: #059669;
+}
+.pipeline-step.active[data-tahap="SELESAI"] .pipeline-label {
+  color: #059669;
+}
+
+.pipeline-step.active[data-tahap="PELAKSANAAN"] .pipeline-dot,
+.pipeline-step.active[data-tahap="PELAKSANAAN"] .pipeline-count {
+  background: #4F46E5;
+  border-color: #4F46E5;
+}
+.pipeline-step.active[data-tahap="PELAKSANAAN"] .pipeline-label {
+  color: #4F46E5;
+}
+
+.pipeline-step.active[data-tahap="PEMILIHAN"] .pipeline-dot,
+.pipeline-step.active[data-tahap="PEMILIHAN"] .pipeline-count {
+  background: #D97706;
+  border-color: #D97706;
+}
+.pipeline-step.active[data-tahap="PEMILIHAN"] .pipeline-label {
+  color: #D97706;
+}
+
+@media (max-width: 768px) {
+  .pipeline-stepper-container {
+    overflow-x: auto;
+    padding-bottom: 8px;
+    justify-content: flex-start;
+  }
+  .pipeline-step {
+    min-width: 82px;
+    padding: 8px 4px;
+  }
 }
 
 /* ============================================================
