@@ -8861,6 +8861,65 @@ function _tuRenderPaketKPI(d) {
   if (elProgres) elProgres.textContent = (d.avgProgresFisik || 0) + '%';
   if (elRealisasi) elRealisasi.textContent = _formatRupiah(d.totalRealisasiKeu || 0);
   if (elBadge) elBadge.textContent = (d.totalPaket || 0) + ' paket';
+
+  // Kalkulasi & perbarui live counter di tiap kartu tahapan workflow pipeline (Opsi 2)
+  var counts = {
+    ALL: 0,
+    PERSIAPAN: 0,
+    PEMILIHAN: 0,
+    KONTRAK: 0,
+    PELAKSANAAN: 0,
+    BAST: 0,
+    SELESAI: 0
+  };
+  var items = (d && d.items) || (_TU.paketData && _TU.paketData.items) || [];
+  items.forEach(function (it) {
+    if (it.status === 'VOID') return;
+    counts.ALL++;
+    if (counts[it.tahap] !== undefined) {
+      counts[it.tahap]++;
+    }
+  });
+
+  Object.keys(counts).forEach(function (key) {
+    var el = document.getElementById('tu-pkt-count-' + key);
+    if (el) {
+      el.textContent = counts[key] + ' paket';
+    }
+  });
+}
+
+function _tuSelectPaketTahap(tahap) {
+  tahap = tahap || 'ALL';
+  var selTahap = document.getElementById('tu-paket-filter-tahap');
+  if (selTahap) {
+    selTahap.value = tahap;
+  }
+  _tuUpdatePipelineActive(tahap);
+  _tuFilterPaket();
+}
+
+function _tuUpdatePipelineActive(tahap) {
+  tahap = tahap || 'ALL';
+  var steps = document.querySelectorAll('#tu-paket-pipeline-stepper .pipeline-step');
+  steps.forEach(function (step) {
+    if (step.getAttribute('data-tahap') === tahap) {
+      step.classList.add('active');
+    } else {
+      step.classList.remove('active');
+    }
+  });
+
+  var resetBtn = document.getElementById('tu-pkt-reset-filter');
+  if (resetBtn) {
+    if (tahap === 'ALL') {
+      resetBtn.style.opacity = '0.5';
+      resetBtn.style.pointerEvents = 'none';
+    } else {
+      resetBtn.style.opacity = '1';
+      resetBtn.style.pointerEvents = 'auto';
+    }
+  }
 }
 
 function _tuSetPaketSeg(status) {
@@ -8883,6 +8942,8 @@ function _tuFilterPaket() {
   var tahap = selTahap ? selTahap.value : 'ALL';
   var statusSeg = _TU.paketSeg || 'ALL';
   var q = searchInput ? searchInput.value.toLowerCase().trim() : '';
+
+  _tuUpdatePipelineActive(tahap);
 
   var items = _TU.paketData.items.filter(function (it) {
     if (statusSeg === 'AKTIF' && it.tahap === 'SELESAI') return false;

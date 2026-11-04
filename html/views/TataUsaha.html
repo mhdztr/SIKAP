@@ -558,32 +558,74 @@
   <!-- TAB 2: MONITORING PAKET PENGADAAN (SUB-MODUL B)            -->
   <!-- ══════════════════════════════════════════════════════════ -->
   <div id="tu-pane-paket" class="tu-pane n-hidden">
-    <!-- ── 6-STAGE WORKFLOW STEPPER ───────────────────────── -->
+    <!-- ── 6-STAGE WORKFLOW STEPPER (INTERACTIVE PIPELINE FILTER) ─ -->
     <div class="content-section">
-      <div class="stepper-container">
-        <div class="stepper-step completed">
-          <div class="stepper-dot">1</div>
-          <div class="stepper-label">Persiapan</div>
+      <div class="pipeline-card">
+        <div class="pipeline-header">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span style="font-size:0.875rem; font-weight:700; color:var(--n-text-primary);">
+              Siklus &amp; Distribusi Progres Pengadaan
+            </span>
+            <span class="badge" style="background:var(--n-bg-subtle); color:var(--n-text-muted); font-size:0.75rem;">
+              Filter Interaktif
+            </span>
+          </div>
+          <button type="button" class="btn-ghost" id="tu-pkt-reset-filter" onclick="_tuSelectPaketTahap('ALL')" style="font-size:0.75rem; padding:4px 8px; color:var(--n-text-muted); opacity:0.6; pointer-events:none;">
+            Tampilkan Semua Tahap
+          </button>
         </div>
-        <div class="stepper-step completed">
-          <div class="stepper-dot">2</div>
-          <div class="stepper-label">Pemilihan</div>
-        </div>
-        <div class="stepper-step active">
-          <div class="stepper-dot">3</div>
-          <div class="stepper-label">Kontrak</div>
-        </div>
-        <div class="stepper-step">
-          <div class="stepper-dot">4</div>
-          <div class="stepper-label">Pelaksanaan</div>
-        </div>
-        <div class="stepper-step">
-          <div class="stepper-dot">5</div>
-          <div class="stepper-label">BAST</div>
-        </div>
-        <div class="stepper-step">
-          <div class="stepper-dot">6</div>
-          <div class="stepper-label">Selesai</div>
+
+        <div class="pipeline-stepper-container" id="tu-paket-pipeline-stepper">
+          <div class="pipeline-step active" data-tahap="ALL" onclick="_tuSelectPaketTahap('ALL')" role="button" tabindex="0" title="Tampilkan seluruh paket pekerjaan">
+            <div class="pipeline-dot">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="7" height="7"></rect>
+                <rect x="14" y="3" width="7" height="7"></rect>
+                <rect x="14" y="14" width="7" height="7"></rect>
+                <rect x="3" y="14" width="7" height="7"></rect>
+              </svg>
+            </div>
+            <div class="pipeline-label">Semua</div>
+            <span class="pipeline-count tnum" id="tu-pkt-count-ALL">0 paket</span>
+          </div>
+
+          <div class="pipeline-divider"></div>
+
+          <div class="pipeline-step" data-tahap="PERSIAPAN" onclick="_tuSelectPaketTahap('PERSIAPAN')" role="button" tabindex="0" title="Filter Tahap 1: Persiapan">
+            <div class="pipeline-dot">1</div>
+            <div class="pipeline-label">Persiapan</div>
+            <span class="pipeline-count tnum" id="tu-pkt-count-PERSIAPAN">0 paket</span>
+          </div>
+
+          <div class="pipeline-step" data-tahap="PEMILIHAN" onclick="_tuSelectPaketTahap('PEMILIHAN')" role="button" tabindex="0" title="Filter Tahap 2: Pemilihan">
+            <div class="pipeline-dot">2</div>
+            <div class="pipeline-label">Pemilihan</div>
+            <span class="pipeline-count tnum" id="tu-pkt-count-PEMILIHAN">0 paket</span>
+          </div>
+
+          <div class="pipeline-step" data-tahap="KONTRAK" onclick="_tuSelectPaketTahap('KONTRAK')" role="button" tabindex="0" title="Filter Tahap 3: Kontrak">
+            <div class="pipeline-dot">3</div>
+            <div class="pipeline-label">Kontrak</div>
+            <span class="pipeline-count tnum" id="tu-pkt-count-KONTRAK">0 paket</span>
+          </div>
+
+          <div class="pipeline-step" data-tahap="PELAKSANAAN" onclick="_tuSelectPaketTahap('PELAKSANAAN')" role="button" tabindex="0" title="Filter Tahap 4: Pelaksanaan">
+            <div class="pipeline-dot">4</div>
+            <div class="pipeline-label">Pelaksanaan</div>
+            <span class="pipeline-count tnum" id="tu-pkt-count-PELAKSANAAN">0 paket</span>
+          </div>
+
+          <div class="pipeline-step" data-tahap="BAST" onclick="_tuSelectPaketTahap('BAST')" role="button" tabindex="0" title="Filter Tahap 5: BAST">
+            <div class="pipeline-dot">5</div>
+            <div class="pipeline-label">BAST</div>
+            <span class="pipeline-count tnum" id="tu-pkt-count-BAST">0 paket</span>
+          </div>
+
+          <div class="pipeline-step" data-tahap="SELESAI" onclick="_tuSelectPaketTahap('SELESAI')" role="button" tabindex="0" title="Filter Tahap 6: Selesai">
+            <div class="pipeline-dot">6</div>
+            <div class="pipeline-label">Selesai</div>
+            <span class="pipeline-count tnum" id="tu-pkt-count-SELESAI">0 paket</span>
+          </div>
         </div>
       </div>
     </div>
