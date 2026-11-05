@@ -110,21 +110,6 @@ function _evKonteks(refSheet, row) {
   return _evSlug(String(refSheet), 40);
 }
 
-function _evKapalLabel(kapalId) {
-  var id = String(kapalId || '').trim();
-  if (!id) return 'Tanpa-Kapal';
-  try {
-    var rows = sheetToObjects(openMasterSheet(SHEET_MASTER.KAPAL));
-    for (var i = 0; i < rows.length; i++) {
-      if (String(rows[i]['KapalID']) === id) {
-        var nm = String(rows[i]['Nama'] || '').trim();
-        return _evSlug(nm || id, 40);
-      }
-    }
-  } catch (e) { /* fallback */ }
-  return _evSlug(id, 40);
-}
-
 /** Bersihkan nama folder/file dari karakter tak aman; spasi → '-'. */
 function _evSanitize(s) {
   return String(s || '')
