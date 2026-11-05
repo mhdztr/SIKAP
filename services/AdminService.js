@@ -403,6 +403,7 @@ function notifikasi_markRead(token, notifId) {
         notifSheet.getRange(found.rowIndex, readIdx + 1).setValue(true);
       }
     }
+    try { CacheService.getScriptCache().remove('NOTIF_UNREAD_' + session.userId); } catch (eC) {}
     return { success: true };
   } catch (e) {
     return { success: false, error: e.message };
@@ -430,6 +431,7 @@ function notifikasi_markAllRead(token) {
         }
       }
     }
+    try { CacheService.getScriptCache().remove('NOTIF_UNREAD_' + session.userId); } catch (eC) {}
     return { success: true };
   } catch (e) {
     return { success: false, error: e.message };
@@ -500,44 +502,76 @@ function notifikasi_generateReminderMingguan(token) {
 }
 
 /**
- * Heartbeat & live-sync state engine (Fase 15).
+ * Heartbeat & live-sync state engine (Fase 15 & 17).
+ * Sangat ringan (Zero-Sheet Read via Cache/Properties, <50ms) agar tidak membebani kuota & lock spreadsheet GAS.
  * Memeriksa versi transaksi terkini, notifikasi belum dibaca, dan antrean persetujuan.
  * @param {string} token
  */
 function app_getSyncState(token) {
   try {
     var session = _requireSession(token);
-    var notifSheet = openLogSheet(SHEET_LOG.NOTIFICATIONS);
-    var notifs = sheetToObjects(notifSheet);
-    var unread = notifs.filter(function (n) {
-      return String(n['UserID']) === String(session.userId) && (n['IsRead'] === false || String(n['IsRead']).toLowerCase() === 'false');
-    }).length;
+    var cache = CacheService.getScriptCache();
+    var props = PropertiesService.getScriptProperties();
 
-    var queueCount = 0;
-    if (session.role === ROLE.SUPERADMIN || session.role === ROLE.DIREKTUR || session.role === ROLE.KADIV) {
-      try {
-        var queueSheet = openLogSheet(SHEET_LOG.APPROVAL_QUEUE);
-        var qRows = sheetToObjects(queueSheet);
-        queueCount = qRows.filter(function (q) {
-          return String(q['Status']).toUpperCase() === 'PENDING';
-        }).length;
-      } catch (errQ) {}
+    // 1. Versi Transaksi & Metadata (Zero-Sheet Read via Cache/Properties)
+    var txVersion = cache.get('DASH_TX_VERSION');
+    if (!txVersion) {
+      txVersion = props.getProperty('DASH_TX_VERSION') || '1';
     }
 
-    // Hitung versi transaksi dari baris terakhir TX_TataUsaha & telemetri waktu
-    var txVersion = 1;
-    var lastTs = new Date().toISOString();
-    try {
-      var tuSheet = openTuSheet(SHEET_TU.TATA_USAHA);
-      txVersion = tuSheet.getLastRow();
-      if (txVersion > 1) {
-        var rowData = tuSheet.getRange(txVersion, 1, 1, 10).getValues()[0];
-        var tsVal = rowData[4]; // Kolom 5 = Timestamp (audit relational)
-        if (tsVal) {
-          lastTs = (tsVal instanceof Date) ? tsVal.toISOString() : new Date(tsVal).toISOString();
-        }
+    var metaRaw = cache.get('METADATA_LAST_TX');
+    var lastTxMeta = null;
+    if (metaRaw) {
+      try { lastTxMeta = JSON.parse(metaRaw); } catch (eM) {}
+    }
+    if (!lastTxMeta) {
+      var propMeta = props.getProperty('METADATA_LAST_TX');
+      if (propMeta) {
+        try { lastTxMeta = JSON.parse(propMeta); } catch (eP) {}
       }
-    } catch (errTx) {}
+    }
+    if (!lastTxMeta) {
+      lastTxMeta = {
+        timestamp: new Date().toISOString(),
+        sheet: 'TX_TataUsaha'
+      };
+    }
+
+    // 2. Notifikasi Belum Dibaca (Cache per-user 60 detik)
+    var unread = 0;
+    var notifKey = 'NOTIF_UNREAD_' + session.userId;
+    var cachedUnread = cache.get(notifKey);
+    if (cachedUnread !== null && cachedUnread !== undefined) {
+      unread = Number(cachedUnread) || 0;
+    } else {
+      try {
+        var notifSheet = openLogSheet(SHEET_LOG.NOTIFICATIONS);
+        var notifs = sheetToObjects(notifSheet);
+        unread = notifs.filter(function (n) {
+          return String(n['UserID']) === String(session.userId) && (n['IsRead'] === false || String(n['IsRead']).toLowerCase() === 'false');
+        }).length;
+        cache.put(notifKey, String(unread), 60);
+      } catch (errN) {}
+    }
+
+    // 3. Antrean Persetujuan (Cache per-role 60 detik)
+    var queueCount = 0;
+    if (session.role === ROLE.SUPERADMIN || session.role === ROLE.DIREKTUR || session.role === ROLE.KADIV) {
+      var queueKey = 'QUEUE_COUNT_PENDING';
+      var cachedQueue = cache.get(queueKey);
+      if (cachedQueue !== null && cachedQueue !== undefined) {
+        queueCount = Number(cachedQueue) || 0;
+      } else {
+        try {
+          var queueSheet = openLogSheet(SHEET_LOG.APPROVAL_QUEUE);
+          var qRows = sheetToObjects(queueSheet);
+          queueCount = qRows.filter(function (q) {
+            return String(q['Status']).toUpperCase() === 'PENDING';
+          }).length;
+          cache.put(queueKey, String(queueCount), 60);
+        } catch (errQ) {}
+      }
+    }
 
     return {
       success: true,
@@ -545,10 +579,7 @@ function app_getSyncState(token) {
         txVersion: String(txVersion),
         unreadNotif: unread,
         queueCount: queueCount,
-        lastTxMetadata: {
-          timestamp: lastTs,
-          sheet: 'TX_TataUsaha'
-        }
+        lastTxMetadata: lastTxMeta
       }
     };
   } catch (e) {

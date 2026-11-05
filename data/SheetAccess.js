@@ -147,8 +147,20 @@ function openLogSheet(sheetName) {
  * @returns {GoogleAppsScript.Spreadsheet.Sheet}
  */
 function openTuSheet(sheetName) {
-  var tuId = ensureTuSpreadsheet();
-  var ss = SpreadsheetApp.openById(tuId);
+  var props = PropertiesService.getScriptProperties();
+  var tuId  = props.getProperty(PROP_KEY.TU_SS_ID);
+  var ss = null;
+  if (tuId) {
+    try {
+      ss = SpreadsheetApp.openById(tuId);
+    } catch (e) {
+      Logger.log('[openTuSheet] ID lama tidak valid: ' + e.message);
+    }
+  }
+  if (!ss) {
+    tuId = ensureTuSpreadsheet();
+    ss = SpreadsheetApp.openById(tuId);
+  }
   var sheet = ss.getSheetByName(sheetName);
   if (!sheet) {
     sheet = _autoCreateTuSheet(ss, sheetName);
@@ -808,6 +820,9 @@ function bumpTxVersion(sheetName) {
     // TTL 6 jam — jauh melebihi TTL cache agregat (300s) agar penanda tidak
     // lebih dulu kedaluwarsa daripada entri yang dijaganya.
     cache.put('DASH_TX_VERSION', String(n + 1), 21600);
+    try {
+      PropertiesService.getScriptProperties().setProperty('DASH_TX_VERSION', String(n + 1));
+    } catch (eP) {}
 
     // Metadata transaksi terakhir (Fase 17 — Live Telemetry)
     var meta = {

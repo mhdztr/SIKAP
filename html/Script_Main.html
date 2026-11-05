@@ -2286,6 +2286,26 @@ function _idNum(v) {
 }
 
 // ── DROPDOWN PERIODE (Tahun/Bulan/Minggu) ─────────────────
+function _v(id) {
+  var el = document.getElementById(id);
+  return el ? (el.value !== undefined ? el.value : (el.textContent || '')) : '';
+}
+
+function _formatDate(v) {
+  if (!v) return '—';
+  var d = new Date(v);
+  if (isNaN(d.getTime())) return '—';
+  return d.toLocaleDateString('id-ID');
+}
+
+function _moduleStub(title) {
+  return '<div class="content-section">' +
+    '<div class="content-section-hd">' + _esc(title || 'Modul') + '</div>' +
+    '<div class="n-card"><div class="n-empty-state"><div class="n-empty-state-title">Modul ' + _esc(title || '') + '</div>' +
+    '<div class="n-empty-state-desc">Modul sedang dimuat atau template belum tersedia.</div></div></div>' +
+  '</div>';
+}
+
 function _opsInitPeriodeUi(prefix) {
   prefix = prefix || 'tu-';
   var now = new Date();
@@ -3921,15 +3941,18 @@ var _TU = {
 // ── RENDER ────────────────────────────────────────────────
 
 function _renderTataUsaha(el) {
+  if (!el) el = document.getElementById('page-content');
+  if (!el) return;
   // Clone template dari DOM
   var tpl = document.getElementById('view-tpl-tata-usaha');
   if (!tpl) { el.innerHTML = _moduleStub('Tata Usaha'); return; }
   el.innerHTML = tpl.innerHTML;
-  _attachInit('tu', { refSheet: 'TX_TataUsaha' });
+
+  try { _attachInit('tu', { refSheet: 'TX_TataUsaha' }); } catch (e) { /* non-kritis */ }
 
   // Dropdown periode Tahun/Bulan/Minggu Ke- (pola sama dengan modul lain)
-  _opsInitPeriodeUi('tu-');
-  _tuSyncPeriodeHint();
+  try { _opsInitPeriodeUi('tu-'); } catch (e) { /* non-kritis */ }
+  try { _tuSyncPeriodeHint(); } catch (e) { /* non-kritis */ }
 
   // Buka tab yang sedang aktif
   _tuSwitchTab(_TU.activeTab || 'anggaran');
@@ -3937,7 +3960,13 @@ function _renderTataUsaha(el) {
 
 function _tuSyncPeriodeHint() {
   var hint = document.getElementById('tu-periode-hint');
-  if (hint) hint.textContent = 'Periode: ' + (_composePeriode('tu-') || '—');
+  if (hint) {
+    try {
+      hint.textContent = 'Periode: ' + (_composePeriode('tu-') || '—');
+    } catch (e) {
+      hint.textContent = 'Periode: —';
+    }
+  }
 }
 
 function _tuLoadKPI(silent) {

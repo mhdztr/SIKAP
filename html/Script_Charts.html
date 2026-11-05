@@ -126,10 +126,10 @@ function _chartEmpty(canvasId, msg) {
 }
 
 function _chartShow(canvasId) {
-  var el = document.getElementById(canvasId);
+  var el = document.querySelector('#page-content #' + canvasId) || document.getElementById(canvasId);
   if (!el) return;
   el.style.display = '';
-  var box = el.closest('.chart-box');
+  var box = el.closest ? el.closest('.chart-box') : el.parentElement;
   if (box) {
     var ov = box.querySelector('.chart-empty');
     if (ov) ov.remove();
@@ -326,7 +326,7 @@ function _chartYScale() {
 // ============================================================
 function _chartLine(canvasId, labels, datasets, opts) {
   opts = opts || {};
-  var canvas = document.getElementById(canvasId);
+  var canvas = document.querySelector('#page-content #' + canvasId) || document.getElementById(canvasId);
   if (!canvas) return;
   _chartShow(canvasId);
   if (!_chartHasData(datasets)) {
@@ -398,7 +398,7 @@ function _chartLine(canvasId, labels, datasets, opts) {
 // ============================================================
 function _chartBar(canvasId, labels, datasets, opts) {
   opts = opts || {};
-  var canvas = document.getElementById(canvasId);
+  var canvas = document.querySelector('#page-content #' + canvasId) || document.getElementById(canvasId);
   if (!canvas) return;
   _chartShow(canvasId);
   if (!_chartHasData(datasets)) {
