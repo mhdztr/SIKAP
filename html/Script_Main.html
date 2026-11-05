@@ -79,7 +79,7 @@ function _syncBusy() {
     // Jaring pengaman: force-reset jika counter nyangkut (mis. call tanpa
     // failure-handler lalu GAGAL, sehingga tak ada handler yang menurunkan).
     _BUSY_WATCHDOG = setInterval(function () {
-      if (_BUSY > 0 && (Date.now() - _BUSY_LAST) > 20000) {
+      if (_BUSY > 0 && (Date.now() - _BUSY_LAST) > 12000) {
         _BUSY = 0;
         _syncBusy();
       }
@@ -111,10 +111,20 @@ function _patchGoogleScriptRun() {
         return oWsh.call(this, h);
       }
       _busyInc();
-      return oWsh.call(this, function (res) {
+      var runner = oWsh.call(this, function (res) {
         try { return h ? h(res) : res; }
         finally { _busyDec(); }
       });
+      if (runner && runner.withFailureHandler) {
+        var rWfh = runner.withFailureHandler;
+        runner.withFailureHandler = function (fh) {
+          return rWfh.call(this, function (err) {
+            try { return fh ? fh(err) : err; }
+            finally { _busyDec(); }
+          });
+        };
+      }
+      return runner;
     };
     g.withFailureHandler = function (h) {
       if (_SILENT_RPC) {
@@ -1087,9 +1097,10 @@ function _initApp() {
   } else {
     _routeTo(hash);
   }
-  _applyShellStatus(); // badge notifikasi + strip "divisi belum melapor" (Fase 13)
   _startAppHeartbeat();
-  _runSyncTick(true); // inisialisasi versi live-sync server (Fase 15a)
+  setTimeout(function () {
+    _runSyncTick(false); // inisialisasi versi live-sync server secara hening setelah tampilan utama selesai mount
+  }, 2000);
 
   if (!_APP_INIT_DONE) {
     _APP_INIT_DONE = true;
@@ -2104,6 +2115,7 @@ function _runHeartbeatTick() {
  * Mengirim permintaan ringan ke endpoint backend app_getSyncState (RAM zero-sheet-read, <50ms).
  * Mendeteksi perubahan versi transaksi, unread notifikasi, dan antrean approval.
  */
+var _syncInFlightTimer = null;
 function _runSyncTick(force) {
   if (!APP.token || !APP.user) return;
   var now = Date.now();
@@ -2117,9 +2129,19 @@ function _runSyncTick(force) {
     _syncUpdateIndicator('syncing');
   }
 
+  // Jaring pengaman watchdog: cegah status "Menyinkronkan..." nyangkut permanen jika RPC tertahan di GAS
+  if (_syncInFlightTimer) clearTimeout(_syncInFlightTimer);
+  _syncInFlightTimer = setTimeout(function () {
+    if (APP_SYNC.inFlight) {
+      APP_SYNC.inFlight = false;
+      _syncUpdateIndicator(APP_SYNC.deferredReload ? 'deferred' : 'synced');
+    }
+  }, 12000);
+
   _silentRun(function () {
     google.script.run
       .withSuccessHandler(function (res) {
+        if (_syncInFlightTimer) { clearTimeout(_syncInFlightTimer); _syncInFlightTimer = null; }
         APP_SYNC.inFlight = false;
         if (!res || !res.success) {
           _syncUpdateIndicator(APP_SYNC.deferredReload ? 'deferred' : 'synced');
@@ -2200,6 +2222,7 @@ function _runSyncTick(force) {
         }
       })
       .withFailureHandler(function (err) {
+        if (_syncInFlightTimer) { clearTimeout(_syncInFlightTimer); _syncInFlightTimer = null; }
         APP_SYNC.inFlight = false;
         _failOrLogout(err);
         _syncUpdateIndicator(APP_SYNC.deferredReload ? 'deferred' : 'synced');
@@ -2325,7 +2348,7 @@ function _cartoTileUrl(key) {
 // ── CHART REALISASI ANGGARAN (TATA USAHA) ─────────────────
 function _tuLoadCharts() {
   ['tu-chart-tren', 'tu-chart-bulanan'].forEach(function (cid) {
-    var canvas = document.getElementById(cid);
+    var canvas = document.querySelector('#page-content #' + cid) || document.getElementById(cid);
     if (!canvas) return;
     var box = canvas.closest('.chart-box');
     if (box && (!window._SIKAP_CHARTS || !window._SIKAP_CHARTS[cid]) && !box.querySelector('.chart-skeleton-wrap')) {
@@ -2349,7 +2372,11 @@ function _tuLoadCharts() {
 
   google.script.run
     .withSuccessHandler(function (res) {
-      if (!res.success) return;
+      if (!res || !res.success || !res.data) {
+        _chartEmpty('tu-chart-tren', (res && res.error) || 'Belum ada data tren anggaran.');
+        _chartEmpty('tu-chart-bulanan', (res && res.error) || 'Belum ada data realisasi bulanan.');
+        return;
+      }
       var d = res.data;
       var labels = d.months.map(function (m) { return _chartMonthLabel(m); });
       var fmtCompact = _chartCompact;
@@ -2373,7 +2400,10 @@ function _tuLoadCharts() {
         emptyMsg: 'Belum ada realisasi bulanan pada rentang terpilih.'
       });
     })
-    .withFailureHandler(function () {})
+    .withFailureHandler(function (err) {
+      _chartEmpty('tu-chart-tren', 'Koneksi gagal memuat tren anggaran.');
+      _chartEmpty('tu-chart-bulanan', 'Koneksi gagal memuat realisasi bulanan.');
+    })
     .tataUsaha_getTren(APP.token, APP.filter);
 }
 
@@ -3333,7 +3363,7 @@ function _histActions(cfg, r) {
 }
 
 function _histRender(wrapId, cfg, rows, prefixHtml) {
-  var wrap = document.getElementById(wrapId);
+  var wrap = document.querySelector('#page-content #' + wrapId) || document.getElementById(wrapId);
   if (!wrap) return;
   _hdReset();
   var pre = prefixHtml || '';
@@ -3911,15 +3941,12 @@ function _tuSyncPeriodeHint() {
 }
 
 function _tuLoadKPI(silent) {
-  var strip = document.getElementById('tu-kpi-strip');
-  if (strip && !silent) strip.innerHTML = _tuSkeletonAnggaran();
+  var strip = document.querySelector('#page-content #tu-kpi-strip') || document.getElementById('tu-kpi-strip');
+  if (strip && !silent && !_TU.kpi) strip.innerHTML = _tuSkeletonAnggaran();
 
-  var histWrap = document.getElementById('tu-history-wrap');
-  if (histWrap && !silent && (!histWrap.children.length || histWrap.querySelector('.n-pad-muted') || histWrap.textContent.indexOf('Memuat') !== -1)) {
+  var histWrap = document.querySelector('#page-content #tu-history-wrap') || document.getElementById('tu-history-wrap');
+  if (histWrap && !silent && (!_TU.history || !_TU.history.length)) {
     histWrap.innerHTML = _tableSkeleton(4, 5);
-  }
-  if (!silent) {
-    _tuLoadCharts();
   }
 
   google.script.run
@@ -3927,20 +3954,22 @@ function _tuLoadKPI(silent) {
       if (!res.success) { _tuKPIError(res.error); return; }
       _TU.kpi = res.data;
       _tuRenderKPI(res.data);
-      _tuLoadHistory(silent);
+      _tuLoadHistory(true);
       _tuLoadCharts();
     })
-    .withFailureHandler(function () { _tuKPIError('Gagal memuat KPI.'); })
+    .withFailureHandler(function (err) {
+      _tuKPIError('Gagal memuat KPI: ' + ((err && err.message) || err || 'Kesalahan koneksi.'));
+    })
     .tataUsaha_getKPI(APP.token, APP.filter);
 }
 
 function _tuKPIError(msg) {
-  var el = document.getElementById('tu-kpi-strip');
+  var el = document.querySelector('#page-content #tu-kpi-strip') || document.getElementById('tu-kpi-strip');
   if (el) el.innerHTML = '<div class="n-msg error show">' + _esc(msg) + '</div>';
 }
 
 function _tuRenderKPI(d) {
-  var el = document.getElementById('tu-kpi-strip');
+  var el = document.querySelector('#page-content #tu-kpi-strip') || document.getElementById('tu-kpi-strip');
   if (!el) return;
 
   var progSP2D   = Math.min(Math.max(d.pctSerapanNasional !== undefined ? d.pctSerapanNasional : (d.pctSP2D || 0), 0), 100);
@@ -4492,20 +4521,23 @@ function _tuFillFormContext() {
 // ── HISTORY ───────────────────────────────────────────────
 
 function _tuLoadHistory(silent) {
-  var wrap = document.getElementById('tu-history-wrap');
-  if (wrap && !silent) wrap.innerHTML = _tableSkeleton(4, 5);
+  var wrap = document.querySelector('#page-content #tu-history-wrap') || document.getElementById('tu-history-wrap');
+  if (wrap && !silent && (!_TU.history || !_TU.history.length)) wrap.innerHTML = _tableSkeleton(4, 5);
 
   google.script.run
     .withSuccessHandler(function (res) {
       if (!res.success) {
         _msg('tu-history-msg', 'error', res.error);
-        if (wrap) wrap.innerHTML = '';
+        if (wrap && (!_TU.history || !_TU.history.length)) wrap.innerHTML = '';
         return;
       }
       _TU.history = res.data;
       _tuRenderHistory(res.data);
     })
-    .withFailureHandler(function () { _msg('tu-history-msg', 'error', 'Gagal memuat riwayat.'); })
+    .withFailureHandler(function (err) {
+      _msg('tu-history-msg', 'error', 'Gagal memuat riwayat: ' + ((err && err.message) || err || 'Kesalahan koneksi.'));
+      if (wrap && (!_TU.history || !_TU.history.length)) wrap.innerHTML = '';
+    })
     .tataUsaha_getHistory(APP.token, APP.filter);
 }
 
@@ -4727,7 +4759,7 @@ function _tuSwitchTab(tabName) {
   // Toggle visible pane
   var panes = ['anggaran', 'paket', 'pegawai', 'bmn', 'penghapusan'];
   panes.forEach(function (p) {
-    var paneEl = document.getElementById('tu-pane-' + p);
+    var paneEl = document.querySelector('#page-content #tu-pane-' + p) || document.getElementById('tu-pane-' + p);
     if (!paneEl) return;
     if (p === _TU.activeTab) {
       paneEl.classList.remove('n-hidden');
@@ -4740,7 +4772,7 @@ function _tuSwitchTab(tabName) {
   if (_TU.activeTab === 'anggaran') {
     if (_TU.kpi) {
       _tuRenderKPI(_TU.kpi);
-      if (_TU.history) _tuRenderHistory(_TU.history);
+      if (_TU.history && _TU.history.length) _tuRenderHistory(_TU.history);
       _tuLoadKPI(true);
     } else {
       _tuLoadKPI();
