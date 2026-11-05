@@ -54,9 +54,28 @@ function _busyDec() {
   _syncBusy();
 }
 function _syncBusy() {
+  var isBusy = (_BUSY > 0);
+
+  // 1. Topbar Loading Pill (Header Top-Right)
+  var topbarLoading = document.getElementById('topbar-loading-indicator');
+  if (topbarLoading) topbarLoading.classList.toggle('n-hidden', !isBusy);
+
+  // 2. Toolbar Loading Bar (Dedicated Sub-Bar Right)
+  var topLoading = document.getElementById('top-loading-bar');
+  if (topLoading) topLoading.classList.toggle('n-hidden', !isBusy);
+
+  // 3. Global Top Edge Indeterminate Progress Line
+  var globalProg = document.getElementById('global-progress-line');
+  if (globalProg) {
+    globalProg.classList.toggle('n-hidden', !isBusy);
+    globalProg.classList.toggle('active', isBusy);
+  }
+
+  // 4. Filter busy indicator
   var el = document.getElementById('filter-busy');
-  if (el) el.style.display = (_BUSY > 0) ? 'flex' : 'none';
-  if (_BUSY > 0 && !_BUSY_WATCHDOG) {
+  if (el) el.style.display = isBusy ? 'flex' : 'none';
+
+  if (isBusy && !_BUSY_WATCHDOG) {
     // Jaring pengaman: force-reset jika counter nyangkut (mis. call tanpa
     // failure-handler lalu GAGAL, sehingga tak ada handler yang menurunkan).
     _BUSY_WATCHDOG = setInterval(function () {
@@ -65,7 +84,7 @@ function _syncBusy() {
         _syncBusy();
       }
     }, 1000);
-  } else if (_BUSY === 0 && _BUSY_WATCHDOG) {
+  } else if (!isBusy && _BUSY_WATCHDOG) {
     clearInterval(_BUSY_WATCHDOG);
     _BUSY_WATCHDOG = null;
   }
@@ -80,14 +99,13 @@ function _silentRun(fn) {
   }
 }
 
-(function () {
+function _patchGoogleScriptRun() {
   try {
     var g = window.google && google.script && google.script.run;
-    if (!g) return;
+    if (!g || g.__nBusyPatched) return;
+    g.__nBusyPatched = true;
     var oWsh = g.withSuccessHandler;
     var oWfh = g.withFailureHandler;
-    if (g.__nBusyPatched) return;
-    g.__nBusyPatched = true;
     g.withSuccessHandler = function (h) {
       if (_SILENT_RPC) {
         return oWsh.call(this, h);
@@ -108,9 +126,20 @@ function _silentRun(fn) {
       });
     };
   } catch (e) {
-    // patch gagal → spinner tidak tampil, call tetap berjalan normal (tidak wajib)
+    // patch gagal → spinner tidak tampil, call tetap berjalan normal
   }
-})();
+}
+
+_patchGoogleScriptRun();
+if (typeof window !== 'undefined') {
+  window.addEventListener('load', _patchGoogleScriptRun);
+  var _patchTimer = setInterval(function () {
+    _patchGoogleScriptRun();
+    if (window.google && google.script && google.script.run && google.script.run.__nBusyPatched) {
+      clearInterval(_patchTimer);
+    }
+  }, 250);
+}
 
 // ── SYNC & HEARTBEAT STATE (Fase 15a/17) ─────────────────────
 var APP_SYNC = {
@@ -1334,8 +1363,10 @@ function _appActiveWraps() {
 function _loadApprovals() {
   var act = _appActiveWraps();
   if (act.length === 0) return;
-  var firstWrap = document.getElementById(act[0].wrapId);
-  if (firstWrap) firstWrap.innerHTML = _loadingInline('Memuat permintaan registrasi\u2026');
+  for (var i = 0; i < act.length; i++) {
+    var w = document.getElementById(act[i].wrapId);
+    if (w) w.innerHTML = _tableSkeleton(4, 5);
+  }
 
   google.script.run
     .withSuccessHandler(function (res) {
@@ -1512,7 +1543,7 @@ function _adnStatusBadge(st) {
 function _adnLoadUsers() {
   var wrap = document.getElementById('adn-users-wrap');
   if (!wrap) return;
-  wrap.innerHTML = _loadingInline('Memuat daftar pengguna\u2026');
+  wrap.innerHTML = _tableSkeleton(6, 6);
   _msg('adn-users-msg', null);
   _asyncArm('adn-users', wrap, '_adnLoadUsers()');
 
@@ -1715,7 +1746,7 @@ function _adnResetPassword() {
 function _adnLoadAudit() {
   var wrap = document.getElementById('adn-audit-wrap');
   if (!wrap) return;
-  wrap.innerHTML = _loadingInline('Memuat jejak audit\u2026');
+  wrap.innerHTML = _tableSkeleton(6, 5);
   _msg('adn-audit-msg', null);
   _asyncArm('adn-audit', wrap, '_adnReloadAudit()');
 
@@ -2293,6 +2324,29 @@ function _cartoTileUrl(key) {
 
 // ── CHART REALISASI ANGGARAN (TATA USAHA) ─────────────────
 function _tuLoadCharts() {
+  ['tu-chart-tren', 'tu-chart-bulanan'].forEach(function (cid) {
+    var canvas = document.getElementById(cid);
+    if (!canvas) return;
+    var box = canvas.closest('.chart-box');
+    if (box && (!window._SIKAP_CHARTS || !window._SIKAP_CHARTS[cid]) && !box.querySelector('.chart-skeleton-wrap')) {
+      canvas.style.display = 'none';
+      var emptyEl = box.querySelector('.chart-empty');
+      if (emptyEl) emptyEl.remove();
+      var sk = document.createElement('div');
+      sk.className = 'chart-skeleton-wrap';
+      sk.innerHTML = '' +
+        '<div class="chart-skeleton-bar" style="height:30%;"></div>' +
+        '<div class="chart-skeleton-bar" style="height:50%;"></div>' +
+        '<div class="chart-skeleton-bar" style="height:40%;"></div>' +
+        '<div class="chart-skeleton-bar" style="height:65%;"></div>' +
+        '<div class="chart-skeleton-bar" style="height:80%;"></div>' +
+        '<div class="chart-skeleton-bar" style="height:60%;"></div>' +
+        '<div class="chart-skeleton-bar" style="height:90%;"></div>' +
+        '<div class="chart-skeleton-bar" style="height:75%;"></div>';
+      box.appendChild(sk);
+    }
+  });
+
   google.script.run
     .withSuccessHandler(function (res) {
       if (!res.success) return;
@@ -3313,7 +3367,7 @@ function _histRender(wrapId, cfg, rows, prefixHtml) {
   wrap.innerHTML = pre + t + '</tbody></table></div>';
 }
 
-// ── LOADING INDICATORS ────────────────────────────────────
+// ── LOADING INDICATORS & SKELETON SHIMMER ──────────────────
 
 function _loadingInline(text) {
   return '<div class="md-loading-inline"><span class="n-spin-sm"></span><span>' +
@@ -3321,25 +3375,101 @@ function _loadingInline(text) {
 }
 
 function _kpiSkeleton(n) {
-  var chips = '';
-  for (var i = 0; i < (n || 4); i++) {
-    chips += '<div class="n-card kpi-skeleton-item"><div class="sk-bar sk-bar-lg"></div>' +
-             '<div class="sk-bar sk-bar-sm" style="margin-top:10px;"></div><div class="sk-bar sk-bar-sm" style="margin-top:6px;width:40%;"></div></div>';
+  var count = n || 4;
+  var cards = '';
+  for (var i = 0; i < count; i++) {
+    cards += '' +
+      '<div class="kpi-skeleton-card">' +
+        '<div class="sk-bar sk-bar-xs sk-w-50"></div>' +
+        '<div class="sk-bar sk-bar-xl sk-w-70" style="margin:6px 0;"></div>' +
+        '<div class="sk-bar sk-bar-xs sk-w-85"></div>' +
+      '</div>';
   }
-  return '<div class="kpi-skeleton">' + chips + '</div>';
+  return '<div class="kpi-skeleton-grid" style="grid-template-columns: repeat(' + count + ', 1fr);">' + cards + '</div>';
+}
+
+function _tuSkeletonAnggaran() {
+  return '' +
+    '<div class="treasury-skeleton-cockpit">' +
+      '<div class="treasury-header" style="margin-bottom:0;">' +
+        '<div class="treasury-title-group">' +
+          '<h2 class="treasury-title">Dasbor Penyerapan Anggaran &amp; Kas Negara</h2>' +
+        '</div>' +
+        '<div class="treasury-actions">' +
+          '<span class="sk-bar sk-bar-md" style="width:100px; border-radius:999px;"></span>' +
+          '<span class="sk-bar sk-bar-lg" style="width:130px; border-radius:8px;"></span>' +
+          '<span class="sk-bar sk-bar-lg" style="width:160px; border-radius:8px;"></span>' +
+        '</div>' +
+      '</div>' +
+      '<div class="treasury-kpi-grid">' +
+        '<div class="treasury-kpi-card">' +
+          '<div class="sk-bar sk-bar-xs sk-w-50" style="margin-bottom:10px;"></div>' +
+          '<div class="sk-bar sk-bar-xl sk-w-85" style="margin-bottom:14px;"></div>' +
+          '<div class="sk-bar sk-bar-xs sk-w-70" style="margin-bottom:6px;"></div>' +
+          '<div class="sk-bar sk-bar-xs sk-w-50"></div>' +
+        '</div>' +
+        '<div class="treasury-kpi-card">' +
+          '<div class="sk-bar sk-bar-xs sk-w-50" style="margin-bottom:10px;"></div>' +
+          '<div style="display:flex; justify-content:space-between; margin-bottom:12px;">' +
+            '<div class="sk-bar sk-bar-xl sk-w-33"></div><div class="sk-bar sk-bar-md sk-w-33"></div>' +
+          '</div>' +
+          '<div class="sk-bar sk-bar-xs sk-w-100" style="margin-bottom:12px;"></div>' +
+          '<div class="sk-bar sk-bar-xs sk-w-70"></div>' +
+        '</div>' +
+        '<div class="treasury-kpi-card">' +
+          '<div class="sk-bar sk-bar-xs sk-w-50" style="margin-bottom:10px;"></div>' +
+          '<div style="display:flex; justify-content:space-between; margin-bottom:12px;">' +
+            '<div class="sk-bar sk-bar-xl sk-w-33"></div><div class="sk-bar sk-bar-md sk-w-33"></div>' +
+          '</div>' +
+          '<div class="sk-bar sk-bar-xs sk-w-100" style="margin-bottom:12px;"></div>' +
+          '<div class="sk-bar sk-bar-xs sk-w-70"></div>' +
+        '</div>' +
+        '<div class="treasury-kpi-card">' +
+          '<div class="sk-bar sk-bar-xs sk-w-50" style="margin-bottom:10px;"></div>' +
+          '<div class="sk-bar sk-bar-lg sk-w-70" style="border-radius:999px; margin-bottom:12px;"></div>' +
+          '<div class="sk-bar sk-bar-xs sk-w-70" style="margin-bottom:6px;"></div>' +
+          '<div class="sk-bar sk-bar-md sk-w-50"></div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="treasury-schema-row">' +
+        '<div class="schema-card">' +
+          '<div style="display:flex; justify-content:space-between; margin-bottom:12px;">' +
+            '<div class="sk-bar sk-bar-md sk-w-33"></div><div class="sk-bar sk-bar-xs sk-w-25"></div>' +
+          '</div>' +
+          '<div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px;">' +
+            '<div class="sk-bar sk-bar-md sk-w-70"></div><div class="sk-bar sk-bar-md sk-w-70"></div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="schema-card">' +
+          '<div style="display:flex; justify-content:space-between; margin-bottom:12px;">' +
+            '<div class="sk-bar sk-bar-md sk-w-33"></div><div class="sk-bar sk-bar-xs sk-w-25"></div>' +
+          '</div>' +
+          '<div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px;">' +
+            '<div class="sk-bar sk-bar-md sk-w-70"></div><div class="sk-bar sk-bar-md sk-w-70"></div>' +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
 }
 
 function _tableSkeleton(rows, cols) {
+  var rCount = rows || 5;
+  var cCount = cols || 5;
   var h = '<thead><tr>';
-  for (var c = 0; c < (cols || 3); c++) h += '<th><div class="sk-bar sk-bar-sm" style="width:80%;"></div></th>';
+  for (var c = 0; c < cCount; c++) {
+    h += '<th><div class="sk-bar sk-bar-xs sk-w-70"></div></th>';
+  }
   h += '</tr></thead><tbody>';
-  for (var r = 0; r < (rows || 4); r++) {
+  for (var r = 0; r < rCount; r++) {
     h += '<tr>';
-    for (var cc = 0; cc < (cols || 3); cc++) h += '<td><div class="sk-bar sk-bar-sm"></div></td>';
+    for (var cc = 0; cc < cCount; cc++) {
+      var wClass = (cc === 0) ? 'sk-w-85' : (cc === 1 ? 'sk-w-100' : (cc === cCount - 1 ? 'sk-w-50' : 'sk-w-70'));
+      h += '<td><div class="sk-bar sk-bar-sm ' + wClass + '"></div></td>';
+    }
     h += '</tr>';
   }
   h += '</tbody>';
-  return '<div class="n-table-wrap"><table class="n-table n-table-full">' + h + '</table></div>';
+  return '<div class="n-table-wrap"><table class="table-skeleton n-table n-table-full">' + h + '</table></div>';
 }
 
 // ── LAMPIRAN INLINE (Fase 10 revisi) ─────────────────────
@@ -3782,7 +3912,15 @@ function _tuSyncPeriodeHint() {
 
 function _tuLoadKPI(silent) {
   var strip = document.getElementById('tu-kpi-strip');
-  if (strip && !silent) strip.innerHTML = _kpiSkeleton(4);
+  if (strip && !silent) strip.innerHTML = _tuSkeletonAnggaran();
+
+  var histWrap = document.getElementById('tu-history-wrap');
+  if (histWrap && !silent && (!histWrap.children.length || histWrap.querySelector('.n-pad-muted') || histWrap.textContent.indexOf('Memuat') !== -1)) {
+    histWrap.innerHTML = _tableSkeleton(4, 5);
+  }
+  if (!silent) {
+    _tuLoadCharts();
+  }
 
   google.script.run
     .withSuccessHandler(function (res) {
@@ -4355,7 +4493,7 @@ function _tuFillFormContext() {
 
 function _tuLoadHistory(silent) {
   var wrap = document.getElementById('tu-history-wrap');
-  if (wrap && !silent) wrap.innerHTML = _loadingInline('Memuat riwayat\u2026');
+  if (wrap && !silent) wrap.innerHTML = _tableSkeleton(4, 5);
 
   google.script.run
     .withSuccessHandler(function (res) {
@@ -4633,6 +4771,17 @@ function _tuSwitchTab(tabName) {
 // ── SUB-MODUL KEPEGAWAIAN ────────────────────────────────
 
 function _tuLoadPegawai(force) {
+  var dirWrap = document.getElementById('tu-peg-dir-wrap');
+  if (dirWrap && (force || !_TU.pegawaiData)) {
+    dirWrap.innerHTML = _tableSkeleton(6, 6);
+  }
+  if (force || !_TU.pegawaiData) {
+    ['tu-peg-kpi-total', 'tu-peg-kpi-poa', 'tu-peg-kpi-awak', 'tu-peg-kpi-p3k', 'tu-peg-kpi-p3kpw', 'tu-peg-kpi-pjlp', 'tu-peg-kpi-magang'].forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el) el.innerHTML = '<span class="sk-bar sk-bar-sm sk-w-50" style="display:inline-block; vertical-align:middle;"></span>';
+    });
+  }
+
   google.script.run
     .withSuccessHandler(function (res) {
       if (!res || !res.success) {
@@ -6168,8 +6317,13 @@ function _tuLoadPaket(force) {
   if (msg) msg.innerHTML = '';
   var wrap = document.getElementById('tu-paket-table-wrap');
   if (wrap && (force || !_TU.paketData)) {
-    wrap.innerHTML = '<div style="padding:32px; text-align:center; color:var(--n-text-muted); font-size:.875rem;">' +
-      'Memuat data paket pekerjaan Dit. POA...</div>';
+    wrap.innerHTML = _tableSkeleton(5, 6);
+  }
+  if (force || !_TU.paketData) {
+    ['tu-paket-kpi-total', 'tu-paket-kpi-kontrak', 'tu-paket-kpi-progres', 'tu-paket-kpi-realisasi'].forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el) el.innerHTML = '<span class="sk-bar sk-bar-md sk-w-50" style="display:inline-block; vertical-align:middle;"></span>';
+    });
   }
 
   google.script.run
@@ -6612,6 +6766,16 @@ var _BMN_MAP = {
 };
 
 function _tuLoadBMN(force) {
+  if (force || !_BMN.listData) {
+    var wrap = document.getElementById('bmn-table-wrap');
+    if (wrap) wrap.innerHTML = _tableSkeleton(6, 7);
+    var hpsWrap = document.getElementById('bmn-hps-table-wrap');
+    if (hpsWrap) hpsWrap.innerHTML = _tableSkeleton(5, 6);
+    ['bmn-kpi-gross', 'bmn-kpi-net', 'bmn-kpi-laik', 'bmn-kpi-hapus'].forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el) el.innerHTML = '<span class="sk-bar sk-bar-md sk-w-50" style="display:inline-block; vertical-align:middle;"></span>';
+    });
+  }
   _bmnLoadMasters(function () {
     _bmnInitMap();
     _bmnLoadSummary(force);
@@ -6810,6 +6974,12 @@ function _bmnPopulateMasterSelects(masters) {
 }
 
 function _bmnLoadSummary(force) {
+  if (force || !_BMN.summary) {
+    ['bmn-kpi-gross', 'bmn-kpi-net', 'bmn-kpi-laik', 'bmn-kpi-hapus'].forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el) el.innerHTML = '<span class="sk-bar sk-bar-md sk-w-50" style="display:inline-block; vertical-align:middle;"></span>';
+    });
+  }
   google.script.run
     .withSuccessHandler(function (res) {
       if (!res.success) return;
@@ -6890,7 +7060,7 @@ function _bmnRenderSummary(d) {
 function _bmnLoadAsetList(silent) {
   var wrap = document.getElementById('bmn-table-wrap');
   if (wrap && !silent) {
-    wrap.innerHTML = '<div style="padding:28px; text-align:center; color:var(--n-text-muted); font-size:.875rem;">Memuat daftar inventaris BMN...</div>';
+    wrap.innerHTML = _tableSkeleton(6, 7);
   }
 
   google.script.run
@@ -8735,10 +8905,8 @@ function _bmnSwitchMainTab(tab) {
 
 function _bmnLoadPenghapusanList(force) {
   var wrap = document.getElementById('bmn-hps-table-wrap');
-  if (wrap && (!wrap.innerHTML || force)) {
-    wrap.innerHTML = '<div style="padding:32px; text-align:center; color:var(--n-text-muted); font-size:.875rem;">' +
-      'Memuat berkas usulan penghapusan aset BMN...' +
-      '</div>';
+  if (wrap && (!wrap.innerHTML || force || wrap.textContent.indexOf('Memuat') !== -1)) {
+    wrap.innerHTML = _tableSkeleton(5, 6);
   }
 
   google.script.run
@@ -8924,9 +9092,18 @@ function _bmnOpenCreateHapusModal() {
 
   var tbody = document.getElementById('bmn-hps-eligible-tbody');
   if (tbody) {
-    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:16px; color:var(--n-text-muted);">' +
-      'Memuat daftar aset eligible untuk penghapusan...' +
-      '</td></tr>';
+    var skRows = '';
+    for (var r = 0; r < 4; r++) {
+      skRows += '<tr>' +
+        '<td><div class="sk-bar sk-bar-xs sk-w-50"></div></td>' +
+        '<td><div class="sk-bar sk-bar-sm sk-w-85"></div></td>' +
+        '<td><div class="sk-bar sk-bar-sm sk-w-70"></div></td>' +
+        '<td><div class="sk-bar sk-bar-sm sk-w-50"></div></td>' +
+        '<td><div class="sk-bar sk-bar-sm sk-w-70"></div></td>' +
+        '<td><div class="sk-bar sk-bar-xs sk-w-70"></div></td>' +
+      '</tr>';
+    }
+    tbody.innerHTML = skRows;
   }
 
   openModal('modal-bmn-create-hapus');
@@ -9154,7 +9331,20 @@ function _bmnOpenDetailHapusModal(penghapusanId) {
   if (elMsg) elMsg.innerHTML = '';
 
   var tbody = document.getElementById('bmn-detail-hps-items-tbody');
-  if (tbody) tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:16px; color:var(--n-text-muted);">Memuat berkas usulan...</td></tr>';
+  if (tbody) {
+    var skDetailRows = '';
+    for (var rd = 0; rd < 3; rd++) {
+      skDetailRows += '<tr>' +
+        '<td><div class="sk-bar sk-bar-xs sk-w-50"></div></td>' +
+        '<td><div class="sk-bar sk-bar-sm sk-w-85"></div></td>' +
+        '<td><div class="sk-bar sk-bar-sm sk-w-70"></div></td>' +
+        '<td><div class="sk-bar sk-bar-sm sk-w-50"></div></td>' +
+        '<td><div class="sk-bar sk-bar-sm sk-w-70"></div></td>' +
+        '<td><div class="sk-bar sk-bar-xs sk-w-50"></div></td>' +
+      '</tr>';
+    }
+    tbody.innerHTML = skDetailRows;
+  }
 
   openModal('modal-bmn-detail-hapus');
 

@@ -116,6 +116,8 @@ function _chartEmpty(canvasId, msg) {
   el.style.display = 'none';
   var box = el.closest('.chart-box');
   if (!box) return;
+  var sk = box.querySelector('.chart-skeleton-wrap');
+  if (sk) sk.remove();
   if (box.querySelector('.chart-empty')) return;
   var d = document.createElement('div');
   d.className = 'chart-empty';
@@ -131,6 +133,8 @@ function _chartShow(canvasId) {
   if (box) {
     var ov = box.querySelector('.chart-empty');
     if (ov) ov.remove();
+    var sk = box.querySelector('.chart-skeleton-wrap');
+    if (sk) sk.remove();
   }
 }
 

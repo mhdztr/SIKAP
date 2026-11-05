@@ -3418,6 +3418,262 @@ select.n-input {
 }
 
 /* ============================================================
+   TOP-RIGHT LOADING BAR & GLOBAL PROGRESS LINE
+   ============================================================ */
+.global-progress-line {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: transparent;
+  z-index: 99999;
+  overflow: hidden;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 200ms ease;
+}
+
+.global-progress-line.active {
+  opacity: 1;
+}
+
+.global-progress-bar {
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, #10B981, #059669, #34D399, transparent);
+  box-shadow: 0 0 10px #10B981, 0 0 4px #059669;
+  animation: progress-indeterminate 1.4s infinite ease-in-out;
+}
+
+@keyframes progress-indeterminate {
+  0% { left: -50%; width: 30%; }
+  50% { left: 30%; width: 60%; }
+  100% { left: 105%; width: 40%; }
+}
+
+/* Topbar Right Group */
+.topbar-right-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  position: relative;
+  z-index: 2;
+}
+
+/* Topbar Loading Pill (Header Top-Right) */
+.topbar-loading-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 14px;
+  height: var(--ctl-h-md);
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.22);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: #FFFFFF;
+  user-select: none;
+  transition: opacity 200ms cubic-bezier(0.16, 1, 0.3, 1), transform 200ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.topbar-loading-indicator.n-hidden {
+  display: none !important;
+}
+
+.topbar-loading-spinner {
+  animation: _spin 0.8s linear infinite;
+  color: #34D399;
+  flex-shrink: 0;
+}
+
+.topbar-loading-track {
+  width: 72px;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.22);
+  border-radius: 999px;
+  overflow: hidden;
+  position: relative;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.25);
+}
+
+.topbar-loading-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  background: linear-gradient(90deg, #10B981, #FDE047, #34D399, #10B981);
+  background-size: 250% 100%;
+  border-radius: 999px;
+  animation: topbar-shimmer-fill 1.2s infinite linear;
+}
+
+@keyframes topbar-shimmer-fill {
+  0% { background-position: 250% 0; }
+  100% { background-position: -250% 0; }
+}
+
+.topbar-loading-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #FFFFFF;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+
+/* Toolbar Loading Bar (Dedicated Sub-Bar Right) */
+.top-loading-bar {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+  height: var(--ctl-h-md);
+  border-radius: 999px;
+  background: rgba(6, 78, 59, 0.08);
+  border: 1px solid rgba(6, 78, 59, 0.22);
+  transition: opacity 180ms ease, transform 180ms ease;
+  user-select: none;
+}
+
+.top-loading-bar.n-hidden {
+  display: none !important;
+}
+
+.top-loading-bar-track {
+  width: 64px;
+  height: 5px;
+  background: rgba(6, 78, 59, 0.16);
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+}
+
+.top-loading-bar-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  background: linear-gradient(90deg, #059669, #34D399, #059669);
+  background-size: 200% 100%;
+  border-radius: 4px;
+  animation: top-bar-shimmer 1.1s infinite linear;
+}
+
+@keyframes top-bar-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.top-loading-bar-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #065F46;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+
+/* ============================================================
+   SKELETON SHIMMER LOADING SYSTEM (Apple HIG Restraint)
+   ============================================================ */
+@keyframes sk-shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.sk-shimmer,
+.sk-bar,
+.sk-box,
+.sk-circle {
+  background: linear-gradient(90deg, #F1F5F9 25%, #E2E8F0 50%, #F1F5F9 75%);
+  background-size: 200% 100%;
+  animation: sk-shimmer 1.5s infinite ease-in-out;
+  border-radius: 6px;
+  display: block;
+}
+
+.sk-bar-xs { height: 10px; }
+.sk-bar-sm { height: 14px; }
+.sk-bar-md { height: 18px; }
+.sk-bar-lg { height: 26px; }
+.sk-bar-xl { height: 36px; }
+
+.sk-w-25  { width: 25% !important; }
+.sk-w-33  { width: 33% !important; }
+.sk-w-50  { width: 50% !important; }
+.sk-w-70  { width: 70% !important; }
+.sk-w-85  { width: 85% !important; }
+.sk-w-100 { width: 100% !important; }
+
+/* KPI Skeleton Layout */
+.kpi-skeleton-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 20px;
+}
+.kpi-skeleton-card {
+  background: #FFFFFF;
+  border: 1px solid var(--n-border, #E2E8F0);
+  border-radius: 12px;
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+}
+
+/* Treasury Cockpit Skeleton */
+.treasury-skeleton-cockpit {
+  background: #FFFFFF;
+  border: 1px solid var(--n-border, #E2E8F0);
+  border-radius: 12px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  margin-bottom: 20px;
+}
+
+/* Chart Skeleton */
+.chart-skeleton-wrap {
+  width: 100%;
+  height: 220px;
+  display: flex;
+  align-items: flex-end;
+  gap: 14px;
+  padding: 24px 16px 12px;
+  background: #F8FAFC;
+  border-radius: 8px;
+  box-sizing: border-box;
+}
+.chart-skeleton-bar {
+  flex: 1;
+  background: linear-gradient(90deg, #F1F5F9 25%, #E2E8F0 50%, #F1F5F9 75%);
+  background-size: 200% 100%;
+  animation: sk-shimmer 1.5s infinite ease-in-out;
+  border-radius: 4px 4px 0 0;
+}
+
+/* Table Skeleton */
+.table-skeleton {
+  width: 100%;
+  border-collapse: collapse;
+}
+.table-skeleton th,
+.table-skeleton td {
+  padding: 12px 16px;
+  border-bottom: 1px solid #F1F5F9;
+}
+
+/* ============================================================
    ACCESSIBILITY & REDUCED MOTION
    ============================================================ */
 @media (prefers-reduced-motion: reduce) {

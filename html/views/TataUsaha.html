@@ -37,7 +37,66 @@
   <div id="tu-pane-anggaran" class="tu-pane">
     <!-- ── KPI STRIP ANGGARAN (APBN Cockpit Card) ────── -->
     <div id="tu-kpi-strip">
-      <!-- diisi _tuRenderKPI() -->
+      <div class="treasury-skeleton-cockpit">
+        <div class="treasury-header" style="margin-bottom:0;">
+          <div class="treasury-title-group">
+            <h2 class="treasury-title">Dasbor Penyerapan Anggaran &amp; Kas Negara</h2>
+          </div>
+          <div class="treasury-actions">
+            <span class="sk-bar sk-bar-md" style="width:100px; border-radius:999px;"></span>
+            <span class="sk-bar sk-bar-lg" style="width:130px; border-radius:8px;"></span>
+            <span class="sk-bar sk-bar-lg" style="width:160px; border-radius:8px;"></span>
+          </div>
+        </div>
+        <div class="treasury-kpi-grid">
+          <div class="treasury-kpi-card">
+            <div class="sk-bar sk-bar-xs sk-w-50" style="margin-bottom:10px;"></div>
+            <div class="sk-bar sk-bar-xl sk-w-85" style="margin-bottom:14px;"></div>
+            <div class="sk-bar sk-bar-xs sk-w-70" style="margin-bottom:6px;"></div>
+            <div class="sk-bar sk-bar-xs sk-w-50"></div>
+          </div>
+          <div class="treasury-kpi-card">
+            <div class="sk-bar sk-bar-xs sk-w-50" style="margin-bottom:10px;"></div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:12px;">
+              <div class="sk-bar sk-bar-xl sk-w-33"></div><div class="sk-bar sk-bar-md sk-w-33"></div>
+            </div>
+            <div class="sk-bar sk-bar-xs sk-w-100" style="margin-bottom:12px;"></div>
+            <div class="sk-bar sk-bar-xs sk-w-70"></div>
+          </div>
+          <div class="treasury-kpi-card">
+            <div class="sk-bar sk-bar-xs sk-w-50" style="margin-bottom:10px;"></div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:12px;">
+              <div class="sk-bar sk-bar-xl sk-w-33"></div><div class="sk-bar sk-bar-md sk-w-33"></div>
+            </div>
+            <div class="sk-bar sk-bar-xs sk-w-100" style="margin-bottom:12px;"></div>
+            <div class="sk-bar sk-bar-xs sk-w-70"></div>
+          </div>
+          <div class="treasury-kpi-card">
+            <div class="sk-bar sk-bar-xs sk-w-50" style="margin-bottom:10px;"></div>
+            <div class="sk-bar sk-bar-lg sk-w-70" style="border-radius:999px; margin-bottom:12px;"></div>
+            <div class="sk-bar sk-bar-xs sk-w-70" style="margin-bottom:6px;"></div>
+            <div class="sk-bar sk-bar-md sk-w-50"></div>
+          </div>
+        </div>
+        <div class="treasury-schema-row">
+          <div class="schema-card">
+            <div style="display:flex; justify-content:space-between; margin-bottom:12px;">
+              <div class="sk-bar sk-bar-md sk-w-33"></div><div class="sk-bar sk-bar-xs sk-w-25"></div>
+            </div>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px;">
+              <div class="sk-bar sk-bar-md sk-w-70"></div><div class="sk-bar sk-bar-md sk-w-70"></div>
+            </div>
+          </div>
+          <div class="schema-card">
+            <div style="display:flex; justify-content:space-between; margin-bottom:12px;">
+              <div class="sk-bar sk-bar-md sk-w-33"></div><div class="sk-bar sk-bar-xs sk-w-25"></div>
+            </div>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px;">
+              <div class="sk-bar sk-bar-md sk-w-70"></div><div class="sk-bar sk-bar-md sk-w-70"></div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- ── ANALISIS KINERJA SERAPAN FISKAL ───────────── -->
@@ -54,7 +113,19 @@
               <span class="chart-chip"><i style="background:rgba(6,78,59,0.35);"></i>Akrual (Fisik)</span>
             </div>
           </div>
-          <div class="chart-box"><canvas id="tu-chart-tren"></canvas></div>
+          <div class="chart-box">
+            <canvas id="tu-chart-tren"></canvas>
+            <div class="chart-skeleton-wrap">
+              <div class="chart-skeleton-bar" style="height:30%;"></div>
+              <div class="chart-skeleton-bar" style="height:50%;"></div>
+              <div class="chart-skeleton-bar" style="height:40%;"></div>
+              <div class="chart-skeleton-bar" style="height:65%;"></div>
+              <div class="chart-skeleton-bar" style="height:80%;"></div>
+              <div class="chart-skeleton-bar" style="height:60%;"></div>
+              <div class="chart-skeleton-bar" style="height:90%;"></div>
+              <div class="chart-skeleton-bar" style="height:75%;"></div>
+            </div>
+          </div>
         </div>
         <div class="chart-cell">
           <div class="chart-cell-hd">
@@ -66,7 +137,19 @@
               <span class="chart-chip"><i style="background:rgba(6,78,59,0.35);"></i>Akrual (Fisik)</span>
             </div>
           </div>
-          <div class="chart-box"><canvas id="tu-chart-bulanan"></canvas></div>
+          <div class="chart-box">
+            <canvas id="tu-chart-bulanan"></canvas>
+            <div class="chart-skeleton-wrap">
+              <div class="chart-skeleton-bar" style="height:35%;"></div>
+              <div class="chart-skeleton-bar" style="height:55%;"></div>
+              <div class="chart-skeleton-bar" style="height:45%;"></div>
+              <div class="chart-skeleton-bar" style="height:70%;"></div>
+              <div class="chart-skeleton-bar" style="height:60%;"></div>
+              <div class="chart-skeleton-bar" style="height:85%;"></div>
+              <div class="chart-skeleton-bar" style="height:75%;"></div>
+              <div class="chart-skeleton-bar" style="height:90%;"></div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -382,7 +465,25 @@
       <div class="content-section-hd">Riwayat Laporan Anggaran</div>
       <div id="tu-history-msg" class="n-msg"></div>
       <div class="n-card" style="padding:0;overflow-x:auto;" id="tu-history-wrap">
-        <div style="padding:20px 24px;color:var(--n-text-muted);font-size:.875rem;">Memuat riwayat…</div>
+        <div class="n-table-wrap">
+          <table class="table-skeleton n-table n-table-full">
+            <thead>
+              <tr>
+                <th><div class="sk-bar sk-bar-xs sk-w-70"></div></th>
+                <th><div class="sk-bar sk-bar-xs sk-w-70"></div></th>
+                <th><div class="sk-bar sk-bar-xs sk-w-70"></div></th>
+                <th><div class="sk-bar sk-bar-xs sk-w-70"></div></th>
+                <th><div class="sk-bar sk-bar-xs sk-w-70"></div></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td><div class="sk-bar sk-bar-sm sk-w-85"></div></td><td><div class="sk-bar sk-bar-sm sk-w-100"></div></td><td><div class="sk-bar sk-bar-sm sk-w-70"></div></td><td><div class="sk-bar sk-bar-sm sk-w-70"></div></td><td><div class="sk-bar sk-bar-sm sk-w-50"></div></td></tr>
+              <tr><td><div class="sk-bar sk-bar-sm sk-w-85"></div></td><td><div class="sk-bar sk-bar-sm sk-w-100"></div></td><td><div class="sk-bar sk-bar-sm sk-w-70"></div></td><td><div class="sk-bar sk-bar-sm sk-w-70"></div></td><td><div class="sk-bar sk-bar-sm sk-w-50"></div></td></tr>
+              <tr><td><div class="sk-bar sk-bar-sm sk-w-85"></div></td><td><div class="sk-bar sk-bar-sm sk-w-100"></div></td><td><div class="sk-bar sk-bar-sm sk-w-70"></div></td><td><div class="sk-bar sk-bar-sm sk-w-70"></div></td><td><div class="sk-bar sk-bar-sm sk-w-50"></div></td></tr>
+              <tr><td><div class="sk-bar sk-bar-sm sk-w-85"></div></td><td><div class="sk-bar sk-bar-sm sk-w-100"></div></td><td><div class="sk-bar sk-bar-sm sk-w-70"></div></td><td><div class="sk-bar sk-bar-sm sk-w-70"></div></td><td><div class="sk-bar sk-bar-sm sk-w-50"></div></td></tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
 
@@ -721,8 +822,25 @@
 
         <div id="tu-paket-msg" class="n-msg" style="margin:8px 20px 0 20px;"></div>
         <div style="overflow-x:auto;" id="tu-paket-table-wrap">
-          <div style="padding:32px; text-align:center; color:var(--n-text-muted); font-size:.875rem;">
-            Memuat daftar paket pengadaan…
+          <div class="n-table-wrap">
+            <table class="table-skeleton n-table n-table-full">
+              <thead>
+                <tr>
+                  <th><div class="sk-bar sk-bar-xs sk-w-70"></div></th>
+                  <th><div class="sk-bar sk-bar-xs sk-w-70"></div></th>
+                  <th><div class="sk-bar sk-bar-xs sk-w-70"></div></th>
+                  <th><div class="sk-bar sk-bar-xs sk-w-70"></div></th>
+                  <th><div class="sk-bar sk-bar-xs sk-w-70"></div></th>
+                  <th><div class="sk-bar sk-bar-xs sk-w-70"></div></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td><div class="sk-bar sk-bar-sm sk-w-85"></div></td><td><div class="sk-bar sk-bar-sm sk-w-100"></div></td><td><div class="sk-bar sk-bar-sm sk-w-70"></div></td><td><div class="sk-bar sk-bar-sm sk-w-70"></div></td><td><div class="sk-bar sk-bar-sm sk-w-50"></div></td><td><div class="sk-bar sk-bar-sm sk-w-50"></div></td></tr>
+                <tr><td><div class="sk-bar sk-bar-sm sk-w-85"></div></td><td><div class="sk-bar sk-bar-sm sk-w-100"></div></td><td><div class="sk-bar sk-bar-sm sk-w-70"></div></td><td><div class="sk-bar sk-bar-sm sk-w-70"></div></td><td><div class="sk-bar sk-bar-sm sk-w-50"></div></td><td><div class="sk-bar sk-bar-sm sk-w-50"></div></td></tr>
+                <tr><td><div class="sk-bar sk-bar-sm sk-w-85"></div></td><td><div class="sk-bar sk-bar-sm sk-w-100"></div></td><td><div class="sk-bar sk-bar-sm sk-w-70"></div></td><td><div class="sk-bar sk-bar-sm sk-w-70"></div></td><td><div class="sk-bar sk-bar-sm sk-w-50"></div></td><td><div class="sk-bar sk-bar-sm sk-w-50"></div></td></tr>
+                <tr><td><div class="sk-bar sk-bar-sm sk-w-85"></div></td><td><div class="sk-bar sk-bar-sm sk-w-100"></div></td><td><div class="sk-bar sk-bar-sm sk-w-70"></div></td><td><div class="sk-bar sk-bar-sm sk-w-70"></div></td><td><div class="sk-bar sk-bar-sm sk-w-50"></div></td><td><div class="sk-bar sk-bar-sm sk-w-50"></div></td></tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
@@ -1111,11 +1229,10 @@
               </tr>
             </thead>
             <tbody id="tu-peg-dir-tbody">
-              <tr>
-                <td colspan="7" style="text-align:center; padding:32px; color:var(--n-text-muted);">
-                  Memuat data personel dan standar pelatihan…
-                </td>
-              </tr>
+              <tr><td><div class="sk-bar sk-bar-xs sk-w-50"></div></td><td><div class="sk-bar sk-bar-sm sk-w-85"></div></td><td><div class="sk-bar sk-bar-sm sk-w-70"></div></td><td><div class="sk-bar sk-bar-sm sk-w-50"></div></td><td><div class="sk-bar sk-bar-sm sk-w-70"></div></td><td><div class="sk-bar sk-bar-xs sk-w-50"></div></td><td><div class="sk-bar sk-bar-sm sk-w-70"></div></td></tr>
+              <tr><td><div class="sk-bar sk-bar-xs sk-w-50"></div></td><td><div class="sk-bar sk-bar-sm sk-w-85"></div></td><td><div class="sk-bar sk-bar-sm sk-w-70"></div></td><td><div class="sk-bar sk-bar-sm sk-w-50"></div></td><td><div class="sk-bar sk-bar-sm sk-w-70"></div></td><td><div class="sk-bar sk-bar-xs sk-w-50"></div></td><td><div class="sk-bar sk-bar-sm sk-w-70"></div></td></tr>
+              <tr><td><div class="sk-bar sk-bar-xs sk-w-50"></div></td><td><div class="sk-bar sk-bar-sm sk-w-85"></div></td><td><div class="sk-bar sk-bar-sm sk-w-70"></div></td><td><div class="sk-bar sk-bar-sm sk-w-50"></div></td><td><div class="sk-bar sk-bar-sm sk-w-70"></div></td><td><div class="sk-bar sk-bar-xs sk-w-50"></div></td><td><div class="sk-bar sk-bar-sm sk-w-70"></div></td></tr>
+              <tr><td><div class="sk-bar sk-bar-xs sk-w-50"></div></td><td><div class="sk-bar sk-bar-sm sk-w-85"></div></td><td><div class="sk-bar sk-bar-sm sk-w-70"></div></td><td><div class="sk-bar sk-bar-sm sk-w-50"></div></td><td><div class="sk-bar sk-bar-sm sk-w-70"></div></td><td><div class="sk-bar sk-bar-xs sk-w-50"></div></td><td><div class="sk-bar sk-bar-sm sk-w-70"></div></td></tr>
             </tbody>
           </table>
         </div>
@@ -1996,8 +2113,27 @@
           <!-- Wadah Isi Tabel Register -->
           <div id="bmn-table-msg" class="n-msg" style="margin:8px 20px 0 20px;"></div>
           <div style="overflow-x:auto;" id="bmn-table-wrap">
-            <div style="padding:32px; text-align:center; color:var(--n-text-muted); font-size:.875rem;">Memuat daftar
-              inventaris BMN…</div>
+            <div class="n-table-wrap">
+              <table class="table-skeleton n-table n-table-full">
+                <thead>
+                  <tr>
+                    <th><div class="sk-bar sk-bar-xs sk-w-70"></div></th>
+                    <th><div class="sk-bar sk-bar-xs sk-w-70"></div></th>
+                    <th><div class="sk-bar sk-bar-xs sk-w-70"></div></th>
+                    <th><div class="sk-bar sk-bar-xs sk-w-70"></div></th>
+                    <th><div class="sk-bar sk-bar-xs sk-w-70"></div></th>
+                    <th><div class="sk-bar sk-bar-xs sk-w-70"></div></th>
+                    <th><div class="sk-bar sk-bar-xs sk-w-70"></div></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><td><div class="sk-bar sk-bar-sm sk-w-85"></div></td><td><div class="sk-bar sk-bar-sm sk-w-100"></div></td><td><div class="sk-bar sk-bar-sm sk-w-70"></div></td><td><div class="sk-bar sk-bar-sm sk-w-50"></div></td><td><div class="sk-bar sk-bar-sm sk-w-70"></div></td><td><div class="sk-bar sk-bar-xs sk-w-50"></div></td><td><div class="sk-bar sk-bar-sm sk-w-70"></div></td></tr>
+                  <tr><td><div class="sk-bar sk-bar-sm sk-w-85"></div></td><td><div class="sk-bar sk-bar-sm sk-w-100"></div></td><td><div class="sk-bar sk-bar-sm sk-w-70"></div></td><td><div class="sk-bar sk-bar-sm sk-w-50"></div></td><td><div class="sk-bar sk-bar-sm sk-w-70"></div></td><td><div class="sk-bar sk-bar-xs sk-w-50"></div></td><td><div class="sk-bar sk-bar-sm sk-w-70"></div></td></tr>
+                  <tr><td><div class="sk-bar sk-bar-sm sk-w-85"></div></td><td><div class="sk-bar sk-bar-sm sk-w-100"></div></td><td><div class="sk-bar sk-bar-sm sk-w-70"></div></td><td><div class="sk-bar sk-bar-sm sk-w-50"></div></td><td><div class="sk-bar sk-bar-sm sk-w-70"></div></td><td><div class="sk-bar sk-bar-xs sk-w-50"></div></td><td><div class="sk-bar sk-bar-sm sk-w-70"></div></td></tr>
+                  <tr><td><div class="sk-bar sk-bar-sm sk-w-85"></div></td><td><div class="sk-bar sk-bar-sm sk-w-100"></div></td><td><div class="sk-bar sk-bar-sm sk-w-70"></div></td><td><div class="sk-bar sk-bar-sm sk-w-50"></div></td><td><div class="sk-bar sk-bar-sm sk-w-70"></div></td><td><div class="sk-bar sk-bar-xs sk-w-50"></div></td><td><div class="sk-bar sk-bar-sm sk-w-70"></div></td></tr>
+                </tbody>
+              </table>
+            </div>
           </div>
 
           <!-- Pagination Footer -->
@@ -2108,8 +2244,25 @@
             <!-- Wadah Isi Tabel Berkas Usulan -->
             <div id="bmn-hps-table-msg" class="n-msg" style="margin:8px 20px 0 20px;"></div>
             <div style="overflow-x:auto;" id="bmn-hps-table-wrap">
-              <div style="padding:32px; text-align:center; color:var(--n-text-muted); font-size:.875rem;">
-                Memuat daftar usulan penghapusan BMN…
+              <div class="n-table-wrap">
+                <table class="table-skeleton n-table n-table-full">
+                  <thead>
+                    <tr>
+                      <th><div class="sk-bar sk-bar-xs sk-w-70"></div></th>
+                      <th><div class="sk-bar sk-bar-xs sk-w-70"></div></th>
+                      <th><div class="sk-bar sk-bar-xs sk-w-70"></div></th>
+                      <th><div class="sk-bar sk-bar-xs sk-w-70"></div></th>
+                      <th><div class="sk-bar sk-bar-xs sk-w-70"></div></th>
+                      <th><div class="sk-bar sk-bar-xs sk-w-70"></div></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr><td><div class="sk-bar sk-bar-sm sk-w-85"></div></td><td><div class="sk-bar sk-bar-sm sk-w-100"></div></td><td><div class="sk-bar sk-bar-sm sk-w-70"></div></td><td><div class="sk-bar sk-bar-sm sk-w-50"></div></td><td><div class="sk-bar sk-bar-sm sk-w-70"></div></td><td><div class="sk-bar sk-bar-sm sk-w-50"></div></td></tr>
+                    <tr><td><div class="sk-bar sk-bar-sm sk-w-85"></div></td><td><div class="sk-bar sk-bar-sm sk-w-100"></div></td><td><div class="sk-bar sk-bar-sm sk-w-70"></div></td><td><div class="sk-bar sk-bar-sm sk-w-50"></div></td><td><div class="sk-bar sk-bar-sm sk-w-70"></div></td><td><div class="sk-bar sk-bar-sm sk-w-50"></div></td></tr>
+                    <tr><td><div class="sk-bar sk-bar-sm sk-w-85"></div></td><td><div class="sk-bar sk-bar-sm sk-w-100"></div></td><td><div class="sk-bar sk-bar-sm sk-w-70"></div></td><td><div class="sk-bar sk-bar-sm sk-w-50"></div></td><td><div class="sk-bar sk-bar-sm sk-w-70"></div></td><td><div class="sk-bar sk-bar-sm sk-w-50"></div></td></tr>
+                    <tr><td><div class="sk-bar sk-bar-sm sk-w-85"></div></td><td><div class="sk-bar sk-bar-sm sk-w-100"></div></td><td><div class="sk-bar sk-bar-sm sk-w-70"></div></td><td><div class="sk-bar sk-bar-sm sk-w-50"></div></td><td><div class="sk-bar sk-bar-sm sk-w-70"></div></td><td><div class="sk-bar sk-bar-sm sk-w-50"></div></td></tr>
+                  </tbody>
+                </table>
               </div>
             </div>
           </div>

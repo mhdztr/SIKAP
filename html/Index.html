@@ -269,6 +269,11 @@
      ========================================================= -->
 <div id="app-wrapper" class="n-hidden">
 
+  <!-- GLOBAL INDETERMINATE PROGRESS BAR (TOP EDGE) -->
+  <div id="global-progress-line" class="global-progress-line n-hidden" role="progressbar" aria-label="Memuat data...">
+    <div class="global-progress-bar"></div>
+  </div>
+
   <!-- TOP APPLICATION BAR (SIKAP Executive Command Header) -->
   <header class="app-topbar" id="app-topbar">
     <div class="topbar-inner">
@@ -287,7 +292,20 @@
       </div>
 
       <!-- User Profile Pill & Dropdown (Clean, Uncrowded Header) -->
-      <div class="user-menu-container">
+      <div class="topbar-right-group">
+        <!-- Topbar Loading Pill (Header Top-Right) -->
+        <div id="topbar-loading-indicator" class="topbar-loading-indicator n-hidden" role="status" aria-live="polite" title="Sedang memuat data dari server...">
+          <svg class="topbar-loading-spinner" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-opacity="0.25"></circle>
+            <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" stroke-linecap="round"></path>
+          </svg>
+          <div class="topbar-loading-track">
+            <div class="topbar-loading-fill"></div>
+          </div>
+          <span class="topbar-loading-label">Memuat data&hellip;</span>
+        </div>
+
+        <div class="user-menu-container">
         <div class="sb-user-card" id="sb-user-card" onclick="_toggleUserMenu(event)" role="button" tabindex="0" title="Buka menu akun">
           <div class="user-avatar-pill" id="user-avatar-initials">SA</div>
           <div class="sb-user-info">
@@ -348,7 +366,8 @@
           </div>
         </div>
       </div>
-    </div>
+      </div><!-- end topbar-right-group -->
+    </div><!-- end topbar-inner -->
 
     <!-- PRIMARY MODULE NAVIGATION BAR (5 Sub-Modul Anti-Gabruk SAJA) -->
     <nav class="app-modulenav">
@@ -394,6 +413,14 @@
           <!-- Filter Periode diisi oleh _renderPageHeader() -->
         </div>
         <div class="toolbar-right">
+          <!-- Top-Right Toolbar Loading Bar -->
+          <div id="top-loading-bar" class="top-loading-bar n-hidden" role="status" aria-live="polite" title="Sedang memuat data dari server...">
+            <div class="top-loading-bar-track">
+              <div class="top-loading-bar-fill"></div>
+            </div>
+            <span class="top-loading-bar-label">Memuat…</span>
+          </div>
+
           <!-- Live Sync Pill -->
           <div id="sync-indicator" class="sync-indicator" onclick="_triggerManualSync()" title="Data tersinkron dengan server. Klik untuk periksa pembaruan.">
             <span class="sync-dot-live"></span>
