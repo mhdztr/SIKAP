@@ -11,8 +11,6 @@
 **SIKAP** adalah sistem informasi manajemen terintegrasi yang berfungsi sebagai tulang punggung tata kelola administratif, finansial, dan logistik di lingkungan Direktorat Pemantauan dan Operasi Armada. SIKAP dibangun dengan arsitektur satelit mandiri berkinerja tinggi (*distributed satellite system*) di atas runtime Google Apps Script (GAS) dan Google Spreadsheet untuk menjamin stabilitas data operasional volume tinggi tanpa menimbulkan persaingan kunci (*lock contention*) pada basis data pusat operasional armada.
 
 ### Parameter Identitas Teknis:
-- **Script ID (Google Apps Script):** `1Cpuia8-M-g0b3S_IOKKrwn-T4XSIjQbHiYJm85Mhr7XhVFfe3QugZmJv`
-- **Repositori GitHub:** `https://github.com/mhdztr/SIKAP.git`
 - **Spreadsheet Basis Data Satelit:** `RadarPOA_SIKAP_DB`
 - **Spreadsheet Master Data (Read-Only):** `RadarPOA_Master_DB`
 - **Penyimpanan Berkas Digital:** Google Drive Folder `POA_Evidence_SIKAP`
