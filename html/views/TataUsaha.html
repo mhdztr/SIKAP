@@ -852,7 +852,7 @@
         <div class="modal-hd-bar">
           <div>
             <h2 id="tu-paket-modal-title">Catat Progres Paket Pengadaan</h2>
-            <div class="modal-hd-sub">Pencatatan siklus hidup 6 tahap pekerjaan pengadaan barang/jasa Dit. POA</div>
+            <div class="modal-hd-sub" id="tu-paket-modal-sub">Pencatatan siklus hidup 6 tahap pekerjaan pengadaan barang/jasa Dit. POA</div>
           </div>
           <button type="button" class="btn-ghost" style="padding:4px;" onclick="closeModal('modal-tu-paket-form')"
             aria-label="Tutup">
@@ -868,6 +868,9 @@
           <div id="tu-paket-form-msg" class="n-msg"></div>
 
           <form id="tu-paket-form" onsubmit="event.preventDefault(); _tuSubmitPaket();">
+            <input type="hidden" id="tu-pkt-row-id" value="">
+            <input type="hidden" id="tu-pkt-id" value="">
+
             <!-- Seksi 1: Identitas Paket & Satker Pelaksana -->
             <div class="form-section-card">
               <div class="form-section-hd">
@@ -882,19 +885,20 @@
               </div>
               <div class="form-grp">
                 <label for="tu-pkt-nama">Nama Paket Pekerjaan <span style="color:var(--n-crit)">*</span></label>
-                <input type="text" id="tu-pkt-nama" placeholder="Contoh: Pengadaan Genset Pangkalan Benoa 2026"
-                  required>
+                <input type="text" id="tu-pkt-nama" list="tu-pkt-nama-list" placeholder="Pilih dari daftar atau ketik nama paket..."
+                  required oninput="_tuOnPaketNameSelect()">
+                <datalist id="tu-pkt-nama-list"></datalist>
               </div>
               <div class="form-split-grid" style="margin-bottom:0;">
                 <div class="form-grp" style="margin-bottom:0;">
                   <label for="tu-pkt-tahap">Tahap Pekerjaan <span style="color:var(--n-crit)">*</span></label>
                   <select id="tu-pkt-tahap" required onchange="_tuOnPaketTahapChange()">
-                    <option value="PERSIAPAN">1. Persiapan</option>
-                    <option value="PEMILIHAN">2. Pemilihan</option>
-                    <option value="KONTRAK">3. Kontrak</option>
-                    <option value="PELAKSANAAN">4. Pelaksanaan</option>
-                    <option value="BAST">5. BAST</option>
-                    <option value="SELESAI">6. Selesai</option>
+                    <option value="PERSIAPAN">Tahap 1: Persiapan (Penyusunan Spek / HPS)</option>
+                    <option value="PEMILIHAN">Tahap 2: Pemilihan / Tender Penyedia</option>
+                    <option value="KONTRAK">Tahap 3: Penandatanganan Kontrak / SPK</option>
+                    <option value="PELAKSANAAN">Tahap 4: Pelaksanaan Pekerjaan Fisik</option>
+                    <option value="BAST">Tahap 5: Serah Terima Hasil Pekerjaan (BAST)</option>
+                    <option value="SELESAI">Tahap 6: Pekerjaan Selesai &amp; Lunas 100%</option>
                   </select>
                 </div>
                 <div class="form-grp" style="margin-bottom:0;">

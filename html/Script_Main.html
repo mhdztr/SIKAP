@@ -6433,7 +6433,7 @@ function _tuRenderPaketKPI(d) {
   };
   var items = (d && d.items) || (_TU.paketData && _TU.paketData.items) || [];
   items.forEach(function (it) {
-    if (it.status === 'VOID') return;
+    if (it.status === 'VOID' || it.status === 'SUPERSEDED') return;
     counts.ALL++;
     if (counts[it.tahap] !== undefined) {
       counts[it.tahap]++;
@@ -6446,6 +6446,21 @@ function _tuRenderPaketKPI(d) {
       el.textContent = counts[key] + ' paket';
     }
   });
+
+  // Populate datalist rekomendasi nama paket aktif
+  var dlist = document.getElementById('tu-pkt-nama-list');
+  if (dlist) {
+    var seen = {};
+    var opts = '';
+    items.forEach(function (it) {
+      if (it.status === 'VOID' || it.status === 'SUPERSEDED') return;
+      if (it.namaPaket && !seen[it.namaPaket]) {
+        seen[it.namaPaket] = true;
+        opts += '<option value="' + _esc(it.namaPaket) + '">';
+      }
+    });
+    dlist.innerHTML = opts;
+  }
 }
 
 function _tuSelectPaketTahap(tahap) {
@@ -6505,7 +6520,8 @@ function _tuFilterPaket() {
   _tuUpdatePipelineActive(tahap);
 
   var items = _TU.paketData.items.filter(function (it) {
-    if (statusSeg === 'AKTIF' && it.tahap === 'SELESAI') return false;
+    if (it.status === 'SUPERSEDED') return false;
+    if (statusSeg === 'AKTIF' && (it.tahap === 'SELESAI' || it.status === 'VOID')) return false;
     if (statusSeg === 'SELESAI' && it.tahap !== 'SELESAI') return false;
     if (tahap !== 'ALL' && it.tahap !== tahap) return false;
     if (q) {
@@ -6550,7 +6566,8 @@ function _tuRenderPaketTable(items) {
     'DIV-AWAK': 'Pengawakan'
   };
 
-  var canVoid = APP.user && (APP.user.role === 'ADMIN_POA' || (APP.user.role === 'PENGINPUT' && APP.user.divisiId === 'DIV-TU'));
+  var canWrite = APP.user && (APP.user.role === 'ADMIN_POA' || APP.user.role === 'SUPERADMIN' || (APP.user.divisiId === 'DIV-TU'));
+  var canVoid = APP.user && (APP.user.role === 'ADMIN_POA' || APP.user.role === 'SUPERADMIN' || (APP.user.role === 'PENGINPUT' && APP.user.divisiId === 'DIV-TU'));
 
   var h = '<table class="n-table" style="width:100%;">' +
     '<thead>' +
@@ -6585,6 +6602,26 @@ function _tuRenderPaketTable(items) {
 
     var rowStyle = isVoid ? 'opacity:0.5; text-decoration:line-through;' : '';
 
+    var actionsHtml = '';
+    if (!isVoid) {
+      if (canWrite) {
+        actionsHtml += '<button type="button" class="btn-ghost" style="padding:4px 8px; font-size:.75rem; margin-right:4px;" onclick="_tuOpenPaketModal(\'' + _esc(it.rowId) + '\')" title="Perbarui Status &amp; Progres">' +
+          '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:3px; vertical-align:text-top;">' +
+            '<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>' +
+            '<path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>' +
+          '</svg>Update' +
+        '</button>';
+      }
+      if (canVoid) {
+        actionsHtml += '<button type="button" class="btn-ghost" style="padding:4px 8px; color:var(--n-crit); font-size:.75rem;" onclick="_tuAnulirPaket(\'' + _esc(it.rowId) + '\')" title="Anulir">' +
+          'Anulir' +
+        '</button>';
+      }
+    }
+    if (!actionsHtml) {
+      actionsHtml = '<span style="color:var(--n-text-muted); font-size:.75rem;">—</span>';
+    }
+
     h += '<tr style="' + rowStyle + '">' +
       '<td>' +
         '<div style="font-weight:600; color:var(--n-text-primary);">' + _esc(it.namaPaket) + '</div>' +
@@ -6606,11 +6643,7 @@ function _tuRenderPaketTable(items) {
       '</td>' +
       '<td style="text-align:right;" class="tnum font-medium">' + _formatRupiah(it.realisasiKeuangan) + '</td>' +
       '<td>' + evBtn + '</td>' +
-      '<td style="text-align:center;">' +
-        (!isVoid && canVoid
-          ? '<button type="button" class="btn-ghost" style="padding:4px 8px; color:var(--n-crit); font-size:.75rem;" onclick="_tuAnulirPaket(\'' + _esc(it.rowId) + '\')">Anulir</button>'
-          : '<span style="color:var(--n-text-muted); font-size:.75rem;">—</span>') +
-      '</td>' +
+      '<td style="text-align:center;">' + actionsHtml + '</td>' +
     '</tr>';
   });
 
@@ -6618,13 +6651,89 @@ function _tuRenderPaketTable(items) {
   wrap.innerHTML = h;
 }
 
-function _tuOpenPaketModal() {
+function _tuOpenPaketModal(rowId) {
   var form = document.getElementById('tu-paket-form');
   if (form) form.reset();
   var msg = document.getElementById('tu-paket-form-msg');
   if (msg) msg.innerHTML = '';
+
+  var titleEl = document.getElementById('tu-paket-modal-title');
+  var subEl = document.getElementById('tu-paket-modal-sub');
+  var btnSave = document.getElementById('tu-pkt-btn-save');
+  var rowIdInput = document.getElementById('tu-pkt-row-id');
+  var pktIdInput = document.getElementById('tu-pkt-id');
+
+  if (rowId && _TU.paketData && _TU.paketData.items) {
+    var target = null;
+    for (var i = 0; i < _TU.paketData.items.length; i++) {
+      if (_TU.paketData.items[i].rowId === rowId) {
+        target = _TU.paketData.items[i];
+        break;
+      }
+    }
+    if (target) {
+      if (titleEl) titleEl.textContent = 'Update Status & Progres Paket';
+      if (subEl) subEl.textContent = 'Perbarui tahapan siklus hidup pekerjaan, progres fisik, dan realisasi anggaran.';
+      if (btnSave) btnSave.textContent = 'Simpan Pemutakhiran';
+      if (rowIdInput) rowIdInput.value = target.rowId;
+      if (pktIdInput) pktIdInput.value = target.paketId || target.namaPaket;
+
+      var elNama = document.getElementById('tu-pkt-nama');
+      var elTahap = document.getElementById('tu-pkt-tahap');
+      var elDivisi = document.getElementById('tu-pkt-divisi');
+      var elKontrak = document.getElementById('tu-pkt-no-kontrak');
+      var elRekanan = document.getElementById('tu-pkt-rekanan');
+      var elNilai = document.getElementById('tu-pkt-nilai');
+      var elProgres = document.getElementById('tu-pkt-progres-fisik');
+      var elRealisasi = document.getElementById('tu-pkt-realisasi-keu');
+      var elEvidence = document.getElementById('tu-pkt-evidence');
+      var elKendala = document.getElementById('tu-pkt-kendala');
+
+      if (elNama) elNama.value = target.namaPaket || '';
+      if (elTahap) elTahap.value = target.tahap || 'PERSIAPAN';
+      if (elDivisi) elDivisi.value = target.divisiId || 'DIV-TU';
+      if (elKontrak) elKontrak.value = target.noKontrak || '';
+      if (elRekanan) elRekanan.value = target.rekanan || '';
+      if (elNilai) elNilai.value = target.nilaiKontrak || 0;
+      if (elProgres) elProgres.value = target.progresFisik || 0;
+      if (elRealisasi) elRealisasi.value = target.realisasiKeuangan || 0;
+      if (elEvidence) elEvidence.value = target.evidenceUrl || '';
+      if (elKendala) elKendala.value = target.kendala || '';
+
+      _tuOnPaketTahapChange();
+      openModal('modal-tu-paket-form');
+      return;
+    }
+  }
+
+  // Mode Buat Baru
+  if (titleEl) titleEl.textContent = 'Catat Progres Paket Pengadaan';
+  if (subEl) subEl.textContent = 'Pencatatan siklus hidup 6 tahap pekerjaan pengadaan barang/jasa Dit. POA';
+  if (btnSave) btnSave.textContent = 'Simpan Progres';
+  if (rowIdInput) rowIdInput.value = '';
+  if (pktIdInput) pktIdInput.value = '';
+
   _tuOnPaketTahapChange();
   openModal('modal-tu-paket-form');
+}
+
+function _tuOnPaketNameSelect() {
+  var rowIdInput = document.getElementById('tu-pkt-row-id');
+  if (rowIdInput && rowIdInput.value) return;
+  var elNama = document.getElementById('tu-pkt-nama');
+  if (!elNama || !elNama.value.trim() || !_TU.paketData || !_TU.paketData.items) return;
+  var val = elNama.value.trim().toLowerCase();
+  var match = null;
+  for (var i = 0; i < _TU.paketData.items.length; i++) {
+    var it = _TU.paketData.items[i];
+    if (it.status !== 'VOID' && it.status !== 'SUPERSEDED' && (it.namaPaket.toLowerCase() === val || (it.paketId && it.paketId.toLowerCase() === val))) {
+      match = it;
+      break;
+    }
+  }
+  if (match) {
+    _tuOpenPaketModal(match.rowId);
+  }
 }
 
 function _tuOnPaketTahapChange() {
@@ -6648,6 +6757,14 @@ function _tuOnPaketTahapChange() {
     if (inputKontrak) inputKontrak.required = false;
     if (inputRekanan) inputRekanan.required = false;
   }
+
+  // Jika tahap dinaikkan ke BAST atau SELESAI, default progres fisik ke 100% jika masih 0 / kosong
+  if (tahap === 'SELESAI' || tahap === 'BAST') {
+    var elProgres = document.getElementById('tu-pkt-progres-fisik');
+    if (elProgres && (!elProgres.value || Number(elProgres.value) === 0)) {
+      elProgres.value = 100;
+    }
+  }
 }
 
 function _tuSubmitPaket() {
@@ -6655,6 +6772,8 @@ function _tuSubmitPaket() {
   var msg = document.getElementById('tu-paket-form-msg');
   if (msg) msg.innerHTML = '';
 
+  var elRowId = document.getElementById('tu-pkt-row-id');
+  var elPaketId = document.getElementById('tu-pkt-id');
   var elNama = document.getElementById('tu-pkt-nama');
   var elTahap = document.getElementById('tu-pkt-tahap');
   var elDivisi = document.getElementById('tu-pkt-divisi');
@@ -6666,6 +6785,8 @@ function _tuSubmitPaket() {
   var elEvidence = document.getElementById('tu-pkt-evidence');
   var elKendala = document.getElementById('tu-pkt-kendala');
 
+  var targetRowId = elRowId ? elRowId.value.trim() : '';
+  var paketId = elPaketId ? elPaketId.value.trim() : '';
   var nama = elNama ? elNama.value.trim() : '';
   var tahap = elTahap ? elTahap.value : 'PERSIAPAN';
   var divisi = elDivisi ? elDivisi.value : 'DIV-TU';
@@ -6692,10 +6813,12 @@ function _tuSubmitPaket() {
   _setLoading(btn, true);
 
   var payload = {
+    rowId: targetRowId,
+    targetRowId: targetRowId,
+    paketId: paketId || nama,
     periode: periode,
     divisiId: divisi,
     namaPaket: nama,
-    paketId: nama,
     tahap: tahap,
     noKontrak: noKontrak,
     rekanan: rekanan,
@@ -6714,7 +6837,7 @@ function _tuSubmitPaket() {
         return;
       }
       closeModal('modal-tu-paket-form');
-      _msg('tu-paket-msg', 'success', 'Progres paket pekerjaan berhasil dicatat.');
+      _msg('tu-paket-msg', 'success', res.message || (targetRowId ? 'Status dan progres paket pekerjaan berhasil dimutakhirkan.' : 'Progres paket pekerjaan berhasil dicatat.'));
       _tuLoadPaket(true);
     })
     .withFailureHandler(function (err) {

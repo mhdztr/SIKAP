@@ -1239,6 +1239,7 @@ function tataUsaha_getPaket(token, filter) {
         kendala: String(r['KendalaKeterangan'] || ''),
         evidenceUrl: String(r['EvidenceUrl'] || ''),
         status: String(r['Status'] || ''),
+        supersedesRowId: String(r['SupersedesRowID'] || ''),
         submittedBy: String(r['SubmittedBy'] || ''),
         timestamp: r['Timestamp'] instanceof Date ? r['Timestamp'].toISOString() : String(r['Timestamp'] || '')
       };
@@ -1262,6 +1263,8 @@ function tataUsaha_getPaket(token, filter) {
 
 /**
  * Mencatat / memperbarui progres paket pekerjaan pengadaan.
+ * Mendukung siklus hidup pemutakhiran 6 tahap pekerjaan dengan mekanisme
+ * row versioning (baris lama aktif di-SUPERSEDED, baris baru aktif di-append).
  * @param {string} token
  * @param {Object} payload
  */
@@ -1297,9 +1300,58 @@ function tataUsaha_submitPaket(token, payload) {
 
     try {
       var sheet = openTuSheet(SHEET_TU.PAKET_PROGRES);
-      var periode = getCurrentPeriode();
+      var rows = sheetToObjects(sheet);
+      var periode = String(payload.periode || getCurrentPeriode()).trim();
       var ts = new Date();
       var rowId = 'PKT-' + ts.getFullYear() + '-' + Utilities.getUuid().substring(0, 8).toUpperCase();
+
+      var oldRowId = '';
+      var targetIdx = -1;
+      var targetRowId = String(payload.targetRowId || payload.rowId || '').trim();
+      var paketId = String(payload.paketId || '').trim();
+
+      // 1. Cari baris yang akan di-supersede jika ada targetRowId spesifik
+      if (targetRowId) {
+        for (var i = 0; i < rows.length; i++) {
+          if (rows[i]['RowID'] === targetRowId && String(rows[i]['Status']) === ROW_STATUS.ACTIVE) {
+            targetIdx = i + 2;
+            oldRowId = rows[i]['RowID'];
+            if (!paketId && rows[i]['PaketID']) paketId = rows[i]['PaketID'];
+            break;
+          }
+        }
+      }
+
+      // 2. Jika tidak ada targetRowId, cek apakah paket ini sudah pernah dicatat aktif
+      if (targetIdx === -1) {
+        for (var j = 0; j < rows.length; j++) {
+          var r = rows[j];
+          if (String(r['Status']) === ROW_STATUS.ACTIVE) {
+            var matchPaketId = Boolean(paketId && String(r['PaketID']) === paketId);
+            var matchNama = String(r['NamaPaket'] || '').toLowerCase() === namaPaket.toLowerCase() ||
+                            String(r['PaketID'] || '').toLowerCase() === namaPaket.toLowerCase();
+            if (matchPaketId || matchNama) {
+              targetIdx = j + 2;
+              oldRowId = r['RowID'];
+              if (!paketId && r['PaketID']) paketId = r['PaketID'];
+              break;
+            }
+          }
+        }
+      }
+
+      // Jika belum memiliki PaketID, buat ID baru berurutan / terstandar
+      if (!paketId) {
+        paketId = 'PKT-' + ts.getFullYear() + '-' + Utilities.getUuid().substring(0, 5).toUpperCase();
+      }
+
+      var headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+      var colStatus = headers.indexOf('Status') + 1;
+
+      // Jika baris sebelumnya ditemukan aktif, tandai sebagai SUPERSEDED
+      if (targetIdx > 1 && colStatus > 0) {
+        sheet.getRange(targetIdx, colStatus).setValue(ROW_STATUS.SUPERSEDED);
+      }
 
       var newRow = {
         RowID: rowId,
@@ -1308,11 +1360,11 @@ function tataUsaha_submitPaket(token, payload) {
         SubmittedBy: session.userId,
         Timestamp: ts,
         Status: ROW_STATUS.ACTIVE,
-        SupersedesRowID: '',
+        SupersedesRowID: oldRowId,
         VoidReason: '',
         VoidedBy: '',
         VoidedAt: '',
-        PaketID: namaPaket,
+        PaketID: paketId,
         NamaPaket: namaPaket,
         TahapPekerjaan: tahap,
         NomorKontrak: noKontrak,
@@ -1326,13 +1378,22 @@ function tataUsaha_submitPaket(token, payload) {
 
       appendRowData(sheet, newRow);
 
-      logAudit(session.userId, 'SUBMIT_PAKET', 'TX_Paket_Progres', rowId, {
+      logAudit(session.userId, oldRowId ? 'UPDATE_PAKET_PROGRES' : 'SUBMIT_PAKET', 'TX_Paket_Progres', rowId, {
+        oldRowId: oldRowId,
+        paketId: paketId,
         tahap: tahap,
         namaPaket: namaPaket,
         progresFisik: progresFisik
       });
 
-      return { success: true, message: 'Progres paket berhasil disimpan.', rowId: rowId };
+      return {
+        success: true,
+        message: oldRowId
+          ? 'Status dan progres paket berhasil dimutakhirkan ke tahap ' + tahap + '.'
+          : 'Progres paket baru berhasil disimpan.',
+        rowId: rowId,
+        isUpdate: Boolean(oldRowId)
+      };
     } finally {
       lock.releaseLock();
     }
@@ -1352,8 +1413,9 @@ function tataUsaha_anulirPaket(token, params) {
     var session = _tuRequireSession(token);
     _tuAssertVoid(session);
 
-    if (!params || !params.rowId) throw new Error('RowID paket wajib diisi.');
-    var alasan = String(params.alasan || '').trim();
+    if (!params || (!params.rowId && !params.targetRowId)) throw new Error('RowID paket wajib diisi.');
+    var rowIdTarget = String(params.rowId || params.targetRowId || '').trim();
+    var alasan = String(params.alasan || params.voidReason || '').trim();
     if (!alasan) throw new Error('Alasan anulir wajib diisi.');
 
     var lock = LockService.getScriptLock();
@@ -1365,7 +1427,7 @@ function tataUsaha_anulirPaket(token, params) {
       var targetIdx = -1;
 
       for (var i = 0; i < rows.length; i++) {
-        if (rows[i]['RowID'] === params.rowId && String(rows[i]['Status']) === ROW_STATUS.ACTIVE) {
+        if (rows[i]['RowID'] === rowIdTarget && String(rows[i]['Status']) === ROW_STATUS.ACTIVE) {
           targetIdx = i + 2;
           break;
         }
@@ -1384,7 +1446,7 @@ function tataUsaha_anulirPaket(token, params) {
       sheet.getRange(targetIdx, colBy).setValue(session.userId);
       sheet.getRange(targetIdx, colAt).setValue(new Date());
 
-      logAudit(session.userId, 'ANULIR_PAKET', 'TX_Paket_Progres', params.rowId, {
+      logAudit(session.userId, 'ANULIR_PAKET', 'TX_Paket_Progres', rowIdTarget, {
         alasan: alasan
       });
 
