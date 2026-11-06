@@ -1346,7 +1346,9 @@ function _reloadOnFilterChange() {
 
 // ── VIEW CONTENT ──────────────────────────────────────────
 function _renderViewContent(viewId) {
-  _chartTeardownAll(); // destroy instance chart lama sebelum DOM direbuild (Fase 8)
+  if (typeof _chartTeardownAll === 'function') {
+    try { _chartTeardownAll(); } catch (e) { /* ignore */ }
+  }
   var el = document.getElementById('page-content');
   if (viewId === 'tata-usaha')  { _renderTataUsaha(el);   return; }
   if (viewId === 'kelola-akun') { _renderKelolaAkun(el); return; }
@@ -7325,124 +7327,236 @@ function _bmnSwitchView(viewName, asetObj) {
 // ── GEOTAGGING & HAVERSINE NEAREST MATCH (SUB-FASE 18B.4) ───
 
 /**
- * Ekstraktor EXIF GPS JPEG native (Zero-Dependency & Murni Pure-JS)
- * Menjamin ekstraksi koordinat GPS kamera fisik / smartphone berjalan instan ( <5ms )
- * tanpa bergantung CDN external, network, atau script blocking.
+ * Helper parser TIFF IFD untuk GPS metadata (mendukung IFD0, Exif SubIFD, dan IFD1).
+ * Mengurai tag GPS Latitude, Longitude, Altitude dari struktur TIFF header.
+ */
+function _bmnParseTiffGps(v, tiffStart) {
+  if (!v || typeof tiffStart !== 'number' || tiffStart < 0 || tiffStart + 8 > v.byteLength) return null;
+  try {
+    var littleEndian = false;
+    var endianMarker = v.getUint16(tiffStart, false);
+    if (endianMarker === 0x4949) littleEndian = true;
+    else if (endianMarker === 0x4D4D) littleEndian = false;
+    else return null;
+
+    if (v.getUint16(tiffStart + 2, littleEndian) !== 0x002A) return null;
+
+    var ifd0Offset = v.getUint32(tiffStart + 4, littleEndian);
+    if (!ifd0Offset || tiffStart + ifd0Offset + 2 > v.byteLength) return null;
+
+    function readRational(off) {
+      if (typeof off !== 'number' || off < 0) return 0;
+      var actualOff = tiffStart + off;
+      if (actualOff < 0 || actualOff + 8 > v.byteLength) return 0;
+      try {
+        var num = v.getUint32(actualOff, littleEndian);
+        var den = v.getUint32(actualOff + 4, littleEndian);
+        return (den === 0 || isNaN(num) || isNaN(den)) ? 0 : (num / den);
+      } catch (e) {
+        return 0;
+      }
+    }
+
+    function readGpsFromIfd(gpsStart) {
+      if (typeof gpsStart !== 'number' || gpsStart < 0 || gpsStart + 2 > v.byteLength) return null;
+      try {
+        var numGpsEntries = v.getUint16(gpsStart, littleEndian);
+        var latRef = 'N', lonRef = 'E';
+        var latDeg = null, latMin = 0, latSec = 0;
+        var lonDeg = null, lonMin = 0, lonSec = 0;
+        var alt = null;
+        var c0 = '', c1 = '';
+
+        for (var j = 0; j < numGpsEntries; j++) {
+          var gEntry = gpsStart + 2 + (j * 12);
+          if (gEntry + 12 > v.byteLength) break;
+          var gTag = v.getUint16(gEntry, littleEndian);
+
+          if (gTag === 0x0001) { // GPSLatitudeRef
+            c0 = String.fromCharCode(v.getUint8(gEntry + 8)).toUpperCase();
+            c1 = String.fromCharCode(v.getUint8(gEntry + 9)).toUpperCase();
+            latRef = (c0 === 'S' || c0 === 'N') ? c0 : ((c1 === 'S' || c1 === 'N') ? c1 : 'N');
+          } else if (gTag === 0x0002) { // GPSLatitude
+            var vOff = v.getUint32(gEntry + 8, littleEndian);
+            if (vOff >= 8) {
+              latDeg = readRational(vOff);
+              latMin = readRational(vOff + 8);
+              latSec = readRational(vOff + 16);
+            }
+          } else if (gTag === 0x0003) { // GPSLongitudeRef
+            c0 = String.fromCharCode(v.getUint8(gEntry + 8)).toUpperCase();
+            c1 = String.fromCharCode(v.getUint8(gEntry + 9)).toUpperCase();
+            lonRef = (c0 === 'W' || c0 === 'E') ? c0 : ((c1 === 'W' || c1 === 'E') ? c1 : 'E');
+          } else if (gTag === 0x0004) { // GPSLongitude
+            var lOff = v.getUint32(gEntry + 8, littleEndian);
+            if (lOff >= 8) {
+              lonDeg = readRational(lOff);
+              lonMin = readRational(lOff + 8);
+              lonSec = readRational(lOff + 16);
+            }
+          } else if (gTag === 0x0006) { // GPSAltitude
+            var aOff = v.getUint32(gEntry + 8, littleEndian);
+            if (aOff >= 8) {
+              alt = readRational(aOff);
+            }
+          }
+        }
+
+        if (latDeg !== null && lonDeg !== null && !isNaN(latDeg) && !isNaN(lonDeg)) {
+          var lat = latDeg + ((latMin || 0) / 60) + ((latSec || 0) / 3600);
+          var lon = lonDeg + ((lonMin || 0) / 60) + ((lonSec || 0) / 3600);
+          if (latRef === 'S') lat = -lat;
+          if (lonRef === 'W') lon = -lon;
+          if (!isNaN(lat) && !isNaN(lon) && lat >= -90 && lat <= 90 && lon >= -180 && lon <= 180) {
+            return { latitude: lat, longitude: lon, altitude: alt };
+          }
+        }
+      } catch (eGps) {
+        return null;
+      }
+      return null;
+    }
+
+    function scanIfd(ifdStart, depth) {
+      if (depth > 3 || typeof ifdStart !== 'number' || ifdStart < 0 || ifdStart + 2 > v.byteLength) return null;
+      try {
+        var numEntries = v.getUint16(ifdStart, littleEndian);
+        var gpsIfdOffset = null;
+        var exifIfdOffset = null;
+
+        for (var i = 0; i < numEntries; i++) {
+          var entryStart = ifdStart + 2 + (i * 12);
+          if (entryStart + 12 > v.byteLength) break;
+          var tag = v.getUint16(entryStart, littleEndian);
+          if (tag === 0x8825) { // GPS IFD Pointer
+            gpsIfdOffset = v.getUint32(entryStart + 8, littleEndian);
+          } else if (tag === 0x8769) { // Exif IFD Pointer (subIFD)
+            exifIfdOffset = v.getUint32(entryStart + 8, littleEndian);
+          }
+        }
+
+        if (gpsIfdOffset) {
+          var res = readGpsFromIfd(tiffStart + gpsIfdOffset);
+          if (res) return res;
+        }
+
+        if (exifIfdOffset) {
+          var resExif = scanIfd(tiffStart + exifIfdOffset, depth + 1);
+          if (resExif) return resExif;
+        }
+
+        var nextIfdOffsetPos = ifdStart + 2 + (numEntries * 12);
+        if (nextIfdOffsetPos + 4 <= v.byteLength) {
+          var nextIfdOff = v.getUint32(nextIfdOffsetPos, littleEndian);
+          if (nextIfdOff > 0 && nextIfdOff < v.byteLength) {
+            var resNext = scanIfd(tiffStart + nextIfdOff, depth + 1);
+            if (resNext) return resNext;
+          }
+        }
+      } catch (eScan) {
+        return null;
+      }
+
+      return null;
+    }
+
+    return scanIfd(tiffStart + ifd0Offset, 0);
+  } catch (eTiff) {
+    return null;
+  }
+}
+
+/**
+ * Ekstraktor EXIF GPS multi-format native (Zero-Dependency & Murni Pure-JS)
+ * Mendukung JPEG (dengan padding 0xFF & DRI), PNG (eXIf chunk), WebP (EXIF chunk),
+ * raw TIFF/DNG, serta binary scanner fallback pada 256KB pertama berkas.
+ * Menjamin ekstraksi koordinat kamera fisik / smartphone berjalan instan (<2ms).
  */
 function _bmnParseExifGpsFromArrayBuffer(buffer) {
+  if (!buffer || buffer.byteLength < 14) return null;
   try {
     var view = new DataView(buffer);
-    if (view.byteLength < 12 || view.getUint16(0, false) !== 0xFFD8) return null; // Bukan JPEG
+    var len = view.byteLength;
 
-    var length = view.byteLength;
-    var offset = 2;
+    // 1. JPEG Format
+    if (view.getUint16(0, false) === 0xFFD8) {
+      var offset = 2;
+      while (offset < len) {
+        while (offset < len && view.getUint8(offset) === 0xFF) offset++;
+        if (offset >= len) break;
+        var marker = view.getUint8(offset);
+        offset++;
+        if (marker === 0xD8) continue; // SOI
+        if (marker === 0xD9 || marker === 0xDA) break; // EOI or SOS
+        if (marker >= 0xD0 && marker <= 0xD7) continue; // RST
+        if (marker === 0x01) continue; // TEM
 
-    while (offset + 4 < length) {
-      if (view.getUint8(offset) !== 0xFF) return null;
-      var marker = view.getUint8(offset + 1);
-
-      // APP1 Marker (0xFFE1) menyimpan metadata EXIF
-      if (marker === 0xE1) {
-        var app1Len = view.getUint16(offset + 2, false);
-        var exifStart = offset + 4;
-        if (view.getUint32(exifStart, false) === 0x45786966 && view.getUint16(exifStart + 4, false) === 0x0000) {
-          return _bmnParseTiffGps(view, exifStart + 6);
+        if (offset + 2 > len) break;
+        var segLen = view.getUint16(offset, false);
+        if (marker === 0xE1) { // APP1 EXIF
+          if (offset + 8 <= len &&
+              view.getUint32(offset + 2, false) === 0x45786966 &&
+              view.getUint16(offset + 6, false) === 0x0000) {
+            var res = _bmnParseTiffGps(view, offset + 8);
+            if (res) return res;
+          }
         }
-        offset += 2 + app1Len;
-      } else if ((marker >= 0xE0 && marker <= 0xEF) || marker === 0xFE || marker === 0xDB || marker === 0xC0 || marker === 0xC4) {
-        var segLen = view.getUint16(offset + 2, false);
-        offset += 2 + segLen;
-      } else if (marker === 0xD9 || marker === 0xDA) {
-        break; // End of image atau start of scan
-      } else {
-        offset += 2;
+        offset += segLen;
+      }
+    }
+
+    // 2. PNG Format (89 50 4E 47 0D 0A 1A 0A)
+    if (len > 8 && view.getUint32(0, false) === 0x89504E47 && view.getUint32(4, false) === 0x0D0A1A0A) {
+      var pOff = 8;
+      while (pOff + 8 < len) {
+        var cLen = view.getUint32(pOff, false);
+        var cType = view.getUint32(pOff + 4, false);
+        if (cType === 0x65584966) { // "eXIf" chunk
+          var resPng = _bmnParseTiffGps(view, pOff + 8);
+          if (resPng) return resPng;
+        }
+        pOff += 12 + cLen;
+      }
+    }
+
+    // 3. WebP Format (RIFF .... WEBP)
+    if (len > 12 && view.getUint32(0, false) === 0x52494646 && view.getUint32(8, false) === 0x57454250) {
+      var wOff = 12;
+      while (wOff + 8 < len) {
+        var wType = view.getUint32(wOff, false);
+        var wLen = view.getUint32(wOff + 4, true); // Little endian size in RIFF
+        if (wType === 0x45584946) { // "EXIF" chunk
+          var tStart = wOff + 8;
+          if (tStart + 6 <= len && view.getUint32(tStart, false) === 0x45786966 && view.getUint16(tStart + 4, false) === 0x0000) {
+            tStart += 6;
+          }
+          var resWebp = _bmnParseTiffGps(view, tStart);
+          if (resWebp) return resWebp;
+        }
+        wOff += 8 + wLen + (wLen % 2);
+      }
+    }
+
+    // 4. Raw TIFF Format (II*\0 or MM\0*)
+    if (view.getUint16(0, false) === 0x4949 || view.getUint16(0, false) === 0x4D4D) {
+      var resTiff = _bmnParseTiffGps(view, 0);
+      if (resTiff) return resTiff;
+    }
+
+    // 5. Universal Binary Scanner Fallback (Scan first 256KB for Exif\0\0)
+    var scanLimit = Math.min(len - 14, 262144);
+    for (var s = 0; s < scanLimit; s++) {
+      if (view.getUint8(s) === 0x45 &&
+          view.getUint32(s, false) === 0x45786966 &&
+          view.getUint16(s + 4, false) === 0x0000) {
+        var resScan = _bmnParseTiffGps(view, s + 6);
+        if (resScan) return resScan;
       }
     }
   } catch (e) {
     return null;
   }
   return null;
-
-  function _bmnParseTiffGps(v, tiffStart) {
-    var littleEndian = false;
-    var endianMarker = v.getUint16(tiffStart, false);
-    if (endianMarker === 0x4949) {
-      littleEndian = true;
-    } else if (endianMarker === 0x4D4D) {
-      littleEndian = false;
-    } else {
-      return null;
-    }
-
-    if (v.getUint16(tiffStart + 2, littleEndian) !== 0x002A) return null;
-
-    var ifd0Offset = v.getUint32(tiffStart + 4, littleEndian);
-    var ifd0Start = tiffStart + ifd0Offset;
-    if (ifd0Start + 2 > v.byteLength) return null;
-    var numEntries = v.getUint16(ifd0Start, littleEndian);
-
-    var gpsIfdOffset = null;
-    for (var i = 0; i < numEntries; i++) {
-      var entryStart = ifd0Start + 2 + (i * 12);
-      if (entryStart + 12 > v.byteLength) break;
-      var tag = v.getUint16(entryStart, littleEndian);
-      if (tag === 0x8825) { // GPS Info IFD Pointer
-        gpsIfdOffset = v.getUint32(entryStart + 8, littleEndian);
-        break;
-      }
-    }
-
-    if (!gpsIfdOffset) return null;
-
-    var gpsStart = tiffStart + gpsIfdOffset;
-    if (gpsStart + 2 > v.byteLength) return null;
-    var numGpsEntries = v.getUint16(gpsStart, littleEndian);
-
-    var latRef = 'N', lonRef = 'E';
-    var latDeg = null, latMin = null, latSec = null;
-    var lonDeg = null, lonMin = null, lonSec = null;
-
-    function readRational(off) {
-      var actualOff = tiffStart + off;
-      if (actualOff + 8 > v.byteLength) return 0;
-      var num = v.getUint32(actualOff, littleEndian);
-      var den = v.getUint32(actualOff + 4, littleEndian);
-      return den === 0 ? 0 : num / den;
-    }
-
-    for (var j = 0; j < numGpsEntries; j++) {
-      var gEntry = gpsStart + 2 + (j * 12);
-      if (gEntry + 12 > v.byteLength) break;
-      var gTag = v.getUint16(gEntry, littleEndian);
-
-      if (gTag === 0x0001) { // GPSLatitudeRef
-        latRef = String.fromCharCode(v.getUint8(gEntry + 8));
-      } else if (gTag === 0x0002) { // GPSLatitude
-        var vOff = v.getUint32(gEntry + 8, littleEndian);
-        latDeg = readRational(vOff);
-        latMin = readRational(vOff + 8);
-        latSec = readRational(vOff + 16);
-      } else if (gTag === 0x0003) { // GPSLongitudeRef
-        lonRef = String.fromCharCode(v.getUint8(gEntry + 8));
-      } else if (gTag === 0x0004) { // GPSLongitude
-        var lOff = v.getUint32(gEntry + 8, littleEndian);
-        lonDeg = readRational(lOff);
-        lonMin = readRational(lOff + 8);
-        lonSec = readRational(lOff + 16);
-      }
-    }
-
-    if (latDeg !== null && lonDeg !== null) {
-      var lat = latDeg + (latMin / 60) + (latSec / 3600);
-      var lon = lonDeg + (lonMin / 60) + (lonSec / 3600);
-      if (latRef.toUpperCase() === 'S') lat = -lat;
-      if (lonRef.toUpperCase() === 'W') lon = -lon;
-      if (!isNaN(lat) && !isNaN(lon) && lat >= -90 && lat <= 90 && lon >= -180 && lon <= 180) {
-        return { latitude: lat, longitude: lon };
-      }
-    }
-    return null;
-  }
 }
 
 var _EXIFR_LOADED = false;
@@ -7482,8 +7596,10 @@ function _loadExifr(cb) {
       q.forEach(function (fn) { try { fn(); } catch (e) { console.error(e); } });
     };
     fallback.onerror = function () {
-      console.error('Gagal memuat exifr dari seluruh CDN.');
+      console.warn('Gagal memuat exifr dari seluruh CDN. Menggunakan fallback internal.');
+      var q = _exifrQueue.slice();
       _exifrQueue = [];
+      q.forEach(function (fn) { try { fn(); } catch (e) { /* ignore */ } });
     };
     document.head.appendChild(fallback);
   };
@@ -7530,8 +7646,10 @@ function _loadTesseract(cb) {
       q.forEach(function (fn) { try { fn(); } catch (e) { console.error(e); } });
     };
     fallback.onerror = function () {
-      console.error('Gagal memuat tesseract dari seluruh CDN.');
+      console.warn('Gagal memuat tesseract dari seluruh CDN.');
+      var q = _tesseractQueue.slice();
       _tesseractQueue = [];
+      q.forEach(function (fn) { try { fn(); } catch (e) { /* ignore */ } });
     };
     document.head.appendChild(fallback);
   };
@@ -7988,7 +8106,7 @@ function _bmnRemovePhoto() {
 }
 
 function _bmnHandlePhotoFile(e) {
-  var file = e.target.files && e.target.files[0];
+  var file = (e && e.target && e.target.files && e.target.files[0]) || (e instanceof File ? e : null);
   if (!file) return;
 
   _msg('bmn-form-msg', null);
@@ -9107,12 +9225,20 @@ function _bmnRenderPenghapusanList(list) {
 }
 
 function _bmnSetHpsFilter(tahap, btnEl) {
-  _BMN_HPS.tahap = tahap;
-  document.querySelectorAll('.bmn-hps-tab-btn').forEach(function (b) {
-    b.classList.remove('active');
+  _BMN_HPS.tahap = tahap || 'ALL';
+  var btns = document.querySelectorAll('.bmn-hps-seg-btn, .bmn-hps-tab-btn');
+  btns.forEach(function (b) {
+    if (b.getAttribute('data-hps-tahap') === _BMN_HPS.tahap || b === btnEl) {
+      b.classList.add('active');
+    } else {
+      b.classList.remove('active');
+    }
   });
-  if (btnEl) btnEl.classList.add('active');
   _bmnLoadPenghapusanList();
+}
+
+function _bmnSetHpsTahap(tahap, btnEl) {
+  _bmnSetHpsFilter(tahap, btnEl);
 }
 
 function _bmnHpsDebouncedSearch() {
@@ -9123,6 +9249,8 @@ function _bmnHpsDebouncedSearch() {
     _bmnLoadPenghapusanList();
   }, 300);
 }
+
+var _bmnDebouncedHpsSearch = _bmnHpsDebouncedSearch;
 
 // ==========================================
 // CREATE USULAN PENGHAPUSAN
@@ -9477,6 +9605,16 @@ function _bmnRenderDetailHapus(detail) {
   var elUnit = document.getElementById('bmn-detail-hps-total-unit');
   var elPerolehan = document.getElementById('bmn-detail-hps-total-perolehan');
   var elBuku = document.getElementById('bmn-detail-hps-total-buku');
+
+  var elNomor = document.getElementById('bmn-detail-hps-nomor');
+  var elTgl = document.getElementById('bmn-detail-hps-tanggal');
+  var elPeruntukan = document.getElementById('bmn-detail-hps-peruntukan');
+  var elSubmitter = document.getElementById('bmn-detail-hps-submitter');
+
+  if (elNomor) elNomor.textContent = master.penghapusanId || master.nomorSuratUsulan || '—';
+  if (elTgl) elTgl.textContent = _formatDate(master.tanggalUsulan || master.timestamp);
+  if (elPeruntukan) elPeruntukan.textContent = _bmnGetAlasanLabel(master.alasanPenghapusan);
+  if (elSubmitter) elSubmitter.textContent = master.submittedBy || '—';
 
   if (elAlasan) elAlasan.textContent = _bmnGetAlasanLabel(master.alasanPenghapusan);
   if (elKet) elKet.textContent = master.keteranganAlasan || '-';
