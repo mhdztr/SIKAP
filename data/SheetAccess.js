@@ -199,6 +199,8 @@ function ensureTuSpreadsheet() {
   _autoCreateTuSheet(ss, SHEET_TU.BMN_ASET);
   _autoCreateTuSheet(ss, SHEET_TU.BMN_PENGHAPUSAN);
   _autoCreateTuSheet(ss, SHEET_TU.BMN_PENGHAPUSAN_DETAIL);
+  _autoCreateTuSheet(ss, SHEET_TU.BMN_REKAP_SAKTI);
+  _autoCreateTuSheet(ss, SHEET_TU.BMN_NERACA);
   _autoCreateTuSheet(ss, SHEET_TU.MASTER_LOKASI_UPT);
   _autoCreateTuSheet(ss, SHEET_TU.MASTER_BMN_KATEGORI);
   _autoCreateTuSheet(ss, SHEET_TU.MASTER_PAKET);
@@ -257,7 +259,9 @@ function _autoCreateTuSheet(ss, sheetName) {
       'KodeKategori', 'TanggalPerolehan', 'NilaiPerolehan', 'NilaiBuku', 'Kondisi',
       'LokasiID', 'LokasiDetailRuangan', 'Latitude', 'Longitude', 'SumberLokasi',
       'JarakKeUPT_Km', 'TanggalVerifikasi', 'FotoEvidenceID', 'StatusAset',
-      'PenghapusanID', 'KapalID', 'ImportBatchID', 'Keterangan'
+      'PenghapusanID', 'KapalID', 'ImportBatchID', 'Keterangan',
+      'KodeAkunNeraca', 'NoPolisi', 'TglPajakTahunan', 'TglStnkLimaTahunan',
+      'FotoStnkEvidenceID', 'NoDokumenSumber', 'StnkVerified'
     ]);
   } else if (sheetName === SHEET_TU.BMN_PENGHAPUSAN) {
     headers = STD_COLS.concat([
@@ -269,6 +273,18 @@ function _autoCreateTuSheet(ss, sheetName) {
     ]);
   } else if (sheetName === SHEET_TU.BMN_PENGHAPUSAN_DETAIL) {
     headers = STD_COLS.concat(['ParentRowID', 'PenghapusanID', 'AsetID', 'KondisiSaatUsul', 'NilaiBukuSaatUsul']);
+  } else if (sheetName === SHEET_TU.BMN_REKAP_SAKTI) {
+    headers = [
+      'RekapID', 'PeriodeLaporan', 'JenisLaporan', 'KodeAkun', 'UraianAkun',
+      'KodeBarang', 'UraianBarang', 'Satuan', 'KuantitasAwal', 'NilaiAwal',
+      'KuantitasTambah', 'NilaiTambah', 'KuantitasKurang', 'NilaiKurang',
+      'KuantitasAkhir', 'NilaiAkhir', 'UpdatedAt', 'UpdatedBy', 'SumberDokumen'
+    ];
+  } else if (sheetName === SHEET_TU.BMN_NERACA) {
+    headers = [
+      'NeracaID', 'PeriodeLaporan', 'KodeAkun', 'UraianAkun',
+      'JumlahNilai', 'KategoriNeraca', 'UpdatedAt', 'UpdatedBy', 'SumberDokumen'
+    ];
   } else if (sheetName === SHEET_TU.MASTER_LOKASI_UPT) {
     headers = ['LokasiID', 'NamaLokasi', 'JenisLokasi', 'Latitude', 'Longitude', 'RadiusVerifikasiKm', 'StatusAktif'];
   } else if (sheetName === SHEET_TU.MASTER_BMN_KATEGORI) {

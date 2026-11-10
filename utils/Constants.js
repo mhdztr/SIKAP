@@ -18,6 +18,8 @@ var SHEET_TU = {
   BMN_ASET: 'TX_BMN_Aset',
   BMN_PENGHAPUSAN: 'TX_BMN_Penghapusan',
   BMN_PENGHAPUSAN_DETAIL: 'TX_BMN_Penghapusan_Detail',
+  BMN_REKAP_SAKTI: 'TX_BMN_Rekap_Sakti',
+  BMN_NERACA: 'TX_BMN_Neraca',
   MASTER_LOKASI_UPT: 'Master_Lokasi_UPT',
   MASTER_BMN_KATEGORI: 'Master_BMN_Kategori',
   MASTER_PAKET: 'Master_Paket',

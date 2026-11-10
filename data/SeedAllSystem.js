@@ -835,6 +835,17 @@ function seedBMNAset(force) {
         ? 'Aset rusak berat akumulasi pemakaian operasional dinas; suku cadang tidak tersedia.'
         : 'Unit inventaris fisik operasional dalam penguasaan resmi Subbag TU / Pangkalan.';
 
+      var noPolSeed = '';
+      var tglPjkSeed = '';
+      var tglStnkSeed = '';
+      var fotoStnkSeed = '';
+      if (tmpl.kat === 'KAT-KENDARAAN') {
+        noPolSeed = 'BP ' + (8010 + currentNup) + ' Q';
+        tglPjkSeed = '2027-03-10';
+        tglStnkSeed = '2027-03-10';
+        fotoStnkSeed = 'EV-STNK-' + asetId;
+      }
+
       rows.push([
         rowId,
         'DIV-TU',
@@ -869,11 +880,19 @@ function seedBMNAset(force) {
         tmpl.hpsId,
         tmpl.kapal,
         'BATCH-SEED-2026',
-        ket
+        ket,
+        '132111',
+        noPolSeed,
+        tglPjkSeed,
+        tglStnkSeed,
+        fotoStnkSeed,
+        'SPK-SAKTI-2026',
+        'YA'
       ]);
     }
   }
 
+  if (typeof _ensureBmnAsetColumns === 'function') _ensureBmnAsetColumns(sheet);
   sheet.getRange(2, 1, rows.length, rows[0].length).setValues(rows);
   return { status: 'SEEDED', count: rows.length };
 }

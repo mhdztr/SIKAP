@@ -295,6 +295,7 @@ function bmn_getAsetList(token, params) {
     var query            = (params.q || '').trim().toLowerCase();
 
     var sheet = openTuSheet(SHEET_TU.BMN_ASET);
+    if (typeof _ensureBmnAsetColumns === 'function') _ensureBmnAsetColumns(sheet);
     var rows  = sheetToObjects(sheet);
 
     // Filter baris ACTIVE (bukan SUPERSEDED atau VOID)
@@ -378,19 +379,37 @@ function bmn_getAsetList(token, params) {
       var katCode = String(r['KodeKategori'] || '');
       var masaManfaat = masaManfaatMap[katCode] || 0;
       var ageInfo = _bmnComputeAge(r['TanggalPerolehan'], masaManfaat);
+      var kBrg = String(r['KodeBarang'] || '');
+      var nmBrg = String(r['NamaBarang'] || '');
+      var npVal = parseFloat(r['NilaiPerolehan']) || 0;
+      var nbVal = parseFloat(r['NilaiBuku']) || 0;
+      var rawPenc = String(r['KategoriPencatatan'] || '');
+      var capClass = (typeof _bmnClassifyCapitalization === 'function')
+        ? _bmnClassifyCapitalization(npVal, r['KodeAkunNeraca'], rawPenc)
+        : (rawPenc || 'BUKU');
+      var isVeh = (typeof _bmnIsVehicleAsset === 'function')
+        ? _bmnIsVehicleAsset(kBrg, katCode, nmBrg)
+        : (katCode === 'KAT-KENDARAAN');
+      var noPol = String(r['NoPolisi'] || '');
+      var tglPjk = r['TglPajakTahunan'] ? new Date(r['TglPajakTahunan']).toISOString().substring(0, 10) : '';
+      var tglStnk = r['TglStnkLimaTahunan'] ? new Date(r['TglStnkLimaTahunan']).toISOString().substring(0, 10) : '';
+      var stnkInfo = (isVeh && typeof _bmnComputeStnkStatus === 'function')
+        ? _bmnComputeStnkStatus(tglPjk, tglStnk, noPol, nmBrg)
+        : null;
 
       return {
         rowId:               String(r['RowID']),
         asetId:              String(r['AsetID']),
-        kodeBarang:          String(r['KodeBarang'] || ''),
+        kodeBarang:          kBrg,
         nup:                 String(r['NUP'] || ''),
-        namaBarang:          String(r['NamaBarang'] || ''),
+        namaBarang:          nmBrg,
         merekTipe:           String(r['MerekTipe'] || ''),
-        kategoriPencatatan:  String(r['KategoriPencatatan'] || 'BUKU'),
+        kategoriPencatatan:  capClass,
+        labelKapitalisasi:   capClass === 'REGULER' ? 'EKSTRAKOMPTABEL' : (capClass === 'PERSEDIAAN' ? 'PERSEDIAAN' : 'INTRAKOMPTABEL'),
         kodeKategori:        katCode,
         tanggalPerolehan:    r['TanggalPerolehan'] ? new Date(r['TanggalPerolehan']).toISOString().substring(0, 10) : null,
-        nilaiPerolehan:      parseFloat(r['NilaiPerolehan']) || 0,
-        nilaiBuku:           parseFloat(r['NilaiBuku']) || 0,
+        nilaiPerolehan:      npVal,
+        nilaiBuku:           nbVal,
         kondisi:             String(r['Kondisi'] || 'BAIK'),
         lokasiId:            String(r['LokasiID'] || ''),
         lokasiDetailRuangan: String(r['LokasiDetailRuangan'] || ''),
@@ -407,7 +426,16 @@ function bmn_getAsetList(token, params) {
         umurBulan:           ageInfo.umurBulan,
         sisaManfaatTahun:    ageInfo.sisaManfaatTahun,
         isExpired:           ageInfo.isExpired,
-        keterangan:          String(r['Keterangan'] || '')
+        keterangan:          String(r['Keterangan'] || ''),
+        kodeAkunNeraca:      String(r['KodeAkunNeraca'] || (capClass === 'REGULER' ? '132111' : '132111')),
+        noPolisi:            noPol,
+        tglPajakTahunan:     tglPjk,
+        tglStnkLimaTahunan:  tglStnk,
+        fotoStnkEvidenceId:  String(r['FotoStnkEvidenceID'] || ''),
+        noDokumenSumber:     String(r['NoDokumenSumber'] || ''),
+        stnkVerified:        String(r['StnkVerified'] || 'YA'),
+        isKendaraan:         isVeh,
+        stnkStatus:          stnkInfo
       };
     });
 
@@ -438,6 +466,7 @@ function bmn_getSummary(token, filter) {
     _bmnAssertRead(session);
 
     var sheet = openTuSheet(SHEET_TU.BMN_ASET);
+    if (typeof _ensureBmnAsetColumns === 'function') _ensureBmnAsetColumns(sheet);
     var rows  = sheetToObjects(sheet);
 
     var activeRows = rows.filter(function (r) {
@@ -488,13 +517,18 @@ function bmn_getSummary(token, filter) {
     var antreanHapusCount = 0;
     var rusakBeratKandidatHapus = 0;
     var uptCounts = {};
+    var kendaraanDueList = [];
+    var totalKendaraanCount = 0;
 
     for (var i = 0; i < activeRows.length; i++) {
       var r = activeRows[i];
       var np = parseFloat(r['NilaiPerolehan']) || 0;
       var nb = parseFloat(r['NilaiBuku']) || 0;
       var kond = String(r['Kondisi'] || 'BAIK').toUpperCase();
-      var penc = String(r['KategoriPencatatan'] || 'BUKU').toUpperCase();
+      var rawPenc = String(r['KategoriPencatatan'] || 'BUKU').toUpperCase();
+      var penc = (typeof _bmnClassifyCapitalization === 'function')
+        ? _bmnClassifyCapitalization(np, r['KodeAkunNeraca'], rawPenc)
+        : rawPenc;
       var stAset = String(r['StatusAset'] || 'AKTIF').toUpperCase();
       var lokId = String(r['LokasiID'] || 'UPT-PUSAT-POA');
 
@@ -507,6 +541,44 @@ function bmn_getSummary(token, filter) {
       } else {
         countBuku++;
         nilaiBukuSum += nb;
+      }
+
+      if (stAset === 'AKTIF' && typeof _bmnIsVehicleAsset === 'function') {
+        var kBrgSum = String(r['KodeBarang'] || '');
+        var katSum  = String(r['KodeKategori'] || '');
+        var nmSum   = String(r['NamaBarang'] || '');
+        if (_bmnIsVehicleAsset(kBrgSum, katSum, nmSum)) {
+          totalKendaraanCount++;
+          var noPolSum  = String(r['NoPolisi'] || '');
+          var tPjkSum   = r['TglPajakTahunan'] ? new Date(r['TglPajakTahunan']).toISOString().substring(0, 10) : '';
+          var tStnkSum  = r['TglStnkLimaTahunan'] ? new Date(r['TglStnkLimaTahunan']).toISOString().substring(0, 10) : '';
+          var stnkCheck = _bmnComputeStnkStatus(tPjkSum, tStnkSum, noPolSum, nmSum);
+          if (stnkCheck && (stnkCheck.statusReminder === 'LEWAT_JATUH_TEMPO' || stnkCheck.statusReminder === 'SEGERA_JATUH_TEMPO')) {
+            kendaraanDueList.push({
+              asetId: String(r['AsetID']),
+              kodeBarang: kBrgSum,
+              nup: String(r['NUP'] || ''),
+              namaBarang: nmSum,
+              merekTipe: String(r['MerekTipe'] || ''),
+              noPolisi: noPolSum || ('NUP-' + r['NUP']),
+              lokasiId: lokId,
+              tglPajakTahunan: tPjkSum,
+              tglStnkLimaTahunan: tStnkSum,
+              daysToPajak: stnkCheck.daysToPajak,
+              daysToStnk: stnkCheck.daysToStnk,
+              minDays: stnkCheck.minDays,
+              statusReminder: stnkCheck.statusReminder,
+              milestoneStage: stnkCheck.milestoneStage,
+              milestoneLabel: stnkCheck.milestoneLabel,
+              shouldTriggerPopup: stnkCheck.shouldTriggerPopup,
+              isOverdueDaily: stnkCheck.isOverdueDaily,
+              checkpointKey: stnkCheck.checkpointKey,
+              jenisTindakan: stnkCheck.jenisTindakan,
+              alertMessage: stnkCheck.alertMessage,
+              stnkStatus: stnkCheck
+            });
+          }
+        }
       }
 
       if (kondisiCounts.hasOwnProperty(kond)) {
@@ -587,6 +659,11 @@ function bmn_getSummary(token, filter) {
         },
         uptCounts: uptCounts,
         uptList: uptArray,
+        kendaraanSummary: {
+          totalKendaraan: totalKendaraanCount,
+          jatuhTempoCount: kendaraanDueList.length,
+          dueAlerts: kendaraanDueList
+        },
         notificationAlert: {
           hasRusakBeratAlert: rusakBeratKandidatHapus > 0,
           kandidatCount: rusakBeratKandidatHapus,
@@ -711,6 +788,32 @@ function bmn_submitAset(token, params) {
         }
       }
 
+      // Penanganan foto/scan STNK kendaraan dinas (base64) jika dikirimkan
+      var fotoStnkEvidenceId = params.fotoStnkEvidenceId || '';
+      if (params.stnkPayload && params.stnkPayload.dataBase64) {
+        try {
+          var sB64 = String(params.stnkPayload.dataBase64).replace(/^data:[^;]+;base64,/, '').trim();
+          var sMime = params.stnkPayload.mimeType || 'image/jpeg';
+          var sName = params.stnkPayload.fileName || ('STNK_' + asetId + '.jpg');
+          var sBlob = Utilities.newBlob(Utilities.base64Decode(sB64), sMime, sName);
+
+          var rootFolderStnk = _evGetOrCreateRoot();
+          var fTuStnk = _evGetOrCreateSub(rootFolderStnk, 'Tata Usaha');
+          var fYmStnk = _evGetOrCreateSub(fTuStnk, (periode && periode.length >= 7) ? periode.substring(0, 7) : 'Umum');
+          var fAsetStnk = _evGetOrCreateSub(fYmStnk, 'BMN-' + asetId);
+          var driveFileStnk = fAsetStnk.createFile(sBlob);
+          fotoStnkEvidenceId = _evAppendEvidence(SHEET_TU.BMN_ASET, newRowId, driveFileStnk.getId(), sName, sMime, 'UPLOAD_STNK', session.userId);
+        } catch (stnkErr) {
+          Logger.log('[bmn_submitAset stnk photo error] ' + stnkErr.message);
+        }
+      }
+
+      var npInput = parseFloat(params.nilaiPerolehan) || 0;
+      var nbInput = parseFloat(params.nilaiBuku) || 0;
+      var autoCap = (typeof _bmnClassifyCapitalization === 'function')
+        ? _bmnClassifyCapitalization(npInput, params.kodeAkunNeraca, params.kategoriPencatatan)
+        : (params.kategoriPencatatan || 'BUKU');
+
       var newRow = [
         newRowId,
         _BMN_DIVISI_ID,
@@ -727,11 +830,11 @@ function bmn_submitAset(token, params) {
         String(params.nup).trim(),
         String(params.namaBarang).trim(),
         params.merekTipe ? String(params.merekTipe).trim() : '',
-        params.kategoriPencatatan || 'BUKU',
-        params.kodeKategori || 'KAT-ALAT_KANTOR',
+        autoCap,
+        params.kodeKategori || 'KAT-KANTOR',
         params.tanggalPerolehan ? new Date(params.tanggalPerolehan) : now,
-        parseFloat(params.nilaiPerolehan) || 0,
-        parseFloat(params.nilaiBuku) || 0,
+        npInput,
+        nbInput,
         params.kondisi || 'BAIK',
         lokasiId,
         params.lokasiDetailRuangan ? String(params.lokasiDetailRuangan).trim() : '',
@@ -745,7 +848,14 @@ function bmn_submitAset(token, params) {
         '',      // PenghapusanID
         params.kapalId || '',
         '',      // ImportBatchID
-        params.keterangan ? String(params.keterangan).trim() : ''
+        params.keterangan ? String(params.keterangan).trim() : '',
+        params.kodeAkunNeraca ? String(params.kodeAkunNeraca).trim() : '132111',
+        params.noPolisi ? String(params.noPolisi).trim().toUpperCase() : '',
+        params.tglPajakTahunan ? String(params.tglPajakTahunan).trim() : '',
+        params.tglStnkLimaTahunan ? String(params.tglStnkLimaTahunan).trim() : '',
+        fotoStnkEvidenceId,
+        params.noDokumenSumber ? String(params.noDokumenSumber).trim() : '',
+        params.stnkVerified ? String(params.stnkVerified).trim() : 'YA'
       ];
 
       var lastRow = sheet.getLastRow();
@@ -989,6 +1099,7 @@ function bmn_getAsetEligibleHapus(token) {
     _bmnAssertRead(session);
 
     var sheet = openTuSheet(SHEET_TU.BMN_ASET);
+    if (typeof _ensureBmnAsetColumns === 'function') _ensureBmnAsetColumns(sheet);
     var rows  = sheetToObjects(sheet);
 
     var eligible = rows.filter(function (r) {
@@ -1579,3 +1690,1262 @@ function bmn_voidPenghapusan(token, params) {
     return { success: false, error: e.message };
   }
 }
+
+// ===========================================================================
+// SIMANPOA ENGINE: PENATAUSAHAAN & PENGELOLAAN BMN (SAKTI PDF, NERACA, STNK)
+// ===========================================================================
+
+var _BMN_CAPITALIZATION_THRESHOLD = 2000000; // Rp 2.000.000 sesuai aturan kapitalisasi BMN Kemenkeu
+
+/**
+ * Klasifikasi otomatis kapitalisasi BMN di sisi server:
+ * - Akun 117xxx -> PERSEDIAAN
+ * - Nilai per unit >= Rp 2.000.000 -> BUKU (Intrakomptabel)
+ * - Nilai per unit < Rp 2.000.000 -> REGULER (Ekstrakomptabel)
+ */
+function _bmnClassifyCapitalization(nilaiPerolehan, kodeAkun, fallback) {
+  var akunStr = String(kodeAkun || '').trim();
+  if (akunStr.indexOf('117') === 0) return 'PERSEDIAAN';
+  var np = parseFloat(nilaiPerolehan) || 0;
+  if (np >= _BMN_CAPITALIZATION_THRESHOLD) return 'BUKU';
+  if (np > 0 && np < _BMN_CAPITALIZATION_THRESHOLD) return 'REGULER';
+  var fb = String(fallback || 'BUKU').toUpperCase();
+  if (fb === 'EKSTRA' || fb === 'EKSTRAKOMPTABEL' || fb === 'REGULER') return 'REGULER';
+  if (fb === 'PERSEDIAAN') return 'PERSEDIAAN';
+  return 'BUKU';
+}
+
+/**
+ * Deteksi apakah suatu aset merupakan Kendaraan Bermotor Dinas (Mobil / Motor).
+ */
+function _bmnIsVehicleAsset(kodeBarang, kodeKategori, namaBarang) {
+  var kb = String(kodeBarang || '').replace(/\./g, '').trim();
+  var kat = String(kodeKategori || '').toUpperCase().trim();
+  var nm = String(namaBarang || '').toLowerCase();
+  if (kat === 'KAT-KENDARAAN') return true;
+  if (kb.indexOf('30201') === 0 || kb.indexOf('30101') === 0) return true;
+  if (/mini\s*bus|minibus|sepeda\s*motor|motor\s*dinas|mobil\s*patroli|mobil\s*dinas|pick\s*up|hilux|innova|pajero|hiace|avanza|vario|nmax/.test(nm)) {
+    return true;
+  }
+  return false;
+}
+
+/**
+ * Kalkulasi server-side sisa hari jatuh tempo Pajak Tahunan & STNK 5 Tahunan kendaraan dinas.
+ * Aturan Peringatan (apabila tanggal jatuh tempo belum diperbarui):
+ * - Pra-Tenggat & Hari H: Peringatan muncul pada tahapan H-30, H-7, H-1, dan Hari H (H-0).
+ * - Lewat Tenggat (< 0 hari): Peringatan aktif muncul SETIAP HARI hingga diperbarui.
+ */
+function _bmnComputeStnkStatus(tglPajakStr, tglStnkStr, noPolisi, namaBarang) {
+  var now = new Date();
+  var todayMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+  var todayIso = now.getFullYear() + '-' + ('0' + (now.getMonth() + 1)).slice(-2) + '-' + ('0' + now.getDate()).slice(-2);
+  var msPerDay = 24 * 60 * 60 * 1000;
+
+  var daysPajak = null;
+  var daysStnk  = null;
+
+  if (tglPajakStr) {
+    var dP = new Date(tglPajakStr);
+    if (!isNaN(dP.getTime())) {
+      var pMidnight = new Date(dP.getFullYear(), dP.getMonth(), dP.getDate()).getTime();
+      daysPajak = Math.round((pMidnight - todayMidnight) / msPerDay);
+    }
+  }
+
+  if (tglStnkStr) {
+    var dS = new Date(tglStnkStr);
+    if (!isNaN(dS.getTime())) {
+      var sMidnight = new Date(dS.getFullYear(), dS.getMonth(), dS.getDate()).getTime();
+      daysStnk = Math.round((sMidnight - todayMidnight) / msPerDay);
+    }
+  }
+
+  if (daysPajak === null && daysStnk === null) {
+    return {
+      hasStnkData: false,
+      tglPajak: '',
+      tglStnk: '',
+      daysToPajak: null,
+      daysToStnk: null,
+      minDays: null,
+      statusReminder: 'BELUM_DIISI',
+      milestoneStage: 'NONE',
+      milestoneLabel: 'Belum Diisi',
+      shouldTriggerPopup: false,
+      isOverdueDaily: false,
+      checkpointKey: '',
+      jenisTindakan: 'Lengkapi Dokumen & Masa Berlaku STNK',
+      alertMessage: 'Kendaraan dinas ' + (noPolisi || namaBarang || '') + ' belum dilengkapi data jatuh tempo pajak/STNK.'
+    };
+  }
+
+  var minDays = null;
+  if (daysPajak !== null && daysStnk !== null) {
+    minDays = Math.min(daysPajak, daysStnk);
+  } else if (daysPajak !== null) {
+    minDays = daysPajak;
+  } else {
+    minDays = daysStnk;
+  }
+
+  var isStnkRenewal = (daysStnk !== null && daysStnk <= 45 && (daysPajak === null || daysStnk <= daysPajak + 7));
+  var jenisTindakan = isStnkRenewal
+    ? 'Pembayaran Pajak & Penggantian STNK 5 Tahunan Baru'
+    : 'Pembayaran Pajak STNK Tahunan';
+  var targetTgl = isStnkRenewal ? (tglStnkStr || tglPajakStr) : (tglPajakStr || tglStnkStr);
+
+  var statusReminder = 'AMAN';
+  var milestoneStage = 'AMAN';
+  var milestoneLabel = 'Aman (H-' + minDays + ')';
+  var shouldTriggerPopup = false;
+  var isOverdueDaily = false;
+  var checkpointKey = '';
+
+  if (minDays < 0) {
+    // Lewat Tenggat: Warning wajib muncul SETIAP HARI selama belum diperbarui
+    statusReminder = 'LEWAT_JATUH_TEMPO';
+    milestoneStage = 'LEWAT_TENGGAT_HARIAN';
+    milestoneLabel = 'Lewat Tenggat H+' + Math.abs(minDays) + ' (Warning Harian)';
+    shouldTriggerPopup = true;
+    isOverdueDaily = true;
+    checkpointKey = 'OVERDUE_DAILY_' + targetTgl + '_' + todayIso;
+  } else if (minDays === 0) {
+    // Hari H
+    statusReminder = 'SEGERA_JATUH_TEMPO';
+    milestoneStage = 'HARI_H';
+    milestoneLabel = 'Hari H — Jatuh Tempo Hari Ini';
+    shouldTriggerPopup = true;
+    checkpointKey = 'MILESTONE_H0_' + targetTgl;
+  } else if (minDays === 1) {
+    // H-1
+    statusReminder = 'SEGERA_JATUH_TEMPO';
+    milestoneStage = 'H_1';
+    milestoneLabel = 'Peringatan H-1 Jatuh Tempo';
+    shouldTriggerPopup = true;
+    checkpointKey = 'MILESTONE_H1_' + targetTgl;
+  } else if (minDays <= 7) {
+    // Fase H-7 (termasuk tepat H-7 atau jika belum diperbarui di rentang H-7..H-2)
+    statusReminder = 'SEGERA_JATUH_TEMPO';
+    milestoneStage = 'H_7';
+    milestoneLabel = (minDays === 7) ? 'Peringatan H-7 Jatuh Tempo' : ('Fase H-7 (Sisa H-' + minDays + ')');
+    shouldTriggerPopup = true;
+    checkpointKey = 'MILESTONE_H7_' + targetTgl;
+  } else if (minDays <= 30) {
+    // Fase H-30 (termasuk tepat H-30 atau jika belum diperbarui di rentang H-30..H-8)
+    statusReminder = 'SEGERA_JATUH_TEMPO';
+    milestoneStage = 'H_30';
+    milestoneLabel = (minDays === 30) ? 'Peringatan H-30 Jatuh Tempo' : ('Fase H-30 (Sisa H-' + minDays + ')');
+    shouldTriggerPopup = true;
+    checkpointKey = 'MILESTONE_H30_' + targetTgl;
+  } else if (minDays <= 60) {
+    statusReminder = 'PERHATIAN';
+    milestoneStage = 'PERHATIAN';
+    milestoneLabel = 'H-' + minDays;
+  }
+
+  var platLabel = noPolisi ? ('plat nomor ' + noPolisi) : (namaBarang || 'Kendaraan Dinas');
+  var prefixUrgency = isOverdueDaily
+    ? '[PERINGATAN HARIAN — LEWAT TENGGAT H+' + Math.abs(minDays) + '] '
+    : (minDays === 0 ? '[JATUH TEMPO HARI INI (HARI H)] ' : (minDays === 1 ? '[PERINGATAN H-1] ' : (minDays <= 7 ? '[PERINGATAN H-7] ' : '[PERINGATAN H-30] ')));
+
+  var alertMessage = prefixUrgency + 'Kendaraan dinas ' + platLabel +
+    (namaBarang ? ' (' + namaBarang + ')' : '') +
+    ', jatuh tempo tanggal ' + targetTgl +
+    ', harus segera dilakukan ' + jenisTindakan.toLowerCase() + '.';
+
+  return {
+    hasStnkData: true,
+    tglPajak: tglPajakStr || '',
+    tglStnk: tglStnkStr || '',
+    daysToPajak: daysPajak,
+    daysToStnk: daysStnk,
+    minDays: minDays,
+    statusReminder: statusReminder,
+    milestoneStage: milestoneStage,
+    milestoneLabel: milestoneLabel,
+    shouldTriggerPopup: shouldTriggerPopup,
+    isOverdueDaily: isOverdueDaily,
+    checkpointKey: checkpointKey,
+    jenisTindakan: jenisTindakan,
+    alertMessage: alertMessage
+  };
+}
+
+/**
+ * Self-healing kolom tambahan pada TX_BMN_Aset agar kompatibel dengan spreadsheet lama.
+ */
+function _ensureBmnAsetColumns(sheet) {
+  if (!sheet) return;
+  try {
+    var lastCol = sheet.getLastColumn();
+    if (lastCol < 1) return;
+    var headers = sheet.getRange(1, 1, 1, lastCol).getValues()[0];
+    var extraCols = [
+      'KodeAkunNeraca', 'NoPolisi', 'TglPajakTahunan', 'TglStnkLimaTahunan',
+      'FotoStnkEvidenceID', 'NoDokumenSumber', 'StnkVerified'
+    ];
+    var missing = [];
+    for (var i = 0; i < extraCols.length; i++) {
+      if (headers.indexOf(extraCols[i]) === -1) {
+        missing.push(extraCols[i]);
+      }
+    }
+    if (missing.length > 0) {
+      sheet.getRange(1, lastCol + 1, 1, missing.length)
+        .setValues([missing])
+        .setFontWeight('bold')
+        .setBackground('#E8EAF6');
+    }
+  } catch (e) {
+    Logger.log('[_ensureBmnAsetColumns] ' + e.message);
+  }
+}
+
+/**
+ * Mengambil seluruh data workspace SIMANPOA:
+ * - Posisi BMN di Neraca (dari TX_BMN_Neraca hasil sinkronisasi PDF SAKTI)
+ * - Tabel 11 Kolom SAKTI (Intrakomptabel, Ekstrakomptabel, dan Gabungan dari TX_BMN_Rekap_Sakti)
+ * - Daftar Kendaraan Dinas + Peringatan Jatuh Tempo Pajak / STNK (H-30, H-7, H-1, Hari H, dan Harian saat Lewat Tenggat)
+ * Catatan: Tidak melakukan preload data statis; membaca murni dari database aktual.
+ */
+function bmn_getSaktiWorkspace(token, params) {
+  try {
+    var session = _bmnRequireSession(token);
+    _bmnAssertRead(session);
+
+    var neracaSheet = openTuSheet(SHEET_TU.BMN_NERACA);
+    var rekapSheet  = openTuSheet(SHEET_TU.BMN_REKAP_SAKTI);
+    var asetSheet   = openTuSheet(SHEET_TU.BMN_ASET);
+    _ensureBmnAsetColumns(asetSheet);
+
+    var neracaRows = sheetToObjects(neracaSheet);
+    var rekapRows  = sheetToObjects(rekapSheet);
+    var asetRows   = sheetToObjects(asetSheet).filter(function (r) {
+      return String(r['Status']) === ROW_STATUS.ACTIVE;
+    });
+
+    // 1. Olah Neraca
+    var totalPersediaan = 0;
+    var totalAsetTetapBruto = 0;
+    var totalAkumulasiPenyusutan = 0;
+    var totalAsetTakBerwujudBruto = 0;
+    var totalNonOperasionalBruto = 0;
+    var totalNeracaBersih = 0;
+
+    var neracaItems = neracaRows.map(function (n) {
+      var val = parseFloat(n['JumlahNilai']) || 0;
+      var kat = String(n['KategoriNeraca'] || 'ASET_TETAP');
+      totalNeracaBersih += val;
+      if (kat === 'PERSEDIAAN') totalPersediaan += val;
+      else if (kat === 'ASET_TETAP') totalAsetTetapBruto += val;
+      else if (kat === 'AKUMULASI_PENYUSUTAN') totalAkumulasiPenyusutan += val;
+      else if (kat === 'ASET_TAK_BERWUJUD') totalAsetTakBerwujudBruto += val;
+      else if (kat === 'ASET_NON_OPERASIONAL') totalNonOperasionalBruto += val;
+
+      return {
+        neracaId: String(n['NeracaID'] || ''),
+        periodeLaporan: String(n['PeriodeLaporan'] || '2026-09-30'),
+        kodeAkun: String(n['KodeAkun'] || ''),
+        uraianAkun: String(n['UraianAkun'] || ''),
+        jumlahNilai: val,
+        kategoriNeraca: kat,
+        sumberDokumen: String(n['SumberDokumen'] || '')
+      };
+    });
+
+    // 2. Olah Rincian 11 Kolom SAKTI (INTRA, EKSTRA, dan komputasi GABUNGAN otomatis)
+    var intraItems = [];
+    var ekstraItems = [];
+    var gabunganMap = {};
+
+    var sumIntra = { qAwal: 0, nAwal: 0, qTambah: 0, nTambah: 0, qKurang: 0, nKurang: 0, qAkhir: 0, nAkhir: 0 };
+    var sumEkstra = { qAwal: 0, nAwal: 0, qTambah: 0, nTambah: 0, qKurang: 0, nKurang: 0, qAkhir: 0, nAkhir: 0 };
+
+    for (var i = 0; i < rekapRows.length; i++) {
+      var r = rekapRows[i];
+      var jenis = String(r['JenisLaporan'] || 'INTRA').toUpperCase();
+      var itemObj = {
+        rekapId: String(r['RekapID'] || ''),
+        periodeLaporan: String(r['PeriodeLaporan'] || '2026-09-30'),
+        jenisLaporan: jenis,
+        kodeAkun: String(r['KodeAkun'] || '132111'),
+        uraianAkun: String(r['UraianAkun'] || 'Peralatan dan Mesin'),
+        kodeBarang: String(r['KodeBarang'] || ''),
+        uraianBarang: String(r['UraianBarang'] || ''),
+        satuan: String(r['Satuan'] || 'Unit'),
+        kuantitasAwal: parseFloat(r['KuantitasAwal']) || 0,
+        nilaiAwal: parseFloat(r['NilaiAwal']) || 0,
+        kuantitasTambah: parseFloat(r['KuantitasTambah']) || 0,
+        nilaiTambah: parseFloat(r['NilaiTambah']) || 0,
+        kuantitasKurang: parseFloat(r['KuantitasKurang']) || 0,
+        nilaiKurang: parseFloat(r['NilaiKurang']) || 0,
+        kuantitasAkhir: parseFloat(r['KuantitasAkhir']) || 0,
+        nilaiAkhir: parseFloat(r['NilaiAkhir']) || 0,
+        sumberDokumen: String(r['SumberDokumen'] || '')
+      };
+
+      if (jenis === 'EKSTRA') {
+        ekstraItems.push(itemObj);
+        sumEkstra.qAwal += itemObj.kuantitasAwal;
+        sumEkstra.nAwal += itemObj.nilaiAwal;
+        sumEkstra.qTambah += itemObj.kuantitasTambah;
+        sumEkstra.nTambah += itemObj.nilaiTambah;
+        sumEkstra.qKurang += itemObj.kuantitasKurang;
+        sumEkstra.nKurang += itemObj.nilaiKurang;
+        sumEkstra.qAkhir += itemObj.kuantitasAkhir;
+        sumEkstra.nAkhir += itemObj.nilaiAkhir;
+      } else {
+        intraItems.push(itemObj);
+        sumIntra.qAwal += itemObj.kuantitasAwal;
+        sumIntra.nAwal += itemObj.nilaiAwal;
+        sumIntra.qTambah += itemObj.kuantitasTambah;
+        sumIntra.nTambah += itemObj.nilaiTambah;
+        sumIntra.qKurang += itemObj.kuantitasKurang;
+        sumIntra.nKurang += itemObj.nilaiKurang;
+        sumIntra.qAkhir += itemObj.kuantitasAkhir;
+        sumIntra.nAkhir += itemObj.nilaiAkhir;
+      }
+
+      var gKey = itemObj.kodeAkun + '__' + itemObj.kodeBarang;
+      if (!gabunganMap[gKey]) {
+        gabunganMap[gKey] = {
+          rekapId: 'GAB-' + itemObj.kodeBarang,
+          periodeLaporan: itemObj.periodeLaporan,
+          jenisLaporan: 'GABUNGAN',
+          kodeAkun: itemObj.kodeAkun,
+          uraianAkun: itemObj.uraianAkun,
+          kodeBarang: itemObj.kodeBarang,
+          uraianBarang: itemObj.uraianBarang.replace(/\s*\(Di Bawah Kapitalisasi\)|\s*\(Ekstrakomptabel\)/gi, ''),
+          satuan: itemObj.satuan,
+          kuantitasAwal: 0,
+          nilaiAwal: 0,
+          kuantitasTambah: 0,
+          nilaiTambah: 0,
+          kuantitasKurang: 0,
+          nilaiKurang: 0,
+          kuantitasAkhir: 0,
+          nilaiAkhir: 0,
+          intraCount: 0,
+          ekstraCount: 0
+        };
+      }
+      var gTarget = gabunganMap[gKey];
+      gTarget.kuantitasAwal += itemObj.kuantitasAwal;
+      gTarget.nilaiAwal += itemObj.nilaiAwal;
+      gTarget.kuantitasTambah += itemObj.kuantitasTambah;
+      gTarget.nilaiTambah += itemObj.nilaiTambah;
+      gTarget.kuantitasKurang += itemObj.kuantitasKurang;
+      gTarget.nilaiKurang += itemObj.nilaiKurang;
+      gTarget.kuantitasAkhir += itemObj.kuantitasAkhir;
+      gTarget.nilaiAkhir += itemObj.nilaiAkhir;
+      if (jenis === 'EKSTRA') gTarget.ekstraCount += itemObj.kuantitasAkhir;
+      else gTarget.intraCount += itemObj.kuantitasAkhir;
+    }
+
+    var gabunganItems = [];
+    for (var gk in gabunganMap) {
+      if (gabunganMap.hasOwnProperty(gk)) {
+        gabunganItems.push(gabunganMap[gk]);
+      }
+    }
+
+    // 3. Olah Daftar Kendaraan Dinas (Mobil & Motor) & Peringatan Pajak/STNK
+    var kendaraanList = [];
+    var dueAlerts = [];
+
+    for (var a = 0; a < asetRows.length; a++) {
+      var ar = asetRows[a];
+      var kBrg = String(ar['KodeBarang'] || '');
+      var kat  = String(ar['KodeKategori'] || '');
+      var nm   = String(ar['NamaBarang'] || '');
+      if (_bmnIsVehicleAsset(kBrg, kat, nm)) {
+        var noPol = String(ar['NoPolisi'] || '');
+        var tPjk  = ar['TglPajakTahunan'] ? new Date(ar['TglPajakTahunan']).toISOString().substring(0, 10) : '';
+        var tStnk = ar['TglStnkLimaTahunan'] ? new Date(ar['TglStnkLimaTahunan']).toISOString().substring(0, 10) : '';
+        var stnkInfo = _bmnComputeStnkStatus(tPjk, tStnk, noPol, nm);
+
+        var vObj = {
+          rowId: String(ar['RowID'] || ''),
+          asetId: String(ar['AsetID'] || ''),
+          kodeBarang: kBrg,
+          nup: String(ar['NUP'] || ''),
+          namaBarang: nm,
+          merekTipe: String(ar['MerekTipe'] || ''),
+          noPolisi: noPol,
+          lokasiId: String(ar['LokasiID'] || 'UPT-PUSAT-POA'),
+          lokasiDetailRuangan: String(ar['LokasiDetailRuangan'] || ''),
+          nilaiPerolehan: parseFloat(ar['NilaiPerolehan']) || 0,
+          nilaiBuku: parseFloat(ar['NilaiBuku']) || 0,
+          kondisi: String(ar['Kondisi'] || 'BAIK'),
+          statusAset: String(ar['StatusAset'] || 'AKTIF'),
+          tglPajakTahunan: tPjk,
+          tglStnkLimaTahunan: tStnk,
+          fotoEvidenceId: String(ar['FotoEvidenceID'] || ''),
+          fotoStnkEvidenceId: String(ar['FotoStnkEvidenceID'] || ''),
+          stnkVerified: String(ar['StnkVerified'] || 'YA'),
+          stnkStatus: stnkInfo
+        };
+        kendaraanList.push(vObj);
+
+        if (vObj.statusAset === 'AKTIF' && stnkInfo && (stnkInfo.statusReminder === 'LEWAT_JATUH_TEMPO' || stnkInfo.statusReminder === 'SEGERA_JATUH_TEMPO')) {
+          dueAlerts.push(vObj);
+        }
+      }
+    }
+
+    // Urutkan kendaraan berdasarkan sisa hari pajak terdekat di atas
+    kendaraanList.sort(function (x, y) {
+      var dx = (x.stnkStatus && x.stnkStatus.minDays !== null) ? x.stnkStatus.minDays : 9999;
+      var dy = (y.stnkStatus && y.stnkStatus.minDays !== null) ? y.stnkStatus.minDays : 9999;
+      return dx - dy;
+    });
+
+    dueAlerts.sort(function (x, y) {
+      var dx = (x.stnkStatus && x.stnkStatus.minDays !== null) ? x.stnkStatus.minDays : 9999;
+      var dy = (y.stnkStatus && y.stnkStatus.minDays !== null) ? y.stnkStatus.minDays : 9999;
+      return dx - dy;
+    });
+
+    var activePeriodeLabel = (neracaItems.length > 0 && neracaItems[0].periodeLaporan)
+      ? neracaItems[0].periodeLaporan
+      : ((rekapRows.length > 0 && rekapRows[0]['PeriodeLaporan']) ? String(rekapRows[0]['PeriodeLaporan']) : 'Belum Ada Sinkronisasi PDF SAKTI');
+
+    return {
+      success: true,
+      data: {
+        periodeLaporan: activePeriodeLabel,
+        neraca: {
+          items: neracaItems,
+          totals: {
+            persediaan: totalPersediaan,
+            asetTetapBruto: totalAsetTetapBruto,
+            akumulasiPenyusutan: totalAkumulasiPenyusutan,
+            asetTakBerwujudBruto: totalAsetTakBerwujudBruto,
+            nonOperasionalBruto: totalNonOperasionalBruto,
+            neracaBersih: totalNeracaBersih
+          }
+        },
+        rekapSakti: {
+          intra: intraItems,
+          ekstra: ekstraItems,
+          gabungan: gabunganItems,
+          summaryIntra: sumIntra,
+          summaryEkstra: sumEkstra,
+          summaryGabungan: {
+            qAwal: sumIntra.qAwal + sumEkstra.qAwal,
+            nAwal: sumIntra.nAwal + sumEkstra.nAwal,
+            qTambah: sumIntra.qTambah + sumEkstra.qTambah,
+            nTambah: sumIntra.nTambah + sumEkstra.nTambah,
+            qKurang: sumIntra.qKurang + sumEkstra.qKurang,
+            nKurang: sumIntra.nKurang + sumEkstra.nKurang,
+            qAkhir: sumIntra.qAkhir + sumEkstra.qAkhir,
+            nAkhir: sumIntra.nAkhir + sumEkstra.nAkhir
+          }
+        },
+        kendaraan: {
+          items: kendaraanList,
+          dueAlerts: dueAlerts,
+          totalCount: kendaraanList.length,
+          dueCount: dueAlerts.length
+        }
+      }
+    };
+  } catch (e) {
+    Logger.log('[bmn_getSaktiWorkspace] ' + e.message);
+    return { success: false, error: e.message };
+  }
+}
+
+/**
+ * Preview / Dry-Run Sinkronisasi Dokumen Laporan PDF SAKTI Kemenkeu.
+ * Menerima hasil ekstraksi baris dari PDF SAKTI (Neraca / Intra / Ekstra / Gabungan / Pembelian Semester)
+ * dan menghitung delta perubahan terhadap database SIMANPOA di server.
+ */
+function bmn_previewSaktiSync(token, payload) {
+  try {
+    var session = _bmnRequireSession(token);
+    _bmnAssertWrite(session);
+
+    if (!payload || !payload.rows || !Array.isArray(payload.rows)) {
+      throw new Error('Data hasil pembacaan dokumen PDF kosong atau tidak valid.');
+    }
+
+    var docType = String(payload.docType || 'RINCIAN_BARANG').toUpperCase();
+    var jenisLap = String(payload.jenisLaporan || 'AUTO').toUpperCase();
+    var periodeLap = String(payload.periodeLaporan || '2026-09-30');
+    var fileName = String(payload.fileName || 'Dokumen_SAKTI.pdf');
+
+    if (docType === 'NERACA') {
+      var neracaSheet = openTuSheet(SHEET_TU.BMN_NERACA);
+      var existNrc = sheetToObjects(neracaSheet);
+      var nrcMap = {};
+      existNrc.forEach(function (n) {
+        nrcMap[String(n['KodeAkun'])] = parseFloat(n['JumlahNilai']) || 0;
+      });
+
+      var previewNeraca = payload.rows.map(function (r) {
+        var kode = String(r.kodeAkun || r.kode || '').trim();
+        var uraian = String(r.uraianAkun || r.uraian || '').trim();
+        var nilaiBaru = parseFloat(r.jumlahNilai !== undefined ? r.jumlahNilai : r.nilaiAkhir) || 0;
+        var nilaiLama = nrcMap.hasOwnProperty(kode) ? nrcMap[kode] : null;
+        var selisih = nilaiLama !== null ? (nilaiBaru - nilaiLama) : nilaiBaru;
+        var statusDelta = nilaiLama === null ? 'AKUN_BARU' : (Math.abs(selisih) > 0 ? 'BERUBAH' : 'TETAP');
+
+        return {
+          kodeAkun: kode,
+          uraianAkun: uraian,
+          nilaiLama: nilaiLama || 0,
+          nilaiBaru: nilaiBaru,
+          selisih: selisih,
+          statusDelta: statusDelta
+        };
+      });
+
+      return {
+        success: true,
+        data: {
+          docType: 'NERACA',
+          jenisLaporan: 'NERACA',
+          periodeLaporan: periodeLap,
+          fileName: fileName,
+          totalRows: previewNeraca.length,
+          previewRows: previewNeraca
+        }
+      };
+    }
+
+    // Untuk Rincian Barang (Intra / Ekstra / Gabungan / Pembelian)
+    var rekapSheet = openTuSheet(SHEET_TU.BMN_REKAP_SAKTI);
+    var existRekap = sheetToObjects(rekapSheet);
+    var rekapMap = {};
+    existRekap.forEach(function (rk) {
+      var key = String(rk['JenisLaporan']) + '__' + String(rk['KodeBarang']);
+      rekapMap[key] = rk;
+    });
+
+    var totalMutasiTambahQty = 0;
+    var totalMutasiTambahNilai = 0;
+    var totalMutasiKurangQty = 0;
+    var totalMutasiKurangNilai = 0;
+    var changedCount = 0;
+
+    var previewItems = payload.rows.map(function (r) {
+      var kodeBrg = String(r.kodeBarang || r.kode || '').replace(/\./g, '').trim();
+      var uraianBrg = String(r.uraianBarang || r.uraian || '').trim();
+      var sat = String(r.satuan || r.sat || 'Unit').trim();
+      var kodeAkun = String(r.kodeAkun || '132111').trim();
+      var uraianAkun = String(r.uraianAkun || 'Peralatan dan Mesin').trim();
+
+      var qAwal = parseFloat(r.kuantitasAwal) || 0;
+      var nAwal = parseFloat(r.nilaiAwal) || 0;
+      var qTambah = parseFloat(r.kuantitasTambah) || 0;
+      var nTambah = parseFloat(r.nilaiTambah) || 0;
+      var qKurang = parseFloat(r.kuantitasKurang) || 0;
+      var nKurang = parseFloat(r.nilaiKurang) || 0;
+      var qAkhir = parseFloat(r.kuantitasAkhir !== undefined ? r.kuantitasAkhir : (qAwal + qTambah - qKurang)) || 0;
+      var nAkhir = parseFloat(r.nilaiAkhir !== undefined ? r.nilaiAkhir : (nAwal + nTambah - nKurang)) || 0;
+
+      // Hitung nilai per unit untuk klasifikasi kapitalisasi otomatis (Intra >= 2 Jt vs Ekstra < 2 Jt)
+      var unitVal = qAkhir > 0 ? (nAkhir / qAkhir) : (qTambah > 0 ? (nTambah / qTambah) : nAwal);
+      var resolvedJenis = jenisLap;
+      if (resolvedJenis === 'AUTO' || resolvedJenis === 'GABUNGAN' || resolvedJenis === 'TRANSAKSI') {
+        resolvedJenis = (unitVal > 0 && unitVal < _BMN_CAPITALIZATION_THRESHOLD) ? 'EKSTRA' : 'INTRA';
+      }
+
+      var lookupKey = resolvedJenis + '__' + kodeBrg;
+      var existing = rekapMap[lookupKey] || null;
+      var oldQ = existing ? (parseFloat(existing['KuantitasAkhir']) || 0) : null;
+      var oldN = existing ? (parseFloat(existing['NilaiAkhir']) || 0) : null;
+
+      var statusBaris = 'TETAP';
+      if (!existing) {
+        statusBaris = 'BARANG_BARU';
+        changedCount++;
+      } else if (qTambah > 0 && qKurang > 0) {
+        statusBaris = 'MUTASI_TAMBAH_KURANG';
+        changedCount++;
+      } else if (qTambah > 0) {
+        statusBaris = 'MUTASI_BERTAMBAH';
+        changedCount++;
+      } else if (qKurang > 0) {
+        statusBaris = 'MUTASI_BERKURANG';
+        changedCount++;
+      } else if (oldQ !== qAkhir || Math.abs((oldN || 0) - nAkhir) > 1) {
+        statusBaris = 'SALDO_BERUBAH';
+        changedCount++;
+      }
+
+      totalMutasiTambahQty += qTambah;
+      totalMutasiTambahNilai += nTambah;
+      totalMutasiKurangQty += qKurang;
+      totalMutasiKurangNilai += nKurang;
+
+      return {
+        jenisLaporan: resolvedJenis,
+        labelKapitalisasi: resolvedJenis === 'EKSTRA' ? 'EKSTRAKOMPTABEL (< Rp 2 Jt)' : 'INTRAKOMPTABEL (>= Rp 2 Jt)',
+        kodeAkun: kodeAkun,
+        uraianAkun: uraianAkun,
+        kodeBarang: kodeBrg,
+        uraianBarang: uraianBrg,
+        satuan: sat,
+        kuantitasAwal: qAwal,
+        nilaiAwal: nAwal,
+        kuantitasTambah: qTambah,
+        nilaiTambah: nTambah,
+        kuantitasKurang: qKurang,
+        nilaiKurang: nKurang,
+        kuantitasAkhir: qAkhir,
+        nilaiAkhir: nAkhir,
+        nilaiPerUnitEstimasi: Math.round(unitVal),
+        oldKuantitasAkhir: oldQ,
+        oldNilaiAkhir: oldN,
+        statusDelta: statusBaris
+      };
+    });
+
+    return {
+      success: true,
+      data: {
+        docType: 'RINCIAN_BARANG',
+        jenisLaporan: jenisLap,
+        periodeLaporan: periodeLap,
+        fileName: fileName,
+        totalRows: previewItems.length,
+        changedCount: changedCount,
+        totalMutasiTambahQty: totalMutasiTambahQty,
+        totalMutasiTambahNilai: totalMutasiTambahNilai,
+        totalMutasiKurangQty: totalMutasiKurangQty,
+        totalMutasiKurangNilai: totalMutasiKurangNilai,
+        previewRows: previewItems
+      }
+    };
+  } catch (e) {
+    Logger.log('[bmn_previewSaktiSync] ' + e.message);
+    return { success: false, error: e.message };
+  }
+}
+
+/**
+ * Commit / Terapkan Sinkronisasi Dokumen PDF SAKTI ke basis data SIMANPOA setelah diverifikasi operator.
+ */
+function bmn_commitSaktiSync(token, payload) {
+  try {
+    var session = _bmnRequireSession(token);
+    _bmnAssertWrite(session);
+
+    if (!payload || !payload.rows || !Array.isArray(payload.rows) || payload.rows.length === 0) {
+      throw new Error('Tidak ada baris data yang dipilih untuk disinkronkan.');
+    }
+
+    var lock = LockService.getScriptLock();
+    lock.waitLock(15000);
+
+    try {
+      var now = new Date();
+      var docType = String(payload.docType || 'RINCIAN_BARANG').toUpperCase();
+      var periodeLap = String(payload.periodeLaporan || '2026-09-30');
+      var fileName = String(payload.fileName || 'Sinkronisasi_PDF_SAKTI.pdf');
+
+      if (docType === 'NERACA') {
+        var neracaSheet = openTuSheet(SHEET_TU.BMN_NERACA);
+        var existNrc = sheetToObjects(neracaSheet);
+        var nrcIdxMap = {};
+        for (var n = 0; n < existNrc.length; n++) {
+          nrcIdxMap[String(existNrc[n]['KodeAkun'])] = n + 2;
+        }
+
+        var updatedNrc = 0;
+        var insertedNrc = 0;
+
+        for (var i = 0; i < payload.rows.length; i++) {
+          var r = payload.rows[i];
+          var kode = String(r.kodeAkun || '').trim();
+          if (!kode) continue;
+          var uraian = String(r.uraianAkun || '').trim();
+          var nilai = parseFloat(r.nilaiBaru !== undefined ? r.nilaiBaru : r.jumlahNilai) || 0;
+          var kat = 'ASET_TETAP';
+          if (kode.indexOf('117') === 0) kat = 'PERSEDIAAN';
+          else if (kode.indexOf('137') === 0 || kode.indexOf('169') === 0) kat = 'AKUMULASI_PENYUSUTAN';
+          else if (kode.indexOf('162') === 0) kat = 'ASET_TAK_BERWUJUD';
+          else if (kode.indexOf('166') === 0) kat = 'ASET_NON_OPERASIONAL';
+
+          if (nrcIdxMap[kode]) {
+            var rowNum = nrcIdxMap[kode];
+            neracaSheet.getRange(rowNum, 2, 1, 8).setValues([[
+              periodeLap, kode, uraian, nilai, kat, now, session.userId, fileName
+            ]]);
+            updatedNrc++;
+          } else {
+            var nId = 'NRC-' + Utilities.getUuid().substring(0, 8).toUpperCase();
+            neracaSheet.appendRow([
+              nId, periodeLap, kode, uraian, nilai, kat, now, session.userId, fileName
+            ]);
+            insertedNrc++;
+          }
+        }
+
+        logAudit(session.userId, 'SYNC_SAKTI_NERACA', 'TX_BMN_Neraca', periodeLap, {
+          fileName: fileName,
+          updated: updatedNrc,
+          inserted: insertedNrc
+        });
+
+        return {
+          success: true,
+          message: 'Laporan Posisi BMN di Neraca berhasil disinkronkan (' + updatedNrc + ' akun diperbarui, ' + insertedNrc + ' akun baru).'
+        };
+      }
+
+      // Sinkronisasi Rincian Barang (Intra / Ekstra) + Auto-Generate Unit di TX_BMN_Aset bila diminta
+      var rekapSheet = openTuSheet(SHEET_TU.BMN_REKAP_SAKTI);
+      var existRekap = sheetToObjects(rekapSheet);
+      var rekapIdxMap = {};
+      for (var k = 0; k < existRekap.length; k++) {
+        var rKey = String(existRekap[k]['JenisLaporan']).toUpperCase() + '__' + String(existRekap[k]['KodeBarang']);
+        rekapIdxMap[rKey] = k + 2;
+      }
+
+      var updatedRekap = 0;
+      var insertedRekap = 0;
+      var autoUnitAdded = 0;
+
+      var asetSheet = openTuSheet(SHEET_TU.BMN_ASET);
+      _ensureBmnAsetColumns(asetSheet);
+      var asetRows = sheetToObjects(asetSheet);
+      var maxNupByKode = {};
+      for (var a = 0; a < asetRows.length; a++) {
+        var kb = String(asetRows[a]['KodeBarang'] || '').replace(/\./g, '');
+        var nupNum = parseInt(asetRows[a]['NUP'], 10) || 0;
+        if (!maxNupByKode[kb] || nupNum > maxNupByKode[kb]) {
+          maxNupByKode[kb] = nupNum;
+        }
+      }
+
+      var newUnitRows = [];
+      var periode = getCurrentPeriode();
+
+      for (var j = 0; j < payload.rows.length; j++) {
+        var item = payload.rows[j];
+        var kodeBrg = String(item.kodeBarang || '').replace(/\./g, '').trim();
+        if (!kodeBrg) continue;
+
+        var qAwal = parseFloat(item.kuantitasAwal) || 0;
+        var nAwal = parseFloat(item.nilaiAwal) || 0;
+        var qTambah = parseFloat(item.kuantitasTambah) || 0;
+        var nTambah = parseFloat(item.nilaiTambah) || 0;
+        var qKurang = parseFloat(item.kuantitasKurang) || 0;
+        var nKurang = parseFloat(item.nilaiKurang) || 0;
+        var qAkhir = parseFloat(item.kuantitasAkhir !== undefined ? item.kuantitasAkhir : (qAwal + qTambah - qKurang)) || 0;
+        var nAkhir = parseFloat(item.nilaiAkhir !== undefined ? item.nilaiAkhir : (nAwal + nTambah - nKurang)) || 0;
+
+        var unitVal = qAkhir > 0 ? (nAkhir / qAkhir) : (qTambah > 0 ? (nTambah / qTambah) : nAwal);
+        var jenis = String(item.jenisLaporan || '').toUpperCase();
+        if (jenis !== 'INTRA' && jenis !== 'EKSTRA') {
+          jenis = (unitVal > 0 && unitVal < _BMN_CAPITALIZATION_THRESHOLD) ? 'EKSTRA' : 'INTRA';
+        }
+
+        var mapKey = jenis + '__' + kodeBrg;
+        var kodeAkun = String(item.kodeAkun || '132111');
+        var uraianAkun = String(item.uraianAkun || 'Peralatan dan Mesin');
+        var uraianBrg = String(item.uraianBarang || 'Barang BMN');
+        var satuan = String(item.satuan || 'Unit');
+
+        if (rekapIdxMap[mapKey]) {
+          var rIdx = rekapIdxMap[mapKey];
+          rekapSheet.getRange(rIdx, 2, 1, 18).setValues([[
+            periodeLap, jenis, kodeAkun, uraianAkun, kodeBrg, uraianBrg, satuan,
+            qAwal, nAwal, qTambah, nTambah, qKurang, nKurang, qAkhir, nAkhir,
+            now, session.userId, fileName
+          ]]);
+          updatedRekap++;
+        } else {
+          var newRekapId = 'RKP-' + Utilities.getUuid().substring(0, 8).toUpperCase();
+          rekapSheet.appendRow([
+            newRekapId, periodeLap, jenis, kodeAkun, uraianAkun, kodeBrg, uraianBrg, satuan,
+            qAwal, nAwal, qTambah, nTambah, qKurang, nKurang, qAkhir, nAkhir,
+            now, session.userId, fileName
+          ]);
+          insertedRekap++;
+        }
+
+        // Jika terdapat Mutasi Bertambah (> 0) dan opsi autoGenerateUnits aktif, tambahkan ke TX_BMN_Aset (maks 20 unit per item agar aman)
+        if (payload.autoGenerateUnits !== false && qTambah > 0 && qTambah <= 25) {
+          var perUnitTambah = Math.round(nTambah / qTambah);
+          var pencatatanUnit = (jenis === 'EKSTRA' || perUnitTambah < _BMN_CAPITALIZATION_THRESHOLD) ? 'REGULER' : 'BUKU';
+          var katUnit = _bmnIsVehicleAsset(kodeBrg, '', uraianBrg) ? 'KAT-KENDARAAN' : (kodeBrg.indexOf('310') === 0 ? 'KAT-TIK' : 'KAT-KANTOR');
+          var baseNup = maxNupByKode[kodeBrg] || Math.max(0, Math.round(qAwal));
+
+          for (var u = 1; u <= qTambah; u++) {
+            var nextNup = baseNup + u;
+            maxNupByKode[kodeBrg] = nextNup;
+            var uAsetId = 'BMN-' + kodeBrg + '-' + ('000' + nextNup).slice(-3);
+            var uRowId = 'ROW-' + Utilities.getUuid().substring(0, 12).toUpperCase();
+            newUnitRows.push([
+              uRowId, _BMN_DIVISI_ID, periode, session.userId, now,
+              ROW_STATUS.ACTIVE, '', '', '', '',
+              uAsetId, kodeBrg, String(nextNup), uraianBrg, 'Hasil Sinkronisasi PDF SAKTI (' + periodeLap + ')',
+              pencatatanUnit, katUnit, periodeLap, perUnitTambah, perUnitTambah,
+              'BAIK', 'UPT-PUSAT-POA', 'Dit. POA (Pusat KKP Jakarta)', -6.175392, 106.827153,
+              'IMPOR_SAKTI_PDF', 0.05, periodeLap, '', 'AKTIF', '', '', 'SYNC-SAKTI-' + periodeLap,
+              'Mutasi bertambah otomatis dari dokumen ' + fileName,
+              kodeAkun, '', '', '', '', fileName, 'YA'
+            ]);
+            autoUnitAdded++;
+          }
+        }
+      }
+
+      if (newUnitRows.length > 0) {
+        asetSheet.getRange(asetSheet.getLastRow() + 1, 1, newUnitRows.length, newUnitRows[0].length).setValues(newUnitRows);
+      }
+
+      logAudit(session.userId, 'SYNC_SAKTI_RINCIAN', 'TX_BMN_Rekap_Sakti', periodeLap, {
+        fileName: fileName,
+        updatedRekap: updatedRekap,
+        insertedRekap: insertedRekap,
+        autoUnitAdded: autoUnitAdded
+      });
+
+      return {
+        success: true,
+        data: {
+          updatedRekap: updatedRekap,
+          insertedRekap: insertedRekap,
+          autoUnitAdded: autoUnitAdded
+        },
+        message: 'Sinkronisasi PDF SAKTI berhasil diterapkan (' + updatedRekap + ' kelompok diperbarui, ' + insertedRekap + ' kelompok baru' + (autoUnitAdded > 0 ? ', serta ' + autoUnitAdded + ' unit mutasi bertambah dicatat ke Register Aset' : '') + ').'
+      };
+    } finally {
+      lock.releaseLock();
+    }
+  } catch (e) {
+    Logger.log('[bmn_commitSaktiSync] ' + e.message);
+    return { success: false, error: e.message };
+  }
+}
+
+/**
+ * Mencocokkan hasil pembacaan dokumen PDF SK Penghapusan / BAST Transfer Keluar
+ * dengan aset aktif yang ada di database SIMANPOA untuk diverifikasi pengguna.
+ */
+function bmn_previewDisposalDoc(token, payload) {
+  try {
+    var session = _bmnRequireSession(token);
+    _bmnAssertWrite(session);
+
+    payload = payload || {};
+    var extractedCodes = payload.extractedCodes || [];
+    var extractedKeywords = payload.extractedKeywords || [];
+    var rawText = String(payload.rawText || '').toLowerCase();
+
+    var asetSheet = openTuSheet(SHEET_TU.BMN_ASET);
+    _ensureBmnAsetColumns(asetSheet);
+    var asetRows = sheetToObjects(asetSheet).filter(function (r) {
+      return String(r['Status']) === ROW_STATUS.ACTIVE &&
+             String(r['StatusAset'] || 'AKTIF').toUpperCase() !== 'DIHAPUS';
+    });
+
+    var matchedAssets = [];
+    var otherEligibleAssets = [];
+
+    for (var i = 0; i < asetRows.length; i++) {
+      var r = asetRows[i];
+      var aId = String(r['AsetID'] || '');
+      var kBrg = String(r['KodeBarang'] || '').replace(/\./g, '').trim();
+      var kBrgRaw = String(r['KodeBarang'] || '').trim();
+      var nup = String(r['NUP'] || '').trim();
+      var nm = String(r['NamaBarang'] || '').trim();
+      var merk = String(r['MerekTipe'] || '').trim();
+      var noPol = String(r['NoPolisi'] || '').trim();
+      var kond = String(r['Kondisi'] || 'BAIK').toUpperCase();
+
+      var matchReason = '';
+      var matchConfidence = 0;
+
+      // 1. Cek kecocokan Kode Barang 10 digit
+      if (kBrg && (extractedCodes.indexOf(kBrg) !== -1 || (rawText && rawText.indexOf(kBrg.toLowerCase()) !== -1) || (kBrgRaw && rawText.indexOf(kBrgRaw.toLowerCase()) !== -1))) {
+        matchReason = 'Kode Barang (' + kBrg + ') terdeteksi di dalam dokumen';
+        matchConfidence = 92;
+      }
+      // 2. Cek kecocokan Plat Nomor Kendaraan
+      if (!matchReason && noPol && rawText && rawText.indexOf(noPol.toLowerCase()) !== -1) {
+        matchReason = 'Nomor Polisi (' + noPol + ') terdeteksi di dalam dokumen';
+        matchConfidence = 96;
+      }
+      // 3. Cek kecocokan Nama Barang / Merek
+      if (!matchReason && rawText) {
+        var nmWords = nm.toLowerCase().split(/\s+/).filter(function (w) { return w.length >= 4; });
+        for (var w = 0; w < nmWords.length; w++) {
+          if (rawText.indexOf(nmWords[w]) !== -1) {
+            matchReason = 'Kata kunci "' + nmWords[w] + '" cocok dengan dokumen';
+            matchConfidence = kond === 'RUSAK_BERAT' ? 88 : 75;
+            break;
+          }
+        }
+      }
+      // 4. Cek keyword eksplisit dari parser
+      if (!matchReason && extractedKeywords.length > 0) {
+        var combined = (nm + ' ' + merk + ' ' + kBrg).toLowerCase();
+        for (var kw = 0; kw < extractedKeywords.length; kw++) {
+          var kWord = String(extractedKeywords[kw] || '').toLowerCase().trim();
+          if (kWord.length >= 3 && combined.indexOf(kWord) !== -1) {
+            matchReason = 'Cocok dengan item surat: "' + extractedKeywords[kw] + '"';
+            matchConfidence = 85;
+            break;
+          }
+        }
+      }
+
+      var itemDto = {
+        asetId: aId,
+        kodeBarang: String(r['KodeBarang'] || ''),
+        nup: nup,
+        namaBarang: nm,
+        merekTipe: merk,
+        noPolisi: noPol,
+        kondisi: kond,
+        lokasiId: String(r['LokasiID'] || ''),
+        nilaiPerolehan: parseFloat(r['NilaiPerolehan']) || 0,
+        nilaiBuku: parseFloat(r['NilaiBuku']) || 0,
+        statusAset: String(r['StatusAset'] || 'AKTIF'),
+        matchReason: matchReason,
+        matchConfidence: matchConfidence,
+        isRecommended: matchConfidence >= 75 || kond === 'RUSAK_BERAT'
+      };
+
+      if (matchConfidence > 0) {
+        matchedAssets.push(itemDto);
+      } else {
+        otherEligibleAssets.push(itemDto);
+      }
+    }
+
+    // Jika dokumen tidak menyebut kode spesifik (mis. scan buram), prioritaskan aset RUSAK_BERAT sebagai rekomendasi verifikasi
+    if (matchedAssets.length === 0) {
+      for (var j = 0; j < otherEligibleAssets.length; j++) {
+        if (otherEligibleAssets[j].kondisi === 'RUSAK_BERAT') {
+          otherEligibleAssets[j].matchReason = 'Rekomendasi otomatis (Aset Kondisi Rusak Berat — Verifikasi Manual)';
+          otherEligibleAssets[j].matchConfidence = 70;
+          matchedAssets.push(otherEligibleAssets[j]);
+        }
+      }
+    }
+
+    return {
+      success: true,
+      data: {
+        matchedCount: matchedAssets.length,
+        matchedAssets: matchedAssets,
+        otherEligibleAssets: otherEligibleAssets.slice(0, 40)
+      }
+    };
+  } catch (e) {
+    Logger.log('[bmn_previewDisposalDoc] ' + e.message);
+    return { success: false, error: e.message };
+  }
+}
+
+/**
+ * Mengeksekusi pengurangan / penghapusan / transfer keluar aset secara otomatis
+ * berdasarkan dokumen SK Penghapusan / BAST yang telah diverifikasi pengguna,
+ * sekaligus menyimpan dokumen bukti ke Google Drive.
+ */
+function bmn_executeDocumentDisposal(token, payload) {
+  try {
+    var session = _bmnRequireSession(token);
+    _bmnAssertWrite(session);
+
+    if (!payload || !payload.asetIds || !Array.isArray(payload.asetIds) || payload.asetIds.length === 0) {
+      throw new Error('Pilih minimal 1 unit aset yang telah diverifikasi untuk dikurangi/dihapus.');
+    }
+    if (!payload.nomorDokumen) {
+      throw new Error('Nomor Dokumen Surat / SK / BAST wajib diisi (atau diverifikasi dari hasil bacaan PDF).');
+    }
+
+    var lock = LockService.getScriptLock();
+    lock.waitLock(15000);
+
+    try {
+      var now = new Date();
+      var periode = getCurrentPeriode();
+      var jenisPengelolaan = String(payload.jenisPengelolaan || 'SK_PENGHAPUSAN').toUpperCase();
+      // jenisPengelolaan: 'SK_PENGHAPUSAN' | 'TRANSFER_KELUAR' | 'NON_OPERASIONAL' | 'USULAN_BARU'
+      var alasan = String(payload.alasan || 'RUSAK_BERAT');
+      var nomorDok = String(payload.nomorDokumen || '').trim();
+      var tanggalDok = String(payload.tanggalDokumen || Utilities.formatDate(now, 'GMT+7', 'yyyy-MM-dd'));
+      var instansiTujuan = String(payload.instansiTujuan || 'KPKNL Jakarta I / Sesditjen PSDKP');
+      var keterangan = String(payload.keterangan || ('Eksekusi otomatis berbasis dokumen ' + nomorDok));
+
+      // 1. Simpan file PDF/Gambar dokumen ke Google Drive bila disertakan
+      var docEvidenceUrl = String(payload.evidenceUrl || '');
+      var parentRowId = generateRowId('TX_BMN_Penghapusan');
+
+      if (payload.filePayload && payload.filePayload.dataBase64) {
+        try {
+          var fB64 = String(payload.filePayload.dataBase64).replace(/^data:[^;]+;base64,/, '').trim();
+          var fMime = payload.filePayload.mimeType || 'application/pdf';
+          var fName = payload.filePayload.fileName || ('DOK_PENGELOLAAN_' + Utilities.formatDate(now, 'GMT+7', 'yyyyMMdd') + '.pdf');
+          var fBlob = Utilities.newBlob(Utilities.base64Decode(fB64), fMime, fName);
+
+          var rootFolder = _evGetOrCreateRoot();
+          var fTu = _evGetOrCreateSub(rootFolder, 'Tata Usaha');
+          var fBmn = _evGetOrCreateSub(fTu, 'Pengelolaan_BMN');
+          var driveFile = fBmn.createFile(fBlob);
+          var evId = _evAppendEvidence(SHEET_TU.BMN_PENGHAPUSAN, parentRowId, driveFile.getId(), fName, fMime, 'UPLOAD_SK_BAST', session.userId);
+          docEvidenceUrl = driveFile.getUrl() || evId;
+        } catch (evErr) {
+          Logger.log('[bmn_executeDocumentDisposal drive upload] ' + evErr.message);
+          if (!docEvidenceUrl) docEvidenceUrl = 'DRV-LOCAL-' + parentRowId;
+        }
+      }
+      if (!docEvidenceUrl) {
+        docEvidenceUrl = 'DOK-VERIFIED-' + nomorDok;
+      }
+
+      // 2. Temukan aset di TX_BMN_Aset & perbarui statusnya
+      var asetSheet = openTuSheet(SHEET_TU.BMN_ASET);
+      _ensureBmnAsetColumns(asetSheet);
+      var asetRows = sheetToObjects(asetSheet);
+      var asetHeaders = asetSheet.getRange(1, 1, 1, asetSheet.getLastColumn()).getValues()[0];
+
+      var colStatusAset  = asetHeaders.indexOf('StatusAset') + 1;
+      var colPenghapusan = asetHeaders.indexOf('PenghapusanID') + 1;
+      var colKondisi     = asetHeaders.indexOf('Kondisi') + 1;
+      var colAkunNeraca  = asetHeaders.indexOf('KodeAkunNeraca') + 1;
+      var colDokSumber   = asetHeaders.indexOf('NoDokumenSumber') + 1;
+
+      var hpsSheet = openTuSheet(SHEET_TU.BMN_PENGHAPUSAN);
+      var hpsRows  = sheetToObjects(hpsSheet);
+      var tahun = now.getFullYear();
+      var counter = hpsRows.length + 1;
+      var penghapusanId = 'HPS-' + tahun + '-' + ('0000' + counter).slice(-4);
+
+      var targetAssets = [];
+      var totalPerolehan = 0;
+      var totalBuku = 0;
+      var kodeKurangMap = {};
+
+      var newStatusAset = 'DIHAPUS';
+      var tahapRecord = 'BAST_SELESAI';
+      if (jenisPengelolaan === 'USULAN_BARU') {
+        newStatusAset = 'DALAM_PENGHAPUSAN';
+        tahapRecord = 'SURAT_USULAN';
+      } else if (jenisPengelolaan === 'TRANSFER_KELUAR') {
+        newStatusAset = 'DIHAPUS';
+        tahapRecord = 'BAST_SELESAI';
+      } else if (jenisPengelolaan === 'NON_OPERASIONAL') {
+        newStatusAset = 'DALAM_PENGHAPUSAN';
+        tahapRecord = 'SK_PENGHAPUSAN';
+      }
+
+      for (var i = 0; i < asetRows.length; i++) {
+        var ar = asetRows[i];
+        if (payload.asetIds.indexOf(ar['AsetID']) !== -1 && String(ar['Status']) === ROW_STATUS.ACTIVE) {
+          var rowIdx = i + 2;
+          targetAssets.push(ar);
+          var np = parseFloat(ar['NilaiPerolehan']) || 0;
+          var nb = parseFloat(ar['NilaiBuku']) || 0;
+          totalPerolehan += np;
+          totalBuku += nb;
+
+          if (colStatusAset > 0) asetSheet.getRange(rowIdx, colStatusAset).setValue(newStatusAset);
+          if (colPenghapusan > 0) asetSheet.getRange(rowIdx, colPenghapusan).setValue(penghapusanId);
+          if (colDokSumber > 0) asetSheet.getRange(rowIdx, colDokSumber).setValue(nomorDok);
+          if (jenisPengelolaan === 'NON_OPERASIONAL' && colAkunNeraca > 0) {
+            asetSheet.getRange(rowIdx, colAkunNeraca).setValue('166112');
+          }
+          if (alasan === 'RUSAK_BERAT' && colKondisi > 0) {
+            asetSheet.getRange(rowIdx, colKondisi).setValue('RUSAK_BERAT');
+          }
+
+          var kClean = String(ar['KodeBarang'] || '').replace(/\./g, '').trim();
+          if (kClean) {
+            if (!kodeKurangMap[kClean]) kodeKurangMap[kClean] = { qty: 0, nilai: 0 };
+            kodeKurangMap[kClean].qty += 1;
+            kodeKurangMap[kClean].nilai += np;
+          }
+        }
+      }
+
+      if (targetAssets.length === 0) {
+        throw new Error('Aset yang dipilih tidak ditemukan atau sudah tidak aktif.');
+      }
+
+      // 3. Catat ke TX_BMN_Penghapusan & TX_BMN_Penghapusan_Detail
+      var hpsRowData = [
+        parentRowId, _BMN_DIVISI_ID, periode, session.userId, now, ROW_STATUS.ACTIVE, '', '', '', '',
+        penghapusanId,
+        tahapRecord,
+        alasan,
+        '[' + jenisPengelolaan + '] ' + keterangan,
+        nomorDok,
+        tanggalDok,
+        docEvidenceUrl,
+        nomorDok,
+        tanggalDok,
+        instansiTujuan,
+        docEvidenceUrl,
+        nomorDok,
+        tanggalDok,
+        docEvidenceUrl,
+        docEvidenceUrl,
+        targetAssets.length,
+        totalPerolehan,
+        totalBuku
+      ];
+      hpsSheet.appendRow(hpsRowData);
+
+      var detailSheet = openTuSheet(SHEET_TU.BMN_PENGHAPUSAN_DETAIL);
+      var detailRows = targetAssets.map(function (ta) {
+        return [
+          generateRowId('TX_BMN_Penghapusan_Detail'),
+          _BMN_DIVISI_ID, periode, session.userId, now, ROW_STATUS.ACTIVE, '', '', '', '',
+          parentRowId, penghapusanId, ta['AsetID'], ta['Kondisi'] || 'RUSAK_BERAT', parseFloat(ta['NilaiBuku']) || 0
+        ];
+      });
+      detailSheet.getRange(detailSheet.getLastRow() + 1, 1, detailRows.length, detailRows[0].length).setValues(detailRows);
+
+      // 4. Jika penghapusan selesai / transfer keluar, kurangi otomatis saldo di TX_BMN_Rekap_Sakti (Mutasi Berkurang)
+      if (newStatusAset === 'DIHAPUS') {
+        var rekapSheet = openTuSheet(SHEET_TU.BMN_REKAP_SAKTI);
+        var rekapRows  = sheetToObjects(rekapSheet);
+        for (var r = 0; r < rekapRows.length; r++) {
+          var rk = rekapRows[r];
+          var rkKode = String(rk['KodeBarang'] || '').replace(/\./g, '').trim();
+          if (kodeKurangMap[rkKode]) {
+            var delta = kodeKurangMap[rkKode];
+            var curKurangQ = (parseFloat(rk['KuantitasKurang']) || 0) + delta.qty;
+            var curKurangN = (parseFloat(rk['NilaiKurang']) || 0) + delta.nilai;
+            var curAkhirQ  = Math.max(0, (parseFloat(rk['KuantitasAkhir']) || 0) - delta.qty);
+            var curAkhirN  = Math.max(0, (parseFloat(rk['NilaiAkhir']) || 0) - delta.nilai);
+
+            var rRowIdx = r + 2;
+            rekapSheet.getRange(rRowIdx, 13, 1, 6).setValues([[
+              curKurangQ, curKurangN, curAkhirQ, curAkhirN, now, session.userId
+            ]]);
+            delete kodeKurangMap[rkKode];
+          }
+        }
+      }
+
+      logAudit(session.userId, 'EXECUTE_DOCUMENT_DISPOSAL', 'TX_BMN_Penghapusan', parentRowId, {
+        penghapusanId: penghapusanId,
+        jenisPengelolaan: jenisPengelolaan,
+        nomorDokumen: nomorDok,
+        totalUnit: targetAssets.length,
+        totalNilaiPerolehan: totalPerolehan
+      });
+
+      return {
+        success: true,
+        data: {
+          penghapusanId: penghapusanId,
+          tahap: tahapRecord,
+          statusAsetBaru: newStatusAset,
+          totalUnit: targetAssets.length,
+          totalNilaiPerolehan: totalPerolehan,
+          totalNilaiBuku: totalBuku
+        },
+        message: 'Dokumen ' + nomorDok + ' berhasil diverifikasi & dieksekusi: ' + targetAssets.length + ' unit aset otomatis diperbarui ke status ' + newStatusAset + '.'
+      };
+    } finally {
+      lock.releaseLock();
+    }
+  } catch (e) {
+    Logger.log('[bmn_executeDocumentDisposal] ' + e.message);
+    return { success: false, error: e.message };
+  }
+}
+
+/**
+ * Memperbarui data STNK & tanggal jatuh tempo pajak kendaraan dinas secara cepat
+ * (termasuk unggah berkas STNK baru setelah perpanjangan pajak tahunan atau lima tahunan).
+ */
+function bmn_updateStnkKendaraan(token, payload) {
+  try {
+    var session = _bmnRequireSession(token);
+    _bmnAssertWrite(session);
+
+    if (!payload || !payload.asetId) {
+      throw new Error('AsetID kendaraan wajib diisi.');
+    }
+    if (!payload.noPolisi || !payload.tglPajakTahunan) {
+      throw new Error('Nomor Polisi dan Tanggal Jatuh Tempo Pajak Tahunan wajib diisi.');
+    }
+
+    var lock = LockService.getScriptLock();
+    lock.waitLock(10000);
+
+    try {
+      var sheet = openTuSheet(SHEET_TU.BMN_ASET);
+      _ensureBmnAsetColumns(sheet);
+      var rows = sheetToObjects(sheet);
+      var headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+
+      var targetRowIdx = -1;
+      var targetRowObj = null;
+      for (var i = 0; i < rows.length; i++) {
+        if (String(rows[i]['AsetID']) === String(payload.asetId) && String(rows[i]['Status']) === ROW_STATUS.ACTIVE) {
+          targetRowIdx = i + 2;
+          targetRowObj = rows[i];
+          break;
+        }
+      }
+
+      if (targetRowIdx === -1 || !targetRowObj) {
+        throw new Error('Data kendaraan dinas tidak ditemukan.');
+      }
+
+      var fotoStnkId = String(payload.fotoStnkEvidenceId || targetRowObj['FotoStnkEvidenceID'] || '');
+      if (payload.stnkPayload && payload.stnkPayload.dataBase64) {
+        try {
+          var sB64 = String(payload.stnkPayload.dataBase64).replace(/^data:[^;]+;base64,/, '').trim();
+          var sMime = payload.stnkPayload.mimeType || 'image/jpeg';
+          var sName = payload.stnkPayload.fileName || ('STNK_' + payload.asetId + '.jpg');
+          var sBlob = Utilities.newBlob(Utilities.base64Decode(sB64), sMime, sName);
+
+          var rootFolder = _evGetOrCreateRoot();
+          var fTu = _evGetOrCreateSub(rootFolder, 'Tata Usaha');
+          var fStnk = _evGetOrCreateSub(fTu, 'STNK_Kendaraan_Dinas');
+          var driveFile = fStnk.createFile(sBlob);
+          fotoStnkId = _evAppendEvidence(SHEET_TU.BMN_ASET, String(targetRowObj['RowID']), driveFile.getId(), sName, sMime, 'UPLOAD_STNK', session.userId);
+        } catch (upErr) {
+          Logger.log('[bmn_updateStnkKendaraan upload] ' + upErr.message);
+        }
+      }
+
+      var colNoPol  = headers.indexOf('NoPolisi') + 1;
+      var colPajak  = headers.indexOf('TglPajakTahunan') + 1;
+      var colStnk   = headers.indexOf('TglStnkLimaTahunan') + 1;
+      var colFotoS  = headers.indexOf('FotoStnkEvidenceID') + 1;
+      var colVerif  = headers.indexOf('StnkVerified') + 1;
+
+      if (colNoPol > 0) sheet.getRange(targetRowIdx, colNoPol).setValue(String(payload.noPolisi).trim().toUpperCase());
+      if (colPajak > 0) sheet.getRange(targetRowIdx, colPajak).setValue(String(payload.tglPajakTahunan).trim());
+      if (colStnk > 0 && payload.tglStnkLimaTahunan) {
+        sheet.getRange(targetRowIdx, colStnk).setValue(String(payload.tglStnkLimaTahunan).trim());
+      }
+      if (colFotoS > 0 && fotoStnkId) sheet.getRange(targetRowIdx, colFotoS).setValue(fotoStnkId);
+      if (colVerif > 0) sheet.getRange(targetRowIdx, colVerif).setValue('YA');
+
+      logAudit(session.userId, 'UPDATE_STNK_KENDARAAN', 'TX_BMN_Aset', String(targetRowObj['RowID']), {
+        asetId: payload.asetId,
+        noPolisi: payload.noPolisi,
+        tglPajakTahunan: payload.tglPajakTahunan,
+        tglStnkLimaTahunan: payload.tglStnkLimaTahunan || ''
+      });
+
+      return {
+        success: true,
+        message: 'Data pajak & STNK kendaraan ' + payload.noPolisi + ' berhasil diperbarui.'
+      };
+    } finally {
+      lock.releaseLock();
+    }
+  } catch (e) {
+    Logger.log('[bmn_updateStnkKendaraan] ' + e.message);
+    return { success: false, error: e.message };
+  }
+}
+

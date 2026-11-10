@@ -3674,6 +3674,363 @@ select.n-input {
 }
 
 /* ============================================================
+   SIMANPOA — DEDICATED SUB-APPLICATION SHELL & WORKSPACE STYLES
+   (Sistem Manajemen Aset Negara Direktorat POA)
+   ============================================================ */
+.simanpoa-back-btn {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  height: var(--ctl-h-md);
+  padding: 0 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.32);
+  color: #FFFFFF;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 160ms cubic-bezier(0.16, 1, 0.3, 1);
+  margin-right: 6px;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  white-space: nowrap;
+}
+
+.simanpoa-back-btn:hover {
+  background: rgba(255, 255, 255, 0.24);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: translateX(-2px);
+}
+
+body.simanpoa-mode .simanpoa-back-btn {
+  display: inline-flex;
+}
+
+body.simanpoa-mode .app-modulenav {
+  display: none;
+}
+
+body.simanpoa-mode #app-toolbar {
+  display: none;
+}
+
+/* SIMANPOA Command Header Banner */
+.simanpoa-command-bar {
+  background: linear-gradient(135deg, #042F2E 0%, #064E3B 55%, #0F766E 100%);
+  border-radius: 14px;
+  padding: 18px 22px;
+  margin-bottom: 18px;
+  color: #FFFFFF;
+  box-shadow: 0 10px 25px -5px rgba(4, 47, 46, 0.22), 0 4px 10px -2px rgba(4, 47, 46, 0.12);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  position: relative;
+  overflow: hidden;
+}
+
+.simanpoa-command-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+.simanpoa-brand-block {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.simanpoa-badge-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #34D399;
+  flex-shrink: 0;
+}
+
+.simanpoa-title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.simanpoa-app-name {
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #FFFFFF;
+  margin: 0;
+}
+
+.simanpoa-satker-pill {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: rgba(52, 211, 153, 0.18);
+  border: 1px solid rgba(52, 211, 153, 0.4);
+  color: #A7F3D0;
+  letter-spacing: 0.03em;
+  font-variant-numeric: tabular-nums;
+}
+
+.simanpoa-app-sub {
+  font-size: 0.8125rem;
+  color: rgba(255, 255, 255, 0.82);
+  margin-top: 2px;
+}
+
+.simanpoa-command-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* 2 Main Pillars Switcher (Penatausahaan BMN vs Pengelolaan BMN) */
+.simanpoa-pillar-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+@media (max-width: 768px) {
+  .simanpoa-pillar-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.simanpoa-pillar-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: 11px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1.5px solid rgba(255, 255, 255, 0.16);
+  color: #FFFFFF;
+  cursor: pointer;
+  text-align: left;
+  transition: all 180ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.simanpoa-pillar-card:hover {
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.32);
+}
+
+.simanpoa-pillar-card.active {
+  background: #FFFFFF;
+  border-color: #FFFFFF;
+  color: #064E3B;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.16);
+}
+
+.simanpoa-pillar-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.simanpoa-pillar-ico {
+  width: 36px;
+  height: 36px;
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.14);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.simanpoa-pillar-card.active .simanpoa-pillar-ico {
+  background: rgba(6, 78, 59, 0.1);
+  color: #064E3B;
+}
+
+.simanpoa-pillar-title {
+  font-size: 0.9375rem;
+  font-weight: 800;
+  line-height: 1.25;
+}
+
+.simanpoa-pillar-desc {
+  font-size: 0.74rem;
+  opacity: 0.82;
+  margin-top: 2px;
+  line-height: 1.3;
+}
+
+.simanpoa-pillar-badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.16);
+  color: #FFFFFF;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.simanpoa-pillar-card.active .simanpoa-pillar-badge {
+  background: #ECFDF5;
+  color: #065F46;
+  border: 1px solid rgba(5, 150, 105, 0.25);
+}
+
+/* Sub-Workspace Navigation Bar inside Penatausahaan / Pengelolaan */
+.simanpoa-subworkspace-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  background: #FFFFFF;
+  border: 1px solid var(--n-border);
+  border-radius: 12px;
+  padding: 8px 12px;
+  margin-bottom: 18px;
+  box-shadow: var(--n-shadow-1);
+}
+
+.simanpoa-subtab-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.simanpoa-subtab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: var(--ctl-h-md);
+  padding: 0 13px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--n-text-secondary);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 140ms ease;
+}
+
+.simanpoa-subtab-btn:hover {
+  background: var(--n-surface-1);
+  color: var(--n-text-primary);
+}
+
+.simanpoa-subtab-btn.active {
+  background: var(--n-primary);
+  color: #FFFFFF;
+  font-weight: 700;
+  box-shadow: 0 2px 6px rgba(6, 78, 59, 0.22);
+}
+
+/* STNK Early Warning Alert Banner */
+.simanpoa-stnk-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 12px 18px;
+  border-radius: 12px;
+  background: linear-gradient(90deg, #FFFBEB 0%, #FEF3C7 100%);
+  border: 1.5px solid #F59E0B;
+  color: #92400E;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+}
+
+.simanpoa-stnk-banner.is-overdue {
+  background: linear-gradient(90deg, #FFF1F2 0%, #FFE4E6 100%);
+  border-color: #E11D48;
+  color: #9F1239;
+}
+
+/* SAKTI 11-Column Financial Table */
+.sakti-11col-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.78rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.sakti-11col-table th {
+  background: #F8FAFC;
+  color: var(--n-text-secondary);
+  font-weight: 700;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 9px 10px;
+  border-bottom: 1.5px solid var(--n-border);
+  border-right: 1px solid var(--n-border-hairline);
+}
+
+.sakti-11col-table td {
+  padding: 9px 10px;
+  border-bottom: 1px solid var(--n-border-hairline);
+  border-right: 1px solid var(--n-border-hairline);
+  vertical-align: middle;
+}
+
+.sakti-11col-table tr.sakti-akun-group-row td {
+  background: #F0FDF4;
+  font-weight: 800;
+  color: #064E3B;
+}
+
+.sakti-11col-table tr.sakti-total-row td {
+  background: #0F172A;
+  color: #FFFFFF;
+  font-weight: 800;
+}
+
+/* STNK OCR Field Verification Highlight */
+.stnk-field-unverified {
+  border-color: #F59E0B !important;
+  background: #FFFBEB !important;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.15) !important;
+}
+
+.stnk-ocr-confidence-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+
+.stnk-ocr-confidence-badge.is-high {
+  background: #ECFDF5;
+  color: #059669;
+  border: 1px solid rgba(5, 150, 105, 0.25);
+}
+
+.stnk-ocr-confidence-badge.is-blur {
+  background: #FFFBEB;
+  color: #B45309;
+  border: 1px solid #F59E0B;
+}
+
+/* ============================================================
    ACCESSIBILITY & REDUCED MOTION
    ============================================================ */
 @media (prefers-reduced-motion: reduce) {

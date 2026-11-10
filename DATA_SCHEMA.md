@@ -160,6 +160,55 @@ Tabel induk seluruh aset fisik individual BMN. Setiap baris mewakili 1 unit fisi
 | 32 | `KapalID` | Text | Ya | `KP-HIU-01` | Diisi jika inventaris melekat pada kapal pengawas armada. |
 | 33 | `ImportBatchID` | Text | Ya | `BATCH-20261026-01` | Penanda batch impor jika bersumber dari Smart Bulk Import SAKTI. |
 | 34 | `Keterangan` | Text | Ya | `Unit operasional staf anggaran` | Catatan tambahan kondisi fisik atau riwayat perbaikan. |
+| 35 | `KodeAkunNeraca` | Text | Ya | `132111` | Kode akun neraca 6-digit SAKTI (mis. 132111 Peralatan & Mesin). |
+| 36 | `NoPolisi` | Text | Ya | `B 1042 PQA` | Nomor plat polisi (khusus aset armada kendaraan dinas). |
+| 37 | `TglPajakTahunan` | Date | Ya | `2026-11-20` | Tanggal jatuh tempo perpanjangan PKB / pajak tahunan. |
+| 38 | `TglStnkLimaTahunan` | Date | Ya | `2029-11-20` | Tanggal jatuh tempo perpanjangan STNK 5 tahunan (pergantian plat nomor). |
+| 39 | `FotoStnkEvidenceID`| Text | Ya | `EV-S1T2N3K4` | Ref: `TX_Evidence.EvidenceID` (lampiran scan/foto berkas STNK). |
+| 40 | `NoDokumenSumber` | Text | Ya | `SK/2026/09/POA` | Nomor SK pengadaan, kontrak, atau BAST sumber pencatatan awal. |
+| 41 | `StnkVerified` | Enum | Tidak | `YA` | Verifikasi visual integritas dokumen STNK (`YA`, `TIDAK`). |
+
+---
+
+### 2.5 `TX_BMN_Rekap_Sakti` — Buku Daftar Barang 11 Kolom SAKTI Kemenkeu
+Mencatat agregasi saldo dan mutasi buku daftar barang SAKTI (Intrakomptabel $\ge$ Rp 2 Jt, Ekstrakomptabel $<$ Rp 2 Jt, dan komputasi Gabungan).
+
+| # | Nama Kolom | Tipe Data | Nullable | Contoh Nilai | Aturan Bisnis & Validasi |
+|---|---|---|:---:|---|---|
+| 1 | `RekapID` | Text (PK) | Tidak | `SAKTI-INTRA-3050104001` | ID unik gabungan jenis dan kode barang. |
+| 2 | `PeriodeLaporan` | Text | Tidak | `2026-09-30` | Tanggal cut-off periode laporan SAKTI (mis. Semester / Triwulan). |
+| 3 | `JenisLaporan` | Enum | Tidak | `INTRA` | Kategori kapitalisasi: `INTRA`, `EKSTRA`, `GABUNGAN`. |
+| 4 | `KodeAkun` | Text | Tidak | `132111` | Kode akun neraca 6 digit Kemenkeu. |
+| 5 | `UraianAkun` | Text | Tidak | `Peralatan dan Mesin` | Nama akun neraca induk. |
+| 6 | `KodeBarang` | Text | Tidak | `3050104001` | Kode katalog 10 digit barang BMN. |
+| 7 | `UraianBarang` | Text | Tidak | `Laptop / Notebook` | Deskripsi jenis kelompok barang. |
+| 8 | `Satuan` | Text | Tidak | `Unit` | Satuan pengukuran fisik (Unit, Buah, Set, dsb). |
+| 9 | `KuantitasAwal` | Number | Tidak | `14` | Jumlah unit fisik saldo awal periode. |
+| 10 | `NilaiAwal` | Number (IDR) | Tidak | `210000000` | Nilai perolehan saldo awal (Rp). |
+| 11 | `KuantitasTambah` | Number | Tidak | `2` | Mutasi bertambah unit periode berjalan. |
+| 12 | `NilaiTambah` | Number (IDR) | Tidak | `30000000` | Nilai mutasi bertambah (Rp) dari pembelian/hibah. |
+| 13 | `KuantitasKurang` | Number | Tidak | `1` | Mutasi berkurang unit periode berjalan (penghapusan/transfer). |
+| 14 | `NilaiKurang` | Number (IDR) | Tidak | `15000000` | Nilai mutasi berkurang (Rp). |
+| 15 | `KuantitasAkhir` | Number | Tidak | `15` | Saldo akhir unit fisik ($= Awal + Tambah - Kurang$). |
+| 16 | `NilaiAkhir` | Number (IDR) | Tidak | `225000000` | Saldo akhir nilai pembukuan ($= Awal + Tambah - Kurang$). |
+| 17 | `SumberDokumen` | Text | Ya | `Laporan_Barang_Intrakomptabel_September_2026.pdf` | Nama file PDF hasil cetak SAKTI sumber sinkronisasi. |
+| 18 | `UpdatedAt` | DateTime | Tidak | `2026-11-10T10:00:00Z` | Timestamp terakhir sinkronisasi PDF SAKTI. |
+
+---
+
+### 2.6 `TX_BMN_Neraca` — Posisi Akun BMN di Neraca SAKTI
+Mencatat 14 akun posisi neraca BMN Dit. POA (Aset Tetap Bruto, Akumulasi Penyusutan, Persediaan, Aset Tak Berwujud).
+
+| # | Nama Kolom | Tipe Data | Nullable | Contoh Nilai | Aturan Bisnis & Validasi |
+|---|---|---|:---:|---|---|
+| 1 | `NeracaID` | Text (PK) | Tidak | `NRC-132111` | ID akun neraca (`NRC-` + KodeAkun). |
+| 2 | `KodeAkun` | Text | Tidak | `132111` | Kode akun neraca 6 digit resmi Kemenkeu. |
+| 3 | `UraianAkun` | Text | Tidak | `Peralatan dan Mesin` | Nama akun neraca standar akuntansi pemerintah. |
+| 4 | `JumlahNilai` | Number (IDR) | Tidak | `3827419840` | Jumlah saldo nilai pembukuan neraca (Rp). |
+| 5 | `KategoriNeraca` | Enum | Tidak | `ASET_TETAP` | Klasifikasi: `ASET_TETAP`, `AKUMULASI_PENYUSUTAN`, `PERSEDIAAN`, `ASET_TAK_BERWUJUD`, `ASET_NON_OPERASIONAL`. |
+| 6 | `PeriodeLaporan` | Text | Tidak | `2026-09-30` | Tanggal posisi neraca SAKTI. |
+| 7 | `SumberDokumen` | Text | Ya | `Laporan_Posisi_BMN_di_Neraca_September_2026.pdf` | Nama file PDF laporan neraca SAKTI. |
+| 8 | `UpdatedAt` | DateTime | Tidak | `2026-11-10T10:00:00Z` | Waktu rekam sinkronisasi PDF. |
 
 ---
 
