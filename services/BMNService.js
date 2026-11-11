@@ -719,6 +719,30 @@ function bmn_submitAset(token, params) {
     if (!params.kodeBarang || !params.nup || !params.namaBarang) {
       throw new Error('Kode Barang, NUP, dan Nama Barang wajib diisi.');
     }
+    var kodeClean = String(params.kodeBarang).replace(/\./g, '').trim();
+    if (!/^\d{10}$/.test(kodeClean)) {
+      throw new Error('Kode Barang BMN wajib terdiri dari 10 digit angka (mis. 3050104001).');
+    }
+    var nupInt = parseInt(String(params.nup).trim(), 10);
+    if (!/^\d+$/.test(String(params.nup).trim()) || isNaN(nupInt) || nupInt < 1) {
+      throw new Error('NUP wajib berupa bilangan bulat positif (minimal 1).');
+    }
+    var npVal = parseFloat(params.nilaiPerolehan);
+    var nbVal = parseFloat(params.nilaiBuku);
+    if (isNaN(npVal) || npVal <= 0) {
+      throw new Error('Nilai Perolehan wajib lebih besar dari Rp 0.');
+    }
+    if (isNaN(nbVal) || nbVal < 0) {
+      throw new Error('Nilai Buku tidak boleh bernilai negatif.');
+    }
+    if (nbVal > npVal) {
+      throw new Error('Nilai Buku tidak masuk akal karena melebihi Nilai Perolehan aset.');
+    }
+    var todayStr = Utilities.formatDate(new Date(), 'Asia/Jakarta', 'yyyy-MM-dd');
+    var tglAcq = String(params.tanggalPerolehan || '').trim();
+    if (!tglAcq || !/^\d{4}-\d{2}-\d{2}$/.test(tglAcq) || tglAcq < '1945-01-01' || tglAcq > todayStr) {
+      throw new Error('Tanggal Perolehan tidak valid atau berada di masa depan.');
+    }
     if (!params.kondisi) {
       throw new Error('Kondisi aset (Baik / Rusak Ringan / Rusak Berat) wajib ditentukan.');
     }
@@ -731,8 +755,14 @@ function bmn_submitAset(token, params) {
       var rows  = sheetToObjects(sheet);
 
       // Hitung koordinat dan matching UPT terdekat jika ada koordinat GPS
-      var lat = parseFloat(params.latitude) || null;
-      var lon = parseFloat(params.longitude) || null;
+      var lat = (params.latitude !== '' && params.latitude !== null && params.latitude !== undefined) ? parseFloat(params.latitude) : null;
+      var lon = (params.longitude !== '' && params.longitude !== null && params.longitude !== undefined) ? parseFloat(params.longitude) : null;
+      if (lat !== null && (isNaN(lat) || lat < -90 || lat > 90)) {
+        throw new Error('Koordinat Latitude GPS harus di antara -90 s/d 90.');
+      }
+      if (lon !== null && (isNaN(lon) || lon < -180 || lon > 180)) {
+        throw new Error('Koordinat Longitude GPS harus di antara -180 s/d 180.');
+      }
       var lokasiId = params.lokasiId || 'UPT-PUSAT-POA';
       var jarakKm = null;
       var sumberLokasi = params.sumberLokasi || 'MANUAL';
@@ -1158,6 +1188,10 @@ function bmn_createPenghapusan(token, payload) {
     }
     if (!payload.asetIds || !Array.isArray(payload.asetIds) || payload.asetIds.length === 0) {
       throw new Error('Pilih minimal 1 unit aset untuk diusulkan penghapusan.');
+    }
+    var todayHps = Utilities.formatDate(new Date(), 'Asia/Jakarta', 'yyyy-MM-dd');
+    if (payload.tanggalSuratUsulan && (String(payload.tanggalSuratUsulan) > todayHps || String(payload.tanggalSuratUsulan) < '1990-01-01')) {
+      throw new Error('Tanggal surat usulan penghapusan tidak valid atau melebihi tanggal hari ini.');
     }
 
     var lock = LockService.getScriptLock();
@@ -2251,6 +2285,13 @@ function bmn_previewSaktiSync(token, payload) {
       var qAkhir = parseFloat(r.kuantitasAkhir !== undefined ? r.kuantitasAkhir : (qAwal + qTambah - qKurang)) || 0;
       var nAkhir = parseFloat(r.nilaiAkhir !== undefined ? r.nilaiAkhir : (nAwal + nTambah - nKurang)) || 0;
 
+      if (qAwal < 0 || qTambah < 0 || qKurang < 0 || qAkhir < 0) {
+        throw new Error('Kuantitas barang pada dokumen SAKTI tidak boleh bernilai negatif (' + kodeBrg + ').');
+      }
+      if (nAwal < 0 || nAkhir < 0) {
+        throw new Error('Saldo nilai rupiah barang tidak boleh bernilai negatif (' + kodeBrg + ').');
+      }
+
       // Hitung nilai per unit untuk klasifikasi kapitalisasi otomatis (Intra >= 2 Jt vs Ekstra < 2 Jt)
       var unitVal = qAkhir > 0 ? (nAkhir / qAkhir) : (qTambah > 0 ? (nTambah / qTambah) : nAwal);
       var resolvedJenis = jenisLap;
@@ -2452,6 +2493,10 @@ function bmn_commitSaktiSync(token, payload) {
         var nKurang = parseFloat(item.nilaiKurang) || 0;
         var qAkhir = parseFloat(item.kuantitasAkhir !== undefined ? item.kuantitasAkhir : (qAwal + qTambah - qKurang)) || 0;
         var nAkhir = parseFloat(item.nilaiAkhir !== undefined ? item.nilaiAkhir : (nAwal + nTambah - nKurang)) || 0;
+
+        if (qAwal < 0 || qTambah < 0 || qKurang < 0 || qAkhir < 0 || nAwal < 0 || nAkhir < 0) {
+          throw new Error('Data kuantitas maupun saldo nilai rincian SAKTI tidak boleh bernilai negatif (' + kodeBrg + ').');
+        }
 
         var unitVal = qAkhir > 0 ? (nAkhir / qAkhir) : (qTambah > 0 ? (nTambah / qTambah) : nAwal);
         var jenis = String(item.jenisLaporan || '').toUpperCase().trim();
@@ -2685,8 +2730,12 @@ function bmn_executeDocumentDisposal(token, payload) {
     if (!payload || !payload.asetIds || !Array.isArray(payload.asetIds) || payload.asetIds.length === 0) {
       throw new Error('Pilih minimal 1 unit aset yang telah diverifikasi untuk dikurangi/dihapus.');
     }
-    if (!payload.nomorDokumen) {
-      throw new Error('Nomor Dokumen Surat / SK / BAST wajib diisi (atau diverifikasi dari hasil bacaan PDF).');
+    if (!payload.nomorDokumen || String(payload.nomorDokumen).trim().length < 3) {
+      throw new Error('Nomor Dokumen Surat / SK / BAST wajib diisi dengan format yang valid (minimal 3 karakter).');
+    }
+    var todayDisp = Utilities.formatDate(new Date(), 'Asia/Jakarta', 'yyyy-MM-dd');
+    if (payload.tanggalDokumen && (String(payload.tanggalDokumen) > todayDisp || String(payload.tanggalDokumen) < '1990-01-01')) {
+      throw new Error('Tanggal Dokumen SK / BAST tidak valid atau berada di masa depan.');
     }
 
     var lock = LockService.getScriptLock();
@@ -2898,6 +2947,21 @@ function bmn_updateStnkKendaraan(token, payload) {
     }
     if (!payload.noPolisi || !payload.tglPajakTahunan) {
       throw new Error('Nomor Polisi dan Tanggal Jatuh Tempo Pajak Tahunan wajib diisi.');
+    }
+    var nopolClean = String(payload.noPolisi).trim().toUpperCase().replace(/\s+/g, ' ');
+    if (!/^[A-Z]{1,2}\s?\d{1,4}\s?[A-Z]{0,3}$/.test(nopolClean) || !/\d/.test(nopolClean)) {
+      throw new Error('Format Nomor Polisi tidak valid (contoh yang benar: B 1042 PQA).');
+    }
+    var pYr = parseInt(String(payload.tglPajakTahunan).substring(0, 4), 10);
+    var curYrStnk = new Date().getFullYear();
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(String(payload.tglPajakTahunan)) || pYr < 2000 || pYr > curYrStnk + 6) {
+      throw new Error('Tanggal jatuh tempo pajak tahunan tidak berada pada tahun yang wajar.');
+    }
+    if (payload.tglStnkLimaTahunan) {
+      var sYr = parseInt(String(payload.tglStnkLimaTahunan).substring(0, 4), 10);
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(String(payload.tglStnkLimaTahunan)) || sYr < 2000 || sYr > curYrStnk + 10) {
+        throw new Error('Tanggal jatuh tempo STNK 5 tahunan tidak berada pada tahun yang wajar.');
+      }
     }
 
     var lock = LockService.getScriptLock();

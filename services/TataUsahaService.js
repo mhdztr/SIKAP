@@ -297,10 +297,10 @@ function tataUsaha_submitMingguan(token, params) {
       var paguABT         = _numParam(params.paguABT,        'Pagu ABT');
 
       // Matriks 2x2 Realisasi: Reguler & ABT
-      var sp2dReg = params.realisasiSP2D_Reguler !== undefined && params.realisasiSP2D_Reguler !== '' ? _num(params.realisasiSP2D_Reguler) : null;
-      var sp2dAbt = params.realisasiSP2D_ABT !== undefined && params.realisasiSP2D_ABT !== '' ? _num(params.realisasiSP2D_ABT) : null;
-      var akruReg = params.realisasiAkrual_Reguler !== undefined && params.realisasiAkrual_Reguler !== '' ? _num(params.realisasiAkrual_Reguler) : null;
-      var akruAbt = params.realisasiAkrual_ABT !== undefined && params.realisasiAkrual_ABT !== '' ? _num(params.realisasiAkrual_ABT) : null;
+      var sp2dReg = params.realisasiSP2D_Reguler !== undefined && params.realisasiSP2D_Reguler !== '' ? _numParam(params.realisasiSP2D_Reguler, 'Realisasi SP2D Reguler') : null;
+      var sp2dAbt = params.realisasiSP2D_ABT !== undefined && params.realisasiSP2D_ABT !== '' ? _numParam(params.realisasiSP2D_ABT, 'Realisasi SP2D ABT') : null;
+      var akruReg = params.realisasiAkrual_Reguler !== undefined && params.realisasiAkrual_Reguler !== '' ? _numParam(params.realisasiAkrual_Reguler, 'Realisasi Akrual Reguler') : null;
+      var akruAbt = params.realisasiAkrual_ABT !== undefined && params.realisasiAkrual_ABT !== '' ? _numParam(params.realisasiAkrual_ABT, 'Realisasi Akrual ABT') : null;
 
       var realisasiSP2D, realisasiAkrual;
       if (sp2dReg !== null || sp2dAbt !== null) {
@@ -366,6 +366,20 @@ function tataUsaha_submitMingguan(token, params) {
             error: 'Pagu berbeda dari laporan sebelumnya. Wajib isi Catatan Revisi Pagu.'
           };
         }
+      }
+
+      var totalPaguMinggu = paguReguler + paguABT;
+      if (totalPaguMinggu <= 0 && (realisasiSP2D > 0 || realisasiAkrual > 0)) {
+        return {
+          success: false,
+          error: 'Pagu DIPA aktif belum ditetapkan (> Rp 0). Tetapkan Pagu DIPA terlebih dahulu sebelum mengisi realisasi.'
+        };
+      }
+      if (totalPaguMinggu > 0 && (realisasiSP2D > totalPaguMinggu || realisasiAkrual > totalPaguMinggu)) {
+        return {
+          success: false,
+          error: 'Realisasi SP2D maupun Akrual minggu ini tidak boleh melebihi total Pagu DIPA aktif.'
+        };
       }
 
       var now   = new Date();
@@ -560,10 +574,10 @@ function tataUsaha_revisi(token, params) {
       var paguABT         = _numParam(params.paguABT,        'Pagu ABT');
 
       // Matriks 2x2 Realisasi: Reguler & ABT
-      var sp2dReg = params.realisasiSP2D_Reguler !== undefined && params.realisasiSP2D_Reguler !== '' ? _num(params.realisasiSP2D_Reguler) : null;
-      var sp2dAbt = params.realisasiSP2D_ABT !== undefined && params.realisasiSP2D_ABT !== '' ? _num(params.realisasiSP2D_ABT) : null;
-      var akruReg = params.realisasiAkrual_Reguler !== undefined && params.realisasiAkrual_Reguler !== '' ? _num(params.realisasiAkrual_Reguler) : null;
-      var akruAbt = params.realisasiAkrual_ABT !== undefined && params.realisasiAkrual_ABT !== '' ? _num(params.realisasiAkrual_ABT) : null;
+      var sp2dReg = params.realisasiSP2D_Reguler !== undefined && params.realisasiSP2D_Reguler !== '' ? _numParam(params.realisasiSP2D_Reguler, 'Realisasi SP2D Reguler') : null;
+      var sp2dAbt = params.realisasiSP2D_ABT !== undefined && params.realisasiSP2D_ABT !== '' ? _numParam(params.realisasiSP2D_ABT, 'Realisasi SP2D ABT') : null;
+      var akruReg = params.realisasiAkrual_Reguler !== undefined && params.realisasiAkrual_Reguler !== '' ? _numParam(params.realisasiAkrual_Reguler, 'Realisasi Akrual Reguler') : null;
+      var akruAbt = params.realisasiAkrual_ABT !== undefined && params.realisasiAkrual_ABT !== '' ? _numParam(params.realisasiAkrual_ABT, 'Realisasi Akrual ABT') : null;
 
       var realisasiSP2D, realisasiAkrual;
       if (sp2dReg !== null || sp2dAbt !== null) {
@@ -590,6 +604,10 @@ function tataUsaha_revisi(token, params) {
 
       if (!targetRowId) return { success: false, error: 'targetRowId wajib diisi.' };
       if (!alasanRevisi) return { success: false, error: 'Alasan revisi wajib diisi.' };
+      var totalPaguRv = paguReguler + paguABT;
+      if (totalPaguRv > 0 && (realisasiSP2D > totalPaguRv || realisasiAkrual > totalPaguRv)) {
+        return { success: false, error: 'Realisasi SP2D maupun Akrual tidak boleh melebihi total Pagu DIPA.' };
+      }
 
       var sheet   = openTuSheet(SHEET_TU.TATA_USAHA);
       var oldRow  = findRowByField(sheet, 'RowID', targetRowId);
@@ -1288,11 +1306,25 @@ function tataUsaha_submitPaket(token, payload) {
     var tahapIdx = _TU_TAHAP_PAKET.indexOf(tahap);
     var noKontrak = String(payload.noKontrak || '').trim();
     var rekanan = String(payload.rekanan || '').trim();
+    var nilaiKontrak = Number(payload.nilaiKontrak) || 0;
+    var realisasiKeuangan = Number(payload.realisasiKeuangan) || 0;
 
-    // Validasi: tahap >= KONTRAK mewajibkan nomor kontrak dan rekanan
+    if (nilaiKontrak < 0 || realisasiKeuangan < 0) {
+      throw new Error('Nilai Kontrak dan Realisasi Keuangan tidak boleh bernilai negatif.');
+    }
+    if (tahapIdx < 2 && realisasiKeuangan > 0) {
+      throw new Error('Realisasi Keuangan harus Rp 0 saat paket masih pada tahap ' + tahap + '.');
+    }
     if (tahapIdx >= 2) {
       if (!noKontrak) throw new Error('Nomor Kontrak wajib diisi untuk tahap ' + tahap + '.');
       if (!rekanan) throw new Error('Rekanan Penyedia wajib diisi untuk tahap ' + tahap + '.');
+      if (nilaiKontrak <= 0) throw new Error('Nilai Kontrak wajib lebih dari Rp 0 untuk tahap ' + tahap + '.');
+    }
+    if (nilaiKontrak > 0 && realisasiKeuangan > nilaiKontrak) {
+      throw new Error('Realisasi Keuangan tidak boleh melebihi Nilai Kontrak.');
+    }
+    if (tahap === 'SELESAI' && progresFisik < 100) {
+      throw new Error('Paket berstatus SELESAI wajib memiliki progres fisik 100%.');
     }
 
     var lock = LockService.getScriptLock();
@@ -1858,8 +1890,15 @@ function tataUsaha_saveSertifikat(token, params) {
 
       var status = String(params.statusKelulusan || 'SUDAH_LULUS').toUpperCase();
       var noSert = String(params.nomorSertifikat || '').trim();
-      var tahun = params.tahunPelatihan ? _num(params.tahunPelatihan) : (new Date().getFullYear());
+      var currentYr = new Date().getFullYear();
+      var tahun = params.tahunPelatihan ? Math.round(_num(params.tahunPelatihan)) : currentYr;
+      if (tahun < 1980 || tahun > currentYr + 1) {
+        throw new Error('Tahun pelatihan harus berada pada rentang wajar (1980 s/d ' + (currentYr + 1) + ').');
+      }
       var expDate = String(params.berlakuSampai || '').trim();
+      if (expDate && parseInt(expDate.substring(0, 4), 10) < tahun) {
+        throw new Error('Tanggal berlaku sertifikat tidak boleh lebih awal dari tahun pelatihan.');
+      }
       var namaPel = String(params.namaPelatihan || '').trim();
       var nowStr = new Date().toISOString();
 
@@ -1949,6 +1988,28 @@ function tataUsaha_savePegawaiMaster(token, params) {
     if (!params || !params.nama) throw new Error('Nama pegawai wajib diisi.');
     if (!params.unitKerja) throw new Error('Unit kerja wajib diisi.');
     if (!params.kelompokJabatan) throw new Error('Kelompok jabatan wajib dipilih.');
+
+    var stPegCheck = String(params.statusKepegawaian || 'PNS').toUpperCase();
+    var nipCheck = String(params.nip || '').trim();
+    var nikCheck = String(params.noIdentitas || '').trim();
+    var tglMulaiCheck = String(params.tglMulaiKontrak || '').trim();
+    var tglSelesaiCheck = String(params.tglSelesaiKontrak || '').trim();
+
+    if (stPegCheck === 'PNS' && !/^\d{18}$/.test(nipCheck)) {
+      throw new Error('NIP PNS wajib terdiri dari 18 digit angka.');
+    }
+    if (stPegCheck === 'P3K' && nipCheck && nipCheck !== '-' && !/^\d{18}$/.test(nipCheck)) {
+      throw new Error('NIP PPPK/P3K wajib terdiri dari 18 digit angka.');
+    }
+    if (stPegCheck === 'PJLP' && !/^\d{16}$/.test(nikCheck)) {
+      throw new Error('NIK KTP untuk PJLP wajib terdiri dari 16 digit angka.');
+    }
+    if (stPegCheck === 'P3K_PARUH_WAKTU' && nikCheck && !/^\d{16}$/.test(nikCheck)) {
+      throw new Error('NIK KTP untuk P3K Paruh Waktu wajib terdiri dari 16 digit angka.');
+    }
+    if (tglMulaiCheck && tglSelesaiCheck && tglSelesaiCheck < tglMulaiCheck) {
+      throw new Error('Tanggal selesai masa kerja/magang tidak boleh lebih awal dari tanggal mulai.');
+    }
 
     var lock = LockService.getScriptLock();
     lock.waitLock(20000);

@@ -4341,6 +4341,10 @@ function tuSubmitPagu() {
   var pAbt = Number((document.getElementById('tu-pagu-modal-abt') || {}).value) || 0;
   var cat  = String((document.getElementById('tu-pagu-modal-catatan') || {}).value || '').trim();
 
+  if (pReg < 0 || pAbt < 0) {
+    _msg('tu-pagu-msg', 'error', 'Pagu Reguler maupun Pagu ABT tidak boleh bernilai negatif.');
+    return;
+  }
   if (pReg + pAbt <= 0) {
     _msg('tu-pagu-msg', 'error', 'Total alokasi Pagu DIPA (Reguler + ABT) harus lebih besar dari Rp 0.');
     return;
@@ -4631,6 +4635,25 @@ function tuSubmit() {
   var sAbt = Number((document.getElementById('tu-real-sp2d-abt')     || {}).value) || 0;
   var aReg = Number((document.getElementById('tu-real-akrual-reguler') || {}).value) || 0;
   var aAbt = Number((document.getElementById('tu-real-akrual-abt')     || {}).value) || 0;
+  var pRegHid = Number((document.getElementById('tu-pagu-reguler') || {}).value) || 0;
+  var pAbtHid = Number((document.getElementById('tu-pagu-abt')     || {}).value) || 0;
+  var kPagu = (_TU.kpi && Number(_TU.kpi.paguTotal)) || (pRegHid + pAbtHid);
+
+  if (sReg < 0 || sAbt < 0 || aReg < 0 || aAbt < 0) {
+    _setLoading(btn, false);
+    _msg('tu-form-msg', 'error', 'Nominal realisasi SP2D maupun Akrual tidak boleh bernilai negatif.');
+    return;
+  }
+  if (kPagu > 0 && ((sReg + sAbt) > kPagu || (aReg + aAbt) > kPagu)) {
+    _setLoading(btn, false);
+    _msg('tu-form-msg', 'error', 'Realisasi SP2D maupun Akrual minggu ini tidak boleh melebihi total Pagu DIPA aktif.');
+    return;
+  }
+  if (kPagu <= 0 && ((sReg + sAbt) > 0 || (aReg + aAbt) > 0)) {
+    _setLoading(btn, false);
+    _msg('tu-form-msg', 'error', 'Tetapkan Pagu DIPA terlebih dahulu sebelum menginput realisasi anggaran.');
+    return;
+  }
 
   var params = {
     periode:                 periode,
@@ -4698,12 +4721,23 @@ function tuRevisiConfirm() {
   _msg('tu-revisi-msg', null);
   var alasan = (document.getElementById('rv-alasan') || {}).value || '';
   if (!alasan.trim()) { _msg('tu-revisi-msg', 'error', 'Alasan revisi wajib diisi.'); return; }
-  _setLoading(btn, true);
 
+  var rvPReg = Number((document.getElementById('rv-pagu-reguler') || {}).value) || 0;
+  var rvPAbt = Number((document.getElementById('rv-pagu-abt')     || {}).value) || 0;
   var sReg = Number((document.getElementById('rv-real-sp2d-reguler') || {}).value) || 0;
   var sAbt = Number((document.getElementById('rv-real-sp2d-abt')     || {}).value) || 0;
   var aReg = Number((document.getElementById('rv-real-akrual-reguler') || {}).value) || 0;
   var aAbt = Number((document.getElementById('rv-real-akrual-abt')     || {}).value) || 0;
+
+  if (rvPReg < 0 || rvPAbt < 0 || sReg < 0 || sAbt < 0 || aReg < 0 || aAbt < 0) {
+    _msg('tu-revisi-msg', 'error', 'Nilai Pagu maupun Realisasi tidak boleh bernilai negatif.');
+    return;
+  }
+  if ((rvPReg + rvPAbt) > 0 && ((sReg + sAbt) > (rvPReg + rvPAbt) || (aReg + aAbt) > (rvPReg + rvPAbt))) {
+    _msg('tu-revisi-msg', 'error', 'Realisasi SP2D maupun Akrual tidak boleh melebihi total Pagu DIPA.');
+    return;
+  }
+  _setLoading(btn, true);
 
   var params = {
     targetRowId:             _TU.pendingRowId,
@@ -5813,11 +5847,20 @@ function _tuSubmitSertifikat() {
   var nama = (document.getElementById('tu-sert-nama') || {}).value;
   var status = (document.getElementById('tu-sert-status') || {}).value;
   var noSert = ((document.getElementById('tu-sert-nomor') || {}).value || '').trim();
-  var tahun = Number((document.getElementById('tu-sert-tahun') || {}).value) || new Date().getFullYear();
+  var currentYr = new Date().getFullYear();
+  var tahun = Number((document.getElementById('tu-sert-tahun') || {}).value) || currentYr;
   var expired = (document.getElementById('tu-sert-expired') || {}).value || '';
 
   if (!pegId || !kode) {
     _msg(msgElId, 'error', 'Identitas sasaran sertifikat tidak lengkap.');
+    return;
+  }
+  if (tahun < 1980 || tahun > currentYr + 1 || !isFinite(tahun)) {
+    _msg(msgElId, 'error', 'Tahun pelatihan tidak masuk akal (rentang valid: 1980 s/d ' + (currentYr + 1) + ').');
+    return;
+  }
+  if (expired && parseInt(expired.substring(0, 4), 10) < tahun) {
+    _msg(msgElId, 'error', 'Tanggal masa berlaku sertifikat tidak boleh lebih awal dari tahun pelatihan.');
     return;
   }
 
@@ -6235,18 +6278,26 @@ function _tuSubmitPegawaiMaster() {
   if (statusPeg === 'PNS') {
     nip = ((document.getElementById('tu-m-nip-pns') || {}).value || '').trim();
     tingkat = (document.getElementById('tu-m-golongan-pns') || {}).value || tingkat;
-    if (!nip) {
-      _msg(msgElId, 'error', 'NIP wajib diisi untuk pegawai PNS.');
+    if (!nip || !/^\d{18}$/.test(nip)) {
+      _msg(msgElId, 'error', 'NIP PNS wajib terdiri dari 18 digit angka.');
       return;
     }
   } else if (statusPeg === 'P3K') {
     nip = ((document.getElementById('tu-m-nip-p3k') || {}).value || '').trim();
+    if (nip && nip !== '-' && !/^\d{18}$/.test(nip)) {
+      _msg(msgElId, 'error', 'NIP PPPK/P3K wajib terdiri dari 18 digit angka.');
+      return;
+    }
     noIdentitas = ((document.getElementById('tu-m-sk-p3k') || {}).value || '').trim();
     tingkat = (document.getElementById('tu-m-gol-p3k') || {}).value || tingkat;
     tglMulai = (document.getElementById('tu-m-mulai-p3k') || {}).value || '';
     tglSelesai = (document.getElementById('tu-m-selesai-p3k') || {}).value || '';
   } else if (statusPeg === 'P3K_PARUH_WAKTU') {
     noIdentitas = ((document.getElementById('tu-m-nik-p3k-pw') || {}).value || '').trim();
+    if (noIdentitas && !/^\d{16}$/.test(noIdentitas)) {
+      _msg(msgElId, 'error', 'NIK KTP P3K Paruh Waktu wajib terdiri dari 16 digit angka.');
+      return;
+    }
     var alokasiJam = ((document.getElementById('tu-m-jam-p3k-pw') || {}).value || '').trim();
     if (alokasiJam) catatan = (catatan ? catatan + ' | ' : '') + 'Alokasi: ' + alokasiJam;
     tglMulai = (document.getElementById('tu-m-mulai-p3k-pw') || {}).value || '';
@@ -6258,8 +6309,8 @@ function _tuSubmitPegawaiMaster() {
     if (noSpk) catatan = (catatan ? catatan + ' | ' : '') + 'No SPK: ' + noSpk;
     tglMulai = (document.getElementById('tu-m-mulai-pjlp') || {}).value || '';
     tglSelesai = (document.getElementById('tu-m-selesai-pjlp') || {}).value || '';
-    if (!noIdentitas) {
-      _msg(msgElId, 'error', 'NIK KTP wajib diisi untuk PJLP.');
+    if (!noIdentitas || !/^\d{16}$/.test(noIdentitas)) {
+      _msg(msgElId, 'error', 'NIK KTP PJLP wajib terdiri dari 16 digit angka.');
       return;
     }
     kelompok = 'PJLP';
@@ -6281,6 +6332,11 @@ function _tuSubmitPegawaiMaster() {
     kelompok = 'Non-Kompetensi';
     tingkat = 'NON_JENJANG';
     if (!jabatan) jabatan = 'Peserta ' + subJenis + ' (' + asalKampus + (prodi ? ' - ' + prodi : '') + ')';
+  }
+
+  if (tglMulai && tglSelesai && tglSelesai < tglMulai) {
+    _msg(msgElId, 'error', 'Tanggal selesai kontrak/magang tidak boleh lebih awal dari tanggal mulai.');
+    return;
   }
 
   if (!nama || !unit) {
@@ -6827,10 +6883,38 @@ function _tuSubmitPaket() {
     _msg('tu-paket-form-msg', 'error', 'Nama paket pekerjaan wajib diisi.');
     return;
   }
+  if (nilai < 0 || realisasi < 0) {
+    _msg('tu-paket-form-msg', 'error', 'Nilai Kontrak dan Realisasi Keuangan tidak boleh bernilai negatif.');
+    return;
+  }
+  if (!isFinite(progres) || progres < 0 || progres > 100) {
+    _msg('tu-paket-form-msg', 'error', 'Progres fisik pekerjaan harus berada di antara 0% hingga 100%.');
+    return;
+  }
 
   var isContracted = ['KONTRAK', 'PELAKSANAAN', 'BAST', 'SELESAI'].indexOf(tahap) !== -1;
+  if (!isContracted && realisasi > 0) {
+    _msg('tu-paket-form-msg', 'error', 'Realisasi Keuangan tidak boleh diisi sebelum paket mencapai tahap Kontrak.');
+    return;
+  }
   if (isContracted && (!noKontrak || !rekanan)) {
     _msg('tu-paket-form-msg', 'error', 'Nomor kontrak dan nama rekanan wajib diisi untuk tahap ' + tahap + '.');
+    return;
+  }
+  if (isContracted && nilai <= 0) {
+    _msg('tu-paket-form-msg', 'error', 'Nilai Kontrak wajib lebih besar dari Rp 0 untuk tahap ' + tahap + '.');
+    return;
+  }
+  if (nilai > 0 && realisasi > nilai) {
+    _msg('tu-paket-form-msg', 'error', 'Realisasi Keuangan tidak boleh melebihi Nilai Kontrak.');
+    return;
+  }
+  if (tahap === 'SELESAI' && progres < 100) {
+    _msg('tu-paket-form-msg', 'error', 'Paket berstatus SELESAI wajib memiliki progres fisik 100%.');
+    return;
+  }
+  if (evidence && !/^https?:\/\/\S+/i.test(evidence)) {
+    _msg('tu-paket-form-msg', 'error', 'Tautan dokumen bukti harus berupa URL valid (diawali http:// atau https://).');
     return;
   }
 
@@ -8595,6 +8679,24 @@ function _bmnEditAset(asetId) {
   }
 }
 
+function _bmnTodayIso() {
+  var d = new Date();
+  var yyyy = d.getFullYear();
+  var mm = ('0' + (d.getMonth() + 1)).slice(-2);
+  var dd = ('0' + d.getDate()).slice(-2);
+  return yyyy + '-' + mm + '-' + dd;
+}
+
+function _bmnValidateSaneDate(isoStr, minYear, maxYear) {
+  var s = String(isoStr || '').trim();
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) return false;
+  var parts = s.split('-').map(Number);
+  var y = parts[0], m = parts[1], day = parts[2];
+  if (y < minYear || y > maxYear || m < 1 || m > 12 || day < 1 || day > 31) return false;
+  var dt = new Date(y, m - 1, day);
+  return dt.getFullYear() === y && dt.getMonth() === (m - 1) && dt.getDate() === day;
+}
+
 function _bmnSubmitForm() {
   var btn = document.getElementById('bmn-btn-save');
   var msgElId = 'bmn-form-msg';
@@ -8626,23 +8728,67 @@ function _bmnSubmitForm() {
   var fotoStnkEvId = (document.getElementById('bmn-form-foto-stnk-evidence-id') || {}).value || '';
 
   // Field Geotagging & Bukti Foto
-  var lat       = parseFloat((document.getElementById('bmn-form-lat') || {}).value) || null;
-  var lon       = parseFloat((document.getElementById('bmn-form-lon') || {}).value) || null;
+  var latRaw    = (document.getElementById('bmn-form-lat') || {}).value;
+  var lonRaw    = (document.getElementById('bmn-form-lon') || {}).value;
+  var lat       = (latRaw !== '' && latRaw !== undefined && latRaw !== null) ? parseFloat(latRaw) : null;
+  var lon       = (lonRaw !== '' && lonRaw !== undefined && lonRaw !== null) ? parseFloat(lonRaw) : null;
   var sumberLok = (document.getElementById('bmn-form-sumber-lokasi') || {}).value || 'MANUAL';
   var jarakKm   = parseFloat((document.getElementById('bmn-form-jarak-upt') || {}).value) || null;
   var fotoEvId  = (document.getElementById('bmn-form-foto-evidence-id') || {}).value || '';
 
+  var kodeClean = kode.replace(/\./g, '').trim();
+  var todayIso = _bmnTodayIso();
+  var curYr = new Date().getFullYear();
+
   if (!kode || !nup || !nama) {
     _msg(msgElId, 'error', 'Kode Barang, NUP, dan Nama Barang wajib diisi.');
+    return;
+  }
+  if (!/^\d{10}$/.test(kodeClean)) {
+    _msg(msgElId, 'error', 'Kode Barang BMN wajib terdiri dari 10 digit angka (mis. 3050104001).');
+    return;
+  }
+  if (!/^\d+$/.test(nup) || parseInt(nup, 10) < 1) {
+    _msg(msgElId, 'error', 'NUP wajib berupa angka bulat positif minimal 1.');
+    return;
+  }
+  if (!tgl || !_bmnValidateSaneDate(tgl, 1945, curYr) || tgl > todayIso) {
+    _msg(msgElId, 'error', 'Tanggal Perolehan tidak valid atau berada di masa depan.');
+    return;
+  }
+  if (!isFinite(np) || np <= 0) {
+    _msg(msgElId, 'error', 'Nilai Perolehan wajib lebih besar dari Rp 0.');
+    return;
+  }
+  if (!isFinite(nb) || nb < 0) {
+    _msg(msgElId, 'error', 'Nilai Buku tidak boleh bernilai negatif.');
+    return;
+  }
+  if (nb > np) {
+    _msg(msgElId, 'error', 'Nilai Buku tidak masuk akal karena melebihi Nilai Perolehan.');
     return;
   }
   if (!upt) {
     _msg(msgElId, 'error', 'Lokasi UPT penempatan wajib dipilih.');
     return;
   }
-  if (isKend && noPol && !tglPajak) {
-    _msg(msgElId, 'error', 'Tanggal Jatuh Tempo Pajak Tahunan wajib diisi untuk kendaraan dinas.');
+  if (lat !== null && (isNaN(lat) || lat < -90 || lat > 90 || lon === null || isNaN(lon) || lon < -180 || lon > 180)) {
+    _msg(msgElId, 'error', 'Koordinat GPS tidak berada dalam rentang Latitude/Longitude yang sah.');
     return;
+  }
+  if (isKend && noPol) {
+    if (!/^[A-Z]{1,2}\s?\d{1,4}\s?[A-Z]{0,3}$/.test(noPol) || !/\d/.test(noPol)) {
+      _msg(msgElId, 'error', 'Format Nomor Polisi tidak valid (contoh yang benar: B 1042 PQA).');
+      return;
+    }
+    if (!tglPajak || !_bmnValidateSaneDate(tglPajak, 2000, curYr + 6)) {
+      _msg(msgElId, 'error', 'Tanggal Jatuh Tempo Pajak Tahunan wajib diisi dengan tahun wajar (2000 s/d ' + (curYr + 6) + ').');
+      return;
+    }
+    if (tglStnk && !_bmnValidateSaneDate(tglStnk, 2000, curYr + 10)) {
+      _msg(msgElId, 'error', 'Tanggal Jatuh Tempo STNK 5 Tahunan tidak berada pada rentang tahun wajar.');
+      return;
+    }
   }
 
   _setLoading(btn, true);
@@ -8782,556 +8928,12 @@ function _loadSheetJS(cb) {
   document.head.appendChild(script);
 }
 
-var _BMN_IMPORT = {
-  mode: 'file',
-  file: null,
-  validRows: [],
-  invalidRows: [],
-  totalGross: 0,
-  totalNet: 0,
-  isProcessing: false
-};
+// ============================================================
+// SUB-MODUL BMN: KONSOLIDASI IMPOR KE SINKRONISASI SAKTI TERPADU
+// ============================================================
 
 function _bmnOpenImportModal() {
-  _BMN_IMPORT.mode = 'file';
-  _BMN_IMPORT.file = null;
-  _BMN_IMPORT.validRows = [];
-  _BMN_IMPORT.invalidRows = [];
-  _BMN_IMPORT.totalGross = 0;
-  _BMN_IMPORT.totalNet = 0;
-  _BMN_IMPORT.isProcessing = false;
-
-  var fileInp = document.getElementById('bmn-import-file-input');
-  if (fileInp) fileInp.value = '';
-  var fileInfo = document.getElementById('bmn-file-info');
-  if (fileInfo) { fileInfo.textContent = ''; fileInfo.style.display = 'none'; }
-  var pasteInp = document.getElementById('bmn-paste-input');
-  if (pasteInp) pasteInp.value = '';
-
-  _msg('bmn-import-msg', null);
-  var reportEl = document.getElementById('bmn-dryrun-report');
-  if (reportEl) reportEl.classList.add('n-hidden');
-  var progWrap = document.getElementById('bmn-import-progress-wrap');
-  if (progWrap) progWrap.classList.add('n-hidden');
-
-  var btnCommit = document.getElementById('bmn-btn-commit-import');
-  if (btnCommit) {
-    btnCommit.disabled = true;
-    btnCommit.textContent = 'Simpan Aset ke Database';
-  }
-
-  _bmnSwitchImportMode('file');
-  openModal('modal-bmn-import');
-
-  // Bind drag & drop handlers if not yet bound
-  var dropzone = document.getElementById('bmn-import-dropzone');
-  if (dropzone && !dropzone._dndBound) {
-    dropzone._dndBound = true;
-    ['dragenter', 'dragover'].forEach(function (ev) {
-      dropzone.addEventListener(ev, function (e) {
-        e.preventDefault();
-        e.stopPropagation();
-        dropzone.classList.add('dragover');
-      }, false);
-    });
-    ['dragleave', 'drop'].forEach(function (ev) {
-      dropzone.addEventListener(ev, function (e) {
-        e.preventDefault();
-        e.stopPropagation();
-        dropzone.classList.remove('dragover');
-      }, false);
-    });
-    dropzone.addEventListener('drop', function (e) {
-      var dt = e.dataTransfer;
-      if (dt && dt.files && dt.files.length) {
-        _bmnHandleFile(dt.files[0]);
-      }
-    }, false);
-  }
-
-  // Pre-load SheetJS silently
-  _loadSheetJS();
-}
-
-function _bmnSwitchImportMode(mode) {
-  _BMN_IMPORT.mode = mode;
-  var btnFile   = document.getElementById('bmn-import-tab-file');
-  var btnPaste  = document.getElementById('bmn-import-tab-paste');
-  var paneFile  = document.getElementById('bmn-import-pane-file');
-  var panePaste = document.getElementById('bmn-import-pane-paste');
-
-  if (mode === 'file') {
-    if (btnFile) btnFile.classList.add('active');
-    if (btnPaste) btnPaste.classList.remove('active');
-    if (paneFile) paneFile.classList.remove('n-hidden');
-    if (panePaste) panePaste.classList.add('n-hidden');
-  } else {
-    if (btnFile) btnFile.classList.remove('active');
-    if (btnPaste) btnPaste.classList.add('active');
-    if (paneFile) paneFile.classList.add('n-hidden');
-    if (panePaste) panePaste.classList.remove('n-hidden');
-  }
-}
-
-function _bmnHandleFileSelect(e) {
-  var files = e.target.files;
-  if (files && files.length) {
-    _bmnHandleFile(files[0]);
-  }
-}
-
-function _bmnHandleFile(file) {
-  _BMN_IMPORT.file = file;
-  var infoEl = document.getElementById('bmn-file-info');
-  if (infoEl) {
-    var sz = (file.size / 1024).toFixed(1) + ' KB';
-    if (file.size > 1048576) sz = (file.size / 1048576).toFixed(2) + ' MB';
-    infoEl.textContent = file.name + ' (' + sz + ')';
-    infoEl.style.display = 'block';
-  }
-  _msg('bmn-import-msg', null);
-}
-
-function _bmnDownloadTemplate() {
-  _loadSheetJS(function () {
-    var wsData = [
-      ['Kode Barang', 'NUP', 'Nama Barang', 'Merek/Tipe', 'Kategori', 'Pencatatan', 'Tanggal Perolehan', 'Nilai Perolehan', 'Nilai Buku', 'Kondisi', 'Lokasi UPT', 'Ruangan', 'Keterangan'],
-      ['3.05.01.04.001', '1', 'Laptop ThinkPad X1 Carbon Gen 11', 'Lenovo Core i7 16GB SSD 512GB', 'Alat Kantor & Rumah Tangga', 'BUKU', '2023-05-15', 25000000, 18500000, 'BAIK', 'Pusat (POA)', 'Ruang Rapat Ditjen', 'Pengadaan APBN 2023'],
-      ['3.01.02.01.002', '12', 'Teropong Binocular Marine 7x50', 'Bushnell Waterproof Compass', 'Alat Komunikasi & Navigasi', 'REGULER', '2024-01-10', 4500000, 4200000, 'BAIK', 'Pangkalan Batam', 'Gudang Logistik', 'Inventaris Pengawasan Patroli'],
-      ['3.01.01.01.005', '3', 'Radio Komunikasi SSB Marine', 'Icom IC-M802 HF', 'Alat Komunikasi & Navigasi', 'BUKU', '2021-08-20', 32000000, 12000000, 'RUSAK_RINGAN', 'Pangkalan Belawan', 'Ruang Radio', 'Perlu kalibrasi antena'],
-      ['3.05.02.01.010', '1', 'Meja Rapat Kayu Jati 10 Kursi', 'Custom Jepara Solid Wood', 'Alat Kantor & Rumah Tangga', 'REGULER', '2018-03-01', 15000000, 0, 'RUSAK_BERAT', 'Pangkalan Cilacap', 'Ruang Arsip', 'Rekomendasi usulan hapus']
-    ];
-    var ws = XLSX.utils.aoa_to_sheet(wsData);
-    var wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Template_BMN_SAKTI');
-    XLSX.writeFile(wb, 'Template_Impor_BMN_SAKTI_SIKAP.xlsx');
-  });
-}
-
-function _bmnExecuteDryRun() {
-  _msg('bmn-import-msg', null);
-  var btn = document.getElementById('bmn-btn-dryrun');
-
-  if (_BMN_IMPORT.mode === 'file') {
-    if (!_BMN_IMPORT.file) {
-      _msg('bmn-import-msg', 'error', 'Pilih atau unggah berkas Excel / CSV terlebih dahulu.');
-      return;
-    }
-
-    _setLoading(btn, true);
-    _loadSheetJS(function () {
-      var reader = new FileReader();
-      reader.onload = function (e) {
-        try {
-          var data = new Uint8Array(e.target.result);
-          var wb = XLSX.read(data, { type: 'array', cellDates: true });
-          var firstSheetName = wb.SheetNames[0];
-          var ws = wb.Sheets[firstSheetName];
-          var grid = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
-          _setLoading(btn, false);
-          _bmnProcessGridData(grid);
-        } catch (ex) {
-          _setLoading(btn, false);
-          _msg('bmn-import-msg', 'error', 'Gagal membaca berkas Excel: ' + ex.message);
-        }
-      };
-      reader.onerror = function () {
-        _setLoading(btn, false);
-        _msg('bmn-import-msg', 'error', 'Gagal membaca file dari disk.');
-      };
-      reader.readAsArrayBuffer(_BMN_IMPORT.file);
-    });
-  } else {
-    // Mode Paste Grid
-    var text = ((document.getElementById('bmn-paste-input') || {}).value || '').trim();
-    if (!text) {
-      _msg('bmn-import-msg', 'error', 'Tempel data teks dari spreadsheet SAKTI terlebih dahulu.');
-      return;
-    }
-
-    _setLoading(btn, true);
-    setTimeout(function () {
-      var lines = text.split(/\r?\n/);
-      var grid = lines.map(function (line) {
-        return line.split('\t').map(function (c) { return c.trim(); });
-      });
-      _setLoading(btn, false);
-      _bmnProcessGridData(grid);
-    }, 50);
-  }
-}
-
-function _bmnProcessGridData(grid) {
-  if (!grid || grid.length < 2) {
-    _msg('bmn-import-msg', 'error', 'Data tidak mencukupi (minimal harus ada 1 baris header dan 1 baris data).');
-    return;
-  }
-
-  // 1. Deteksi Baris Header (Pindai s/d 10 baris pertama)
-  var headerRowIdx = -1;
-  var maxMatch = 0;
-  var scanLimit = Math.min(10, grid.length);
-
-  for (var r = 0; r < scanLimit; r++) {
-    var row = grid[r] || [];
-    var matchCount = 0;
-    for (var c = 0; c < row.length; c++) {
-      var txt = String(row[c] || '').toLowerCase();
-      if (/kode|kd.*brg|nup|nama.*brg|uraian|barang|kondisi|nilai|perolehan|buku/i.test(txt)) {
-        matchCount++;
-      }
-    }
-    if (matchCount > maxMatch) {
-      maxMatch = matchCount;
-      headerRowIdx = r;
-    }
-  }
-
-  if (headerRowIdx === -1 || maxMatch < 2) {
-    _msg('bmn-import-msg', 'error', 'Baris header tidak terdeteksi. Pastikan terdapat kolom Kode Barang, NUP, atau Nama Barang.');
-    return;
-  }
-
-  var rawHeaders = grid[headerRowIdx] || [];
-  var colMap = {};
-
-  // 2. Pemetaan Sinonim Kolom (Fuzzy Matching)
-  rawHeaders.forEach(function (h, idx) {
-    var txt = String(h || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-    if (!txt) return;
-
-    if (!colMap.kodeBarang && (txt.indexOf('kodebarang') !== -1 || txt === 'kdbrg' || txt === 'kode' || txt === 'kodebrg')) {
-      colMap.kodeBarang = idx;
-    } else if (!colMap.nup && (txt === 'nup' || txt.indexOf('nourut') !== -1 || txt === 'no' || txt === 'nourutpendaftaran')) {
-      colMap.nup = idx;
-    } else if (!colMap.namaBarang && (txt.indexOf('namabarang') !== -1 || txt.indexOf('uraian') !== -1 || txt === 'nama' || txt === 'deskripsi')) {
-      colMap.namaBarang = idx;
-    } else if (!colMap.merekTipe && (txt.indexOf('merek') !== -1 || txt.indexOf('merk') !== -1 || txt.indexOf('tipe') !== -1 || txt.indexOf('spesifikasi') !== -1)) {
-      colMap.merekTipe = idx;
-    } else if (!colMap.kategoriPencatatan && (txt.indexOf('pencatatan') !== -1 || txt.indexOf('akun') !== -1 || txt.indexOf('intra') !== -1 || txt.indexOf('ekstra') !== -1)) {
-      colMap.kategoriPencatatan = idx;
-    } else if (!colMap.kodeKategori && (txt.indexOf('kategori') !== -1 || txt.indexOf('klasifikasi') !== -1 || txt.indexOf('golongan') !== -1)) {
-      colMap.kodeKategori = idx;
-    } else if (!colMap.tanggalPerolehan && (txt.indexOf('tanggal') !== -1 || txt.indexOf('tgl') !== -1 || txt.indexOf('tahun') !== -1)) {
-      colMap.tanggalPerolehan = idx;
-    } else if (!colMap.nilaiPerolehan && (txt.indexOf('perolehan') !== -1 || txt.indexOf('hargabeli') !== -1 || txt.indexOf('nilaibeli') !== -1)) {
-      colMap.nilaiPerolehan = idx;
-    } else if (!colMap.nilaiBuku && (txt.indexOf('nilaibuku') !== -1 || txt === 'buku' || txt.indexOf('nilaisisa') !== -1)) {
-      colMap.nilaiBuku = idx;
-    } else if (!colMap.kondisi && (txt.indexOf('kondisi') !== -1 || txt.indexOf('keadaan') !== -1)) {
-      colMap.kondisi = idx;
-    } else if (!colMap.lokasiId && (txt.indexOf('lokasi') !== -1 || txt.indexOf('upt') !== -1 || txt.indexOf('pangkalan') !== -1 || txt.indexOf('satker') !== -1)) {
-      colMap.lokasiId = idx;
-    } else if (!colMap.lokasiDetailRuangan && (txt.indexOf('ruang') !== -1 || txt.indexOf('detail') !== -1)) {
-      colMap.lokasiDetailRuangan = idx;
-    } else if (!colMap.keterangan && (txt.indexOf('keterangan') !== -1 || txt.indexOf('catatan') !== -1 || txt === 'ket')) {
-      colMap.keterangan = idx;
-    }
-  });
-
-  if (colMap.kodeBarang === undefined && colMap.namaBarang === undefined) {
-    _msg('bmn-import-msg', 'error', 'Kolom Kode Barang atau Nama Barang tidak berhasil dikenali.');
-    return;
-  }
-
-  // 3. Iterasi dan Validasi Tiap Baris Data
-  var validRows = [];
-  var invalidRows = [];
-  var totalGross = 0;
-  var totalNet = 0;
-
-  var uptMasters = (_BMN.masters && _BMN.masters.uptList) || [];
-  var katMasters = (_BMN.masters && _BMN.masters.kategoriList) || [];
-
-  for (var i = headerRowIdx + 1; i < grid.length; i++) {
-    var r = grid[i];
-    if (!r || r.length === 0) continue;
-
-    // Cek apakah baris kosong total
-    var isAllEmpty = true;
-    for (var k = 0; k < r.length; k++) {
-      if (String(r[k] || '').trim()) { isAllEmpty = false; break; }
-    }
-    if (isAllEmpty) continue;
-
-    var rowNum = i + 1;
-    var kode = colMap.kodeBarang !== undefined ? String(r[colMap.kodeBarang] || '').trim() : '';
-    var nup  = colMap.nup !== undefined ? String(r[colMap.nup] || '').trim() : '';
-    var nama = colMap.namaBarang !== undefined ? String(r[colMap.namaBarang] || '').trim() : '';
-    var merek = colMap.merekTipe !== undefined ? String(r[colMap.merekTipe] || '').trim() : '';
-    var pencRaw = colMap.kategoriPencatatan !== undefined ? String(r[colMap.kategoriPencatatan] || '').toUpperCase() : '';
-    var katRaw = colMap.kodeKategori !== undefined ? String(r[colMap.kodeKategori] || '').trim() : '';
-    var tglRaw = colMap.tanggalPerolehan !== undefined ? r[colMap.tanggalPerolehan] : null;
-    var npRaw = colMap.nilaiPerolehan !== undefined ? r[colMap.nilaiPerolehan] : 0;
-    var nbRaw = colMap.nilaiBuku !== undefined ? r[colMap.nilaiBuku] : 0;
-    var kondRaw = colMap.kondisi !== undefined ? String(r[colMap.kondisi] || '').toUpperCase() : '';
-    var uptRaw = colMap.lokasiId !== undefined ? String(r[colMap.lokasiId] || '').trim() : '';
-    var ruang = colMap.lokasiDetailRuangan !== undefined ? String(r[colMap.lokasiDetailRuangan] || '').trim() : '';
-    var ket = colMap.keterangan !== undefined ? String(r[colMap.keterangan] || '').trim() : '';
-
-    var errors = [];
-    if (!kode) errors.push('Kode Barang kosong');
-    if (!nup) errors.push('NUP kosong');
-    if (!nama) errors.push('Nama Barang kosong');
-
-    // Parse Rupiah
-    var np = _bmnParseRupiah(npRaw);
-    var nb = _bmnParseRupiah(nbRaw);
-
-    // Normalisasi Pencatatan (BUKU vs REGULER)
-    var penc = 'BUKU';
-    if (pencRaw.indexOf('REGULER') !== -1 || pencRaw.indexOf('52') !== -1 || pencRaw.indexOf('EKSTRA') !== -1) {
-      penc = 'REGULER';
-    }
-
-    // Normalisasi Kondisi (BAIK, RUSAK_RINGAN, RUSAK_BERAT)
-    var kond = 'BAIK';
-    if (kondRaw === 'RB' || kondRaw.indexOf('BERAT') !== -1) {
-      kond = 'RUSAK_BERAT';
-    } else if (kondRaw === 'RR' || kondRaw.indexOf('RINGAN') !== -1) {
-      kond = 'RUSAK_RINGAN';
-    }
-
-    // Normalisasi Kategori
-    var kodeKategori = 'KAT-ALAT_KANTOR';
-    if (katRaw && katMasters.length) {
-      for (var km = 0; km < katMasters.length; km++) {
-        var mItem = katMasters[km];
-        if (mItem.kodeKategori.toLowerCase() === katRaw.toLowerCase() ||
-            mItem.namaKategori.toLowerCase().indexOf(katRaw.toLowerCase()) !== -1 ||
-            katRaw.toLowerCase().indexOf(mItem.namaKategori.toLowerCase()) !== -1) {
-          kodeKategori = mItem.kodeKategori;
-          break;
-        }
-      }
-    }
-
-    // Normalisasi UPT
-    var lokasiId = 'UPT-PUSAT';
-    if (uptRaw && uptMasters.length) {
-      for (var um = 0; um < uptMasters.length; um++) {
-        var uItem = uptMasters[um];
-        if (uItem.lokasiId.toLowerCase() === uptRaw.toLowerCase() ||
-            uItem.namaLokasi.toLowerCase().indexOf(uptRaw.toLowerCase()) !== -1 ||
-            uptRaw.toLowerCase().indexOf(uItem.namaLokasi.toLowerCase()) !== -1) {
-          lokasiId = uItem.lokasiId;
-          break;
-        }
-      }
-    }
-
-    // Parse Tanggal
-    var tglIso = _bmnParseDate(tglRaw);
-
-    var itemObj = {
-      rowNum: rowNum,
-      kodeBarang: kode,
-      nup: nup,
-      namaBarang: nama,
-      merekTipe: merek,
-      kategoriPencatatan: penc,
-      kodeKategori: kodeKategori,
-      tanggalPerolehan: tglIso,
-      nilaiPerolehan: np,
-      nilaiBuku: nb,
-      kondisi: kond,
-      lokasiId: lokasiId,
-      lokasiDetailRuangan: ruang,
-      keterangan: ket
-    };
-
-    if (errors.length === 0) {
-      validRows.push(itemObj);
-      totalGross += np;
-      totalNet += nb;
-    } else {
-      itemObj.errors = errors;
-      invalidRows.push(itemObj);
-    }
-  }
-
-  _BMN_IMPORT.validRows = validRows;
-  _BMN_IMPORT.invalidRows = invalidRows;
-  _BMN_IMPORT.totalGross = totalGross;
-  _BMN_IMPORT.totalNet = totalNet;
-
-  // 4. Render Hasil Dry-Run
-  var totalRows = validRows.length + invalidRows.length;
-  var statTotal = document.getElementById('bmn-stat-total');
-  var statValid = document.getElementById('bmn-stat-valid');
-  var statInvalid = document.getElementById('bmn-stat-invalid');
-  var statGross = document.getElementById('bmn-stat-gross');
-
-  if (statTotal) statTotal.textContent = totalRows;
-  if (statValid) statValid.textContent = validRows.length;
-  if (statInvalid) statInvalid.textContent = invalidRows.length;
-  if (statGross) statGross.textContent = _rupiah(totalGross);
-
-  // Render Error Box if any
-  var errBox = document.getElementById('bmn-import-error-list');
-  if (errBox) {
-    if (invalidRows.length > 0) {
-      var errHtml = '<strong>' + invalidRows.length + ' baris dilewati karena data tidak lengkap:</strong><ul style="margin:4px 0 0 16px; padding:0;">';
-      invalidRows.slice(0, 10).forEach(function (ir) {
-        errHtml += '<li>Baris ' + ir.rowNum + ': ' + ir.errors.join(', ') + ' (' + _esc(ir.namaBarang || ir.kodeBarang || 'Tanpa Nama') + ')</li>';
-      });
-      if (invalidRows.length > 10) {
-        errHtml += '<li>... dan ' + (invalidRows.length - 10) + ' baris bermasalah lainnya.</li>';
-      }
-      errHtml += '</ul>';
-      errBox.innerHTML = errHtml;
-      errBox.style.display = 'block';
-    } else {
-      errBox.innerHTML = '';
-      errBox.style.display = 'none';
-    }
-  }
-
-  // Render Preview 5 Baris
-  var tbody = document.getElementById('bmn-import-preview-body');
-  if (tbody) {
-    var sampleRows = validRows.slice(0, 5);
-    if (sampleRows.length === 0 && invalidRows.length > 0) sampleRows = invalidRows.slice(0, 5);
-
-    tbody.innerHTML = sampleRows.map(function (s) {
-      var isValid = !s.errors;
-      var badge = isValid
-        ? '<span class="badge" style="background:#DEF7EC;color:#03543F;">Valid</span>'
-        : '<span class="badge" style="background:#FEE2E2;color:#DC2626;">Galat</span>';
-      return '<tr>' +
-        '<td>' + badge + '</td>' +
-        '<td class="tnum font-bold">' + _esc(s.kodeBarang || '—') + '</td>' +
-        '<td class="tnum">' + _esc(s.nup || '—') + '</td>' +
-        '<td>' + _esc(s.namaBarang || '—') + '</td>' +
-        '<td>' + _esc(s.kondisi || '—') + '</td>' +
-        '<td>' + _esc(s.kategoriPencatatan || '—') + '</td>' +
-        '<td style="text-align:right;" class="tnum">' + _rupiah(s.nilaiPerolehan) + '</td>' +
-      '</tr>';
-    }).join('');
-  }
-
-  var reportWrap = document.getElementById('bmn-dryrun-report');
-  if (reportWrap) reportWrap.classList.remove('n-hidden');
-
-  var btnCommit = document.getElementById('bmn-btn-commit-import');
-  if (btnCommit) {
-    if (validRows.length > 0) {
-      btnCommit.disabled = false;
-      btnCommit.textContent = 'Simpan ' + validRows.length + ' Unit ke Database';
-    } else {
-      btnCommit.disabled = true;
-      btnCommit.textContent = 'Tidak Ada Baris Valid';
-    }
-  }
-}
-
-function _bmnParseRupiah(val) {
-  if (val === null || val === undefined || val === '') return 0;
-  if (typeof val === 'number') return isNaN(val) ? 0 : val;
-  var s = String(val).replace(/Rp|\s/gi, '').trim();
-  if (s.indexOf('.') !== -1 && s.indexOf(',') !== -1) {
-    s = s.replace(/\./g, '').replace(',', '.');
-  } else if (s.indexOf('.') !== -1 && s.indexOf(',') === -1) {
-    var parts = s.split('.');
-    if (parts.length > 2 || (parts.length === 2 && parts[1].length === 3)) {
-      s = s.replace(/\./g, '');
-    }
-  } else if (s.indexOf(',') !== -1) {
-    s = s.replace(',', '.');
-  }
-  var n = parseFloat(s);
-  return isNaN(n) ? 0 : n;
-}
-
-function _bmnParseDate(val) {
-  if (!val) return new Date().toISOString().substring(0, 10);
-  if (val instanceof Date) {
-    return isNaN(val.getTime()) ? new Date().toISOString().substring(0, 10) : val.toISOString().substring(0, 10);
-  }
-  if (typeof val === 'number') {
-    // Excel serial date number
-    var d = new Date(Math.round((val - 25569) * 86400 * 1000));
-    return isNaN(d.getTime()) ? new Date().toISOString().substring(0, 10) : d.toISOString().substring(0, 10);
-  }
-  var s = String(val).trim();
-  var match = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/);
-  if (match) {
-    var dd = match[1].padStart(2, '0');
-    var mm = match[2].padStart(2, '0');
-    var yyyy = match[3];
-    return yyyy + '-' + mm + '-' + dd;
-  }
-  var parsed = new Date(s);
-  return isNaN(parsed.getTime()) ? new Date().toISOString().substring(0, 10) : parsed.toISOString().substring(0, 10);
-}
-
-function _bmnExecuteImportCommit() {
-  if (_BMN_IMPORT.isProcessing) return;
-  var validRows = _BMN_IMPORT.validRows || [];
-  if (!validRows.length) return;
-
-  var btn = document.getElementById('bmn-btn-commit-import');
-  var progWrap = document.getElementById('bmn-import-progress-wrap');
-  var progBar = document.getElementById('bmn-import-progress-bar');
-  var progPct = document.getElementById('bmn-import-progress-pct');
-  var progTxt = document.getElementById('bmn-import-progress-txt');
-
-  _BMN_IMPORT.isProcessing = true;
-  if (btn) btn.disabled = true;
-  if (progWrap) progWrap.classList.remove('n-hidden');
-
-  var chunkSize = 200;
-  var totalChunks = Math.ceil(validRows.length / chunkSize);
-  var currentChunkIdx = 0;
-  var batchId = 'BATCH-BMN-' + (new Date()).toISOString().replace(/[-:T]/g, '').substring(0, 14) + '-' + Math.random().toString(36).substring(2, 8).toUpperCase();
-
-  function sendNextChunk() {
-    var start = currentChunkIdx * chunkSize;
-    var chunk = validRows.slice(start, start + chunkSize);
-    var pct = Math.round((currentChunkIdx / totalChunks) * 100);
-
-    if (progBar) progBar.style.width = pct + '%';
-    if (progPct) progPct.textContent = pct + '%';
-    if (progTxt) progTxt.textContent = 'Menyimpan batch ' + (currentChunkIdx + 1) + ' dari ' + totalChunks + ' (' + start + ' - ' + (start + chunk.length) + ' aset)...';
-
-    google.script.run
-      .withSuccessHandler(function (res) {
-        if (!res.success) {
-          _BMN_IMPORT.isProcessing = false;
-          if (btn) btn.disabled = false;
-          _msg('bmn-import-msg', 'error', 'Galat pada batch ' + (currentChunkIdx + 1) + ': ' + (res.error || 'Gagal menyimpan.'));
-          return;
-        }
-
-        currentChunkIdx++;
-        if (currentChunkIdx < totalChunks) {
-          sendNextChunk();
-        } else {
-          // Selesai seluruh batch!
-          if (progBar) progBar.style.width = '100%';
-          if (progPct) progPct.textContent = '100%';
-          if (progTxt) progTxt.textContent = 'Selesai! ' + validRows.length + ' unit aset berhasil diimpor.';
-
-          setTimeout(function () {
-            _BMN_IMPORT.isProcessing = false;
-            closeModal('modal-bmn-import');
-            _msg('bmn-table-msg', 'success', 'Berhasil mengimpor ' + validRows.length + ' unit aset BMN ke register inventaris.');
-            _tuLoadBMN(true);
-          }, 800);
-        }
-      })
-      .withFailureHandler(function (err) {
-        _BMN_IMPORT.isProcessing = false;
-        if (btn) btn.disabled = false;
-        _msg('bmn-import-msg', 'error', 'Terjadi kesalahan sistem saat mengirim batch: ' + (err.message || 'Koneksi gagal.'));
-      })
-      .bmn_importBatchAset(APP.token, {
-        items: chunk,
-        batchId: batchId
-      });
-  }
-
-  sendNextChunk();
+  _simanpoaOpenSaktiSyncModal('RINCIAN_BARANG');
 }
 
 // ============================================================
@@ -9766,6 +9368,14 @@ function _bmnSubmitCreateHapus() {
   }
   if (!keterangan) {
     _msg('bmn-create-hps-msg', 'error', 'Keterangan / pertimbangan usulan wajib diisi.');
+    return;
+  }
+  if (tglSurat && (!_bmnValidateSaneDate(tglSurat, 1990, new Date().getFullYear()) || tglSurat > _bmnTodayIso())) {
+    _msg('bmn-create-hps-msg', 'error', 'Tanggal surat usulan tidak valid atau berada di masa depan.');
+    return;
+  }
+  if (linkSurat && !/^https?:\/\/\S+/i.test(linkSurat)) {
+    _msg('bmn-create-hps-msg', 'error', 'Tautan surat usulan harus berupa URL yang valid (http:// atau https://).');
     return;
   }
 
@@ -11024,9 +10634,22 @@ function _simanpoaSubmitQuickStnk() {
   var tglPajak = (document.getElementById('simanpoa-qs-tgl-pajak') || {}).value || '';
   var tglStnk = (document.getElementById('simanpoa-qs-tgl-stnk') || {}).value || '';
   var btn = document.getElementById('simanpoa-btn-save-quick-stnk');
+  var curYr = new Date().getFullYear();
 
   if (!asetId || !noPol || !tglPajak) {
     _msg('simanpoa-quick-stnk-msg', 'error', 'Nomor polisi dan tanggal jatuh tempo pajak tahunan wajib diisi.');
+    return;
+  }
+  if (!/^[A-Z]{1,2}\s?\d{1,4}\s?[A-Z]{0,3}$/.test(noPol) || !/\d/.test(noPol)) {
+    _msg('simanpoa-quick-stnk-msg', 'error', 'Format Nomor Polisi tidak valid (contoh yang benar: B 1042 PQA).');
+    return;
+  }
+  if (!_bmnValidateSaneDate(tglPajak, 2000, curYr + 6)) {
+    _msg('simanpoa-quick-stnk-msg', 'error', 'Tanggal jatuh tempo pajak tahunan tidak berada pada rentang tahun yang wajar.');
+    return;
+  }
+  if (tglStnk && !_bmnValidateSaneDate(tglStnk, 2000, curYr + 10)) {
+    _msg('simanpoa-quick-stnk-msg', 'error', 'Tanggal jatuh tempo STNK 5 tahunan tidak berada pada rentang tahun yang wajar.');
     return;
   }
 
@@ -11475,12 +11098,33 @@ function _simanpoaProcessExtractedSaktiLines(allLines, fileName) {
     perEl.value = parsed.periodeLaporan;
   }
 
+  if (parsed.periodeLaporan && !_bmnValidateSaneDate(parsed.periodeLaporan, 2000, new Date().getFullYear() + 1)) {
+    _simanpoaSetSaktiProgress(false, 0, '');
+    if (prevBox) prevBox.classList.add('n-hidden');
+    if (commitBtn) commitBtn.disabled = true;
+    _msg('simanpoa-sync-msg', 'error', 'Format Periode / Tanggal Buku tidak valid. Gunakan format YYYY-MM-DD (contoh: 2026-09-30).');
+    return;
+  }
+
   if (!parsed.rows || parsed.rows.length === 0) {
     _simanpoaSetSaktiProgress(false, 0, '');
     if (prevBox) prevBox.classList.add('n-hidden');
     if (commitBtn) commitBtn.disabled = true;
     _msg('simanpoa-sync-msg', 'error', 'Format tabel SAKTI tidak dikenali atau tidak ditemukan baris data pada dokumen ini. Pastikan berkas berasal dari ekspor resmi SAKTI.');
     return;
+  }
+
+  if (parsed.docType !== 'NERACA') {
+    var invalidSakti = parsed.rows.filter(function (r) {
+      return r.kuantitasAwal < 0 || r.kuantitasTambah < 0 || r.kuantitasKurang < 0 || r.kuantitasAkhir < 0 || r.nilaiAwal < 0 || r.nilaiAkhir < 0;
+    });
+    if (invalidSakti.length > 0) {
+      _simanpoaSetSaktiProgress(false, 0, '');
+      if (prevBox) prevBox.classList.add('n-hidden');
+      if (commitBtn) commitBtn.disabled = true;
+      _msg('simanpoa-sync-msg', 'error', 'Ditemukan ' + invalidSakti.length + ' baris dengan kuantitas atau saldo nilai negatif yang tidak wajar. Periksa kembali dokumen sumber SAKTI.');
+      return;
+    }
   }
 
   _simanpoaSetSaktiProgress(true, 90, 'Menganalisis perubahan delta dengan basis data SIMANPOA di server...');
@@ -11533,9 +11177,9 @@ function _simanpoaHandleSaktiFile(e) {
 
   var ext = (file.name.split('.').pop() || '').toLowerCase();
 
-  if (ext === 'xlsx' || ext === 'xls') {
-    _simanpoaSetSaktiProgress(true, 25, 'Memuat pembaca lembar kerja Excel...');
-    _msg('simanpoa-sync-msg', 'info', 'Membaca berkas Excel SAKTI...');
+  if (ext === 'xlsx' || ext === 'xls' || ext === 'csv') {
+    _simanpoaSetSaktiProgress(true, 25, 'Memuat pembaca lembar kerja Excel / CSV...');
+    _msg('simanpoa-sync-msg', 'info', 'Membaca berkas ' + ext.toUpperCase() + ' SAKTI...');
     _loadSheetJS(function () {
       if (typeof XLSX === 'undefined') {
         _simanpoaSetSaktiProgress(false, 0, '');
@@ -11951,12 +11595,12 @@ function _simanpoaExecuteDocDisposal() {
   var instansi = ((document.getElementById('simanpoa-disp-instansi') || {}).value || '').trim();
   var btn = document.getElementById('simanpoa-btn-execute-disposal');
 
-  if (!noDok) {
-    _msg('simanpoa-disposal-msg', 'error', 'Nomor Dokumen SK / BAST wajib diisi.');
+  if (!noDok || noDok.length < 3 || !/[A-Z0-9]/i.test(noDok)) {
+    _msg('simanpoa-disposal-msg', 'error', 'Nomor Dokumen SK / BAST wajib diisi dengan format yang valid (minimal 3 karakter).');
     return;
   }
-  if (!tglDok) {
-    _msg('simanpoa-disposal-msg', 'error', 'Tanggal Dokumen wajib diisi.');
+  if (!tglDok || !_bmnValidateSaneDate(tglDok, 1990, new Date().getFullYear()) || tglDok > _bmnTodayIso()) {
+    _msg('simanpoa-disposal-msg', 'error', 'Tanggal Dokumen tidak valid atau berada di masa depan.');
     return;
   }
 
