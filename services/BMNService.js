@@ -2220,8 +2220,13 @@ function bmn_previewSaktiSync(token, payload) {
     var existRekap = sheetToObjects(rekapSheet);
     var rekapMap = {};
     existRekap.forEach(function (rk) {
-      var key = String(rk['JenisLaporan']) + '__' + String(rk['KodeBarang']);
-      rekapMap[key] = rk;
+      var jenisRk = String(rk['JenisLaporan'] || '').toUpperCase().trim();
+      var akunRk = String(rk['KodeAkun'] || '').trim();
+      var brgRk = String(rk['KodeBarang'] || '').replace(/\./g, '').trim();
+      rekapMap[jenisRk + '__' + akunRk + '__' + brgRk] = rk;
+      if (!rekapMap[jenisRk + '__' + brgRk]) {
+        rekapMap[jenisRk + '__' + brgRk] = rk;
+      }
     });
 
     var totalMutasiTambahQty = 0;
@@ -2253,8 +2258,8 @@ function bmn_previewSaktiSync(token, payload) {
         resolvedJenis = (unitVal > 0 && unitVal < _BMN_CAPITALIZATION_THRESHOLD) ? 'EKSTRA' : 'INTRA';
       }
 
-      var lookupKey = resolvedJenis + '__' + kodeBrg;
-      var existing = rekapMap[lookupKey] || null;
+      var lookupKey = resolvedJenis + '__' + kodeAkun + '__' + kodeBrg;
+      var existing = rekapMap[lookupKey] || rekapMap[resolvedJenis + '__' + kodeBrg] || null;
       var oldQ = existing ? (parseFloat(existing['KuantitasAkhir']) || 0) : null;
       var oldN = existing ? (parseFloat(existing['NilaiAkhir']) || 0) : null;
 
@@ -2352,11 +2357,12 @@ function bmn_commitSaktiSync(token, payload) {
         var existNrc = sheetToObjects(neracaSheet);
         var nrcIdxMap = {};
         for (var n = 0; n < existNrc.length; n++) {
-          nrcIdxMap[String(existNrc[n]['KodeAkun'])] = n + 2;
+          nrcIdxMap[String(existNrc[n]['KodeAkun']).trim()] = n + 2;
         }
 
         var updatedNrc = 0;
         var insertedNrc = 0;
+        var newNeracaRows = [];
 
         for (var i = 0; i < payload.rows.length; i++) {
           var r = payload.rows[i];
@@ -2378,11 +2384,15 @@ function bmn_commitSaktiSync(token, payload) {
             updatedNrc++;
           } else {
             var nId = 'NRC-' + Utilities.getUuid().substring(0, 8).toUpperCase();
-            neracaSheet.appendRow([
+            newNeracaRows.push([
               nId, periodeLap, kode, uraian, nilai, kat, now, session.userId, fileName
             ]);
             insertedNrc++;
           }
+        }
+
+        if (newNeracaRows.length > 0) {
+          neracaSheet.getRange(neracaSheet.getLastRow() + 1, 1, newNeracaRows.length, newNeracaRows[0].length).setValues(newNeracaRows);
         }
 
         logAudit(session.userId, 'SYNC_SAKTI_NERACA', 'TX_BMN_Neraca', periodeLap, {
@@ -2402,8 +2412,10 @@ function bmn_commitSaktiSync(token, payload) {
       var existRekap = sheetToObjects(rekapSheet);
       var rekapIdxMap = {};
       for (var k = 0; k < existRekap.length; k++) {
-        var rKey = String(existRekap[k]['JenisLaporan']).toUpperCase() + '__' + String(existRekap[k]['KodeBarang']);
-        rekapIdxMap[rKey] = k + 2;
+        var rJenis = String(existRekap[k]['JenisLaporan'] || '').toUpperCase().trim();
+        var rAkun = String(existRekap[k]['KodeAkun'] || '').trim();
+        var rBrg = String(existRekap[k]['KodeBarang'] || '').replace(/\./g, '').trim();
+        rekapIdxMap[rJenis + '__' + rAkun + '__' + rBrg] = k + 2;
       }
 
       var updatedRekap = 0;
@@ -2422,6 +2434,8 @@ function bmn_commitSaktiSync(token, payload) {
         }
       }
 
+      var newRekapRows = [];
+      var newRekapBatchIdx = {};
       var newUnitRows = [];
       var periode = getCurrentPeriode();
 
@@ -2440,16 +2454,16 @@ function bmn_commitSaktiSync(token, payload) {
         var nAkhir = parseFloat(item.nilaiAkhir !== undefined ? item.nilaiAkhir : (nAwal + nTambah - nKurang)) || 0;
 
         var unitVal = qAkhir > 0 ? (nAkhir / qAkhir) : (qTambah > 0 ? (nTambah / qTambah) : nAwal);
-        var jenis = String(item.jenisLaporan || '').toUpperCase();
+        var jenis = String(item.jenisLaporan || '').toUpperCase().trim();
         if (jenis !== 'INTRA' && jenis !== 'EKSTRA') {
           jenis = (unitVal > 0 && unitVal < _BMN_CAPITALIZATION_THRESHOLD) ? 'EKSTRA' : 'INTRA';
         }
 
-        var mapKey = jenis + '__' + kodeBrg;
-        var kodeAkun = String(item.kodeAkun || '132111');
-        var uraianAkun = String(item.uraianAkun || 'Peralatan dan Mesin');
-        var uraianBrg = String(item.uraianBarang || 'Barang BMN');
-        var satuan = String(item.satuan || 'Unit');
+        var kodeAkun = String(item.kodeAkun || '132111').trim();
+        var mapKey = jenis + '__' + kodeAkun + '__' + kodeBrg;
+        var uraianAkun = String(item.uraianAkun || 'Peralatan dan Mesin').trim();
+        var uraianBrg = String(item.uraianBarang || 'Barang BMN').trim();
+        var satuan = String(item.satuan || 'Unit').trim();
 
         if (rekapIdxMap[mapKey]) {
           var rIdx = rekapIdxMap[mapKey];
@@ -2459,9 +2473,16 @@ function bmn_commitSaktiSync(token, payload) {
             now, session.userId, fileName
           ]]);
           updatedRekap++;
+        } else if (newRekapBatchIdx[mapKey] !== undefined) {
+          newRekapRows[newRekapBatchIdx[mapKey]] = [
+            newRekapRows[newRekapBatchIdx[mapKey]][0], periodeLap, jenis, kodeAkun, uraianAkun, kodeBrg, uraianBrg, satuan,
+            qAwal, nAwal, qTambah, nTambah, qKurang, nKurang, qAkhir, nAkhir,
+            now, session.userId, fileName
+          ];
         } else {
           var newRekapId = 'RKP-' + Utilities.getUuid().substring(0, 8).toUpperCase();
-          rekapSheet.appendRow([
+          newRekapBatchIdx[mapKey] = newRekapRows.length;
+          newRekapRows.push([
             newRekapId, periodeLap, jenis, kodeAkun, uraianAkun, kodeBrg, uraianBrg, satuan,
             qAwal, nAwal, qTambah, nTambah, qKurang, nKurang, qAkhir, nAkhir,
             now, session.userId, fileName
@@ -2469,7 +2490,7 @@ function bmn_commitSaktiSync(token, payload) {
           insertedRekap++;
         }
 
-        // Jika terdapat Mutasi Bertambah (> 0) dan opsi autoGenerateUnits aktif, tambahkan ke TX_BMN_Aset (maks 20 unit per item agar aman)
+        // Jika terdapat Mutasi Bertambah (> 0) dan opsi autoGenerateUnits aktif, tambahkan ke TX_BMN_Aset (maks 25 unit per item agar aman)
         if (payload.autoGenerateUnits !== false && qTambah > 0 && qTambah <= 25) {
           var perUnitTambah = Math.round(nTambah / qTambah);
           var pencatatanUnit = (jenis === 'EKSTRA' || perUnitTambah < _BMN_CAPITALIZATION_THRESHOLD) ? 'REGULER' : 'BUKU';
@@ -2479,7 +2500,8 @@ function bmn_commitSaktiSync(token, payload) {
           for (var u = 1; u <= qTambah; u++) {
             var nextNup = baseNup + u;
             maxNupByKode[kodeBrg] = nextNup;
-            var uAsetId = 'BMN-' + kodeBrg + '-' + ('000' + nextNup).slice(-3);
+            var nupPad = nextNup >= 1000 ? String(nextNup) : ('000' + nextNup).slice(-3);
+            var uAsetId = 'BMN-' + kodeBrg + '-' + nupPad;
             var uRowId = 'ROW-' + Utilities.getUuid().substring(0, 12).toUpperCase();
             newUnitRows.push([
               uRowId, _BMN_DIVISI_ID, periode, session.userId, now,
@@ -2494,6 +2516,10 @@ function bmn_commitSaktiSync(token, payload) {
             autoUnitAdded++;
           }
         }
+      }
+
+      if (newRekapRows.length > 0) {
+        rekapSheet.getRange(rekapSheet.getLastRow() + 1, 1, newRekapRows.length, newRekapRows[0].length).setValues(newRekapRows);
       }
 
       if (newUnitRows.length > 0) {
