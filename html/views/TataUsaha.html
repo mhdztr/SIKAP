@@ -3257,22 +3257,7 @@
               <span class="form-section-badge" style="background:#ECFDF5; color:#065F46;">Wajib 2 Dokumen (Fisik + STNK)</span>
             </div>
 
-            <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:14px;">
-              <div class="form-grp">
-                <label for="bmn-form-nopol">Nomor Polisi (Plat Nomor) <span style="color:var(--n-crit)">*</span></label>
-                <input type="text" id="bmn-form-nopol" placeholder="Mis. B 1042 PQA" style="text-transform:uppercase;">
-              </div>
-              <div class="form-grp">
-                <label for="bmn-form-tgl-pajak">Jatuh Tempo Pajak Tahunan <span style="color:var(--n-crit)">*</span></label>
-                <input type="date" id="bmn-form-tgl-pajak">
-              </div>
-              <div class="form-grp">
-                <label for="bmn-form-tgl-stnk">Jatuh Tempo STNK 5 Tahunan</label>
-                <input type="date" id="bmn-form-tgl-stnk">
-              </div>
-            </div>
-
-            <div style="display:grid; grid-template-columns: 240px 1fr; gap:16px; margin-top:8px; align-items:start;">
+            <div style="display:grid; grid-template-columns: 220px 1fr; gap:16px; align-items:start;">
               <div>
                 <input type="file" id="bmn-form-foto-stnk" class="n-file-input-hidden" accept="image/*,application/pdf" onchange="_bmnHandleStnkFile(event)">
                 <label for="bmn-form-foto-stnk" class="n-file-trigger-btn">
@@ -3281,42 +3266,60 @@
                     <circle cx="8.5" cy="8.5" r="1.5"></circle>
                     <polyline points="21 15 16 10 5 21"></polyline>
                   </svg>
-                  <span>Pilih Foto/Scan STNK</span>
+                  <span>Unggah Foto / PDF STNK</span>
                 </label>
-                <div id="bmn-stnk-preview-wrap" style="position:relative; width:100%; height:110px; border-radius:8px; border:1px dashed var(--n-border); background:var(--n-surface-1); display:flex; align-items:center; justify-content:center; overflow:hidden; margin-top:4px;">
+                <div id="bmn-stnk-preview-wrap" style="position:relative; width:100%; height:118px; border-radius:8px; border:1px dashed var(--n-border); background:var(--n-surface-1); display:flex; align-items:center; justify-content:center; overflow:hidden; margin-top:6px;">
                   <img id="bmn-stnk-preview-img" src="" alt="Pratinjau STNK" style="max-width:100%; max-height:100%; object-fit:contain; display:none;">
                   <div id="bmn-stnk-placeholder" style="font-size:0.75rem; color:var(--n-text-muted); text-align:center; padding:8px;">
-                    Belum ada berkas STNK
+                    Unggah foto/PDF STNK untuk pemindaian OCR otomatis
                   </div>
                 </div>
               </div>
 
               <div>
-                <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+                <div class="stnk-scan-toolbar">
                   <button type="button" class="btn-outline ctl-sm" id="bmn-btn-scan-stnk" onclick="_bmnTriggerStnkOcr()">
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <line x1="4" y1="9" x2="20" y2="9"></line>
-                      <line x1="4" y1="15" x2="20" y2="15"></line>
-                      <line x1="10" y1="3" x2="8" y2="21"></line>
-                      <line x1="16" y1="3" x2="14" y2="21"></line>
+                      <path d="M3 7V5a2 2 0 0 1 2-2h2"></path>
+                      <path d="M17 3h2a2 2 0 0 1 2 2v2"></path>
+                      <path d="M21 17v2a2 2 0 0 1-2 2h-2"></path>
+                      <path d="M7 21H5a2 2 0 0 1-2-2v-2"></path>
+                      <line x1="7" y1="12" x2="17" y2="12"></line>
                     </svg>
-                    <span>Pindai OCR STNK (Anti-Blur Preprocessing)</span>
+                    <span>Pindai Ulang OCR STNK</span>
                   </button>
-                  <span id="bmn-stnk-ocr-status" style="font-size:0.75rem; color:var(--n-text-muted);"></span>
+                  <span id="bmn-stnk-conf-badge" class="stnk-ocr-confidence-badge" style="display:none;"></span>
+                </div>
+                <div id="bmn-stnk-ocr-status" style="font-size:0.75rem; color:var(--n-text-muted); margin-top:6px;">
+                  Setelah berkas diunggah, OCR membaca identitas dan masa berlaku STNK secara otomatis.
                 </div>
 
-                <div id="bmn-stnk-ocr-result-box" style="padding:10px 12px; background:var(--n-surface-1); border-radius:8px; border:1px solid var(--n-border); font-size:0.78rem;">
-                  <div style="font-weight:600; margin-bottom:4px; display:flex; align-items:center; justify-content:space-between;">
-                    <span>Verifikasi Data Visual STNK:</span>
-                    <span id="bmn-stnk-conf-badge" class="badge" style="display:none;"></span>
-                  </div>
-                  <div style="display:flex; align-items:center; gap:8px; margin-top:6px;">
-                    <input type="checkbox" id="bmn-form-stnk-verified" value="YA">
-                    <label for="bmn-form-stnk-verified" style="font-weight:600; font-size:0.75rem; cursor:pointer;">
-                      Saya menyatakan telah memeriksa fisik/scan STNK dan data jatuh tempo telah diverifikasi akurat.
-                    </label>
-                  </div>
-                </div>
+                <div id="bmn-stnk-ocr-missing-box" class="stnk-ocr-missing-alert n-hidden"></div>
+                <div id="bmn-stnk-ocr-detail" class="stnk-ocr-panel n-hidden"></div>
+              </div>
+            </div>
+
+            <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:14px; margin-top:12px;">
+              <div class="form-grp">
+                <label for="bmn-form-nopol">Nomor Polisi (Plat Nomor) <span style="color:var(--n-crit)">*</span><span id="bmn-stnk-flag-nopol"></span></label>
+                <input type="text" id="bmn-form-nopol" placeholder="Mis. B 1042 PQA" style="text-transform:uppercase;" oninput="_stnkClearFieldFlag(this, 'bmn-stnk-flag-nopol')">
+              </div>
+              <div class="form-grp">
+                <label for="bmn-form-tgl-pajak">Jatuh Tempo Pajak Tahunan <span style="color:var(--n-crit)">*</span><span id="bmn-stnk-flag-pajak"></span></label>
+                <input type="date" id="bmn-form-tgl-pajak" oninput="_stnkClearFieldFlag(this, 'bmn-stnk-flag-pajak')" onchange="_stnkClearFieldFlag(this, 'bmn-stnk-flag-pajak')">
+              </div>
+              <div class="form-grp">
+                <label for="bmn-form-tgl-stnk">Jatuh Tempo STNK 5 Tahunan<span id="bmn-stnk-flag-stnk"></span></label>
+                <input type="date" id="bmn-form-tgl-stnk" oninput="_stnkClearFieldFlag(this, 'bmn-stnk-flag-stnk')" onchange="_stnkClearFieldFlag(this, 'bmn-stnk-flag-stnk')">
+              </div>
+            </div>
+
+            <div id="bmn-stnk-ocr-result-box" class="stnk-ocr-panel">
+              <div style="display:flex; align-items:center; gap:8px;">
+                <input type="checkbox" id="bmn-form-stnk-verified" value="YA">
+                <label for="bmn-form-stnk-verified" style="font-weight:600; font-size:0.75rem; cursor:pointer; margin:0;">
+                  Saya menyatakan telah memeriksa fisik/scan STNK dan data jatuh tempo telah diverifikasi akurat.
+                </label>
               </div>
             </div>
             <input type="hidden" id="bmn-form-foto-stnk-evidence-id" value="">
@@ -4210,20 +4213,62 @@
           <input type="hidden" id="simanpoa-qs-aset-id">
 
           <div class="form-grp">
-            <label for="simanpoa-qs-nopol">Nomor Polisi (Plat Nomor) <span style="color:var(--n-crit)">*</span></label>
-            <input type="text" id="simanpoa-qs-nopol" required style="text-transform:uppercase;">
+            <label>Unggah Foto / Scan PDF STNK (Auto-OCR)</label>
+            <div style="display:grid; grid-template-columns: 160px 1fr; gap:12px; align-items:start;">
+              <div>
+                <input type="file" id="simanpoa-qs-file-stnk" class="n-file-input-hidden" accept="image/*,application/pdf" onchange="_simanpoaHandleQuickStnkFile(event)">
+                <label for="simanpoa-qs-file-stnk" class="n-file-trigger-btn">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                    <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                    <polyline points="21 15 16 10 5 21"></polyline>
+                  </svg>
+                  <span>Pilih Berkas STNK</span>
+                </label>
+                <div id="simanpoa-qs-preview-wrap" style="width:100%; height:88px; border-radius:8px; border:1px dashed var(--n-border); background:var(--n-surface-1); display:flex; align-items:center; justify-content:center; overflow:hidden; margin-top:6px;">
+                  <img id="simanpoa-qs-preview-img" src="" alt="Pratinjau STNK" style="max-width:100%; max-height:100%; object-fit:contain; display:none;">
+                  <div id="simanpoa-qs-placeholder" style="font-size:0.7rem; color:var(--n-text-muted); text-align:center; padding:6px;">
+                    Foto / PDF STNK
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <div class="stnk-scan-toolbar">
+                  <button type="button" class="btn-outline ctl-sm" id="simanpoa-qs-btn-rescan" onclick="_simanpoaTriggerQuickStnkOcr()">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M3 7V5a2 2 0 0 1 2-2h2"></path>
+                      <path d="M17 3h2a2 2 0 0 1 2 2v2"></path>
+                      <path d="M21 17v2a2 2 0 0 1-2 2h-2"></path>
+                      <path d="M7 21H5a2 2 0 0 1-2-2v-2"></path>
+                      <line x1="7" y1="12" x2="17" y2="12"></line>
+                    </svg>
+                    <span>Pindai Ulang OCR</span>
+                  </button>
+                  <span id="simanpoa-qs-conf-badge" class="stnk-ocr-confidence-badge" style="display:none;"></span>
+                </div>
+                <div id="simanpoa-qs-ocr-status" style="font-size:0.74rem; color:var(--n-text-muted); margin-top:6px;">
+                  Unggah STNK atau Notice Pajak untuk membaca plat nomor, jatuh tempo, dan identitas kendaraan secara otomatis.
+                </div>
+                <div id="simanpoa-qs-ocr-missing" class="stnk-ocr-missing-alert n-hidden"></div>
+              </div>
+            </div>
+            <div id="simanpoa-qs-ocr-detail" class="stnk-ocr-panel n-hidden"></div>
           </div>
+
           <div class="form-grp">
-            <label for="simanpoa-qs-tgl-pajak">Tanggal Jatuh Tempo Pajak Tahunan Baru <span style="color:var(--n-crit)">*</span></label>
-            <input type="date" id="simanpoa-qs-tgl-pajak" required>
+            <label for="simanpoa-qs-nopol">Nomor Polisi (Plat Nomor) <span style="color:var(--n-crit)">*</span><span id="simanpoa-qs-flag-nopol"></span></label>
+            <input type="text" id="simanpoa-qs-nopol" required style="text-transform:uppercase;" oninput="_stnkClearFieldFlag(this, 'simanpoa-qs-flag-nopol')">
           </div>
-          <div class="form-grp">
-            <label for="simanpoa-qs-tgl-stnk">Tanggal Jatuh Tempo STNK 5 Tahunan Baru</label>
-            <input type="date" id="simanpoa-qs-tgl-stnk">
-          </div>
-          <div class="form-grp">
-            <label>Unggah Scan/Foto STNK Baru (Bukti Perpanjangan)</label>
-            <input type="file" id="simanpoa-qs-file-stnk" accept="image/*,application/pdf" onchange="_simanpoaHandleQuickStnkFile(event)">
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+            <div class="form-grp">
+              <label for="simanpoa-qs-tgl-pajak">Jatuh Tempo Pajak Tahunan <span style="color:var(--n-crit)">*</span><span id="simanpoa-qs-flag-pajak"></span></label>
+              <input type="date" id="simanpoa-qs-tgl-pajak" required oninput="_stnkClearFieldFlag(this, 'simanpoa-qs-flag-pajak')" onchange="_stnkClearFieldFlag(this, 'simanpoa-qs-flag-pajak')">
+            </div>
+            <div class="form-grp">
+              <label for="simanpoa-qs-tgl-stnk">Jatuh Tempo STNK 5 Tahunan<span id="simanpoa-qs-flag-stnk"></span></label>
+              <input type="date" id="simanpoa-qs-tgl-stnk" oninput="_stnkClearFieldFlag(this, 'simanpoa-qs-flag-stnk')" onchange="_stnkClearFieldFlag(this, 'simanpoa-qs-flag-stnk')">
+            </div>
           </div>
 
           <div class="modal-foot-bar ctl-lg" style="margin-top:16px;">

@@ -8624,19 +8624,14 @@
     _bmnRemovePhoto();
     _bmnResetGeotag();
 
-    // Reset berkas STNK & pra-pemeriksaan
+    // Reset berkas STNK & pra-pemeriksaan OCR
     _BMN.currentStnkPhoto = null;
-    var stnkImg = document.getElementById('bmn-stnk-preview-img');
-    var stnkPh = document.getElementById('bmn-stnk-placeholder');
-    var stnkStat = document.getElementById('bmn-stnk-ocr-status');
-    var stnkBadge = document.getElementById('bmn-stnk-conf-badge');
+    _BMN.currentStnkFile = null;
+    if (typeof _stnkResetOcrUi === 'function') {
+      _stnkResetOcrUi('form');
+    }
     var stnkFile = document.getElementById('bmn-form-foto-stnk');
     var seksiKnd = document.getElementById('bmn-form-seksi-kendaraan');
-
-    if (stnkImg) { stnkImg.src = ''; stnkImg.style.display = 'none'; }
-    if (stnkPh) { stnkPh.style.display = 'block'; stnkPh.innerHTML = 'Belum ada berkas STNK'; }
-    if (stnkStat) stnkStat.textContent = '';
-    if (stnkBadge) stnkBadge.style.display = 'none';
     if (stnkFile) stnkFile.value = '';
 
     var checkKendaraanVisibility = function () {
@@ -10012,74 +10007,179 @@
     }
   }
 
-  function _bmnHandleStnkFile(e) {
-    var file = e.target.files && e.target.files[0];
-    if (!file) return;
+  // ── STNK OCR ENGINE (MULTI-PASS, PDF/IMAGE, INDONESIAN PARSER) ──
 
-    var pImg = document.getElementById('bmn-stnk-preview-img');
-    var ph = document.getElementById('bmn-stnk-placeholder');
-    var statusEl = document.getElementById('bmn-stnk-ocr-status');
-    if (statusEl) statusEl.textContent = 'Memuat berkas STNK...';
+  var _STNK_ID_PLATE_PREFIXES = {
+    A:1, B:1, D:1, E:1, F:1, G:1, H:1, K:1, L:1, M:1, N:1, P:1, R:1, S:1, T:1, W:1, Z:1,
+    AA:1, AB:1, AD:1, AE:1, AG:1, BA:1, BB:1, BD:1, BE:1, BG:1, BH:1, BK:1, BL:1, BM:1,
+    BN:1, BP:1, DA:1, DB:1, DC:1, DD:1, DE:1, DG:1, DH:1, DK:1, DL:1, DM:1, DN:1, DP:1,
+    DR:1, DT:1, DW:1, EA:1, EB:1, ED:1, KB:1, KH:1, KT:1, KU:1, PA:1, PB:1
+  };
 
-    var reader = new FileReader();
-    reader.onload = function (ev) {
-      var b64 = ev.target.result;
-      _BMN.currentStnkPhoto = {
-        dataBase64: b64,
-        mimeType: file.type || 'image/jpeg',
-        fileName: file.name
+  function _stnkGetCtxConfig(ctx) {
+    if (ctx === 'quick') {
+      return {
+        fileInputId: 'simanpoa-qs-file-stnk',
+        previewImgId: 'simanpoa-qs-preview-img',
+        placeholderId: 'simanpoa-qs-placeholder',
+        defaultPlaceholder: 'Foto / PDF STNK',
+        statusId: 'simanpoa-qs-ocr-status',
+        defaultStatus: 'Unggah STNK atau Notice Pajak untuk membaca plat nomor, jatuh tempo, dan identitas kendaraan secara otomatis.',
+        badgeId: 'simanpoa-qs-conf-badge',
+        missingBoxId: 'simanpoa-qs-ocr-missing',
+        detailBoxId: 'simanpoa-qs-ocr-detail',
+        nopolId: 'simanpoa-qs-nopol',
+        tglPajakId: 'simanpoa-qs-tgl-pajak',
+        tglStnkId: 'simanpoa-qs-tgl-stnk',
+        flagNopolId: 'simanpoa-qs-flag-nopol',
+        flagPajakId: 'simanpoa-qs-flag-pajak',
+        flagStnkId: 'simanpoa-qs-flag-stnk',
+        verifiedCheckId: null,
+        merekId: null
       };
-
-      if (file.type.indexOf('image/') === 0) {
-        if (pImg) {
-          pImg.src = b64;
-          pImg.style.display = 'block';
-        }
-        if (ph) ph.style.display = 'none';
-        if (statusEl) statusEl.textContent = 'Foto siap. Klik tombol "Pindai OCR STNK" jika ingin ekstraksi otomatis.';
-      } else {
-        if (pImg) pImg.style.display = 'none';
-        if (ph) {
-          ph.style.display = 'block';
-          ph.innerHTML = '<span style="color:var(--n-primary); font-weight:600;">Dokumen PDF STNK:</span><br>' + _esc(file.name);
-        }
-        if (statusEl) statusEl.textContent = 'Dokumen PDF STNK siap diunggah.';
-      }
+    }
+    return {
+      fileInputId: 'bmn-form-foto-stnk',
+      previewImgId: 'bmn-stnk-preview-img',
+      placeholderId: 'bmn-stnk-placeholder',
+      defaultPlaceholder: 'Unggah foto/PDF STNK untuk pemindaian OCR otomatis',
+      statusId: 'bmn-stnk-ocr-status',
+      defaultStatus: 'Setelah berkas diunggah, OCR membaca identitas dan masa berlaku STNK secara otomatis.',
+      badgeId: 'bmn-stnk-conf-badge',
+      missingBoxId: 'bmn-stnk-ocr-missing-box',
+      detailBoxId: 'bmn-stnk-ocr-detail',
+      nopolId: 'bmn-form-nopol',
+      tglPajakId: 'bmn-form-tgl-pajak',
+      tglStnkId: 'bmn-form-tgl-stnk',
+      flagNopolId: 'bmn-stnk-flag-nopol',
+      flagPajakId: 'bmn-stnk-flag-pajak',
+      flagStnkId: 'bmn-stnk-flag-stnk',
+      verifiedCheckId: 'bmn-form-stnk-verified',
+      merekId: 'bmn-form-merek'
     };
-    reader.readAsDataURL(file);
+  }
+
+  function _stnkClearFieldFlag(el, flagId) {
+    if (el) el.classList.remove('stnk-field-unverified');
+    if (flagId) {
+      var fl = document.getElementById(flagId);
+      if (fl) fl.innerHTML = '';
+    }
+  }
+
+  function _stnkSetFieldFlag(inputId, flagId, mode) {
+    var inp = document.getElementById(inputId);
+    var fl = document.getElementById(flagId);
+    if (inp) {
+      if (mode === 'miss') {
+        inp.classList.add('stnk-field-unverified');
+      } else {
+        inp.classList.remove('stnk-field-unverified');
+      }
+    }
+    if (fl) {
+      if (mode === 'ok') {
+        fl.innerHTML = '<span class="stnk-field-flag is-ok">Terbaca OCR</span>';
+      } else if (mode === 'miss') {
+        fl.innerHTML = '<span class="stnk-field-flag is-miss">Tidak terbaca — isi manual</span>';
+      } else {
+        fl.innerHTML = '';
+      }
+    }
+  }
+
+  function _stnkResetOcrUi(ctx) {
+    var cfg = _stnkGetCtxConfig(ctx);
+    var pImg = document.getElementById(cfg.previewImgId);
+    var ph = document.getElementById(cfg.placeholderId);
+    var st = document.getElementById(cfg.statusId);
+    var bg = document.getElementById(cfg.badgeId);
+    var mb = document.getElementById(cfg.missingBoxId);
+    var db = document.getElementById(cfg.detailBoxId);
+
+    if (pImg) { pImg.src = ''; pImg.style.display = 'none'; }
+    if (ph) { ph.style.display = 'block'; ph.textContent = cfg.defaultPlaceholder; }
+    if (st) st.textContent = cfg.defaultStatus;
+    if (bg) { bg.style.display = 'none'; bg.className = 'stnk-ocr-confidence-badge'; }
+    if (mb) { mb.classList.add('n-hidden'); mb.innerHTML = ''; }
+    if (db) { db.classList.add('n-hidden'); db.innerHTML = ''; }
+
+    _stnkSetFieldFlag(cfg.nopolId, cfg.flagNopolId, null);
+    _stnkSetFieldFlag(cfg.tglPajakId, cfg.flagPajakId, null);
+    _stnkSetFieldFlag(cfg.tglStnkId, cfg.flagStnkId, null);
   }
 
   function _simanpoaPreprocessCanvas(srcCanvas, mode) {
-    var scale = 2.0;
+    var maxDim = Math.max(srcCanvas.width || 1, srcCanvas.height || 1);
+    var targetLong = 1900;
+    var scale = maxDim < 1000 ? Math.min(2.4, targetLong / maxDim) : (maxDim > 2400 ? (2200 / maxDim) : 1.0);
+    if (mode === 'sharpen' && maxDim >= 1000 && maxDim < 1600) scale = 1.4;
+
     var upCanvas = document.createElement('canvas');
-    upCanvas.width = Math.round(srcCanvas.width * scale);
-    upCanvas.height = Math.round(srcCanvas.height * scale);
+    upCanvas.width = Math.max(1, Math.round(srcCanvas.width * scale));
+    upCanvas.height = Math.max(1, Math.round(srcCanvas.height * scale));
     var ctx = upCanvas.getContext('2d');
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = 'high';
     ctx.drawImage(srcCanvas, 0, 0, upCanvas.width, upCanvas.height);
 
-    var imgData = ctx.getImageData(0, 0, upCanvas.width, upCanvas.height);
+    var w = upCanvas.width;
+    var h = upCanvas.height;
+    var imgData = ctx.getImageData(0, 0, w, h);
     var d = imgData.data;
+    var totalPx = w * h;
+    var grayBuf = new Uint8Array(totalPx);
 
-    // 1. Grayscale & Min/Max finding for Contrast Stretching
     var min = 255, max = 0;
-    for (var i = 0; i < d.length; i += 4) {
+    for (var i = 0, p = 0; i < d.length; i += 4, p++) {
       var gray = Math.round(0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2]);
-      d[i] = d[i + 1] = d[i + 2] = gray;
+      grayBuf[p] = gray;
       if (gray < min) min = gray;
       if (gray > max) max = gray;
     }
+
     var range = (max - min) || 1;
-    for (var j = 0; j < d.length; j += 4) {
-      var stretched = Math.round(((d[j] - min) / range) * 255);
-      d[j] = d[j + 1] = d[j + 2] = stretched;
+    var hist = new Int32Array(256);
+    for (var j = 0; j < totalPx; j++) {
+      var stretched = Math.round(((grayBuf[j] - min) / range) * 255);
+      grayBuf[j] = stretched;
+      hist[stretched]++;
+      var oIdx = j * 4;
+      d[oIdx] = d[oIdx + 1] = d[oIdx + 2] = stretched;
     }
+
+    if (mode === 'otsu' || mode === 'binarize') {
+      // Otsu adaptive global threshold
+      var sum = 0;
+      for (var t = 0; t < 256; t++) sum += t * hist[t];
+      var sumB = 0, wB = 0, wF = 0, varMax = 0, threshold = 135;
+      for (var k = 0; k < 256; k++) {
+        wB += hist[k];
+        if (wB === 0) continue;
+        wF = totalPx - wB;
+        if (wF === 0) break;
+        sumB += k * hist[k];
+        var mB = sumB / wB;
+        var mF = (sum - sumB) / wF;
+        var varBetween = wB * wF * (mB - mF) * (mB - mF);
+        if (varBetween > varMax) {
+          varMax = varBetween;
+          threshold = k;
+        }
+      }
+      for (var m = 0; m < totalPx; m++) {
+        var bw = grayBuf[m] > threshold ? 255 : 0;
+        var mIdx = m * 4;
+        d[mIdx] = d[mIdx + 1] = d[mIdx + 2] = bw;
+        d[mIdx + 3] = 255;
+      }
+      ctx.putImageData(imgData, 0, 0);
+      return upCanvas;
+    }
+
     ctx.putImageData(imgData, 0, 0);
 
-    // 2. Unsharp Mask 3x3 Convolution Sharpening
-    var w = upCanvas.width;
-    var h = upCanvas.height;
+    // Unsharp mask 3x3 sharpening
     var src = ctx.getImageData(0, 0, w, h);
     var out = ctx.createImageData(w, h);
     var sD = src.data;
@@ -10097,10 +10197,6 @@
         if (val < 0) val = 0;
         if (val > 255) val = 255;
 
-        if (mode === 'binarize') {
-          val = val > 130 ? 255 : 0;
-        }
-
         oD[idx] = oD[idx + 1] = oD[idx + 2] = val;
         oD[idx + 3] = 255;
       }
@@ -10109,114 +10205,678 @@
     return upCanvas;
   }
 
-  function _bmnTriggerStnkOcr() {
-    var fileInput = document.getElementById('bmn-form-foto-stnk');
-    var file = fileInput && fileInput.files && fileInput.files[0];
-    var statusEl = document.getElementById('bmn-stnk-ocr-status');
-    var badgeEl = document.getElementById('bmn-stnk-conf-badge');
-    var checkEl = document.getElementById('bmn-form-stnk-verified');
+  function _stnkRotateCanvas(srcCanvas, deg) {
+    var rad = (deg * Math.PI) / 180;
+    var swap = (deg === 90 || deg === 270);
+    var out = document.createElement('canvas');
+    out.width = swap ? srcCanvas.height : srcCanvas.width;
+    out.height = swap ? srcCanvas.width : srcCanvas.height;
+    var ctx = out.getContext('2d');
+    ctx.translate(out.width / 2, out.height / 2);
+    ctx.rotate(rad);
+    ctx.drawImage(srcCanvas, -srcCanvas.width / 2, -srcCanvas.height / 2);
+    return out;
+  }
 
-    if (!file) {
-      if (statusEl) statusEl.textContent = 'Pilih foto STNK terlebih dahulu.';
+  function _stnkFileToCanvas(file, b64Data, cb) {
+    var isPdf = (file.type === 'application/pdf') || /\.pdf$/i.test(file.name || '');
+    if (isPdf) {
+      if (!window.pdfjsLib) {
+        cb(new Error('Library PDF.js belum siap di browser untuk merender STNK PDF.'), null);
+        return;
+      }
+      var rawB64 = String(b64Data || '').replace(/^data:[^;]+;base64,/, '');
+      var binStr = atob(rawB64);
+      var bytes = new Uint8Array(binStr.length);
+      for (var i = 0; i < binStr.length; i++) bytes[i] = binStr.charCodeAt(i);
+
+      window.pdfjsLib.getDocument({ data: bytes }).promise
+        .then(function (pdf) {
+          return pdf.getPage(1);
+        })
+        .then(function (page) {
+          var viewport = page.getViewport({ scale: 2.2 });
+          var cvs = document.createElement('canvas');
+          cvs.width = Math.round(viewport.width);
+          cvs.height = Math.round(viewport.height);
+          var ctx = cvs.getContext('2d');
+          return page.render({ canvasContext: ctx, viewport: viewport }).promise.then(function () {
+            cb(null, cvs, cvs.toDataURL('image/png'));
+          });
+        })
+        .catch(function (err) {
+          cb(err || new Error('Gagal merender halaman pertama PDF STNK.'), null);
+        });
       return;
     }
-    if (file.type.indexOf('image/') !== 0) {
-      if (statusEl) statusEl.textContent = 'Pindai OCR hanya mendukung berkas gambar (JPG/PNG).';
-      return;
-    }
-
-    if (statusEl) statusEl.textContent = 'Melakukan pra-pemrosesan anti-blur dan OCR...';
-    if (badgeEl) badgeEl.style.display = 'none';
 
     var img = new Image();
+    img.onload = function () {
+      var cvs = document.createElement('canvas');
+      cvs.width = img.naturalWidth || img.width;
+      cvs.height = img.naturalHeight || img.height;
+      var ctx = cvs.getContext('2d');
+      ctx.drawImage(img, 0, 0);
+      cb(null, cvs, b64Data);
+    };
+    img.onerror = function () {
+      cb(new Error('Berkas gambar STNK tidak dapat didekode.'), null);
+    };
+    img.src = b64Data;
+  }
+
+  function _stnkNormalizeDigits(s) {
+    return String(s || '')
+      .replace(/[OQ]/g, '0')
+      .replace(/[Il|]/g, '1')
+      .replace(/Z/g, '2')
+      .replace(/S/g, '5')
+      .replace(/B/g, '8')
+      .replace(/G/g, '6');
+  }
+
+  function _stnkNormalizeLetters(s) {
+    return String(s || '')
+      .replace(/0/g, 'O')
+      .replace(/1/g, 'I')
+      .replace(/8/g, 'B')
+      .replace(/5/g, 'S');
+  }
+
+  function _stnkNormalizePlateCandidate(rawPrefix, rawNum, rawSuffix, strictPrefix) {
+    var pref = _stnkNormalizeLetters(String(rawPrefix || '').toUpperCase().replace(/[^A-Z0-9]/g, ''));
+    var num = _stnkNormalizeDigits(String(rawNum || '').toUpperCase().replace(/[^A-Z0-9]/g, ''));
+    var suf = _stnkNormalizeLetters(String(rawSuffix || '').toUpperCase().replace(/[^A-Z0-9]/g, ''));
+
+    if (!pref || pref.length > 2 || !/^\d{1,4}$/.test(num) || suf.length > 3) return '';
+    if (strictPrefix && !_STNK_ID_PLATE_PREFIXES[pref]) return '';
+    return suf ? (pref + ' ' + num + ' ' + suf) : (pref + ' ' + num);
+  }
+
+  function _stnkExtractDatesWithContext(lines) {
+    var monthMap = {
+      JAN: 1, JANUARI: 1, JANUARY: 1,
+      FEB: 2, PEB: 2, FEBRUARI: 2, PEBRUARI: 2, FEBRUARY: 2,
+      MAR: 3, MRT: 3, MARET: 3, MARCH: 3,
+      APR: 4, APRIL: 4,
+      MEI: 5, MAY: 5,
+      JUN: 6, JUNI: 6, JUNE: 6,
+      JUL: 7, JULI: 7, JULY: 7,
+      AGU: 8, AGS: 8, AGT: 8, AGUSTUS: 8, AUG: 8, AUGUST: 8,
+      SEP: 9, SEPT: 9, SEPTEMBER: 9,
+      OKT: 10, OCT: 10, OKTOBER: 10, OCTOBER: 10,
+      NOV: 11, NOP: 11, NOVEMBER: 11, NOPEMBER: 11,
+      DES: 12, DEC: 12, DESEMBER: 12, DECEMBER: 12
+    };
+
+    var curYr = new Date().getFullYear();
+    var candidates = [];
+
+    function pushDate(d, m, y, lineIdx, lineText) {
+      if (y < 100) y += 2000;
+      if (d < 1 || d > 31 || m < 1 || m > 12 || y < 2000 || y > curYr + 10) return;
+      var dt = new Date(y, m - 1, d);
+      if (dt.getFullYear() !== y || dt.getMonth() !== (m - 1) || dt.getDate() !== d) return;
+      var iso = y + '-' + (m < 10 ? '0' + m : m) + '-' + (d < 10 ? '0' + d : d);
+
+      var prevLine = lineIdx > 0 ? lines[lineIdx - 1] : '';
+      var ctxStr = (prevLine + ' ' + lineText).toUpperCase();
+      var isIssue = /DITETAPKAN|PENETAPAN|TERBIT|FAKTUR|TGL\.?\s*(?:DAFTAR|BAYAR)|TANGGAL\s*(?:BAYAR|DAFTAR)/.test(lineText);
+      var isPajakHint = /BERLAKU\s*PAJAK|MASA\s*BERLAKU\s*PAJAK|TGL\.?\s*(?:AKHIR\s*)?PAJAK|JT\.?\s*TEMPO\s*PKB|PKB\s*S\/?D|SWDKLLJ\s*S\/?D/.test(ctxStr);
+      var isStnkHint = /BERLAKU\s*(?:S\/?D|SAMPAI)|MASA\s*BERLAKU\s*STNK|TGL\.?\s*AKHIR\s*STNK|STNK\s*(?:5|LIMA)/.test(ctxStr) && !/PAJAK|PKB|SWDKLLJ/.test(lineText);
+
+      candidates.push({
+        iso: iso,
+        year: y,
+        lineIdx: lineIdx,
+        isIssue: isIssue,
+        isPajakHint: isPajakHint,
+        isStnkHint: isStnkHint
+      });
+    }
+
+    lines.forEach(function (ln, idx) {
+      var up = ln.toUpperCase();
+      // Numeric DD-MM-YYYY / D-M-YYYY / DD/MM/YY (allow OCR letter substitutions inside digits)
+      var numRe = /\b([0-3OIl]?[0-9OIlS])\s*[\/\-\.]\s*([01OIl]?[0-9OIlS])\s*[\/\-\.]\s*([12OIl]{1}[0-9OIlSZBG]{1,3}|[0-9OIl]{2})\b/g;
+      var m;
+      while ((m = numRe.exec(up)) !== null) {
+        var dd = parseInt(_stnkNormalizeDigits(m[1]), 10);
+        var mm = parseInt(_stnkNormalizeDigits(m[2]), 10);
+        var yy = parseInt(_stnkNormalizeDigits(m[3]), 10);
+        pushDate(dd, mm, yy, idx, up);
+      }
+
+      // Text month: 10 MAR 2027 / 5 MARET 2027 / 10-MAR-27
+      var txtRe = /\b([0-3OIl]?[0-9OIl])[\s\-\/]+([A-Z]{3,9})[\s\-\/]+(20[0-4][0-9]|[2-3][0-9])\b/g;
+      while ((m = txtRe.exec(up)) !== null) {
+        var mo = monthMap[m[2]];
+        if (mo) {
+          pushDate(parseInt(_stnkNormalizeDigits(m[1]), 10), mo, parseInt(_stnkNormalizeDigits(m[3]), 10), idx, up);
+        }
+      }
+    });
+
+    var tglPajak = '';
+    var tglStnk = '';
+
+    // 1. Explicit context priority
+    var pajakTagged = candidates.filter(function (c) { return c.isPajakHint && !c.isIssue; });
+    var stnkTagged = candidates.filter(function (c) { return c.isStnkHint && !c.isIssue; });
+
+    if (pajakTagged.length > 0) {
+      pajakTagged.sort(function (a, b) { return a.iso.localeCompare(b.iso); });
+      tglPajak = pajakTagged[0].iso;
+    }
+    if (stnkTagged.length > 0) {
+      stnkTagged.sort(function (a, b) { return b.iso.localeCompare(a.iso); });
+      tglStnk = stnkTagged[0].iso;
+    }
+
+    // Notice STNK notice pajak often uses BERLAKU S/D for PKB if STNK date is much further in future
+    if (stnkTagged.length >= 2 && !tglPajak) {
+      var stnkAsc = stnkTagged.map(function (c) { return c.iso; }).sort();
+      if (stnkAsc[0] !== stnkAsc[stnkAsc.length - 1]) {
+        tglPajak = stnkAsc[0];
+        tglStnk = stnkAsc[stnkAsc.length - 1];
+      }
+    }
+
+    // 2. Fallback disambiguation excluding issue dates
+    var nonIssue = candidates
+      .filter(function (c) { return !c.isIssue && c.year >= (curYr - 2) && c.year <= (curYr + 7); })
+      .map(function (c) { return c.iso; });
+
+    var uniq = [];
+    nonIssue.forEach(function (iso) {
+      if (uniq.indexOf(iso) === -1) uniq.push(iso);
+    });
+    uniq.sort();
+
+    if (!tglPajak && !tglStnk && uniq.length >= 2) {
+      tglPajak = uniq[0];
+      tglStnk = uniq[uniq.length - 1];
+    } else if (!tglPajak && tglStnk) {
+      var earlier = uniq.filter(function (iso) { return iso < tglStnk; });
+      if (earlier.length > 0) tglPajak = earlier[earlier.length - 1];
+    } else if (tglPajak && !tglStnk) {
+      var later = uniq.filter(function (iso) { return iso > tglPajak; });
+      if (later.length > 0) tglStnk = later[later.length - 1];
+    } else if (!tglPajak && !tglStnk && uniq.length === 1) {
+      var onlyYr = parseInt(uniq[0].substring(0, 4), 10);
+      if (onlyYr >= curYr + 2) {
+        tglStnk = uniq[0];
+      } else {
+        tglPajak = uniq[0];
+      }
+    }
+
+    return {
+      tglPajakTahunan: tglPajak,
+      tglStnkLimaTahunan: tglStnk,
+      allDetectedDates: uniq
+    };
+  }
+
+  function _stnkExtractLabelValue(lines, labelRegex, nextStopRegex) {
+    for (var i = 0; i < lines.length; i++) {
+      var m = lines[i].match(labelRegex);
+      if (m) {
+        var val = (m[1] || '').replace(/^[\s:;.\-]+/, '').trim();
+        if (nextStopRegex) {
+          var stopIdx = val.search(nextStopRegex);
+          if (stopIdx !== -1) val = val.substring(0, stopIdx).trim();
+        }
+        val = val.replace(/\s+/g, ' ').trim();
+        if (val && val.length >= 2) return val;
+      }
+    }
+    return '';
+  }
+
+  function _stnkParseIndonesianText(rawText) {
+    var cleanText = String(rawText || '').replace(/\r/g, '\n');
+    var lines = cleanText.split('\n').map(function (l) {
+      return l.replace(/[|_~`]+/g, ' ').replace(/\s+/g, ' ').trim();
+    }).filter(function (l) { return l.length > 1; });
+    var upperLines = lines.map(function (l) { return l.toUpperCase(); });
+    var fullUpper = upperLines.join('\n');
+
+    // 1. Nomor Polisi / Registrasi
+    var noPolisi = '';
+    for (var i = 0; i < upperLines.length; i++) {
+      var ln = upperLines[i];
+      if (/(?:NO\.?\s*POL(?:ISI)?|NOMOR\s*REGISTRASI|NRKB|NO\.?\s*REGISTRASI)/.test(ln)) {
+        var scope = ln + (i + 1 < upperLines.length ? (' ' + upperLines[i + 1]) : '');
+        var afterLbl = scope.replace(/^.*?(?:NO\.?\s*POL(?:ISI)?|NOMOR\s*REGISTRASI|NRKB|NO\.?\s*REGISTRASI)[:\s\-]*/, '');
+        var pm = afterLbl.match(/\b([A-Z0-9]{1,2})\s*[-.]?\s*([0-9OIlSZBG]{1,4})\s*[-.]?\s*([A-Z0-9]{1,3})?\b/);
+        if (pm) {
+          var cand = _stnkNormalizePlateCandidate(pm[1], pm[2], pm[3], false);
+          if (cand && _STNK_ID_PLATE_PREFIXES[cand.split(' ')[0]]) {
+            noPolisi = cand;
+            break;
+          }
+        }
+      }
+    }
+
+    if (!noPolisi) {
+      var globalMatches = fullUpper.match(/\b([A-Z]{1,2})\s*([0-9]{1,4})\s*([A-Z]{1,3})\b/g) || [];
+      for (var g = 0; g < globalMatches.length; g++) {
+        var parts = globalMatches[g].match(/^([A-Z]{1,2})\s*([0-9]{1,4})\s*([A-Z]{1,3})$/);
+        if (parts) {
+          var gCand = _stnkNormalizePlateCandidate(parts[1], parts[2], parts[3], true);
+          if (gCand) {
+            noPolisi = gCand;
+            break;
+          }
+        }
+      }
+    }
+
+    // 2. Dates (Pajak Tahunan + STNK 5 Tahunan)
+    var dates = _stnkExtractDatesWithContext(upperLines);
+
+    // 3. Detailed Vehicle & STNK Identity Fields
+    var merk = _stnkExtractLabelValue(upperLines, /(?:MEREK|MERK)\s*[:\-]\s*(.+)/i, /\b(?:TYPE|TIPE|JENIS|MODEL|TAHUN)\b/i);
+    var tipe = _stnkExtractLabelValue(upperLines, /(?:TYPE|TIPE)\s*[:\-]\s*(.+)/i, /\b(?:JENIS|MODEL|TAHUN|ISI|WARNA)\b/i);
+    var jenis = _stnkExtractLabelValue(upperLines, /\bJENIS\s*[:\-]\s*(.+)/i, /\b(?:MODEL|TAHUN|ISI|WARNA)\b/i);
+    var model = _stnkExtractLabelValue(upperLines, /\bMODEL\s*[:\-]\s*(.+)/i, /\b(?:TAHUN|ISI|SILINDER|WARNA|NO)\b/i);
+    var warna = _stnkExtractLabelValue(upperLines, /\bWARNA(?!\s*TNKB)\s*[:\-]\s*(.+)/i, /\b(?:BAHAN|BBM|WARNA\s*TNKB|TAHUN|NO)\b/i);
+    var bahanBakar = _stnkExtractLabelValue(upperLines, /\b(?:BAHAN\s*BAKAR|BBM)\s*[:\-]\s*(.+)/i, /\b(?:WARNA|TAHUN|KODE|NOMOR)\b/i);
+    var warnaTnkb = _stnkExtractLabelValue(upperLines, /\bWARNA\s*TNKB\s*[:\-]\s*(.+)/i, /\b(?:TAHUN|NOMOR|BERLAKU)\b/i);
+    var namaPemilik = _stnkExtractLabelValue(upperLines, /\bNAMA\s*PEMILIK\s*[:\-]\s*(.+)/i, /\bALAMAT\b/i);
+
+    var tahunPembuatan = '';
+    var thnMatch = fullUpper.match(/(?:TAHUN\s*(?:PEMBUATAN|BUAT|RAKITAN)|THN\.?\s*(?:BUAT|PEMBUATAN))\s*[:\-]?\s*([12][09][0-9OIl]{2})/);
+    if (thnMatch) {
+      var yrStr = _stnkNormalizeDigits(thnMatch[1]);
+      var yrNum = parseInt(yrStr, 10);
+      if (yrNum >= 1980 && yrNum <= new Date().getFullYear() + 1) tahunPembuatan = String(yrNum);
+    }
+
+    var isiSilinder = '';
+    var ccMatch = fullUpper.match(/(?:ISI\s*SILINDER|SILINDER|DAYA\s*LISTRIK)\s*[:\-]?\s*([0-9OIl]{2,5}\s*(?:CC|KW|WH)?)/);
+    if (ccMatch) {
+      isiSilinder = ccMatch[1].replace(/\s+/g, ' ').trim();
+    }
+
+    var noRangka = '';
+    var rnkMatch = fullUpper.match(/(?:NO(?:MOR)?\.?\s*RANGKA(?:\/NIK(?:\/VIN)?)?|NIK\/VIN)\s*[:\-]?\s*([A-Z0-9\-]{8,22})/);
+    if (rnkMatch) {
+      noRangka = rnkMatch[1].replace(/\-/g, '').trim();
+    } else {
+      var vinCand = fullUpper.match(/\b([A-HJ-NPR-Z0-9]{17})\b/);
+      if (vinCand && /[A-Z]/.test(vinCand[1]) && /\d/.test(vinCand[1])) noRangka = vinCand[1];
+    }
+
+    var noMesin = '';
+    var msnMatch = fullUpper.match(/(?:NO(?:MOR)?\.?\s*MESIN)\s*[:\-]?\s*([A-Z0-9\-]{6,20})/);
+    if (msnMatch) {
+      noMesin = msnMatch[1].trim();
+    }
+
+    var totalPajakRp = '';
+    var pkbMatch = fullUpper.match(/(?:JUMLAH|TOTAL)\s*(?:PEMBAYARAN|PKB|TAGIHAN)?\s*[:\-]?\s*(?:RP\.?\s*)?([0-9]{1,3}(?:[.,][0-9]{3})+)/);
+    if (pkbMatch) {
+      totalPajakRp = 'Rp ' + pkbMatch[1];
+    }
+
+    // Hitung skor kelengkapan core fields (0 - 100)
+    var score = 0;
+    if (noPolisi) score += 40;
+    if (dates.tglPajakTahunan) score += 35;
+    if (dates.tglStnkLimaTahunan) score += 25;
+
+    var detailCount = [merk, tipe, tahunPembuatan, isiSilinder, noRangka, noMesin, warna, bahanBakar, warnaTnkb, namaPemilik, totalPajakRp]
+      .filter(function (v) { return !!v; }).length;
+
+    return {
+      noPolisi: noPolisi,
+      tglPajakTahunan: dates.tglPajakTahunan,
+      tglStnkLimaTahunan: dates.tglStnkLimaTahunan,
+      allDetectedDates: dates.allDetectedDates,
+      merk: merk,
+      tipe: tipe,
+      jenis: jenis,
+      model: model,
+      tahunPembuatan: tahunPembuatan,
+      isiSilinder: isiSilinder,
+      noRangka: noRangka,
+      noMesin: noMesin,
+      warna: warna,
+      bahanBakar: bahanBakar,
+      warnaTnkb: warnaTnkb,
+      namaPemilik: namaPemilik,
+      totalPajakRp: totalPajakRp,
+      detailCount: detailCount,
+      score: score,
+      rawText: cleanText
+    };
+  }
+
+  function _stnkMergeParsed(a, b) {
+    if (!a) return b;
+    if (!b) return a;
+    var merged = {
+      noPolisi: a.noPolisi || b.noPolisi || '',
+      tglPajakTahunan: a.tglPajakTahunan || b.tglPajakTahunan || '',
+      tglStnkLimaTahunan: a.tglStnkLimaTahunan || b.tglStnkLimaTahunan || '',
+      allDetectedDates: (a.allDetectedDates && a.allDetectedDates.length >= (b.allDetectedDates || []).length) ? a.allDetectedDates : b.allDetectedDates,
+      merk: a.merk || b.merk || '',
+      tipe: a.tipe || b.tipe || '',
+      jenis: a.jenis || b.jenis || '',
+      model: a.model || b.model || '',
+      tahunPembuatan: a.tahunPembuatan || b.tahunPembuatan || '',
+      isiSilinder: a.isiSilinder || b.isiSilinder || '',
+      noRangka: (a.noRangka && a.noRangka.length >= (b.noRangka || '').length) ? a.noRangka : (b.noRangka || ''),
+      noMesin: (a.noMesin && a.noMesin.length >= (b.noMesin || '').length) ? a.noMesin : (b.noMesin || ''),
+      warna: a.warna || b.warna || '',
+      bahanBakar: a.bahanBakar || b.bahanBakar || '',
+      warnaTnkb: a.warnaTnkb || b.warnaTnkb || '',
+      namaPemilik: a.namaPemilik || b.namaPemilik || '',
+      totalPajakRp: a.totalPajakRp || b.totalPajakRp || '',
+      rawText: ((a.rawText || '').length >= (b.rawText || '').length) ? a.rawText : b.rawText
+    };
+    var score = 0;
+    if (merged.noPolisi) score += 40;
+    if (merged.tglPajakTahunan) score += 35;
+    if (merged.tglStnkLimaTahunan) score += 25;
+    merged.score = score;
+    merged.detailCount = [merged.merk, merged.tipe, merged.tahunPembuatan, merged.isiSilinder, merged.noRangka, merged.noMesin, merged.warna, merged.bahanBakar, merged.warnaTnkb, merged.namaPemilik, merged.totalPajakRp]
+      .filter(function (v) { return !!v; }).length;
+    return merged;
+  }
+
+  function _stnkRecognizeCanvas(canvas) {
+    return window.Tesseract.recognize(canvas, 'eng+ind')
+      .catch(function () {
+        return window.Tesseract.recognize(canvas, 'eng');
+      });
+  }
+
+  function _stnkRunOcrPasses(srcCanvas, onProgress, cb) {
+    _loadTesseract(function () {
+      if (!window.Tesseract || typeof window.Tesseract.recognize !== 'function') {
+        cb(new Error('Engine Tesseract OCR gagal dimuat dari CDN. Periksa koneksi internet.'), null);
+        return;
+      }
+
+      if (onProgress) onProgress('Pass 1/3: Memindai resolusi tajam (0 derajat)...');
+      var best = null;
+
+      _stnkRecognizeCanvas(_simanpoaPreprocessCanvas(srcCanvas, 'sharpen'))
+        .then(function (r1) {
+          var p1 = _stnkParseIndonesianText((r1 && r1.data && r1.data.text) || '');
+          best = p1;
+          if (best.score >= 100 || (best.score >= 75 && best.noPolisi && best.tglPajakTahunan && best.detailCount >= 3)) {
+            return null;
+          }
+          if (onProgress) onProgress('Pass 2/3: Memindai dengan threshold adaptif Otsu...');
+          return _stnkRecognizeCanvas(_simanpoaPreprocessCanvas(srcCanvas, 'otsu'));
+        })
+        .then(function (r2) {
+          if (r2) {
+            var p2 = _stnkParseIndonesianText((r2.data && r2.data.text) || '');
+            best = _stnkMergeParsed(best, p2);
+          }
+          if (best && best.noPolisi && (best.tglPajakTahunan || best.tglStnkLimaTahunan)) {
+            return null;
+          }
+          if (onProgress) onProgress('Pass 3/3: Mencoba orientasi rotasi 90 derajat...');
+          return _stnkRecognizeCanvas(_simanpoaPreprocessCanvas(_stnkRotateCanvas(srcCanvas, 90), 'sharpen'));
+        })
+        .then(function (r3) {
+          if (r3) {
+            var p3 = _stnkParseIndonesianText((r3.data && r3.data.text) || '');
+            best = _stnkMergeParsed(best, p3);
+          }
+          if (best && best.noPolisi && (best.tglPajakTahunan || best.tglStnkLimaTahunan)) {
+            return null;
+          }
+          return _stnkRecognizeCanvas(_simanpoaPreprocessCanvas(_stnkRotateCanvas(srcCanvas, 270), 'sharpen'));
+        })
+        .then(function (r4) {
+          if (r4) {
+            var p4 = _stnkParseIndonesianText((r4.data && r4.data.text) || '');
+            best = _stnkMergeParsed(best, p4);
+          }
+          cb(null, best);
+        })
+        .catch(function (err) {
+          cb(err || new Error('Proses OCR gagal dijalankan.'), best);
+        });
+    });
+  }
+
+  function _stnkApplyResultToUi(ctx, parsed, errMsg) {
+    var cfg = _stnkGetCtxConfig(ctx);
+    var statusEl = document.getElementById(cfg.statusId);
+    var badgeEl = document.getElementById(cfg.badgeId);
+    var missingBox = document.getElementById(cfg.missingBoxId);
+    var detailBox = document.getElementById(cfg.detailBoxId);
+    var checkEl = cfg.verifiedCheckId ? document.getElementById(cfg.verifiedCheckId) : null;
+
+    if (errMsg || !parsed) {
+      if (badgeEl) {
+        badgeEl.style.display = 'inline-flex';
+        badgeEl.className = 'stnk-ocr-confidence-badge is-fail';
+        badgeEl.textContent = 'OCR Gagal — Input Manual';
+      }
+      if (statusEl) statusEl.textContent = errMsg || 'STNK gagal dipindai oleh OCR.';
+      _stnkSetFieldFlag(cfg.nopolId, cfg.flagNopolId, 'miss');
+      _stnkSetFieldFlag(cfg.tglPajakId, cfg.flagPajakId, 'miss');
+      _stnkSetFieldFlag(cfg.tglStnkId, cfg.flagStnkId, 'miss');
+      if (missingBox) {
+        missingBox.classList.remove('n-hidden');
+        missingBox.innerHTML = '<strong>OCR tidak dapat membaca berkas STNK:</strong> ' + _esc(errMsg || 'Gambar terlalu buram atau format tidak didukung.') +
+          '<br>Bagian yang perlu diisi manual: <strong>Nomor Polisi</strong>, <strong>Jatuh Tempo Pajak Tahunan</strong>, dan <strong>Jatuh Tempo STNK 5 Tahunan</strong>.';
+      }
+      if (checkEl) checkEl.checked = false;
+      return;
+    }
+
+    var nopolEl = document.getElementById(cfg.nopolId);
+    var pajakEl = document.getElementById(cfg.tglPajakId);
+    var stnkEl = document.getElementById(cfg.tglStnkId);
+    var missingFields = [];
+    var firstMissingEl = null;
+
+    if (parsed.noPolisi) {
+      if (nopolEl) nopolEl.value = parsed.noPolisi;
+      _stnkSetFieldFlag(cfg.nopolId, cfg.flagNopolId, 'ok');
+    } else {
+      _stnkSetFieldFlag(cfg.nopolId, cfg.flagNopolId, 'miss');
+      missingFields.push('Nomor Polisi (Plat Nomor)');
+      if (!firstMissingEl && nopolEl) firstMissingEl = nopolEl;
+    }
+
+    if (parsed.tglPajakTahunan) {
+      if (pajakEl) pajakEl.value = parsed.tglPajakTahunan;
+      _stnkSetFieldFlag(cfg.tglPajakId, cfg.flagPajakId, 'ok');
+    } else {
+      _stnkSetFieldFlag(cfg.tglPajakId, cfg.flagPajakId, 'miss');
+      missingFields.push('Jatuh Tempo Pajak Tahunan');
+      if (!firstMissingEl && pajakEl) firstMissingEl = pajakEl;
+    }
+
+    if (parsed.tglStnkLimaTahunan) {
+      if (stnkEl) stnkEl.value = parsed.tglStnkLimaTahunan;
+      _stnkSetFieldFlag(cfg.tglStnkId, cfg.flagStnkId, 'ok');
+    } else {
+      _stnkSetFieldFlag(cfg.tglStnkId, cfg.flagStnkId, 'miss');
+      missingFields.push('Jatuh Tempo STNK 5 Tahunan');
+      if (!firstMissingEl && stnkEl) firstMissingEl = stnkEl;
+    }
+
+    // Isi merek/tipe jika field form kendaraan masih kosong
+    if (cfg.merekId && (parsed.merk || parsed.tipe)) {
+      var mrkEl = document.getElementById(cfg.merekId);
+      if (mrkEl && !mrkEl.value.trim()) {
+        mrkEl.value = [parsed.merk, parsed.tipe].filter(Boolean).join(' ');
+      }
+    }
+
+    // Confidence & Alert banner bagian tidak terbaca
+    if (badgeEl) {
+      badgeEl.style.display = 'inline-flex';
+      if (missingFields.length === 0) {
+        badgeEl.className = 'stnk-ocr-confidence-badge is-high';
+        badgeEl.textContent = 'Terbaca Lengkap (' + (parsed.score || 100) + '%)';
+        if (checkEl) checkEl.checked = true;
+      } else if (missingFields.length < 3) {
+        badgeEl.className = 'stnk-ocr-confidence-badge is-blur';
+        badgeEl.textContent = 'Sebagian Terbaca — Lengkapi ' + missingFields.length + ' Bagian';
+        if (checkEl) checkEl.checked = false;
+      } else {
+        badgeEl.className = 'stnk-ocr-confidence-badge is-fail';
+        badgeEl.textContent = 'Tidak Terbaca (0%) — Isi Manual';
+        if (checkEl) checkEl.checked = false;
+      }
+    }
+
+    if (missingFields.length > 0 && missingBox) {
+      missingBox.classList.remove('n-hidden');
+      var listHtml = missingFields.map(function (f) { return '<li>' + _esc(f) + '</li>'; }).join('');
+      missingBox.innerHTML =
+        '<strong>Bagian STNK yang gagal terbaca OCR — mohon isi manual pada kolom bertanda kuning:</strong>' +
+        '<ul style="margin:4px 0 0 18px; padding:0;">' + listHtml + '</ul>';
+    } else if (missingBox) {
+      missingBox.classList.add('n-hidden');
+      missingBox.innerHTML = '';
+    }
+
+    if (statusEl) {
+      statusEl.textContent = missingFields.length === 0
+        ? 'OCR selesai: seluruh data utama STNK terbaca dan terisi otomatis.'
+        : 'OCR selesai dengan ' + (3 - missingFields.length) + ' dari 3 data utama terbaca. Silakan lengkapi sisanya di bawah.';
+    }
+
+    // Render detail identitas kendaraan yang berhasil dibaca OCR
+    if (detailBox) {
+      var detailPairs = [
+        ['Nomor Polisi', parsed.noPolisi],
+        ['Jatuh Tempo Pajak', parsed.tglPajakTahunan],
+        ['Jatuh Tempo STNK', parsed.tglStnkLimaTahunan],
+        ['Merek / Tipe', [parsed.merk, parsed.tipe].filter(Boolean).join(' ')],
+        ['Jenis / Model', [parsed.jenis, parsed.model].filter(Boolean).join(' · ')],
+        ['Tahun Pembuatan', parsed.tahunPembuatan],
+        ['Isi Silinder / BBM', [parsed.isiSilinder, parsed.bahanBakar].filter(Boolean).join(' · ')],
+        ['Warna / TNKB', [parsed.warna, parsed.warnaTnkb ? ('TNKB ' + parsed.warnaTnkb) : ''].filter(Boolean).join(' · ')],
+        ['Nomor Rangka (VIN)', parsed.noRangka],
+        ['Nomor Mesin', parsed.noMesin],
+        ['Nama Pemilik', parsed.namaPemilik],
+        ['Total PKB Terdeteksi', parsed.totalPajakRp]
+      ].filter(function (pair) { return !!pair[1]; });
+
+      if (detailPairs.length > 0 || parsed.rawText) {
+        var gridHtml = detailPairs.map(function (pair) {
+          return '<div class="stnk-ocr-detail-item">' +
+            '<span class="stnk-ocr-detail-k">' + _esc(pair[0]) + '</span>' +
+            '<span class="stnk-ocr-detail-v">' + _esc(pair[1]) + '</span>' +
+            '</div>';
+        }).join('');
+
+        var rawToggle = parsed.rawText
+          ? '<details style="margin-top:8px;"><summary style="font-size:0.72rem; cursor:pointer; color:var(--n-text-secondary); font-weight:600;">Lihat Teks Mentah Hasil OCR</summary>' +
+            '<pre style="margin:6px 0 0; padding:8px; background:#FFFFFF; border:1px solid var(--n-border-hairline); border-radius:6px; font-size:0.7rem; max-height:110px; overflow:auto; white-space:pre-wrap;">' + _esc(parsed.rawText) + '</pre></details>'
+          : '';
+
+        detailBox.classList.remove('n-hidden');
+        detailBox.innerHTML =
+          '<div style="font-weight:700; font-size:0.74rem; color:var(--n-text-primary);">Rincian Identitas STNK Terbaca OCR</div>' +
+          (gridHtml ? ('<div class="stnk-ocr-detail-grid">' + gridHtml + '</div>') : '<div style="margin-top:4px; color:var(--n-text-muted);">Belum ada atribut rinci yang terbaca jelas.</div>') +
+          rawToggle;
+      } else {
+        detailBox.classList.add('n-hidden');
+        detailBox.innerHTML = '';
+      }
+    }
+
+    if (firstMissingEl && typeof firstMissingEl.focus === 'function') {
+      firstMissingEl.focus();
+    }
+  }
+
+  function _stnkHandleUploadAndOcr(ctx, file) {
+    if (!file) return;
+    var cfg = _stnkGetCtxConfig(ctx);
+    var pImg = document.getElementById(cfg.previewImgId);
+    var ph = document.getElementById(cfg.placeholderId);
+    var statusEl = document.getElementById(cfg.statusId);
+    var badgeEl = document.getElementById(cfg.badgeId);
+    var missingBox = document.getElementById(cfg.missingBoxId);
+    var detailBox = document.getElementById(cfg.detailBoxId);
+
+    if (badgeEl) badgeEl.style.display = 'none';
+    if (missingBox) { missingBox.classList.add('n-hidden'); missingBox.innerHTML = ''; }
+    if (detailBox) { detailBox.classList.add('n-hidden'); detailBox.innerHTML = ''; }
+    if (statusEl) statusEl.textContent = 'Memuat berkas dan menyiapkan pemindaian OCR...';
+
     var reader = new FileReader();
     reader.onload = function (ev) {
-      img.onload = function () {
-        var cvs = document.createElement('canvas');
-        cvs.width = img.naturalWidth || img.width;
-        cvs.height = img.naturalHeight || img.height;
-        var ctx = cvs.getContext('2d');
-        ctx.drawImage(img, 0, 0);
-
-        var preprocessed = _simanpoaPreprocessCanvas(cvs, 'sharpen');
-
-        _loadTesseract(function () {
-          if (!window.Tesseract || typeof window.Tesseract.recognize !== 'function') {
-            if (statusEl) statusEl.textContent = 'Engine Tesseract tidak tersedia. Silakan masukkan data manual.';
-            return;
-          }
-
-          window.Tesseract.recognize(preprocessed, 'eng')
-            .then(function (res) {
-              var text = (res && res.data && res.data.text) || '';
-              var confidence = 0;
-
-              // Cari plat nomor: Mis. B 1042 PQA, D 1234 ABC, dsb.
-              var platMatch = text.match(/\b([A-Z]{1,2})\s*([0-9]{1,4})\s*([A-Z]{1,3})\b/i);
-              if (platMatch) {
-                var nopolField = document.getElementById('bmn-form-nopol');
-                if (nopolField) nopolField.value = (platMatch[1] + ' ' + platMatch[2] + ' ' + platMatch[3]).toUpperCase();
-                confidence += 50;
-              }
-
-              // Cari tanggal: DD-MM-YYYY atau DD/MM/YYYY
-              var dateMatches = text.match(/\b(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{4})\b/g);
-              if (dateMatches && dateMatches.length > 0) {
-                var parsedDates = [];
-                dateMatches.forEach(function (dm) {
-                  var p = dm.split(/[\/\-\.]/);
-                  var d = parseInt(p[0], 10);
-                  var m = parseInt(p[1], 10);
-                  var y = parseInt(p[2], 10);
-                  if (d >= 1 && d <= 31 && m >= 1 && m <= 12 && y >= 2020 && y <= 2040) {
-                    var iso = y + '-' + (m < 10 ? '0' + m : m) + '-' + (d < 10 ? '0' + d : d);
-                    parsedDates.push(iso);
-                  }
-                });
-                parsedDates.sort();
-
-                if (parsedDates.length > 0) {
-                  var tglPajakField = document.getElementById('bmn-form-tgl-pajak');
-                  if (tglPajakField) tglPajakField.value = parsedDates[0];
-                  confidence += 30;
-                }
-                if (parsedDates.length > 1) {
-                  var tglStnkField = document.getElementById('bmn-form-tgl-stnk');
-                  if (tglStnkField) tglStnkField.value = parsedDates[parsedDates.length - 1];
-                  confidence += 20;
-                }
-              }
-
-              if (badgeEl) {
-                badgeEl.style.display = 'inline-block';
-                if (confidence >= 70) {
-                  badgeEl.style.background = '#ECFDF5';
-                  badgeEl.style.color = '#065F46';
-                  badgeEl.textContent = 'Akurasi Tinggi (' + confidence + '%)';
-                  if (checkEl) checkEl.checked = true;
-                } else {
-                  badgeEl.style.background = '#FEF3C7';
-                  badgeEl.style.color = '#92400E';
-                  badgeEl.textContent = 'Perlu Verifikasi Manual (' + confidence + '%)';
-                  if (checkEl) checkEl.checked = false;
-                }
-              }
-
-              if (statusEl) {
-                statusEl.textContent = confidence >= 70
-                  ? 'Pindai OCR berhasil. Data terisi otomatis.'
-                  : 'OCR selesai, namun gambar mungkin buram. Mohon periksa kembali kolom isian.';
-              }
-            })
-            .catch(function (err) {
-              console.warn('[OCR STNK Error]', err);
-              if (statusEl) statusEl.textContent = 'Gagal memindai gambar STNK. Masukkan data manual.';
-            });
-        });
+      var b64 = ev.target.result;
+      var payload = {
+        dataBase64: b64,
+        mimeType: file.type || 'image/jpeg',
+        fileName: file.name
       };
-      img.src = ev.target.result;
+
+      if (ctx === 'quick') {
+        _SIMANPOA.pendingQuickStnkPhoto = payload;
+        _SIMANPOA.pendingQuickStnkFile = file;
+      } else {
+        _BMN.currentStnkPhoto = payload;
+        _BMN.currentStnkFile = file;
+      }
+
+      _stnkFileToCanvas(file, b64, function (convErr, cvs, previewDataUrl) {
+        if (convErr || !cvs) {
+          if (pImg) pImg.style.display = 'none';
+          if (ph) { ph.style.display = 'block'; ph.textContent = file.name || 'Berkas gagal dipratinjau'; }
+          _stnkApplyResultToUi(ctx, null, convErr ? convErr.message : 'Gagal membaca berkas STNK.');
+          return;
+        }
+
+        if (pImg && previewDataUrl) {
+          pImg.src = previewDataUrl;
+          pImg.style.display = 'block';
+        }
+        if (ph) ph.style.display = 'none';
+
+        _stnkRunOcrPasses(
+          cvs,
+          function (progText) {
+            if (statusEl) statusEl.textContent = progText;
+          },
+          function (ocrErr, parsed) {
+            if (ocrErr && (!parsed || parsed.score === 0)) {
+              _stnkApplyResultToUi(ctx, null, ocrErr.message);
+              return;
+            }
+            _stnkApplyResultToUi(ctx, parsed, null);
+          }
+        );
+      });
     };
     reader.readAsDataURL(file);
+  }
+
+  function _bmnHandleStnkFile(e) {
+    var file = e.target.files && e.target.files[0];
+    if (!file) return;
+    _stnkHandleUploadAndOcr('form', file);
+  }
+
+  function _bmnTriggerStnkOcr() {
+    var fileInput = document.getElementById('bmn-form-foto-stnk');
+    var file = (fileInput && fileInput.files && fileInput.files[0]) || _BMN.currentStnkFile;
+    var statusEl = document.getElementById('bmn-stnk-ocr-status');
+    if (!file) {
+      if (statusEl) statusEl.textContent = 'Pilih foto atau PDF STNK terlebih dahulu.';
+      return;
+    }
+    _stnkHandleUploadAndOcr('form', file);
   }
 
   // ── SIMANPOA PILLAR & SUBWORKSPACE SWITCHER ───────────────
@@ -10658,8 +11318,11 @@
     }
 
     _SIMANPOA.pendingQuickStnkPhoto = null;
+    _SIMANPOA.pendingQuickStnkFile = null;
     var msgEl = document.getElementById('simanpoa-quick-stnk-msg');
     if (msgEl) msgEl.innerHTML = '';
+
+    _stnkResetOcrUi('quick');
 
     (document.getElementById('simanpoa-qs-aset-id') || {}).value = asetId;
     (document.getElementById('simanpoa-qs-nopol') || {}).value = target ? (target.noPolisi || '') : '';
@@ -10678,16 +11341,18 @@
   function _simanpoaHandleQuickStnkFile(e) {
     var file = e.target.files && e.target.files[0];
     if (!file) return;
+    _stnkHandleUploadAndOcr('quick', file);
+  }
 
-    var reader = new FileReader();
-    reader.onload = function (ev) {
-      _SIMANPOA.pendingQuickStnkPhoto = {
-        dataBase64: ev.target.result,
-        mimeType: file.type || 'image/jpeg',
-        fileName: file.name
-      };
-    };
-    reader.readAsDataURL(file);
+  function _simanpoaTriggerQuickStnkOcr() {
+    var fileInput = document.getElementById('simanpoa-qs-file-stnk');
+    var file = (fileInput && fileInput.files && fileInput.files[0]) || _SIMANPOA.pendingQuickStnkFile;
+    var statusEl = document.getElementById('simanpoa-qs-ocr-status');
+    if (!file) {
+      if (statusEl) statusEl.textContent = 'Pilih foto atau PDF STNK terlebih dahulu.';
+      return;
+    }
+    _stnkHandleUploadAndOcr('quick', file);
   }
 
   function _simanpoaSubmitQuickStnk() {
