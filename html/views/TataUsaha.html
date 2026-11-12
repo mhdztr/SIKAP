@@ -826,22 +826,22 @@
         <div class="n-card kpi-card">
           <div class="kpi-label">Total Paket Pekerjaan</div>
           <div class="kpi-value tnum" id="tu-paket-kpi-total">0 paket</div>
-          <div class="kpi-sub" id="tu-paket-kpi-total-sub">Seluruh divisi Dit. POA</div>
+          <div class="kpi-sub" id="tu-paket-kpi-total-sub" style="display:none;"></div>
         </div>
         <div class="n-card kpi-card">
           <div class="kpi-label">Total Nilai Kontrak</div>
           <div class="kpi-value tnum" id="tu-paket-kpi-kontrak">Rp 0</div>
-          <div class="kpi-sub" id="tu-paket-kpi-kontrak-sub">Komitmen rekanan penyedia</div>
+          <div class="kpi-sub" id="tu-paket-kpi-kontrak-sub" style="display:none;"></div>
         </div>
         <div class="n-card kpi-card">
           <div class="kpi-label">Rata-rata Progres Fisik</div>
           <div class="kpi-value tnum" id="tu-paket-kpi-progres">0%</div>
-          <div class="kpi-sub" id="tu-paket-kpi-progres-sub">Capaian fisik lapangan</div>
+          <div class="kpi-sub" id="tu-paket-kpi-progres-sub" style="display:none;"></div>
         </div>
         <div class="n-card kpi-card">
           <div class="kpi-label">Realisasi Keuangan</div>
           <div class="kpi-value tnum" id="tu-paket-kpi-realisasi">Rp 0</div>
-          <div class="kpi-sub" id="tu-paket-kpi-realisasi-sub">Pencairan termin pembayaran</div>
+          <div class="kpi-sub" id="tu-paket-kpi-realisasi-sub" style="display:none;"></div>
         </div>
       </div>
     </div>
@@ -2254,31 +2254,29 @@
   <!-- ══════════════════════════════════════════════════════════ -->
   <div id="tu-pane-bmn" class="tu-pane n-hidden">
 
-    <!-- ── SIMANPOA COMMAND HEADER BAR ── -->
+    <!-- ── SIMANPOA WORKSPACE BAR (RINGKAS, TANPA DUPLIKASI HEADER) ── -->
     <div class="simanpoa-command-bar">
       <div class="simanpoa-command-top">
-        <div class="simanpoa-brand-block">
-          <div class="simanpoa-badge-icon">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
-              <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
-            </svg>
-          </div>
-          <div>
-            <div class="simanpoa-title-row">
-              <h2 class="simanpoa-app-name">SIMANPOA</h2>
-              <span class="simanpoa-satker-pill">UAPKPB 032.05.449520 · DIT. POA</span>
+        <div class="simanpoa-pillar-grid">
+          <div class="simanpoa-pillar-card active" id="simanpoa-pillar-penatausahaan" onclick="_simanpoaSwitchPillar('penatausahaan')" role="button" tabindex="0">
+            <div class="simanpoa-pillar-left">
+              <div class="simanpoa-pillar-title">Penatausahaan BMN</div>
             </div>
-            <div class="simanpoa-app-sub">Sistem Informasi Manajemen Aset Negara — Penatausahaan &amp; Pengelolaan Berbasis Dokumen SAKTI</div>
+          </div>
+          <div class="simanpoa-pillar-card" id="simanpoa-pillar-pengelolaan" onclick="_simanpoaSwitchPillar('pengelolaan')" role="button" tabindex="0">
+            <div class="simanpoa-pillar-left">
+              <div class="simanpoa-pillar-title">Pengelolaan &amp; Penghapusan</div>
+            </div>
           </div>
         </div>
+
         <div class="simanpoa-command-actions">
           <button type="button" class="btn-outline ctl-md" id="simanpoa-stnk-alert-btn" onclick="_simanpoaOpenStnkAlertModal()" style="background:rgba(255,255,255,0.12);color:#FFFFFF;border-color:rgba(255,255,255,0.25);">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
               <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
             </svg>
-            <span>Peringatan Pajak STNK</span>
+            <span>Peringatan STNK</span>
             <span class="badge" id="simanpoa-stnk-alert-badge" style="background:#EF4444;color:#FFFFFF;display:none;font-size:0.7rem;padding:2px 6px;">0</span>
           </button>
           <button type="button" class="btn-outline ctl-md" onclick="_simanpoaOpenSaktiSyncModal()" style="background:rgba(255,255,255,0.12);color:#FFFFFF;border-color:rgba(255,255,255,0.25);">
@@ -2287,7 +2285,7 @@
               <polyline points="17 8 12 3 7 8"></polyline>
               <line x1="12" y1="3" x2="12" y2="15"></line>
             </svg>
-            <span>Sinkronisasi PDF SAKTI</span>
+            <span>Sinkronisasi SAKTI</span>
           </button>
           <button type="button" class="btn-outline ctl-md" onclick="_simanpoaExportExcel()" style="background:rgba(255,255,255,0.12);color:#FFFFFF;border-color:rgba(255,255,255,0.25);">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
@@ -2302,48 +2300,8 @@
               <line x1="12" y1="5" x2="12" y2="19"></line>
               <line x1="5" y1="12" x2="19" y2="12"></line>
             </svg>
-            <span>+ Catat Aset Unit</span>
+            <span>Catat Aset</span>
           </button>
-        </div>
-      </div>
-
-      <!-- 2 Main Pillars (Cards Switcher) -->
-      <div class="simanpoa-pillar-grid">
-        <div class="simanpoa-pillar-card active" id="simanpoa-pillar-penatausahaan" onclick="_simanpoaSwitchPillar('penatausahaan')" role="button" tabindex="0">
-          <div class="simanpoa-pillar-left">
-            <div class="simanpoa-pillar-ico">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                <polyline points="14 2 14 8 20 8"></polyline>
-                <line x1="16" y1="13" x2="8" y2="13"></line>
-                <line x1="16" y1="17" x2="8" y2="17"></line>
-                <polyline points="10 9 9 9 8 9"></polyline>
-              </svg>
-            </div>
-            <div>
-              <div class="simanpoa-pillar-title">Pilar 1: Penatausahaan BMN</div>
-              <div class="simanpoa-pillar-desc">Mencatat, Inventarisasi Fisik, Kendaraan &amp; STNK, Neraca &amp; 11 Kolom SAKTI</div>
-            </div>
-          </div>
-          <span class="simanpoa-pillar-badge" id="simanpoa-p1-badge">4 Sub-Workspace</span>
-        </div>
-
-        <div class="simanpoa-pillar-card" id="simanpoa-pillar-pengelolaan" onclick="_simanpoaSwitchPillar('pengelolaan')" role="button" tabindex="0">
-          <div class="simanpoa-pillar-left">
-            <div class="simanpoa-pillar-ico">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="3 6 5 6 21 6"></polyline>
-                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                <line x1="10" y1="11" x2="10" y2="17"></line>
-                <line x1="14" y1="11" x2="14" y2="17"></line>
-              </svg>
-            </div>
-            <div>
-              <div class="simanpoa-pillar-title">Pilar 2: Pengelolaan BMN</div>
-              <div class="simanpoa-pillar-desc">Pengurangan Aset Otomatis Berbasis SK / BAST &amp; Alur Usulan DJKN</div>
-            </div>
-          </div>
-          <span class="simanpoa-pillar-badge" id="simanpoa-p2-badge">Eksekusi Dokumen</span>
         </div>
       </div>
     </div>
@@ -2368,7 +2326,7 @@
               <line x1="8" y1="21" x2="16" y2="21"></line>
               <line x1="12" y1="17" x2="12" y2="21"></line>
             </svg>
-            <span>1. Posisi BMN di Neraca (SAKTI)</span>
+            <span>Neraca SAKTI</span>
           </button>
           <button type="button" class="simanpoa-subtab-btn" id="simanpoa-subtab-sakti11" onclick="_simanpoaSelectPenatausahaanSub('sakti11')">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
@@ -2376,14 +2334,14 @@
               <path d="M3 9h18"></path>
               <path d="M9 21V9"></path>
             </svg>
-            <span>2. Rincian 11 Kolom SAKTI</span>
+            <span>Rincian Barang (11 Kolom)</span>
           </button>
           <button type="button" class="simanpoa-subtab-btn active" id="simanpoa-subtab-register" onclick="_simanpoaSelectPenatausahaanSub('register')">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
               <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
               <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
             </svg>
-            <span>3. Register Unit Fisik &amp; Geotagging</span>
+            <span>Register Unit Fisik</span>
           </button>
           <button type="button" class="simanpoa-subtab-btn" id="simanpoa-subtab-kendaraan" onclick="_simanpoaSelectPenatausahaanSub('kendaraan')">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
@@ -2392,7 +2350,7 @@
               <circle cx="5.5" cy="18.5" r="2.5"></circle>
               <circle cx="18.5" cy="18.5" r="2.5"></circle>
             </svg>
-            <span>4. Kendaraan Dinas &amp; Monitoring STNK</span>
+            <span>Kendaraan &amp; STNK</span>
           </button>
         </div>
       </div>
@@ -2400,40 +2358,34 @@
       <!-- ── SUBPANE 1: POSISI BMN DI NERACA ── -->
       <div id="simanpoa-pane-neraca" class="n-hidden">
         <div class="content-section">
-          <div class="ov-kpi-row" style="grid-template-columns: repeat(4, 1fr);">
+          <div class="ov-kpi-row">
             <div class="n-card kpi-card">
               <div class="kpi-label">Aset Tetap Bruto</div>
-              <div class="kpi-value tnum" id="simanpoa-nrc-kpi-tetap">Rp —</div>
-              <div class="kpi-sub">Peralatan, Mesin, Jaringan, Lainnya</div>
+              <div class="kpi-value tnum" id="simanpoa-nrc-kpi-tetap">Rp 0</div>
             </div>
             <div class="n-card kpi-card">
               <div class="kpi-label">Akumulasi Penyusutan</div>
-              <div class="kpi-value tnum" id="simanpoa-nrc-kpi-susut" style="color:var(--n-crit);">Rp —</div>
-              <div class="kpi-sub">Kontra akun pengurang nilai</div>
+              <div class="kpi-value tnum" id="simanpoa-nrc-kpi-susut" style="color:var(--n-crit);">Rp 0</div>
             </div>
             <div class="n-card kpi-card">
               <div class="kpi-label">Persediaan &amp; Tak Berwujud</div>
-              <div class="kpi-value tnum" id="simanpoa-nrc-kpi-persediaan">Rp —</div>
-              <div class="kpi-sub">Barang konsumsi, amunisi, software</div>
+              <div class="kpi-value tnum" id="simanpoa-nrc-kpi-persediaan">Rp 0</div>
             </div>
             <div class="n-card kpi-card">
-              <div class="kpi-label">Posisi Bersih Neraca BMN</div>
-              <div class="kpi-value tnum" id="simanpoa-nrc-kpi-net" style="color:var(--n-primary);">Rp —</div>
-              <div class="kpi-sub" id="simanpoa-nrc-periode-sub">Laporan SAKTI Kemenkeu</div>
+              <div class="kpi-label">Posisi Bersih Neraca</div>
+              <div class="kpi-value tnum" id="simanpoa-nrc-kpi-net" style="color:var(--n-primary);">Rp 0</div>
+              <div class="kpi-sub" id="simanpoa-nrc-periode-sub">Belum ada data Neraca</div>
             </div>
           </div>
         </div>
 
         <div class="content-section">
           <div class="n-card" style="padding:0; overflow:hidden;">
-            <div style="display:flex; justify-content:space-between; align-items:center; padding:16px 20px; border-bottom:1px solid var(--n-border-hairline); gap:12px; flex-wrap:wrap;">
-              <div>
-                <h3 style="margin:0; font-size:1rem; font-weight:700; color:var(--n-text-primary);">Posisi BMN di Neraca (Laporan Neraca SAKTI)</h3>
-                <div style="font-size:0.75rem; color:var(--n-text-muted); margin-top:2px;" id="simanpoa-nrc-source-desc">Sumber: SAKTI Kemenkeu RI — UAPKPB 032.05.449520</div>
-              </div>
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:14px 20px; border-bottom:1px solid var(--n-border-hairline); gap:12px; flex-wrap:wrap;">
+              <h3 style="margin:0; font-size:0.95rem; font-weight:700; color:var(--n-text-primary);">Posisi BMN di Neraca</h3>
               <div class="ctl-row">
                 <button type="button" class="btn-outline ctl-sm" onclick="_simanpoaLoadWorkspace(true)">Muat Ulang</button>
-                <button type="button" class="btn-primary ctl-sm" onclick="_simanpoaOpenSaktiSyncModal('NERACA')">Sinkronisasi PDF Neraca</button>
+                <button type="button" class="btn-primary ctl-sm" onclick="_simanpoaOpenSaktiSyncModal('NERACA')">Unggah Neraca</button>
               </div>
             </div>
             <div style="overflow-x:auto;">
@@ -2465,14 +2417,11 @@
       <div id="simanpoa-pane-sakti11" class="n-hidden">
         <div class="content-section">
           <div class="n-card" style="padding:0; overflow:hidden;">
-            <div style="display:flex; justify-content:space-between; align-items:center; padding:16px 20px; border-bottom:1px solid var(--n-border-hairline); gap:12px; flex-wrap:wrap;">
-              <div>
-                <h3 style="margin:0; font-size:1rem; font-weight:700; color:var(--n-text-primary);">Rincian Buku Daftar Barang BMN (Format 11 Kolom SAKTI)</h3>
-                <div style="font-size:0.75rem; color:var(--n-text-muted); margin-top:2px;">Saldo Awal, Mutasi Bertambah, Mutasi Berkurang, &amp; Saldo Akhir</div>
-              </div>
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:14px 20px; border-bottom:1px solid var(--n-border-hairline); gap:12px; flex-wrap:wrap;">
+              <h3 style="margin:0; font-size:0.95rem; font-weight:700; color:var(--n-text-primary);">Rincian Daftar Barang (11 Kolom SAKTI)</h3>
               <div class="ctl-row">
                 <button type="button" class="btn-outline ctl-sm" onclick="_simanpoaLoadWorkspace(true)">Muat Ulang</button>
-                <button type="button" class="btn-primary ctl-sm" onclick="_simanpoaOpenSaktiSyncModal('RINCIAN_BARANG')">Sinkronisasi PDF Rincian</button>
+                <button type="button" class="btn-primary ctl-sm" onclick="_simanpoaOpenSaktiSyncModal('RINCIAN_BARANG')">Unggah Rincian</button>
               </div>
             </div>
 
@@ -2543,38 +2492,28 @@
           <!-- Peringatan Jatuh Tempo Alert Banner bila ada kendaraan due -->
           <div id="simanpoa-kendaraan-alert-banner" class="simanpoa-stnk-banner" style="display:none; margin-bottom:14px;"></div>
 
-          <div class="ov-kpi-row" style="grid-template-columns: repeat(4, 1fr); margin-bottom:14px;">
+          <div class="ov-kpi-row" style="margin-bottom:14px;">
             <div class="n-card kpi-card">
-              <div class="kpi-label">Total Armada Kendaraan</div>
+              <div class="kpi-label">Total Armada</div>
               <div class="kpi-value tnum" id="simanpoa-knd-total">0 unit</div>
-              <div class="kpi-sub">Mobil &amp; Sepeda Motor Operasional</div>
             </div>
             <div class="n-card kpi-card">
-              <div class="kpi-label">Pajak Segera Jatuh Tempo</div>
+              <div class="kpi-label">Jatuh Tempo &le; 30 Hari</div>
               <div class="kpi-value tnum" id="simanpoa-knd-segera" style="color:var(--n-warn);">0 unit</div>
-              <div class="kpi-sub">Rentang H-30 hingga H-1</div>
             </div>
             <div class="n-card kpi-card">
-              <div class="kpi-label">Lewat Jatuh Tempo (Overdue)</div>
+              <div class="kpi-label">Lewat Tenggat</div>
               <div class="kpi-value tnum" id="simanpoa-knd-overdue" style="color:var(--n-crit);">0 unit</div>
-              <div class="kpi-sub">Wajib segera diselesaikan</div>
             </div>
             <div class="n-card kpi-card">
-              <div class="kpi-label">Status STNK Aman</div>
+              <div class="kpi-label">STNK Aktif (&gt; 30 Hari)</div>
               <div class="kpi-value tnum" id="simanpoa-knd-aman" style="color:var(--n-primary);">0 unit</div>
-              <div class="kpi-sub">Masa berlaku &gt; 30 hari</div>
             </div>
           </div>
 
           <div class="n-card" style="padding:0; overflow:hidden;">
-            <div style="display:flex; justify-content:space-between; align-items:center; padding:16px 20px; border-bottom:1px solid var(--n-border-hairline); gap:12px; flex-wrap:wrap;">
-              <div>
-                <h3 style="margin:0; font-size:1rem; font-weight:700; color:var(--n-text-primary);">Daftar Kendaraan Dinas &amp; Monitoring STNK</h3>
-                <div style="font-size:0.75rem; color:var(--n-text-muted); margin-top:2px;">Wajib melampirkan 2 dokumen: Foto Fisik Kendaraan &amp; Foto/Scan STNK</div>
-              </div>
-              <div class="ctl-row">
-                <button type="button" class="btn-primary ctl-sm" onclick="_simanpoaOpenStnkAlertModal()">Buka Dialog Peringatan STNK</button>
-              </div>
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:14px 20px; border-bottom:1px solid var(--n-border-hairline); gap:12px; flex-wrap:wrap;">
+              <h3 style="margin:0; font-size:0.95rem; font-weight:700; color:var(--n-text-primary);">Kendaraan Dinas &amp; Pajak STNK</h3>
             </div>
 
             <div style="overflow-x:auto;">
@@ -2607,34 +2546,33 @@
     <div id="bmn-subview-aset">
       <!-- 4 KPI Cards BMN -->
       <div class="content-section">
-        <div class="ov-kpi-row" id="bmn-kpi-strip" style="grid-template-columns: repeat(4, 1fr);">
+        <div class="ov-kpi-row" id="bmn-kpi-strip">
           <div class="n-card kpi-card">
-            <div class="kpi-label">Total Nilai Perolehan (Gross)</div>
+            <div class="kpi-label">Total Nilai Perolehan</div>
             <div class="kpi-value tnum" id="bmn-kpi-gross">Rp —</div>
-            <div class="kpi-sub" id="bmn-kpi-gross-sub">Memuat data...</div>
+            <div class="kpi-sub" id="bmn-kpi-gross-sub"></div>
           </div>
           <div class="n-card kpi-card">
-            <div class="kpi-label">Nilai Buku Terkini (Net)</div>
+            <div class="kpi-label">Nilai Buku Terkini</div>
             <div class="kpi-value tnum" id="bmn-kpi-net">Rp —</div>
-            <div class="kpi-sub" id="bmn-kpi-net-sub">Akrual SAKTI</div>
+            <div class="kpi-sub" id="bmn-kpi-net-sub"></div>
           </div>
           <div class="n-card kpi-card">
-            <div class="kpi-label">% Kelaikan Fisik Aset</div>
+            <div class="kpi-label">% Kelaikan Fisik</div>
             <div class="kpi-value tnum" id="bmn-kpi-laik">—%</div>
-            <div class="kpi-sub" id="bmn-kpi-laik-sub">Kondisi Baik &amp; Rusak Ringan</div>
+            <div class="kpi-sub" id="bmn-kpi-laik-sub"></div>
           </div>
           <div class="n-card kpi-card">
             <div class="kpi-label">Antrean Usulan Hapus</div>
             <div class="kpi-value tnum" id="bmn-kpi-hapus">— unit</div>
-            <div class="kpi-sub" id="bmn-kpi-hapus-sub">DJKN / Pengelola</div>
+            <div class="kpi-sub" id="bmn-kpi-hapus-sub"></div>
           </div>
         </div>
       </div>
 
-      <!-- Rekapitulasi Kondisi Fisik BMN (Executive 3-Column Highlight Grid) -->
-      <div class="content-section" style="margin-bottom:20px;" id="bmn-summary-banner-wrap">
+      <!-- Rekapitulasi Kondisi Fisik BMN (Ringkas) -->
+      <div class="content-section" style="margin-bottom:14px;" id="bmn-summary-banner-wrap">
         <div class="bmn-rekap-grid">
-          <!-- Kolom 1: Kondisi Baik -->
           <div class="bmn-rekap-card">
             <div class="bmn-rekap-head">
               <span class="bmn-rekap-indicator dot-baik"></span>
@@ -2643,11 +2581,9 @@
             </div>
             <div class="bmn-rekap-body">
               <div class="bmn-rekap-count" id="bmn-sum-count-baik">0 unit</div>
-              <div class="bmn-rekap-sub">Kondisi prima siap operasional</div>
             </div>
           </div>
 
-          <!-- Kolom 2: Rusak Ringan -->
           <div class="bmn-rekap-card">
             <div class="bmn-rekap-head">
               <span class="bmn-rekap-indicator dot-rr"></span>
@@ -2656,11 +2592,9 @@
             </div>
             <div class="bmn-rekap-body">
               <div class="bmn-rekap-count" id="bmn-sum-count-rr">0 unit</div>
-              <div class="bmn-rekap-sub">Perlu pemeliharaan / perbaikan berkala</div>
             </div>
           </div>
 
-          <!-- Kolom 3: Rusak Berat -->
           <div class="bmn-rekap-card">
             <div class="bmn-rekap-head">
               <span class="bmn-rekap-indicator dot-rb"></span>
@@ -2669,11 +2603,8 @@
             </div>
             <div class="bmn-rekap-body">
               <div class="bmn-rekap-count" id="bmn-sum-count-rb">0 unit</div>
-              <div class="bmn-rekap-sub">Kandidat usulan penghapusan aset</div>
             </div>
-            <div class="bmn-rekap-action" id="bmn-sum-actions">
-              <!-- Rendered if Rusak Berat > 0 -->
-            </div>
+            <div class="bmn-rekap-action" id="bmn-sum-actions"></div>
           </div>
         </div>
       </div>
@@ -2683,33 +2614,12 @@
         <div class="n-card"
           style="padding:0; overflow:hidden; border-radius:var(--n-radius-md); box-shadow:var(--n-shadow-1);">
 
-          <!-- Baris 1: Header Tabel & Tombol Aksi Utama -->
           <div
-            style="display:flex; justify-content:space-between; align-items:center; padding:16px 20px; border-bottom:1px solid var(--n-border-hairline); gap:12px; flex-wrap:wrap;">
+            style="display:flex; justify-content:space-between; align-items:center; padding:14px 20px; border-bottom:1px solid var(--n-border-hairline); gap:12px; flex-wrap:wrap;">
             <div style="display:flex; align-items:center; gap:10px;">
-              <h3 style="margin:0; font-size:1rem; font-weight:700; color:var(--n-text-primary);">Daftar Inventaris BMN
-              </h3>
+              <h3 style="margin:0; font-size:0.95rem; font-weight:700; color:var(--n-text-primary);">Daftar Inventaris BMN</h3>
               <span class="badge" id="bmn-badge-total-unit"
                 style="background:var(--n-primary-light); color:var(--n-primary); font-size:.75rem; font-weight:600;">Memuat…</span>
-            </div>
-            <div class="ctl-row">
-              <button type="button" class="btn-outline" onclick="_simanpoaOpenSaktiSyncModal('RINCIAN_BARANG')">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                  stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                  <polyline points="7 10 12 15 17 10"></polyline>
-                  <line x1="12" y1="15" x2="12" y2="3"></line>
-                </svg>
-                Sinkronisasi SAKTI
-              </button>
-              <button type="button" class="btn-primary" onclick="_bmnSwitchView('form')">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
-                  stroke-linecap="round" stroke-linejoin="round">
-                  <line x1="12" y1="5" x2="12" y2="19"></line>
-                  <line x1="5" y1="12" x2="19" y2="12"></line>
-                </svg>
-                Tambah Aset
-              </button>
             </div>
           </div>
 
@@ -2915,56 +2825,31 @@
             <line x1="16" y1="17" x2="8" y2="17"></line>
             <polyline points="10 9 9 9 8 9"></polyline>
           </svg>
-          <span>1. Eksekusi Berbasis Dokumen SK / BAST Otomatis</span>
+          <span>Dokumen SK / BAST</span>
         </button>
         <button type="button" class="simanpoa-subtab-btn" id="simanpoa-subtab-usulan" onclick="_simanpoaSelectPengelolaanSub('usulan')">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="9 11 12 14 22 4"></polyline>
             <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
           </svg>
-          <span>2. Alur Usulan Penghapusan (DJKN / KPKNL)</span>
+          <span>Usulan Penghapusan</span>
         </button>
       </div>
     </div>
 
     <!-- ── SUBPANE 1 PENGELOLAAN: EKSEKUSI BERBASIS DOKUMEN SK / BAST ── -->
     <div id="simanpoa-pane-docdisposal">
-      <div class="content-section">
-        <div class="n-card" style="padding:22px; border-radius:14px; background:linear-gradient(135deg, #FFFDF8 0%, #FFFFFF 100%); border:1px solid #FDE68A;">
-          <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:16px; flex-wrap:wrap;">
-            <div style="max-width:760px;">
-              <div style="display:inline-flex; align-items:center; gap:6px; background:#FEF3C7; color:#92400E; padding:3px 10px; border-radius:999px; font-size:0.72rem; font-weight:700; margin-bottom:8px;">
-                <span>OTOMASI DOKUMEN SUMBER</span>
-              </div>
-              <h3 style="margin:0 0 6px 0; font-size:1.125rem; font-weight:800; color:var(--n-text-primary);">
-                Pengurangan &amp; Penghapusan BMN Otomatis Berbasis Surat / Dokumen
-              </h3>
-              <p style="margin:0; font-size:0.8125rem; color:var(--n-text-secondary); line-height:1.5;">
-                Sistem membaca dokumen PDF <strong>SK Penghapusan</strong>, <strong>BAST Serah Terima</strong>, atau <strong>BAST Transfer Keluar</strong>.
-                Kecerdasan sistem akan memindai nomor dokumen, mencocokkan kode barang, nomor polisi, atau nama aset yang terkena dampak, lalu menampilkan panel verifikasi sebelum secara otomatis mengurangi saldo aset di database.
-              </p>
-            </div>
-            <button type="button" class="btn-primary ctl-lg" onclick="_simanpoaOpenDocDisposalModal()" style="background:#D97706; border-color:#D97706; color:#FFFFFF; font-weight:700;">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                <polyline points="17 8 12 3 7 8"></polyline>
-                <line x1="12" y1="3" x2="12" y2="15"></line>
-              </svg>
-              <span>Upload Dokumen SK / BAST</span>
-            </button>
-          </div>
-        </div>
-      </div>
-
       <!-- Riwayat Berkas Dokumen Pengelolaan yang Telah Dieksekusi -->
       <div class="content-section">
         <div class="n-card" style="padding:0; overflow:hidden;">
-          <div style="display:flex; justify-content:space-between; align-items:center; padding:16px 20px; border-bottom:1px solid var(--n-border-hairline); gap:12px; flex-wrap:wrap;">
+          <div style="display:flex; justify-content:space-between; align-items:center; padding:14px 20px; border-bottom:1px solid var(--n-border-hairline); gap:12px; flex-wrap:wrap;">
             <div>
-              <h3 style="margin:0; font-size:1rem; font-weight:700; color:var(--n-text-primary);">Riwayat Eksekusi Dokumen Pengelolaan &amp; Pengurangan Aset</h3>
-              <div style="font-size:0.75rem; color:var(--n-text-muted); margin-top:2px;">Daftar SK Penghapusan dan BAST yang telah diterapkan ke saldo inventaris BMN</div>
+              <h3 style="margin:0; font-size:0.95rem; font-weight:700; color:var(--n-text-primary);">Eksekusi Dokumen SK Penghapusan / BAST</h3>
             </div>
-            <button type="button" class="btn-outline ctl-sm" onclick="_bmnLoadPenghapusanList(true)">Muat Ulang</button>
+            <div class="ctl-row">
+              <button type="button" class="btn-outline ctl-sm" onclick="_bmnLoadPenghapusanList(true)">Muat Ulang</button>
+              <button type="button" class="btn-primary ctl-sm" onclick="_simanpoaOpenDocDisposalModal()" style="background:#D97706; border-color:#D97706; color:#FFFFFF;">Unggah SK / BAST</button>
+            </div>
           </div>
           <div style="overflow-x:auto;">
             <table class="n-table n-table-full" id="simanpoa-table-docdisposal-hist" style="font-size:0.8125rem;">
@@ -2995,7 +2880,7 @@
       <div id="bmn-view-penghapusan">
         <!-- 4 KPI Cards Penghapusan -->
         <div class="content-section">
-          <div class="ov-kpi-row" id="bmn-hps-kpi-strip" style="grid-template-columns: repeat(4, 1fr);">
+          <div class="ov-kpi-row" id="bmn-hps-kpi-strip">
             <div class="n-card kpi-card">
               <div class="kpi-label">Total Berkas Usulan</div>
               <div class="kpi-value tnum" id="bmn-hps-kpi-total">0 berkas</div>

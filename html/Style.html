@@ -3715,17 +3715,19 @@ body.simanpoa-mode #app-toolbar {
   display: none;
 }
 
-/* SIMANPOA Command Header Banner */
+/* SIMANPOA Compact Action Bar */
 .simanpoa-command-bar {
   background: linear-gradient(135deg, #042F2E 0%, #064E3B 55%, #0F766E 100%);
-  border-radius: 14px;
-  padding: 18px 22px;
-  margin-bottom: 18px;
+  border-radius: 12px;
+  padding: 12px 16px;
+  margin-bottom: 14px;
   color: #FFFFFF;
-  box-shadow: 0 10px 25px -5px rgba(4, 47, 46, 0.22), 0 4px 10px -2px rgba(4, 47, 46, 0.12);
+  box-shadow: 0 6px 18px -4px rgba(4, 47, 46, 0.2);
   display: flex;
-  flex-direction: column;
-  gap: 16px;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
   position: relative;
   overflow: hidden;
 }
@@ -3735,108 +3737,51 @@ body.simanpoa-mode #app-toolbar {
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
-  gap: 14px;
-}
-
-.simanpoa-brand-block {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-}
-
-.simanpoa-badge-icon {
-  width: 44px;
-  height: 44px;
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.14);
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #34D399;
-  flex-shrink: 0;
-}
-
-.simanpoa-title-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-.simanpoa-app-name {
-  font-size: 1.25rem;
-  font-weight: 800;
-  letter-spacing: -0.02em;
-  color: #FFFFFF;
-  margin: 0;
-}
-
-.simanpoa-satker-pill {
-  font-size: 0.7rem;
-  font-weight: 700;
-  padding: 3px 9px;
-  border-radius: 999px;
-  background: rgba(52, 211, 153, 0.18);
-  border: 1px solid rgba(52, 211, 153, 0.4);
-  color: #A7F3D0;
-  letter-spacing: 0.03em;
-  font-variant-numeric: tabular-nums;
-}
-
-.simanpoa-app-sub {
-  font-size: 0.8125rem;
-  color: rgba(255, 255, 255, 0.82);
-  margin-top: 2px;
+  gap: 12px;
+  width: 100%;
 }
 
 .simanpoa-command-actions {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   flex-wrap: wrap;
 }
 
-/* 2 Main Pillars Switcher (Penatausahaan BMN vs Pengelolaan BMN) */
 .simanpoa-pillar-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  padding-top: 14px;
-  border-top: 1px solid rgba(255, 255, 255, 0.14);
-}
-
-@media (max-width: 768px) {
-  .simanpoa-pillar-grid {
-    grid-template-columns: 1fr;
-  }
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+  background: rgba(255, 255, 255, 0.12);
+  padding: 4px;
+  border-radius: 10px;
+  max-width: 100%;
 }
 
 .simanpoa-pillar-card {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 12px 16px;
-  border-radius: 11px;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1.5px solid rgba(255, 255, 255, 0.16);
-  color: #FFFFFF;
+  height: var(--ctl-h-md);
+  padding: 0 14px;
+  border-radius: 7px;
+  background: transparent;
+  border: 1px solid transparent;
+  color: rgba(255, 255, 255, 0.88);
   cursor: pointer;
-  text-align: left;
-  transition: all 180ms cubic-bezier(0.16, 1, 0.3, 1);
+  white-space: nowrap;
+  transition: all 160ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .simanpoa-pillar-card:hover {
   background: rgba(255, 255, 255, 0.14);
-  border-color: rgba(255, 255, 255, 0.32);
+  color: #FFFFFF;
 }
 
 .simanpoa-pillar-card.active {
   background: #FFFFFF;
-  border-color: #FFFFFF;
   color: #064E3B;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.16);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
 }
 
 .simanpoa-pillar-left {

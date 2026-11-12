@@ -7050,8 +7050,8 @@ function _simanpoaEnterMode() {
   var tagEl = document.getElementById('topbar-brand-tag');
   var fnEl  = document.getElementById('topbar-brand-fullname');
   if (acrEl) acrEl.textContent = 'SIMANPOA';
-  if (tagEl) tagEl.textContent = 'Aset Dit. POA';
-  if (fnEl) fnEl.textContent = 'Sistem Informasi Manajemen Aset Negara — Dit. POA';
+  if (tagEl) tagEl.textContent = 'UAPKPB 032.05.449520 · Dit. POA';
+  if (fnEl) fnEl.textContent = 'Manajemen Aset Negara (BMN)';
 }
 
 function _simanpoaExitToSikapSilent() {
@@ -7333,11 +7333,12 @@ function _bmnRenderSummary(d) {
   var elHapus    = document.getElementById('bmn-kpi-hapus');
   var elHapusSub = document.getElementById('bmn-kpi-hapus-sub');
 
-  if (elGross)    elGross.textContent = _rupiah(d.totalAsetGross);
-  if (elGrossSub) elGrossSub.textContent = d.totalUnit + ' unit \u00B7 Buku: ' + (d.pencatatan ? d.pencatatan.buku.count : 0) + ' \u00B7 Reg: ' + (d.pencatatan ? d.pencatatan.reguler.count : 0);
-  if (elNet)      elNet.textContent = _rupiah(d.totalNilaiBuku);
+  if (elGross)    elGross.textContent = _rupiah(d.totalAsetGross || 0);
+  if (elGrossSub) elGrossSub.textContent = (d.totalUnit || 0) + ' unit \u00B7 Buku: ' + (d.pencatatan ? d.pencatatan.buku.count : 0) + ' \u00B7 Reg: ' + (d.pencatatan ? d.pencatatan.reguler.count : 0);
+  if (elNet)      elNet.textContent = _rupiah(d.totalNilaiBuku || 0);
   if (elNetSub)   elNetSub.textContent = 'Akrual Terkini SAKTI (Buku)';
-  if (elLaik)     elLaik.textContent = d.pctKelaikanFisik + '%';
+  var laikPctVal = d.pctKelaikanFisik !== undefined ? d.pctKelaikanFisik : (d.pctLaik !== undefined ? d.pctLaik : 0);
+  if (elLaik)     elLaik.textContent = (Number(laikPctVal) || 0) + '%';
   if (elLaikSub)  elLaikSub.textContent = (d.kondisi ? d.kondisi.baik.count : 0) + ' Baik \u00B7 ' + (d.kondisi ? d.kondisi.rusakRingan.count : 0) + ' Rusak Ringan';
   if (elHapus)    elHapus.textContent = (d.antreanHapusCount || 0) + ' unit';
   if (elHapusSub) {
@@ -10285,26 +10286,32 @@ function _simanpoaRenderNeraca(neraca, periodeLaporan) {
   var tbody = document.getElementById('simanpoa-tbody-neraca');
   var footTotal = document.getElementById('simanpoa-neraca-total-cell');
   var periodeSub = document.getElementById('simanpoa-nrc-periode-sub');
-
-  if (periodeSub && periodeLaporan) {
-    periodeSub.textContent = 'SAKTI: ' + periodeLaporan;
-  }
+  var elTetap = document.getElementById('simanpoa-nrc-kpi-tetap');
+  var elSusut = document.getElementById('simanpoa-nrc-kpi-susut');
+  var elPersediaan = document.getElementById('simanpoa-nrc-kpi-persediaan');
+  var elNet = document.getElementById('simanpoa-nrc-kpi-net');
 
   if (!neraca || !neraca.items || neraca.items.length === 0) {
+    if (elTetap) elTetap.textContent = 'Rp 0';
+    if (elSusut) elSusut.textContent = 'Rp 0';
+    if (elPersediaan) elPersediaan.textContent = 'Rp 0';
+    if (elNet) elNet.textContent = 'Rp 0';
+    if (periodeSub) periodeSub.textContent = 'Belum ada data Neraca';
     if (tbody) {
       tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:32px; color:var(--n-text-muted);">' +
-        'Belum ada data Posisi Neraca. Klik tombol <strong>"Sinkronisasi PDF Neraca"</strong> di kanan atas untuk memuat dokumen SAKTI.' +
+        'Belum ada data Neraca. Gunakan tombol <strong>"Sinkronisasi SAKTI"</strong> untuk mengunggah laporan Neraca SAKTI.' +
         '</td></tr>';
     }
     if (footTotal) footTotal.textContent = 'Rp 0';
     return;
   }
 
+  var pLabel = (neraca.items[0] && neraca.items[0].periodeLaporan) || periodeLaporan || '';
+  if (periodeSub) {
+    periodeSub.textContent = pLabel ? ('Periode: ' + pLabel) : 'Data SAKTI';
+  }
+
   var totals = neraca.totals || {};
-  var elTetap = document.getElementById('simanpoa-nrc-kpi-tetap');
-  var elSusut = document.getElementById('simanpoa-nrc-kpi-susut');
-  var elPersediaan = document.getElementById('simanpoa-nrc-kpi-persediaan');
-  var elNet = document.getElementById('simanpoa-nrc-kpi-net');
 
   if (elTetap) elTetap.textContent = _formatRupiah(totals.asetTetapBruto || 0);
   if (elSusut) elSusut.textContent = _formatRupiah(totals.akumulasiPenyusutan || 0);
@@ -11127,8 +11134,8 @@ function _simanpoaProcessExtractedSaktiLines(allLines, fileName) {
     }
   }
 
-  _simanpoaSetSaktiProgress(true, 90, 'Menganalisis perubahan delta dengan basis data SIMANPOA di server...');
-  _msg('simanpoa-sync-msg', 'info', 'Teridentifikasi ' + parsed.rows.length + ' baris (' + parsed.docType + ' - ' + parsed.jenisLaporan + '). Menghitung delta server...');
+  _simanpoaSetSaktiProgress(true, 90, 'Menghitung perubahan delta (' + parsed.rows.length + ' baris)...');
+  _msg('simanpoa-sync-msg', null);
 
   google.script.run
     .withSuccessHandler(function (res) {
@@ -11178,8 +11185,8 @@ function _simanpoaHandleSaktiFile(e) {
   var ext = (file.name.split('.').pop() || '').toLowerCase();
 
   if (ext === 'xlsx' || ext === 'xls' || ext === 'csv') {
-    _simanpoaSetSaktiProgress(true, 25, 'Memuat pembaca lembar kerja Excel / CSV...');
-    _msg('simanpoa-sync-msg', 'info', 'Membaca berkas ' + ext.toUpperCase() + ' SAKTI...');
+    _simanpoaSetSaktiProgress(true, 25, 'Membaca berkas ' + ext.toUpperCase() + '...');
+    _msg('simanpoa-sync-msg', null);
     _loadSheetJS(function () {
       if (typeof XLSX === 'undefined') {
         _simanpoaSetSaktiProgress(false, 0, '');
@@ -11216,8 +11223,8 @@ function _simanpoaHandleSaktiFile(e) {
     return;
   }
 
-  _simanpoaSetSaktiProgress(true, 10, 'Membaca struktur halaman PDF SAKTI...');
-  _msg('simanpoa-sync-msg', 'info', 'Memproses dokumen PDF SAKTI...');
+  _simanpoaSetSaktiProgress(true, 10, 'Membaca dokumen PDF SAKTI...');
+  _msg('simanpoa-sync-msg', null);
 
   var reader = new FileReader();
   reader.onload = function (ev) {
@@ -11288,14 +11295,14 @@ function _simanpoaRenderSaktiPreview(data) {
         '</tr>';
     } else {
       thead.innerHTML = '<tr>' +
-        '<th>Status Delta</th>' +
-        '<th>Akun / Kode Barang</th>' +
-        '<th>Uraian Barang</th>' +
-        '<th>Klasifikasi</th>' +
-        '<th style="text-align:right;">Mutasi Tambah</th>' +
-        '<th style="text-align:right;">Mutasi Kurang</th>' +
-        '<th style="text-align:right;">Qty Akhir</th>' +
-        '<th style="text-align:right;">Nilai Akhir (Rp)</th>' +
+        '<th style="padding:7px 8px;">Status</th>' +
+        '<th style="padding:7px 8px;">Kode</th>' +
+        '<th style="padding:7px 8px;">Uraian Barang</th>' +
+        '<th style="padding:7px 6px;">Jenis</th>' +
+        '<th style="padding:7px 6px; text-align:right;">Tambah</th>' +
+        '<th style="padding:7px 6px; text-align:right;">Kurang</th>' +
+        '<th style="padding:7px 6px; text-align:right;">Qty</th>' +
+        '<th style="padding:7px 8px; text-align:right;">Saldo Akhir</th>' +
         '</tr>';
     }
   }
@@ -11311,9 +11318,9 @@ function _simanpoaRenderSaktiPreview(data) {
           '<td><span class="badge" style="' + badgeStyle + '">' + _esc(r.statusDelta) + '</span></td>' +
           '<td class="tnum font-medium">' + _esc(r.kodeAkun) + '</td>' +
           '<td>' + _esc(r.uraianAkun) + '</td>' +
-          '<td class="tnum" style="text-align:right;">' + _formatRupiah(r.nilaiLama) + '</td>' +
-          '<td class="tnum font-bold" style="text-align:right;">' + _formatRupiah(r.nilaiBaru) + '</td>' +
-          '<td class="tnum" style="text-align:right;">' + _formatRupiah(r.selisih) + '</td>' +
+          '<td class="tnum" style="text-align:right; white-space:nowrap;">' + _formatRupiah(r.nilaiLama) + '</td>' +
+          '<td class="tnum font-bold" style="text-align:right; white-space:nowrap;">' + _formatRupiah(r.nilaiBaru) + '</td>' +
+          '<td class="tnum" style="text-align:right; white-space:nowrap;">' + _formatRupiah(r.selisih) + '</td>' +
           '</tr>';
       });
     } else {
@@ -11321,15 +11328,16 @@ function _simanpoaRenderSaktiPreview(data) {
         var badgeStyle = r.statusDelta === 'TETAP'
           ? 'background:#F3F4F6; color:var(--n-text-secondary);'
           : 'background:#ECFDF5; color:#065F46; font-weight:700;';
+        var shortStatus = r.statusDelta === 'BARANG_BARU' ? 'BARU' : _esc(r.statusDelta);
         html += '<tr>' +
-          '<td><span class="badge" style="' + badgeStyle + '">' + _esc(r.statusDelta) + '</span></td>' +
-          '<td class="tnum font-medium"><div style="font-size:0.68rem; color:var(--n-text-muted);">' + _esc(r.kodeAkun) + '</div>' + _esc(r.kodeBarang) + '</td>' +
-          '<td>' + _esc(r.uraianBarang) + '</td>' +
-          '<td><span class="badge" style="font-size:0.65rem;">' + _esc(r.jenisLaporan) + '</span></td>' +
-          '<td class="tnum" style="text-align:right; color:#065F46; white-space:nowrap;">' + _formatRupiah(r.nilaiTambah) + '</td>' +
-          '<td class="tnum" style="text-align:right; color:#991B1B; white-space:nowrap;">' + _formatRupiah(r.nilaiKurang) + '</td>' +
-          '<td class="tnum" style="text-align:right; white-space:nowrap;">' + _formatNumber(r.kuantitasAkhir) + '</td>' +
-          '<td class="tnum font-bold" style="text-align:right; white-space:nowrap;">' + _formatRupiah(r.nilaiAkhir) + '</td>' +
+          '<td style="padding:6px 8px;"><span class="badge" style="font-size:0.62rem; ' + badgeStyle + '">' + shortStatus + '</span></td>' +
+          '<td class="tnum font-medium" style="padding:6px 8px; white-space:nowrap; font-size:0.72rem;"><div style="font-size:0.62rem; color:var(--n-text-muted);">' + _esc(r.kodeAkun) + '</div>' + _esc(r.kodeBarang) + '</td>' +
+          '<td style="padding:6px 8px; max-width:155px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="' + _esc(r.uraianBarang) + '">' + _esc(r.uraianBarang) + '</td>' +
+          '<td style="padding:6px 6px;"><span class="badge" style="font-size:0.62rem;">' + _esc(r.jenisLaporan) + '</span></td>' +
+          '<td class="tnum" style="padding:6px 6px; text-align:right; color:#065F46; white-space:nowrap;">' + _formatRupiah(r.nilaiTambah) + '</td>' +
+          '<td class="tnum" style="padding:6px 6px; text-align:right; color:#991B1B; white-space:nowrap;">' + _formatRupiah(r.nilaiKurang) + '</td>' +
+          '<td class="tnum" style="padding:6px 6px; text-align:right; white-space:nowrap;">' + _formatNumber(r.kuantitasAkhir) + '</td>' +
+          '<td class="tnum font-bold" style="padding:6px 8px; text-align:right; white-space:nowrap;">' + _formatRupiah(r.nilaiAkhir) + '</td>' +
           '</tr>';
       });
     }

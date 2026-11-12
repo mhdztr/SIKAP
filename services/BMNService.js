@@ -1967,6 +1967,20 @@ function bmn_getSaktiWorkspace(token, params) {
     var totalNonOperasionalBruto = 0;
     var totalNeracaBersih = 0;
 
+    var fmtPeriodeVal = function (raw) {
+      if (!raw) return '';
+      if (Object.prototype.toString.call(raw) === '[object Date]' && !isNaN(raw.getTime())) {
+        return Utilities.formatDate(raw, 'Asia/Jakarta', 'yyyy-MM-dd');
+      }
+      var s = String(raw).trim();
+      if (/^\d{4}-\d{2}-\d{2}/.test(s)) return s.substring(0, 10);
+      var parsed = new Date(s);
+      if (!isNaN(parsed.getTime())) {
+        return Utilities.formatDate(parsed, 'Asia/Jakarta', 'yyyy-MM-dd');
+      }
+      return s;
+    };
+
     var neracaItems = neracaRows.map(function (n) {
       var val = parseFloat(n['JumlahNilai']) || 0;
       var kat = String(n['KategoriNeraca'] || 'ASET_TETAP');
@@ -1979,7 +1993,7 @@ function bmn_getSaktiWorkspace(token, params) {
 
       return {
         neracaId: String(n['NeracaID'] || ''),
-        periodeLaporan: String(n['PeriodeLaporan'] || '2026-09-30'),
+        periodeLaporan: fmtPeriodeVal(n['PeriodeLaporan']) || '2026-09-30',
         kodeAkun: String(n['KodeAkun'] || ''),
         uraianAkun: String(n['UraianAkun'] || ''),
         jumlahNilai: val,
@@ -2001,7 +2015,7 @@ function bmn_getSaktiWorkspace(token, params) {
       var jenis = String(r['JenisLaporan'] || 'INTRA').toUpperCase();
       var itemObj = {
         rekapId: String(r['RekapID'] || ''),
-        periodeLaporan: String(r['PeriodeLaporan'] || '2026-09-30'),
+        periodeLaporan: fmtPeriodeVal(r['PeriodeLaporan']) || '2026-09-30',
         jenisLaporan: jenis,
         kodeAkun: String(r['KodeAkun'] || '132111'),
         uraianAkun: String(r['UraianAkun'] || 'Peralatan dan Mesin'),
@@ -2141,14 +2155,15 @@ function bmn_getSaktiWorkspace(token, params) {
       return dx - dy;
     });
 
-    var activePeriodeLabel = (neracaItems.length > 0 && neracaItems[0].periodeLaporan)
-      ? neracaItems[0].periodeLaporan
-      : ((rekapRows.length > 0 && rekapRows[0]['PeriodeLaporan']) ? String(rekapRows[0]['PeriodeLaporan']) : 'Belum Ada Sinkronisasi PDF SAKTI');
+    var neracaPeriodeLabel = (neracaItems.length > 0 && neracaItems[0].periodeLaporan) ? neracaItems[0].periodeLaporan : '';
+    var rincianPeriodeLabel = (rekapRows.length > 0 && rekapRows[0]['PeriodeLaporan']) ? fmtPeriodeVal(rekapRows[0]['PeriodeLaporan']) : '';
+    var activePeriodeLabel = neracaPeriodeLabel || rincianPeriodeLabel || '';
 
     return {
       success: true,
       data: {
-        periodeLaporan: activePeriodeLabel,
+        periodeLaporan: neracaPeriodeLabel || activePeriodeLabel,
+        periodeRincian: rincianPeriodeLabel,
         neraca: {
           items: neracaItems,
           totals: {
