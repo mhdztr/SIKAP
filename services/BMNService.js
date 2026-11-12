@@ -550,8 +550,18 @@ function bmn_getSummary(token, filter) {
         if (_bmnIsVehicleAsset(kBrgSum, katSum, nmSum)) {
           totalKendaraanCount++;
           var noPolSum  = String(r['NoPolisi'] || '');
-          var tPjkSum   = r['TglPajakTahunan'] ? new Date(r['TglPajakTahunan']).toISOString().substring(0, 10) : '';
-          var tStnkSum  = r['TglStnkLimaTahunan'] ? new Date(r['TglStnkLimaTahunan']).toISOString().substring(0, 10) : '';
+          var _safeD = function (v) {
+            if (!v) return '';
+            if (Object.prototype.toString.call(v) === '[object Date]' && !isNaN(v.getTime())) {
+              return Utilities.formatDate(v, 'Asia/Jakarta', 'yyyy-MM-dd');
+            }
+            var s = String(v).trim();
+            if (/^\d{4}-\d{2}-\d{2}/.test(s)) return s.substring(0, 10);
+            var d = new Date(s);
+            return !isNaN(d.getTime()) ? Utilities.formatDate(d, 'Asia/Jakarta', 'yyyy-MM-dd') : '';
+          };
+          var tPjkSum   = _safeD(r['TglPajakTahunan']);
+          var tStnkSum  = _safeD(r['TglStnkLimaTahunan']);
           var stnkCheck = _bmnComputeStnkStatus(tPjkSum, tStnkSum, noPolSum, nmSum);
           if (stnkCheck && (stnkCheck.statusReminder === 'LEWAT_JATUH_TEMPO' || stnkCheck.statusReminder === 'SEGERA_JATUH_TEMPO')) {
             kendaraanDueList.push({
@@ -2098,6 +2108,47 @@ function bmn_getSaktiWorkspace(token, params) {
       }
     }
 
+    // Fallback: Jika TX_BMN_Neraca belum diunggah tetapi TX_BMN_Rekap_Sakti sudah ada data,
+    // agregasikan saldo akhir per KodeAkun dari Rincian Barang agar tab Neraca tidak kosong.
+    var isDerivedFromRekap = false;
+    if (neracaItems.length === 0 && gabunganItems.length > 0) {
+      isDerivedFromRekap = true;
+      var derivedMap = {};
+      for (var dIdx = 0; dIdx < gabunganItems.length; dIdx++) {
+        var gIt = gabunganItems[dIdx];
+        var dAkun = String(gIt.kodeAkun || '132111').trim();
+        if (!derivedMap[dAkun]) {
+          var dKat = 'ASET_TETAP';
+          if (dAkun.indexOf('117') === 0) dKat = 'PERSEDIAAN';
+          else if (dAkun.indexOf('137') === 0 || dAkun.indexOf('169') === 0) dKat = 'AKUMULASI_PENYUSUTAN';
+          else if (dAkun.indexOf('162') === 0) dKat = 'ASET_TAK_BERWUJUD';
+          else if (dAkun.indexOf('166') === 0) dKat = 'ASET_NON_OPERASIONAL';
+
+          derivedMap[dAkun] = {
+            neracaId: 'DRV-' + dAkun,
+            periodeLaporan: gIt.periodeLaporan || '',
+            kodeAkun: dAkun,
+            uraianAkun: gIt.uraianAkun || ('Akun ' + dAkun),
+            jumlahNilai: 0,
+            kategoriNeraca: dKat,
+            sumberDokumen: 'Ringkasan Rincian Barang SAKTI'
+          };
+        }
+        derivedMap[dAkun].jumlahNilai += (parseFloat(gIt.nilaiAkhir) || 0);
+      }
+      var derivedKeys = Object.keys(derivedMap).sort();
+      for (var dk = 0; dk < derivedKeys.length; dk++) {
+        var dObj = derivedMap[derivedKeys[dk]];
+        neracaItems.push(dObj);
+        totalNeracaBersih += dObj.jumlahNilai;
+        if (dObj.kategoriNeraca === 'PERSEDIAAN') totalPersediaan += dObj.jumlahNilai;
+        else if (dObj.kategoriNeraca === 'ASET_TETAP') totalAsetTetapBruto += dObj.jumlahNilai;
+        else if (dObj.kategoriNeraca === 'AKUMULASI_PENYUSUTAN') totalAkumulasiPenyusutan += dObj.jumlahNilai;
+        else if (dObj.kategoriNeraca === 'ASET_TAK_BERWUJUD') totalAsetTakBerwujudBruto += dObj.jumlahNilai;
+        else if (dObj.kategoriNeraca === 'ASET_NON_OPERASIONAL') totalNonOperasionalBruto += dObj.jumlahNilai;
+      }
+    }
+
     // 3. Olah Daftar Kendaraan Dinas (Mobil & Motor) & Peringatan Pajak/STNK
     var kendaraanList = [];
     var dueAlerts = [];
@@ -2109,8 +2160,8 @@ function bmn_getSaktiWorkspace(token, params) {
       var nm   = String(ar['NamaBarang'] || '');
       if (_bmnIsVehicleAsset(kBrg, kat, nm)) {
         var noPol = String(ar['NoPolisi'] || '');
-        var tPjk  = ar['TglPajakTahunan'] ? new Date(ar['TglPajakTahunan']).toISOString().substring(0, 10) : '';
-        var tStnk = ar['TglStnkLimaTahunan'] ? new Date(ar['TglStnkLimaTahunan']).toISOString().substring(0, 10) : '';
+        var tPjk  = fmtPeriodeVal(ar['TglPajakTahunan']);
+        var tStnk = fmtPeriodeVal(ar['TglStnkLimaTahunan']);
         var stnkInfo = _bmnComputeStnkStatus(tPjk, tStnk, noPol, nm);
 
         var vObj = {
@@ -2166,6 +2217,7 @@ function bmn_getSaktiWorkspace(token, params) {
         periodeRincian: rincianPeriodeLabel,
         neraca: {
           items: neracaItems,
+          isDerivedFromRekap: isDerivedFromRekap,
           totals: {
             persediaan: totalPersediaan,
             asetTetapBruto: totalAsetTetapBruto,
@@ -2450,6 +2502,7 @@ function bmn_commitSaktiSync(token, payload) {
         if (newNeracaRows.length > 0) {
           neracaSheet.getRange(neracaSheet.getLastRow() + 1, 1, newNeracaRows.length, newNeracaRows[0].length).setValues(newNeracaRows);
         }
+        SpreadsheetApp.flush();
 
         logAudit(session.userId, 'SYNC_SAKTI_NERACA', 'TX_BMN_Neraca', periodeLap, {
           fileName: fileName,
@@ -2585,6 +2638,7 @@ function bmn_commitSaktiSync(token, payload) {
       if (newUnitRows.length > 0) {
         asetSheet.getRange(asetSheet.getLastRow() + 1, 1, newUnitRows.length, newUnitRows[0].length).setValues(newUnitRows);
       }
+      SpreadsheetApp.flush();
 
       logAudit(session.userId, 'SYNC_SAKTI_RINCIAN', 'TX_BMN_Rekap_Sakti', periodeLap, {
         fileName: fileName,
