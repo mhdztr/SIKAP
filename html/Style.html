@@ -1979,65 +1979,50 @@ select.n-input {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 6px 12px;
-  border-radius: 999px;
+  height: var(--ctl-h-md, 32px);
+  padding: 0 12px;
+  border-radius: 8px;
   background: var(--n-surface-1, #F8FAFC);
-  border: 1.5px solid var(--n-border-hairline);
+  border: 1px solid var(--n-border-hairline);
   cursor: pointer;
   user-select: none;
-  transition: all 140ms ease;
+  transition: background 120ms ease, border-color 120ms ease, color 120ms ease;
 }
 
 .bmn-rekap-card:hover {
   background: #FFFFFF;
   border-color: #CBD5E1;
-  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.05);
 }
 
 .bmn-rekap-card.is-active {
   background: #ECFDF5;
   border-color: #059669;
-  box-shadow: 0 0 0 2px rgba(5, 150, 105, 0.14);
 }
 
 .bmn-rekap-card.is-rr.is-active {
   background: #FFFBEB;
   border-color: #D97706;
-  box-shadow: 0 0 0 2px rgba(217, 119, 6, 0.14);
 }
 
 .bmn-rekap-card.is-rb.is-active {
   background: #FFF1F2;
   border-color: #E11D48;
-  box-shadow: 0 0 0 2px rgba(225, 29, 72, 0.14);
 }
-
-.bmn-rekap-head {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.bmn-rekap-indicator {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-
-.dot-baik { background: #059669; box-shadow: 0 0 0 2px rgba(5, 150, 105, 0.2); }
-.dot-rr   { background: #D97706; box-shadow: 0 0 0 2px rgba(217, 119, 6, 0.2); }
-.dot-rb   { background: #E11D48; box-shadow: 0 0 0 2px rgba(225, 29, 72, 0.2); }
 
 .bmn-rekap-title {
   font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--n-text-secondary, #475569);
+}
+
+.bmn-rekap-card.is-active .bmn-rekap-title {
   font-weight: 700;
   color: var(--n-text-primary);
 }
 
 .bmn-rekap-count {
   font-size: 0.78rem;
-  font-weight: 800;
+  font-weight: 700;
   color: var(--n-text-primary);
   font-variant-numeric: tabular-nums;
 }
@@ -2045,8 +2030,8 @@ select.n-input {
 .bmn-rekap-badge {
   font-size: 0.7rem;
   font-weight: 700;
-  padding: 1px 6px;
-  border-radius: 999px;
+  padding: 2px 6px;
+  border-radius: 6px;
   font-variant-numeric: tabular-nums;
 }
 
