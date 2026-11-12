@@ -1954,40 +1954,68 @@ select.n-input {
   stroke: var(--n-primary);
 }
 
-/* ── BMN REKAPITULASI FISIK (3-Column Highlight Grid) ── */
+/* ── BMN REKAPITULASI & FILTER KONDISI (Compact Action Strip) ── */
 .bmn-rekap-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  background: #FFFFFF;
+  border-radius: 12px;
+  padding: 10px 14px;
+  border: 1px solid var(--n-border-hairline);
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03);
 }
 
-@media (max-width: 900px) {
-  .bmn-rekap-grid {
-    grid-template-columns: 1fr;
-  }
+.bmn-rekap-chips {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .bmn-rekap-card {
-  background: #FFFFFF;
-  border-radius: 12px;
-  padding: 16px 20px;
-  border: 1px solid var(--n-border-hairline);
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03);
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  gap: 10px;
-  transition: transform 140ms ease, box-shadow 140ms ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: var(--n-surface-1, #F8FAFC);
+  border: 1.5px solid var(--n-border-hairline);
+  cursor: pointer;
+  user-select: none;
+  transition: all 140ms ease;
 }
 
 .bmn-rekap-card:hover {
-  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
+  background: #FFFFFF;
+  border-color: #CBD5E1;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.05);
+}
+
+.bmn-rekap-card.is-active {
+  background: #ECFDF5;
+  border-color: #059669;
+  box-shadow: 0 0 0 2px rgba(5, 150, 105, 0.14);
+}
+
+.bmn-rekap-card.is-rr.is-active {
+  background: #FFFBEB;
+  border-color: #D97706;
+  box-shadow: 0 0 0 2px rgba(217, 119, 6, 0.14);
+}
+
+.bmn-rekap-card.is-rb.is-active {
+  background: #FFF1F2;
+  border-color: #E11D48;
+  box-shadow: 0 0 0 2px rgba(225, 29, 72, 0.14);
 }
 
 .bmn-rekap-head {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 
 .bmn-rekap-indicator {
@@ -2002,40 +2030,34 @@ select.n-input {
 .dot-rb   { background: #E11D48; box-shadow: 0 0 0 2px rgba(225, 29, 72, 0.2); }
 
 .bmn-rekap-title {
-  font-size: 0.8125rem;
+  font-size: 0.78rem;
   font-weight: 700;
   color: var(--n-text-primary);
 }
 
-.bmn-rekap-badge {
-  margin-left: auto;
-  font-size: 0.6875rem;
-  font-weight: 700;
-  padding: 2px 7px;
-  border-radius: 4px;
-  font-variant-numeric: tabular-nums;
-}
-
-.badge-baik { background: rgba(5, 150, 105, 0.1); color: #059669; }
-.badge-rr   { background: rgba(217, 119, 6, 0.1); color: #D97706; }
-.badge-rb   { background: rgba(225, 29, 72, 0.1); color: #E11D48; }
-
 .bmn-rekap-count {
-  font-size: 1.35rem;
+  font-size: 0.78rem;
   font-weight: 800;
   color: var(--n-text-primary);
   font-variant-numeric: tabular-nums;
-  line-height: 1.1;
 }
 
-.bmn-rekap-sub {
-  font-size: 0.75rem;
-  color: var(--n-text-muted);
-  margin-top: 3px;
+.bmn-rekap-badge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 999px;
+  font-variant-numeric: tabular-nums;
 }
+
+.badge-baik { background: rgba(5, 150, 105, 0.12); color: #059669; }
+.badge-rr   { background: rgba(217, 119, 6, 0.12); color: #D97706; }
+.badge-rb   { background: rgba(225, 29, 72, 0.12); color: #E11D48; }
 
 .bmn-rekap-action {
-  margin-top: 4px;
+  margin-left: auto;
+  display: flex;
+  align-items: center;
 }
 
 /* ── UNIFIED TABLE TOOLBAR & CONTROLS (TIER MD: 32px) ── */

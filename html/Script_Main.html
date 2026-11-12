@@ -7100,6 +7100,14 @@
     if (paneAset) paneAset.classList.toggle('n-hidden', _BMN.subTab !== 'aset');
     if (paneHapus) paneHapus.classList.toggle('n-hidden', _BMN.subTab !== 'penghapusan');
 
+    if (_BMN.subTab === 'penghapusan' && typeof _simanpoaSwitchPillar === 'function') {
+      _simanpoaSwitchPillar('pengelolaan');
+      if (typeof _simanpoaSelectPengelolaanSub === 'function') {
+        _simanpoaSelectPengelolaanSub('usulan');
+      }
+      return;
+    }
+
     if (!skipLoad) {
       if (_BMN.subTab === 'penghapusan') {
         _bmnLoadPenghapusanList(true);
@@ -7363,6 +7371,8 @@
       if (d.rusakBeratKandidatHapus > 0) {
         elHapusSub.innerHTML = '<span style="color:var(--n-crit);font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:4px;" onclick="_bmnFilterRusakBerat()" title="Klik untuk memfilter aset Rusak Berat">' +
           d.rusakBeratKandidatHapus + ' unit Rusak Berat siap usul &rarr;</span>';
+      } else if (d.antreanHapusCount > 0) {
+        elHapusSub.textContent = d.antreanHapusCount + ' unit dalam proses usulan';
       } else {
         elHapusSub.textContent = 'Tidak ada antrean penghapusan';
       }
@@ -7374,7 +7384,7 @@
       elBadgeUnit.textContent = (d.totalUnit || 0) + ' unit';
     }
 
-    // Update Rekapitulasi Kondisi Fisik 3-Kolom (Executive Highlight Grid)
+    // Update Rekapitulasi Kondisi Fisik (Filter Strip)
     var bBaik = document.getElementById('bmn-sum-badge-baik');
     var bRR = document.getElementById('bmn-sum-badge-rr');
     var bRB = document.getElementById('bmn-sum-badge-rb');
@@ -7392,15 +7402,18 @@
       if (cRB) cRB.textContent = (d.kondisi.rusakBerat.count || 0) + ' unit';
     }
 
+    if (typeof _bmnSyncKondisiCards === 'function') {
+      _bmnSyncKondisiCards();
+    }
+
     if (actWrap) {
-      if (d.kondisi && d.kondisi.rusakBerat && d.kondisi.rusakBerat.count > 0) {
-        actWrap.innerHTML =
-          '<button type="button" class="btn-danger" style="font-size:0.75rem;padding:4px 10px;width:100%;margin-top:6px;" onclick="_bmnSelectSubTab(\'penghapusan\'); _bmnOpenCreateHapusModal();">' +
-          '+ Buat Usulan Hapus (' + d.kondisi.rusakBerat.count + ' unit)' +
-          '</button>';
-      } else {
-        actWrap.innerHTML = '';
-      }
+      var rbCount = (d.kondisi && d.kondisi.rusakBerat) ? (Number(d.kondisi.rusakBerat.count) || 0) : 0;
+      var btnClass = rbCount > 0 ? 'btn-danger-solid ctl-md' : 'btn-outline ctl-md';
+      var btnLabel = rbCount > 0 ? 'Usulan Penghapusan (' + rbCount + ' unit)' : 'Usulan Penghapusan';
+      actWrap.innerHTML =
+        '<button type="button" class="' + btnClass + '" onclick="_bmnSelectSubTab(\'penghapusan\'); _bmnOpenCreateHapusModal();">' +
+        btnLabel +
+        '</button>';
     }
 
     // Render UPT Map Markers (Sub-Fase 18B.5)
@@ -7578,19 +7591,37 @@
     _bmnLoadAsetList();
   }
 
+  function _bmnSyncKondisiCards() {
+    var activeKond = _BMN.kondisi || 'ALL';
+    var cards = document.querySelectorAll('#bmn-summary-banner-wrap .bmn-rekap-card');
+    cards.forEach(function (card) {
+      card.classList.toggle('is-active', card.getAttribute('data-kondisi') === activeKond);
+    });
+  }
+
+  function _bmnFilterByKondisi(kondisi) {
+    var nextKond = kondisi || 'ALL';
+    if (nextKond !== 'ALL' && _BMN.kondisi === nextKond) {
+      nextKond = 'ALL';
+    }
+    var selKond = document.getElementById('bmn-filter-kondisi');
+    if (selKond) selKond.value = nextKond;
+    _BMN.kondisi = nextKond;
+    _BMN.page = 1;
+    _bmnSyncKondisiCards();
+    _bmnLoadAsetList();
+  }
+
   function _bmnFilterChange() {
     _BMN.kondisi = (document.getElementById('bmn-filter-kondisi') || {}).value || 'ALL';
     _BMN.lokasiId = (document.getElementById('bmn-filter-upt') || {}).value || 'ALL';
     _BMN.page = 1;
+    _bmnSyncKondisiCards();
     _bmnLoadAsetList();
   }
 
   function _bmnFilterRusakBerat() {
-    var selKond = document.getElementById('bmn-filter-kondisi');
-    if (selKond) selKond.value = 'RUSAK_BERAT';
-    _BMN.kondisi = 'RUSAK_BERAT';
-    _BMN.page = 1;
-    _bmnLoadAsetList();
+    _bmnFilterByKondisi('RUSAK_BERAT');
   }
 
   function _bmnDebouncedSearch() {
