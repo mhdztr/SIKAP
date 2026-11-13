@@ -8633,6 +8633,7 @@
     var stnkFile = document.getElementById('bmn-form-foto-stnk');
     var seksiKnd = document.getElementById('bmn-form-seksi-kendaraan');
     if (stnkFile) stnkFile.value = '';
+    if (typeof _stnkWarmWorker === 'function') _stnkWarmWorker();
 
     var checkKendaraanVisibility = function () {
       var katVal = (document.getElementById('bmn-form-kategori') || {}).value || '';
@@ -10109,11 +10110,39 @@
     _stnkSetFieldFlag(cfg.tglStnkId, cfg.flagStnkId, null);
   }
 
-  function _simanpoaPreprocessCanvas(srcCanvas, mode) {
+  var _STNK_WORKER_PROMISE = null;
+
+  function _stnkWarmWorker() {
+    if (_STNK_WORKER_PROMISE) return _STNK_WORKER_PROMISE;
+    _STNK_WORKER_PROMISE = new Promise(function (resolve) {
+      _loadTesseract(function () {
+        if (!window.Tesseract || typeof window.Tesseract.createWorker !== 'function') {
+          _STNK_WORKER_PROMISE = null;
+          resolve(null);
+          return;
+        }
+        window.Tesseract.createWorker('eng')
+          .then(function (w) {
+            return w.setParameters({
+              tessedit_pageseg_mode: '6',
+              preserve_interword_spaces: '1'
+            }).then(function () { return w; });
+          })
+          .then(function (w) { resolve(w); })
+          .catch(function (err) {
+            console.warn('[STNK Worker Init]', err);
+            _STNK_WORKER_PROMISE = null;
+            resolve(null);
+          });
+      });
+    });
+    return _STNK_WORKER_PROMISE;
+  }
+
+  function _simanpoaPreprocessCanvas(srcCanvas, mode, radOverride, biasOverride) {
     var maxDim = Math.max(srcCanvas.width || 1, srcCanvas.height || 1);
-    var targetLong = 1900;
-    var scale = maxDim < 1000 ? Math.min(2.4, targetLong / maxDim) : (maxDim > 2400 ? (2200 / maxDim) : 1.0);
-    if (mode === 'sharpen' && maxDim >= 1000 && maxDim < 1600) scale = 1.4;
+    var targetLong = mode === 'bradley' ? 1350 : 1200;
+    var scale = maxDim < targetLong ? Math.min(2.2, targetLong / maxDim) : (maxDim > 1500 ? (targetLong / maxDim) : 1.0);
 
     var upCanvas = document.createElement('canvas');
     upCanvas.width = Math.max(1, Math.round(srcCanvas.width * scale));
@@ -10121,87 +10150,69 @@
     var ctx = upCanvas.getContext('2d');
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = 'high';
-    ctx.drawImage(srcCanvas, 0, 0, upCanvas.width, upCanvas.height);
 
+    if (mode === 'fastgray') {
+      ctx.filter = 'grayscale(100%) contrast(142%) brightness(106%)';
+      ctx.drawImage(srcCanvas, 0, 0, upCanvas.width, upCanvas.height);
+      ctx.filter = 'none';
+      return upCanvas;
+    }
+
+    ctx.drawImage(srcCanvas, 0, 0, upCanvas.width, upCanvas.height);
     var w = upCanvas.width;
     var h = upCanvas.height;
     var imgData = ctx.getImageData(0, 0, w, h);
     var d = imgData.data;
     var totalPx = w * h;
-    var grayBuf = new Uint8Array(totalPx);
 
-    var min = 255, max = 0;
-    for (var i = 0, p = 0; i < d.length; i += 4, p++) {
-      var gray = Math.round(0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2]);
-      grayBuf[p] = gray;
-      if (gray < min) min = gray;
-      if (gray > max) max = gray;
-    }
+    if (mode === 'bradley' || mode === 'otsu' || mode === 'binarize') {
+      // Penekanan latar biru/merah kertas STNK agar tinta dot-matrix lebih kontras
+      var lum = new Float32Array(totalPx);
+      for (var i = 0, p = 0; i < d.length; i += 4, p++) {
+        lum[p] = 0.35 * d[i] + 0.50 * d[i + 1] + 0.15 * d[i + 2];
+      }
 
-    var range = (max - min) || 1;
-    var hist = new Int32Array(256);
-    for (var j = 0; j < totalPx; j++) {
-      var stretched = Math.round(((grayBuf[j] - min) / range) * 255);
-      grayBuf[j] = stretched;
-      hist[stretched]++;
-      var oIdx = j * 4;
-      d[oIdx] = d[oIdx + 1] = d[oIdx + 2] = stretched;
-    }
-
-    if (mode === 'otsu' || mode === 'binarize') {
-      // Otsu adaptive global threshold
-      var sum = 0;
-      for (var t = 0; t < 256; t++) sum += t * hist[t];
-      var sumB = 0, wB = 0, wF = 0, varMax = 0, threshold = 135;
-      for (var k = 0; k < 256; k++) {
-        wB += hist[k];
-        if (wB === 0) continue;
-        wF = totalPx - wB;
-        if (wF === 0) break;
-        sumB += k * hist[k];
-        var mB = sumB / wB;
-        var mF = (sum - sumB) / wF;
-        var varBetween = wB * wF * (mB - mF) * (mB - mF);
-        if (varBetween > varMax) {
-          varMax = varBetween;
-          threshold = k;
+      // Bradley Local Adaptive Thresholding via Integral Image (cepat < 40ms)
+      var rad = radOverride || 15;
+      var bias = biasOverride || 0.89;
+      var stride = w + 1;
+      var integ = new Float64Array((w + 1) * (h + 1));
+      for (var yy = 0; yy < h; yy++) {
+        var rowSum = 0;
+        var rowBase = yy * w;
+        var iRowCurr = (yy + 1) * stride;
+        var iRowPrev = yy * stride;
+        for (var xx = 0; xx < w; xx++) {
+          rowSum += lum[rowBase + xx];
+          integ[iRowCurr + xx + 1] = integ[iRowPrev + xx + 1] + rowSum;
         }
       }
-      for (var m = 0; m < totalPx; m++) {
-        var bw = grayBuf[m] > threshold ? 255 : 0;
-        var mIdx = m * 4;
-        d[mIdx] = d[mIdx + 1] = d[mIdx + 2] = bw;
-        d[mIdx + 3] = 255;
+
+      for (var y = 0; y < h; y++) {
+        var y0 = y - rad; if (y0 < 0) y0 = 0;
+        var y1 = y + rad; if (y1 >= h) y1 = h - 1;
+        var offY1 = (y1 + 1) * stride;
+        var offY0 = y0 * stride;
+        var yBase = y * w;
+        for (var x = 0; x < w; x++) {
+          var x0 = x - rad; if (x0 < 0) x0 = 0;
+          var x1 = x + rad; if (x1 >= w) x1 = w - 1;
+          var cnt = (x1 - x0 + 1) * (y1 - y0 + 1);
+          var sum = integ[offY1 + x1 + 1] - integ[offY0 + x1 + 1] - integ[offY1 + x0] + integ[offY0 + x0];
+          var val = (lum[yBase + x] < (sum / cnt) * bias) ? 0 : 255;
+          var oIdx = (yBase + x) * 4;
+          d[oIdx] = d[oIdx + 1] = d[oIdx + 2] = val;
+          d[oIdx + 3] = 255;
+        }
       }
       ctx.putImageData(imgData, 0, 0);
       return upCanvas;
     }
 
-    ctx.putImageData(imgData, 0, 0);
-
-    // Unsharp mask 3x3 sharpening
-    var src = ctx.getImageData(0, 0, w, h);
-    var out = ctx.createImageData(w, h);
-    var sD = src.data;
-    var oD = out.data;
-
-    for (var y = 1; y < h - 1; y++) {
-      for (var x = 1; x < w - 1; x++) {
-        var idx = (y * w + x) * 4;
-        var top = ((y - 1) * w + x) * 4;
-        var btm = ((y + 1) * w + x) * 4;
-        var lft = (y * w + (x - 1)) * 4;
-        var rgt = (y * w + (x + 1)) * 4;
-
-        var val = 5 * sD[idx] - sD[top] - sD[btm] - sD[lft] - sD[rgt];
-        if (val < 0) val = 0;
-        if (val > 255) val = 255;
-
-        oD[idx] = oD[idx + 1] = oD[idx + 2] = val;
-        oD[idx + 3] = 255;
-      }
-    }
-    ctx.putImageData(out, 0, 0);
+    // Fallback sharpen contrast stretch
+    ctx.filter = 'grayscale(100%) contrast(140%) brightness(105%)';
+    ctx.drawImage(srcCanvas, 0, 0, w, h);
+    ctx.filter = 'none';
     return upCanvas;
   }
 
@@ -10216,6 +10227,76 @@
     ctx.rotate(rad);
     ctx.drawImage(srcCanvas, -srcCanvas.width / 2, -srcCanvas.height / 2);
     return out;
+  }
+
+  function _stnkCropCanvas(srcCanvas, xFrac, yFrac, wFrac, hFrac) {
+    var x = Math.max(0, Math.floor(srcCanvas.width * xFrac));
+    var y = Math.max(0, Math.floor(srcCanvas.height * yFrac));
+    var w = Math.max(20, Math.min(srcCanvas.width - x, Math.floor(srcCanvas.width * wFrac)));
+    var h = Math.max(20, Math.min(srcCanvas.height - y, Math.floor(srcCanvas.height * hFrac)));
+    var out = document.createElement('canvas');
+    out.width = w;
+    out.height = h;
+    out.getContext('2d').drawImage(srcCanvas, x, y, w, h, 0, 0, w, h);
+    return out;
+  }
+
+  function _stnkRebuildRowsFromWords(words) {
+    if (!words || !words.length) return [];
+    var items = words.filter(function (w) {
+      return w && w.bbox && w.text && String(w.text).trim().length > 0;
+    });
+    if (!items.length) return [];
+
+    // Hitung tinggi huruf median untuk toleransi pengelompokan baris
+    var heights = items.map(function (w) { return Math.max(6, (w.bbox.y1 - w.bbox.y0)); }).sort(function (a, b) { return a - b; });
+    var medH = heights[Math.floor(heights.length * 0.5)] || 14;
+    var rowTol = Math.max(6, medH * 0.65);
+
+    var sorted = items.slice().sort(function (a, b) {
+      var ay = (a.bbox.y0 + a.bbox.y1) * 0.5;
+      var by = (b.bbox.y0 + b.bbox.y1) * 0.5;
+      return ay - by;
+    });
+
+    var rows = [];
+    sorted.forEach(function (w) {
+      var cy = (w.bbox.y0 + w.bbox.y1) * 0.5;
+      var placed = false;
+      for (var i = rows.length - 1; i >= Math.max(0, rows.length - 4); i--) {
+        if (Math.abs(cy - rows[i].cy) <= rowTol) {
+          rows[i].words.push(w);
+          rows[i].cy = (rows[i].cy * (rows[i].words.length - 1) + cy) / rows[i].words.length;
+          placed = true;
+          break;
+        }
+      }
+      if (!placed) {
+        rows.push({ cy: cy, words: [w] });
+      }
+    });
+
+    var outLines = [];
+    rows.forEach(function (r) {
+      r.words.sort(function (a, b) { return a.bbox.x0 - b.bbox.x0; });
+      var segments = [];
+      var curSeg = [r.words[0].text.trim()];
+      for (var j = 1; j < r.words.length; j++) {
+        var gap = r.words[j].bbox.x0 - r.words[j - 1].bbox.x1;
+        if (gap > medH * 3.2) {
+          segments.push(curSeg.join(' '));
+          curSeg = [r.words[j].text.trim()];
+        } else {
+          curSeg.push(r.words[j].text.trim());
+        }
+      }
+      segments.push(curSeg.join(' '));
+      outLines.push(segments.join(' | '));
+      if (segments.length > 1) {
+        segments.forEach(function (sg) { outLines.push(sg); });
+      }
+    });
+    return outLines;
   }
 
   function _stnkFileToCanvas(file, b64Data, cb) {
@@ -10235,7 +10316,7 @@
           return pdf.getPage(1);
         })
         .then(function (page) {
-          var viewport = page.getViewport({ scale: 2.2 });
+          var viewport = page.getViewport({ scale: 2.0 });
           var cvs = document.createElement('canvas');
           cvs.width = Math.round(viewport.width);
           cvs.height = Math.round(viewport.height);
@@ -10288,9 +10369,15 @@
     var num = _stnkNormalizeDigits(String(rawNum || '').toUpperCase().replace(/[^A-Z0-9]/g, ''));
     var suf = _stnkNormalizeLetters(String(rawSuffix || '').toUpperCase().replace(/[^A-Z0-9]/g, ''));
 
+    // Perbaikan OCR umum: BX -> BK (X tidak ada dalam kode wilayah Indonesia)
+    if (pref === 'BX') pref = 'BK';
     if (!pref || pref.length > 2 || !/^\d{1,4}$/.test(num) || suf.length > 3) return '';
     if (strictPrefix && !_STNK_ID_PLATE_PREFIXES[pref]) return '';
     return suf ? (pref + ' ' + num + ' ' + suf) : (pref + ' ' + num);
+  }
+
+  function _stnkIsModelCodeLine(lineStr) {
+    return /(?:GMDF|M\/T|A\/T|XENIA|AVANZA|INNOVA|HILUX|FORTUNER|PAJERO|DAIHATSU|TOYOTA|HONDA|SUZUKI|MITSUBISHI|\bTYPE\b|\bTIPE\b|\bMERK\b|\bMEREK\b)/.test(lineStr);
   }
 
   function _stnkExtractDatesWithContext(lines) {
@@ -10314,16 +10401,16 @@
 
     function pushDate(d, m, y, lineIdx, lineText) {
       if (y < 100) y += 2000;
-      if (d < 1 || d > 31 || m < 1 || m > 12 || y < 2000 || y > curYr + 10) return;
+      if (d < 1 || d > 31 || m < 1 || m > 12 || y < 2005 || y > curYr + 10) return;
       var dt = new Date(y, m - 1, d);
       if (dt.getFullYear() !== y || dt.getMonth() !== (m - 1) || dt.getDate() !== d) return;
       var iso = y + '-' + (m < 10 ? '0' + m : m) + '-' + (d < 10 ? '0' + d : d);
 
       var prevLine = lineIdx > 0 ? lines[lineIdx - 1] : '';
       var ctxStr = (prevLine + ' ' + lineText).toUpperCase();
-      var isIssue = /DITETAPKAN|PENETAPAN|TERBIT|FAKTUR|TGL\.?\s*(?:DAFTAR|BAYAR)|TANGGAL\s*(?:BAYAR|DAFTAR)/.test(lineText);
+      var isIssue = /DITETAPKAN|PENETAPAN|TERBIT|FAKTUR|NO\.?\s*SKUM|NO\.?\s*URUT|KODE\s*LOKASI|TGL\.?\s*(?:DAFTAR|BAYAR)|TANGGAL\s*(?:BAYAR|DAFTAR)/.test(lineText);
       var isPajakHint = /BERLAKU\s*PAJAK|MASA\s*BERLAKU\s*PAJAK|TGL\.?\s*(?:AKHIR\s*)?PAJAK|JT\.?\s*TEMPO\s*PKB|PKB\s*S\/?D|SWDKLLJ\s*S\/?D/.test(ctxStr);
-      var isStnkHint = /BERLAKU\s*(?:S\/?D|SAMPAI)|MASA\s*BERLAKU\s*STNK|TGL\.?\s*AKHIR\s*STNK|STNK\s*(?:5|LIMA)/.test(ctxStr) && !/PAJAK|PKB|SWDKLLJ/.test(lineText);
+      var isStnkHint = /BERLAKU\s*(?:S\/?D|SAMP[A-Z]*)|MASA\s*BERLAKU\s*STNK|TGL\.?\s*AKHIR\s*STNK|STNK\s*(?:5|LIMA)/.test(ctxStr) && !/PAJAK|PKB|SWDKLLJ/.test(lineText);
 
       candidates.push({
         iso: iso,
@@ -10337,8 +10424,7 @@
 
     lines.forEach(function (ln, idx) {
       var up = ln.toUpperCase();
-      // Numeric DD-MM-YYYY / D-M-YYYY / DD/MM/YY (allow OCR letter substitutions inside digits)
-      var numRe = /\b([0-3OIl]?[0-9OIlS])\s*[\/\-\.]\s*([01OIl]?[0-9OIlS])\s*[\/\-\.]\s*([12OIl]{1}[0-9OIlSZBG]{1,3}|[0-9OIl]{2})\b/g;
+      var numRe = /\b([0-3OIl]?[0-9OIlS])\s*[\/\-\.\+]\s*([01OIl]?[0-9OIlS])\s*[\/\-\.\+]\s*([12OIl]{1}[0-9OIlSZBG]{1,3}|[0-9OIl]{2})\b/g;
       var m;
       while ((m = numRe.exec(up)) !== null) {
         var dd = parseInt(_stnkNormalizeDigits(m[1]), 10);
@@ -10347,7 +10433,6 @@
         pushDate(dd, mm, yy, idx, up);
       }
 
-      // Text month: 10 MAR 2027 / 5 MARET 2027 / 10-MAR-27
       var txtRe = /\b([0-3OIl]?[0-9OIl])[\s\-\/]+([A-Z]{3,9})[\s\-\/]+(20[0-4][0-9]|[2-3][0-9])\b/g;
       while ((m = txtRe.exec(up)) !== null) {
         var mo = monthMap[m[2]];
@@ -10360,7 +10445,6 @@
     var tglPajak = '';
     var tglStnk = '';
 
-    // 1. Explicit context priority
     var pajakTagged = candidates.filter(function (c) { return c.isPajakHint && !c.isIssue; });
     var stnkTagged = candidates.filter(function (c) { return c.isStnkHint && !c.isIssue; });
 
@@ -10373,7 +10457,6 @@
       tglStnk = stnkTagged[0].iso;
     }
 
-    // Notice STNK notice pajak often uses BERLAKU S/D for PKB if STNK date is much further in future
     if (stnkTagged.length >= 2 && !tglPajak) {
       var stnkAsc = stnkTagged.map(function (c) { return c.iso; }).sort();
       if (stnkAsc[0] !== stnkAsc[stnkAsc.length - 1]) {
@@ -10382,9 +10465,8 @@
       }
     }
 
-    // 2. Fallback disambiguation excluding issue dates
     var nonIssue = candidates
-      .filter(function (c) { return !c.isIssue && c.year >= (curYr - 2) && c.year <= (curYr + 7); })
+      .filter(function (c) { return !c.isIssue && c.year >= (curYr - 6) && c.year <= (curYr + 7); })
       .map(function (c) { return c.iso; });
 
     var uniq = [];
@@ -10403,12 +10485,7 @@
       var later = uniq.filter(function (iso) { return iso > tglPajak; });
       if (later.length > 0) tglStnk = later[later.length - 1];
     } else if (!tglPajak && !tglStnk && uniq.length === 1) {
-      var onlyYr = parseInt(uniq[0].substring(0, 4), 10);
-      if (onlyYr >= curYr + 2) {
-        tglStnk = uniq[0];
-      } else {
-        tglPajak = uniq[0];
-      }
+      tglStnk = uniq[0];
     }
 
     return {
@@ -10422,33 +10499,39 @@
     for (var i = 0; i < lines.length; i++) {
       var m = lines[i].match(labelRegex);
       if (m) {
-        var val = (m[1] || '').replace(/^[\s:;.\-]+/, '').trim();
+        var val = (m[1] || '').replace(/^[\s:;.\-|']+/, '').trim();
         if (nextStopRegex) {
           var stopIdx = val.search(nextStopRegex);
           if (stopIdx !== -1) val = val.substring(0, stopIdx).trim();
         }
-        val = val.replace(/\s+/g, ' ').trim();
+        val = val.split('|')[0].replace(/\s+/g, ' ').trim();
         if (val && val.length >= 2) return val;
       }
     }
     return '';
   }
 
-  function _stnkParseIndonesianText(rawText) {
+  function _stnkParseIndonesianText(rawText, tesseractData) {
     var cleanText = String(rawText || '').replace(/\r/g, '\n');
-    var lines = cleanText.split('\n').map(function (l) {
-      return l.replace(/[|_~`]+/g, ' ').replace(/\s+/g, ' ').trim();
+    var rawLines = cleanText.split('\n').map(function (l) {
+      return l.replace(/[_~`]+/g, ' ').replace(/\s+/g, ' ').trim();
     }).filter(function (l) { return l.length > 1; });
-    var upperLines = lines.map(function (l) { return l.toUpperCase(); });
+
+    var spatialLines = (tesseractData && tesseractData.words && tesseractData.words.length)
+      ? _stnkRebuildRowsFromWords(tesseractData.words)
+      : [];
+
+    var combinedLines = spatialLines.concat(rawLines);
+    var upperLines = combinedLines.map(function (l) { return l.toUpperCase(); });
     var fullUpper = upperLines.join('\n');
 
-    // 1. Nomor Polisi / Registrasi
+    // 1. Nomor Polisi / Registrasi (fuzzy header + blacklist kode tipe/model kendaraan)
     var noPolisi = '';
     for (var i = 0; i < upperLines.length; i++) {
       var ln = upperLines[i];
-      if (/(?:NO\.?\s*POL(?:ISI)?|NOMOR\s*REGISTRASI|NRKB|NO\.?\s*REGISTRASI)/.test(ln)) {
+      if (/(?:NO[MR]*\.?\s*REG[A-Z]{2,8}|REGETRAS|RECTRAS|NO\.?\s*POL[A-Z]*|NRKB)/.test(ln) && !_stnkIsModelCodeLine(ln)) {
         var scope = ln + (i + 1 < upperLines.length ? (' ' + upperLines[i + 1]) : '');
-        var afterLbl = scope.replace(/^.*?(?:NO\.?\s*POL(?:ISI)?|NOMOR\s*REGISTRASI|NRKB|NO\.?\s*REGISTRASI)[:\s\-]*/, '');
+        var afterLbl = scope.replace(/^.*?(?:NO[MR]*\.?\s*REG[A-Z]{2,8}|REGETRAS|RECTRAS|NO\.?\s*POL[A-Z]*|NRKB)[:\s\-']*/, '');
         var pm = afterLbl.match(/\b([A-Z0-9]{1,2})\s*[-.]?\s*([0-9OIlSZBG]{1,4})\s*[-.]?\s*([A-Z0-9]{1,3})?\b/);
         if (pm) {
           var cand = _stnkNormalizePlateCandidate(pm[1], pm[2], pm[3], false);
@@ -10461,68 +10544,98 @@
     }
 
     if (!noPolisi) {
-      var globalMatches = fullUpper.match(/\b([A-Z]{1,2})\s*([0-9]{1,4})\s*([A-Z]{1,3})\b/g) || [];
-      for (var g = 0; g < globalMatches.length; g++) {
-        var parts = globalMatches[g].match(/^([A-Z]{1,2})\s*([0-9]{1,4})\s*([A-Z]{1,3})$/);
-        if (parts) {
-          var gCand = _stnkNormalizePlateCandidate(parts[1], parts[2], parts[3], true);
-          if (gCand) {
-            noPolisi = gCand;
-            break;
+      for (var k = 0; k < upperLines.length; k++) {
+        var lk = upperLines[k];
+        if (_stnkIsModelCodeLine(lk)) continue;
+        var matches = lk.match(/\b([A-Z]{1,2})\s+([0-9]{2,4})\s+([A-Z]{1,3})(?!\s*[-][A-Z0-9])/g) || [];
+        for (var g = 0; g < matches.length; g++) {
+          var parts = matches[g].match(/^([A-Z]{1,2})\s+([0-9]{2,4})\s+([A-Z]{1,3})$/);
+          if (parts) {
+            var gCand = _stnkNormalizePlateCandidate(parts[1], parts[2], parts[3], true);
+            if (gCand) {
+              noPolisi = gCand;
+              break;
+            }
           }
         }
+        if (noPolisi) break;
       }
     }
 
     // 2. Dates (Pajak Tahunan + STNK 5 Tahunan)
     var dates = _stnkExtractDatesWithContext(upperLines);
 
-    // 3. Detailed Vehicle & STNK Identity Fields
-    var merk = _stnkExtractLabelValue(upperLines, /(?:MEREK|MERK)\s*[:\-]\s*(.+)/i, /\b(?:TYPE|TIPE|JENIS|MODEL|TAHUN)\b/i);
-    var tipe = _stnkExtractLabelValue(upperLines, /(?:TYPE|TIPE)\s*[:\-]\s*(.+)/i, /\b(?:JENIS|MODEL|TAHUN|ISI|WARNA)\b/i);
-    var jenis = _stnkExtractLabelValue(upperLines, /\bJENIS\s*[:\-]\s*(.+)/i, /\b(?:MODEL|TAHUN|ISI|WARNA)\b/i);
-    var model = _stnkExtractLabelValue(upperLines, /\bMODEL\s*[:\-]\s*(.+)/i, /\b(?:TAHUN|ISI|SILINDER|WARNA|NO)\b/i);
-    var warna = _stnkExtractLabelValue(upperLines, /\bWARNA(?!\s*TNKB)\s*[:\-]\s*(.+)/i, /\b(?:BAHAN|BBM|WARNA\s*TNKB|TAHUN|NO)\b/i);
-    var bahanBakar = _stnkExtractLabelValue(upperLines, /\b(?:BAHAN\s*BAKAR|BBM)\s*[:\-]\s*(.+)/i, /\b(?:WARNA|TAHUN|KODE|NOMOR)\b/i);
-    var warnaTnkb = _stnkExtractLabelValue(upperLines, /\bWARNA\s*TNKB\s*[:\-]\s*(.+)/i, /\b(?:TAHUN|NOMOR|BERLAKU)\b/i);
-    var namaPemilik = _stnkExtractLabelValue(upperLines, /\bNAMA\s*PEMILIK\s*[:\-]\s*(.+)/i, /\bALAMAT\b/i);
+    // 3. Detailed Vehicle & STNK Identity Fields (separator `:` opsional!)
+    var merk = _stnkExtractLabelValue(upperLines, /\b(?:MEREK|MERK)\s*[:\-]?\s+(.+)/i, /\b(?:TYPE|TIPE|JENIS|MODEL|WARNA|TAHUN)\b/i);
+    if (!merk) {
+      var knownBrand = fullUpper.match(/\b(TOYOTA|DAIHATSU|HONDA|MITSUBISHI|SUZUKI|NISSAN|ISUZU|HINO|YAMAHA|KAWASAKI|MAZDA|FORD|CHEVROLET|WULING|HYUNDAI)\b/);
+      if (knownBrand) merk = knownBrand[1];
+    }
+
+    var tipe = _stnkExtractLabelValue(upperLines, /\b(?:TYPE|TIPE)\s*[:\-]?\s+(.+)/i, /\b(?:JENIS|MODEL|TAHUN|ISI|WARNA|BAHAN)\b/i);
+    if (!tipe) {
+      var modelSpan = fullUpper.match(/\b([A-Z]\s*\d{3,4}\s*[A-Z]{1,3}\s*[-–]\s*[A-Z0-9]{3,10}(?:\s*\([^)]+\))?)/);
+      if (modelSpan) tipe = modelSpan[1];
+    }
+
+    var jenis = _stnkExtractLabelValue(upperLines, /\bJENIS\s*[:\-]?\s+(.+)/i, /\b(?:MODEL|TAHUN|ISI|WARNA)\b/i);
+    if (!jenis) {
+      var jnM = fullUpper.match(/\b(MOBIL\s*(?:PENUMPANG|BARANG|BUS)|SEPEDA\s*MOTOR)\b/);
+      if (jnM) jenis = jnM[1];
+    }
+
+    var model = _stnkExtractLabelValue(upperLines, /\bMODEL\s*[:\-]?\s+(.+)/i, /\b(?:TAHUN|ISI|SILINDER|WARNA|NO)\b/i);
+    if (!model) {
+      var mdM = fullUpper.match(/\b(MINIBUS|DOUBLE\s*CABIN|PICK\s*UP|JEEP|SEDAN|STATION\s*WAGON|TRUCK|SOLO)\b/);
+      if (mdM) model = mdM[1];
+    }
+
+    var warna = _stnkExtractLabelValue(upperLines, /\bWARNA(?!\s*TNKB)\s*[:\-]?\s+(.+)/i, /\b(?:BAHAN|BBM|WARNA\s*TNKB|TAHUN|NO)\b/i);
+    var bahanBakar = _stnkExtractLabelValue(upperLines, /\b(?:BAHAN\s*BAKAR|BBM)\s*[:\-]?\s+(.+)/i, /\b(?:WARNA|TAHUN|KODE|NOMOR)\b/i);
+    if (!bahanBakar) {
+      var bbmM = fullUpper.match(/\b(PREMIUM|PERTALITE|PERTAMAX|SOLAR|DEXLITE|BENSIN|LISTRIK)\b/);
+      if (bbmM) bahanBakar = bbmM[1];
+    }
+    var warnaTnkb = _stnkExtractLabelValue(upperLines, /\bWARNA\s*TNKB\s*[:\-]?\s+(.+)/i, /\b(?:TAHUN|NOMOR|BERLAKU)\b/i);
+    var namaPemilik = _stnkExtractLabelValue(upperLines, /\b(?:NAMA\s*PEMILIK)\s*[:\-]?\s+(.+)/i, /\bALAMAT\b/i);
 
     var tahunPembuatan = '';
     var thnMatch = fullUpper.match(/(?:TAHUN\s*(?:PEMBUATAN|BUAT|RAKITAN)|THN\.?\s*(?:BUAT|PEMBUATAN))\s*[:\-]?\s*([12][09][0-9OIl]{2})/);
     if (thnMatch) {
-      var yrStr = _stnkNormalizeDigits(thnMatch[1]);
-      var yrNum = parseInt(yrStr, 10);
+      var yrNum = parseInt(_stnkNormalizeDigits(thnMatch[1]), 10);
       if (yrNum >= 1980 && yrNum <= new Date().getFullYear() + 1) tahunPembuatan = String(yrNum);
     }
 
     var isiSilinder = '';
-    var ccMatch = fullUpper.match(/(?:ISI\s*SILINDER|SILINDER|DAYA\s*LISTRIK)\s*[:\-]?\s*([0-9OIl]{2,5}\s*(?:CC|KW|WH)?)/);
+    var ccMatch = fullUpper.match(/(?:ISI\s*SILINDER|SILINDER|DAYA\s*LISTRIK)\s*[:\-]?\s*([0-9OIl]{3,5}(?:\s*(?:CC|KW|WH))?)/);
     if (ccMatch) {
-      isiSilinder = ccMatch[1].replace(/\s+/g, ' ').trim();
+      isiSilinder = _stnkNormalizeDigits(ccMatch[1].replace(/\s+/g, ' ').trim());
     }
 
     var noRangka = '';
-    var rnkMatch = fullUpper.match(/(?:NO(?:MOR)?\.?\s*RANGKA(?:\/NIK(?:\/VIN)?)?|NIK\/VIN)\s*[:\-]?\s*([A-Z0-9\-]{8,22})/);
+    var rnkMatch = fullUpper.match(/(?:NO(?:MOR)?\.?\s*RANGKA(?:\/NIK(?:\/VIN)?)?|NIK\/VIN)[ \t]*[:\-]?[ \t]*([A-Z0-9\- ]{10,22})/);
     if (rnkMatch) {
-      noRangka = rnkMatch[1].replace(/\-/g, '').trim();
+      noRangka = rnkMatch[1].replace(/[\s\-]+/g, '').trim().substring(0, 17);
     } else {
-      var vinCand = fullUpper.match(/\b([A-HJ-NPR-Z0-9]{17})\b/);
-      if (vinCand && /[A-Z]/.test(vinCand[1]) && /\d/.test(vinCand[1])) noRangka = vinCand[1];
+      var vinCand = fullUpper.match(/\b((?:MH|MR|NM|JF|KN|KM|LN)[A-HJ-NPR-Z0-9 ]{13,18})\b/);
+      if (vinCand) noRangka = vinCand[1].replace(/\s+/g, '').substring(0, 17);
     }
 
     var noMesin = '';
     var msnMatch = fullUpper.match(/(?:NO(?:MOR)?\.?\s*MESIN)\s*[:\-]?\s*([A-Z0-9\-]{6,20})/);
     if (msnMatch) {
       noMesin = msnMatch[1].trim();
+    } else {
+      var msnLine = fullUpper.match(/\b([A-Z]{1,4}\d{5,8})\b/);
+      if (msnLine && (!noPolisi || msnLine[1] !== noPolisi.replace(/\s+/g, ''))) noMesin = msnLine[1];
     }
 
     var totalPajakRp = '';
-    var pkbMatch = fullUpper.match(/(?:JUMLAH|TOTAL)\s*(?:PEMBAYARAN|PKB|TAGIHAN)?\s*[:\-]?\s*(?:RP\.?\s*)?([0-9]{1,3}(?:[.,][0-9]{3})+)/);
+    var pkbMatch = fullUpper.match(/(?:JUMLAH|TOTAL)\s*(?:PEMBAYARAN|PKB|TAGIHAN)?\s*[:\-]?\s*(?:RP\.?\s*|\*{2,3}\s*)?([0-9]{1,3}(?:[.,][0-9]{3})+)/);
     if (pkbMatch) {
       totalPajakRp = 'Rp ' + pkbMatch[1];
     }
 
-    // Hitung skor kelengkapan core fields (0 - 100)
     var score = 0;
     if (noPolisi) score += 40;
     if (dates.tglPajakTahunan) score += 35;
@@ -10588,59 +10701,57 @@
     return merged;
   }
 
-  function _stnkRecognizeCanvas(canvas) {
-    return window.Tesseract.recognize(canvas, 'eng+ind')
-      .catch(function () {
-        return window.Tesseract.recognize(canvas, 'eng');
-      });
-  }
-
   function _stnkRunOcrPasses(srcCanvas, onProgress, cb) {
-    _loadTesseract(function () {
-      if (!window.Tesseract || typeof window.Tesseract.recognize !== 'function') {
+    if (onProgress) onProgress('Menyiapkan engine OCR...');
+    _stnkWarmWorker().then(function (worker) {
+      if (!worker) {
         cb(new Error('Engine Tesseract OCR gagal dimuat dari CDN. Periksa koneksi internet.'), null);
         return;
       }
 
-      if (onProgress) onProgress('Pass 1/3: Memindai resolusi tajam (0 derajat)...');
+      if (onProgress) onProgress('Memindai STNK (Adaptive Threshold Tajam)...');
       var best = null;
 
-      _stnkRecognizeCanvas(_simanpoaPreprocessCanvas(srcCanvas, 'sharpen'))
+      worker.recognize(_simanpoaPreprocessCanvas(srcCanvas, 'bradley', 15, 0.89))
         .then(function (r1) {
-          var p1 = _stnkParseIndonesianText((r1 && r1.data && r1.data.text) || '');
-          best = p1;
-          if (best.score >= 100 || (best.score >= 75 && best.noPolisi && best.tglPajakTahunan && best.detailCount >= 3)) {
-            return null;
+          var txt1 = (r1 && r1.data && r1.data.text) || '';
+          best = _stnkParseIndonesianText(txt1, r1 && r1.data);
+
+          // Jika orientasi foto potret miring & nyaris tidak ada huruf terbaca, coba rotasi 90° sekali
+          var isPortrait = srcCanvas.height > srcCanvas.width * 1.15;
+          var alnumLen = txt1.replace(/[^A-Z0-9]/gi, '').length;
+          if (isPortrait && alnumLen < 35) {
+            if (onProgress) onProgress('Mendeteksi orientasi foto potret, memutar 90 derajat...');
+            return worker.recognize(_simanpoaPreprocessCanvas(_stnkRotateCanvas(srcCanvas, 90), 'bradley', 15, 0.89))
+              .then(function (rRot) {
+                var pRot = _stnkParseIndonesianText((rRot && rRot.data && rRot.data.text) || '', rRot && rRot.data);
+                best = _stnkMergeParsed(best, pRot);
+              });
           }
-          if (onProgress) onProgress('Pass 2/3: Memindai dengan threshold adaptif Otsu...');
-          return _stnkRecognizeCanvas(_simanpoaPreprocessCanvas(srcCanvas, 'otsu'));
         })
-        .then(function (r2) {
-          if (r2) {
-            var p2 = _stnkParseIndonesianText((r2.data && r2.data.text) || '');
-            best = _stnkMergeParsed(best, p2);
-          }
-          if (best && best.noPolisi && (best.tglPajakTahunan || best.tglStnkLimaTahunan)) {
-            return null;
-          }
-          if (onProgress) onProgress('Pass 3/3: Mencoba orientasi rotasi 90 derajat...');
-          return _stnkRecognizeCanvas(_simanpoaPreprocessCanvas(_stnkRotateCanvas(srcCanvas, 90), 'sharpen'));
+        .then(function () {
+          // ROI Fallback ultra-cepat (< 1.5s) HANYA jika nomor polisi masih kosong pada area atas STNK
+          if (best && best.noPolisi) return null;
+          if (onProgress) onProgress('Memfokuskan pembacaan ulang area Plat Nomor...');
+          var topCrop = _stnkCropCanvas(srcCanvas, 0.0, 0.05, 0.65, 0.36);
+          return worker.recognize(_simanpoaPreprocessCanvas(topCrop, 'fastgray'))
+            .then(function (rRoi) {
+              var pRoi = _stnkParseIndonesianText((rRoi && rRoi.data && rRoi.data.text) || '', rRoi && rRoi.data);
+              best = _stnkMergeParsed(best, pRoi);
+            });
         })
-        .then(function (r3) {
-          if (r3) {
-            var p3 = _stnkParseIndonesianText((r3.data && r3.data.text) || '');
-            best = _stnkMergeParsed(best, p3);
-          }
-          if (best && best.noPolisi && (best.tglPajakTahunan || best.tglStnkLimaTahunan)) {
-            return null;
-          }
-          return _stnkRecognizeCanvas(_simanpoaPreprocessCanvas(_stnkRotateCanvas(srcCanvas, 270), 'sharpen'));
+        .then(function () {
+          // ROI Fallback (< 1.5s) untuk area Berlaku Sampai jika kedua tanggal jatuh tempo belum terbaca
+          if (best && (best.tglStnkLimaTahunan || best.tglPajakTahunan)) return null;
+          if (onProgress) onProgress('Memfokuskan pembacaan ulang area Masa Berlaku...');
+          var botCrop = _stnkCropCanvas(srcCanvas, 0.25, 0.32, 0.60, 0.42);
+          return worker.recognize(_simanpoaPreprocessCanvas(botCrop, 'bradley', 13, 0.87))
+            .then(function (rDate) {
+              var pDate = _stnkParseIndonesianText((rDate && rDate.data && rDate.data.text) || '', rDate && rDate.data);
+              best = _stnkMergeParsed(best, pDate);
+            });
         })
-        .then(function (r4) {
-          if (r4) {
-            var p4 = _stnkParseIndonesianText((r4.data && r4.data.text) || '');
-            best = _stnkMergeParsed(best, p4);
-          }
+        .then(function () {
           cb(null, best);
         })
         .catch(function (err) {
@@ -11323,6 +11434,7 @@
     if (msgEl) msgEl.innerHTML = '';
 
     _stnkResetOcrUi('quick');
+    if (typeof _stnkWarmWorker === 'function') _stnkWarmWorker();
 
     (document.getElementById('simanpoa-qs-aset-id') || {}).value = asetId;
     (document.getElementById('simanpoa-qs-nopol') || {}).value = target ? (target.noPolisi || '') : '';
