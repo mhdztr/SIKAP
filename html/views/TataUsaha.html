@@ -3894,9 +3894,9 @@
     <div class="n-modal n-modal-form n-modal-xl">
       <div class="modal-hd-bar">
         <div>
-          <h2>Sinkronisasi Laporan PDF SAKTI</h2>
+          <h2>Sinkronisasi Laporan SAKTI</h2>
           <div class="modal-hd-sub">
-            Unggah berkas PDF resmi cetakan SAKTI Kemenkeu (Posisi di Neraca, Intrakomptabel, Ekstrakomptabel, atau Gabungan).
+            Unggah berkas resmi cetakan SAKTI Kemenkeu (Neraca, Intrakomptabel, Ekstrakomptabel, atau Gabungan).
           </div>
         </div>
         <button type="button" class="btn-ghost" style="padding:4px;" onclick="closeModal('modal-simanpoa-sakti-pdf')" aria-label="Tutup">
@@ -3911,7 +3911,7 @@
         <div id="simanpoa-sync-msg" class="n-msg"></div>
 
         <!-- Dropzone Unggah PDF / Excel SAKTI -->
-        <div class="bmn-dropzone" id="simanpoa-dropzone-sakti" onclick="document.getElementById('simanpoa-file-sakti').click()">
+        <div class="bmn-dropzone" id="simanpoa-dropzone-sakti" role="button" tabindex="0" onclick="document.getElementById('simanpoa-file-sakti').click()">
           <input type="file" id="simanpoa-file-sakti" accept=".pdf,.xlsx,.xls,.csv" style="display:none;" onchange="_simanpoaHandleSaktiFile(event)">
           <div style="display:flex; justify-content:center; margin-bottom:8px; color:var(--n-primary);">
             <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
@@ -3923,11 +3923,14 @@
             </svg>
           </div>
           <div style="font-weight:700; font-size:0.95rem; color:var(--n-text-primary);" id="simanpoa-sync-file-lbl">
-            Pilih atau seret berkas PDF / Excel / CSV Laporan SAKTI ke sini
+            Klik di sini atau seret berkas PDF / Excel / CSV Laporan SAKTI
           </div>
           <div style="font-size:0.78rem; color:var(--n-text-muted); margin-top:4px;">
             Mendukung Laporan Neraca, Intrakomptabel, Ekstrakomptabel, dan Gabungan (.pdf, .xlsx, .xls, .csv)
           </div>
+          <button type="button" class="btn-outline ctl-md bmn-dropzone-cta" onclick="event.stopPropagation(); document.getElementById('simanpoa-file-sakti').click();">
+            Pilih Berkas Laporan SAKTI
+          </button>
         </div>
 
         <!-- Pengaturan Parameter Ekstraksi -->
@@ -4039,7 +4042,7 @@
         <div id="simanpoa-disposal-msg" class="n-msg"></div>
 
         <!-- Dropzone Dokumen SK / BAST -->
-        <div class="bmn-dropzone" id="simanpoa-dropzone-disposal" onclick="document.getElementById('simanpoa-file-disposal').click()">
+        <div class="bmn-dropzone" id="simanpoa-dropzone-disposal" role="button" tabindex="0" onclick="document.getElementById('simanpoa-file-disposal').click()">
           <input type="file" id="simanpoa-file-disposal" accept=".pdf,image/*" style="display:none;" onchange="_simanpoaHandleDisposalFile(event)">
           <div style="display:flex; justify-content:center; margin-bottom:8px; color:#D97706;">
             <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
@@ -4050,11 +4053,14 @@
             </svg>
           </div>
           <div style="font-weight:700; font-size:0.95rem; color:var(--n-text-primary);" id="simanpoa-disposal-file-lbl">
-            Pilih Berkas PDF SK Penghapusan / BAST Serah Terima
+            Klik di sini atau seret Berkas PDF SK Penghapusan / BAST
           </div>
           <div style="font-size:0.78rem; color:var(--n-text-muted); margin-top:4px;">
             Sistem membaca nomor surat, tanggal, dan mencocokkan aset terkait secara otomatis
           </div>
+          <button type="button" class="btn-outline ctl-md bmn-dropzone-cta" onclick="event.stopPropagation(); document.getElementById('simanpoa-file-disposal').click();">
+            Pilih Berkas SK / BAST
+          </button>
         </div>
 
         <!-- Metadata Dokumen Sumber -->
