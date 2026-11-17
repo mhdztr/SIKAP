@@ -16,7 +16,8 @@ FASE PENGEMBANGAN SIKAP
 ├── [Fase 3] Sub-Modul B: Monitoring Siklus Paket Pengadaan Lintas Divisi
 ├── [Fase 4] Sub-Modul C: Manajemen Kepegawaian & Headcount Snapshot
 ├── [Fase 5] Sub-Modul D: Inventaris Granular BMN, Geotagging EXIF & Impor SAKTI
-└── [Fase 6] Sub-Modul E: Siklus Usulan Penghapusan Legal Kemenkeu & Audit QA
+├── [Fase 6] Sub-Modul E: Siklus Usulan Penghapusan Legal Kemenkeu & Audit QA
+└── [Fase 7] Integrasi Kepegawaian SIKAP x NAKHODA, Resolusi Disparitas TU & Sheet Formal
 ```
 
 ---
@@ -123,6 +124,27 @@ FASE PENGEMBANGAN SIKAP
   - [x] Form pembuatan usulan dengan seleksi multi-aset kondisi Rusak Berat berfungsi.
   - [x] Karantina otomatis status aset (`DALAM_PENGHAPUSAN`) dan eksekusi status akhir `DIHAPUS` saat BAST selesai tervalidasi.
   - [x] Audit konsistensi kontrol UI 3-tier (`node lint_ui.js`), Zero-Emoji Policy, dan validasi arsitektur lolos 100% tanpa pelanggaran.
+
+---
+
+### Fase 7: Integrasi Kepegawaian Dua Arah SIKAP × NAKHODA, Resolusi Disparitas TU & Sheet Formal
+- **Tujuan Utama:** Menjadikan SIKAP sebagai muara sinkronisasi otomatis dari pergerakan operasional Pengawakan (NAKHODA), menyederhanakan form kepegawaian sesuai aturan E-Pegawai, dan menghadirkan deteksi disparitas data untuk ditindaklanjuti Subbag TU.
+- **Komponen yang Dikerjakan:**
+  - **Tahap 7.1 — Penyelarasan Dokumentasi `.md`:** Pembaruan menyeluruh seluruh file acuan (`AGENTS.md`, `PRD.md`, `ARCHITECTURE.md`, `DATA_SCHEMA.md`, `DESIGN.md`, `PHASES.md`) antara SIKAP dan NAKHODA.
+  - **Tahap 7.2 — Skema & Sheet Formatter Formal (`data/SheetAccess.js`):**
+    - Penambahan kolom self-healing di `Master_Pegawai_POA`: `StatusPenempatan`, `KapalPenempatan`, `UkuranBaju`, `UkuranSepatu`, `SumberSinkronisasi`, `StatusKelengkapanTU`, `CatatanDisparitas`.
+    - Penerapan `applyFormalSheetFormatting()` untuk kerapian Google Sheet (`#0F172A` header, `setFrozenRows(1)`, format `@` plain text untuk NIP/NIK, tanggal ISO `yyyy-mm-dd`, *zebra banding*, lebar kolom proporsional).
+  - **Tahap 7.3 — Logika Kepegawaian & Resolusi Disparitas (`services/TataUsahaService.js`):**
+    - Normalisasi nama kanonik `HURUF BESAR` tanpa gelar/simbol/angka (`sanitizeNamaPersonel`).
+    - Validasi kondisional NIP (wajib 18 digit bagi `PNS`/`P3K`/`P3K_PARUH_WAKTU`, tidak wajib/disembunyikan bagi `PJLP` & `MAGANG`) dan relaksasi NIK/SK menjadi opsional.
+    - Filter periode dinamis (`TW I`–`TW IV`, `Semester I`–`II`, `Rentang Kalender`), dukungan jabatan kapal PJLP (`Juru Masak / Koki` & `Juru Minyak / Oiler`), serta resolusi flag `DISPARITAS_NAKHODA` menjadi `LENGKAP` saat dilengkapi TU.
+  - **Tahap 7.4 — Antarmuka Pengguna SIKAP (`html/views/TataUsaha.html`, `html/Script_Main.html`):**
+    - **Banner Notifikasi Disparitas Nakhoda** & aksi cepat `Lengkapi` per baris tabel.
+    - Penghapusan dropdown Golongan PNS & P3K; pemilih tanggal wajib kalender (anti-ketik manual); penambahan input opsional Ukuran Baju, Ukuran Sepatu, dan Status Penempatan.
+- **Deliverables & Checklist:**
+  - [x] Seluruh dokumen `.md` acuan SIKAP & NAKHODA tersinkronisasi.
+  - [ ] Banner notifikasi disparitas data Nakhoda aktif dan teruji saat push sync berlangsung.
+  - [ ] Aturan kondisional NIP (ASN wajib vs PJLP non-wajib), Calendar Picker, dan `node lint_ui.js` lolos 100% (`0 errors`).
 
 ---
 

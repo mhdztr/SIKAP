@@ -75,22 +75,41 @@ Mencatat struktur sumber daya manusia aparatur di Subbag Tata Usaha.
 ---
 
 ### 2.3.1 `Master_Pegawai_POA` — Direktori Personel & Awak Kapal Pengawas
-Menyimpan data master profil seluruh personel aktif Direktorat Pengawasan Operasional Armada (Dit. POA) dan seluruh Awak Kapal Pengawas di armada PSDKP (serta ruang ekspansi untuk unit kerja/jabatan baru di masa depan).
+Menyimpan data master profil seluruh personel aktif Direktorat Pengawasan Operasional Armada (Dit. POA) dan seluruh Awak Kapal Pengawas di armada PSDKP (tersinkronisasi dua arah dengan `RadarPOA_Nakhoda_DB`).
 
-| # | Nama Kolom | Tipe Data | Nullable | Contoh Nilai | Aturan Bisnis & Validasi |
-|---|---|---|:---:|---|---|
-| 1 | `PegawaiID` | Text (PK) | Tidak | `PEG-0042` | Format unik `PEG-XXXX` 4 digit urut. |
-| 2 | `NIP` | Text | Tidak | `198504122010121002` | 18 digit NIP atau nomor kontrak/NRP (diisi `-` jika belum terdata). |
-| 3 | `Nama` | Text | Tidak | `Capt. Slamet Riyadi, M.Mar` | Nama lengkap beserta gelar resmi aparatur. |
-| 4 | `UnitKerja` | Text | Tidak | `Dit. POA` | Unit kerja asal: `Dit. POA` atau Pangkalan UPT Armada. |
-| 5 | `LingkupData` | Enum | Tidak | `DIT_POA` | `DIT_POA` (Kantor Pusat) atau `AWAK_KAPAL_ARMADA` atau `EKSPANSI`. |
-| 6 | `KelompokJabatan` | Text | Tidak | `Nahkoda` | Rujukan 38 kelompok jabatan standar KKP. |
-| 7 | `JabatanLengkap` | Text | Tidak | `Nakhoda Kapal Kelas II Kapal Pengawas` | Nomenklatur jabatan spesifik lengkap. |
-| 8 | `TingkatKelas` | Enum | Tidak | `KELAS_II` | `KELAS_I` s.d `KELAS_IV`, `AHLI_MADYA`, `AHLI_MUDA`, `TERAMPIL`, dll. |
-| 9 | `KategoriRumpun` | Enum | Tidak | `AWAK_DEK` | Nilai: `AWAK_DEK`, `AWAK_MESIN`, `PENGAWAS`, `MANAJEMEN`. |
-| 10 | `StatusAktif` | Enum | Tidak | `AKTIF` | Nilai: `AKTIF`, `TUGAS_BELAJAR`, `MUTASI`, `NON_AKTIF`. |
-| 11 | `UpdatedAt` | DateTime | Tidak | `2026-11-03T12:00:00Z` | Timestamp pembaruan data terakhir. |
-| 12 | `UpdatedBy` | Text | Tidak | `admin@kkp.go.id` | User atau sistem yang melakukan perubahan. |
+| # | Nama Kolom | Tipe Data | Format Sheet | Nullable | Contoh Nilai | Aturan Bisnis & Validasi |
+|---|---|---|---|:---:|---|---|
+| 1 | `PegawaiID` | Text (PK) | Plain Text (`CENTER`) | Tidak | `PEG-0042` | Format unik `PEG-XXXX` 4 digit urut. |
+| 2 | `NIP` | Text | Plain Text `@` (`CENTER`) | Kondisional | `198504122010121002` | **Wajib 18 digit angka** untuk `PNS`, `P3K`, `P3K_PARUH_WAKTU`. **Opsional/Kosong** untuk `PJLP` & `MAGANG`. |
+| 3 | `Nama` | Text | Text (`LEFT`) | Tidak | `SLAMET RIYADI` | **Wajib HURUF BESAR (`A-Z` & spasi tunggal saja)**, tanpa gelar, tanda petik (`'`), titik, koma, atau angka (`sanitizeNamaPersonel`). |
+| 4 | `UnitKerja` | Text | Text (`LEFT`) | Tidak | `Dit. POA — KP. Orca 01` | Unit kerja asal / lokasi penugasan *human-readable* (mis. `"AKP Pusat Diperbantukan di KP. Hiu 01 — Pangkalan PSDKP Jakarta"`). |
+| 5 | `LingkupData` | Enum | Text (`CENTER`) | Tidak | `AWAK_KAPAL_ARMADA` | `DIT_POA` (Kantor Pusat), `AWAK_KAPAL_ARMADA`, atau `EKSPANSI`. |
+| 6 | `KelompokJabatan` | Text | Text (`LEFT`) | Tidak | `Nahkoda` | Termasuk jabatan awak kapal `Juru Masak (Koki)` & `Juru Minyak (Oiler)` bagi PJLP/P3K. |
+| 7 | `JabatanLengkap` | Text | Text (`LEFT`) | Ya | `Nakhoda Kapal Kelas II` | Nomenklatur jabatan formal TU (dapat di-generate otomatis atau dilengkapi TU bila ada disparitas kiriman Nakhoda). |
+| 8 | `TingkatKelas` | Enum | Text (`CENTER`) | Tidak | `KELAS II` | `KELAS I` s.d `KELAS IV`, `AHLI_MADYA`, `AHLI_MUDA`, `TERAMPIL`, `NON_KELAS`. |
+| 9 | `KategoriRumpun` | Enum | Text (`CENTER`) | Tidak | `AWAK_DEK` | `AWAK_DEK`, `AWAK_MESIN`, `PENUNJANG`, `PENGAWAS`, `MANAJEMEN`. |
+| 10 | `StatusKepegawaian`| Enum | Text (`CENTER`) | Tidak | `PNS` | `PNS`, `P3K`, `P3K_PARUH_WAKTU`, `PJLP`, `MAGANG`. |
+| 11 | `StatusAktif` | Enum | Text (`CENTER`) | Tidak | `AKTIF` | `AKTIF`, `CUTI`, `TUGAS_BELAJAR`, `MUTASI_KELUAR`, `PENSIUN`, `NONAKTIF`. |
+| 12 | `SubJenisSDM` | Text | Text (`CENTER`) | Ya | `PJLP_KAPAL` | Sub-klasifikasi SDM (opsional). |
+| 13 | `NomorIdentitas` | Text | Plain Text `@` (`CENTER`) | Ya | `3171010101900001` | NIK 16 digit atau NRP — **Opsional (*diisi bila ada*)**. |
+| 14 | `InstitusiAsal` | Text | Text (`LEFT`) | Ya | `Poltek KP Sidoarjo` | Khusus Magang / penugasan instansi asal. |
+| 15 | `TanggalMulai` | Date | `yyyy-mm-dd` (`CENTER`) | Ya | `2024-01-15` | Tanggal mulai penempatan/kontrak (wajib pilih kalender). |
+| 16 | `TanggalSelesai` | Date | `yyyy-mm-dd` (`CENTER`) | Ya | `2026-12-31` | Tanggal berakhir masa kontrak/magang (wajib pilih kalender). |
+| 17 | `MentorPembimbing` | Text | Text (`LEFT`) | Ya | `BUDI SANTOSO` | Pembimbing (khusus Magang). |
+| 18 | `CatatanTambahan` | Text | Wrap Text (`LEFT`) | Ya | `Penempatan SK Pusat di KP. Hiu 01` | Narasi keterangan formal *human-readable*. |
+| 19 | `DokumenSK_URL` | Text (URL) | Text (`LEFT`) | Ya | `https://drive.google.com/...` | URL berkas SK Penempatan / Surat Tugas (**Opsional — diisi bila ada**). |
+| 20 | `DokumenSK_EvidenceID`| Text | Plain Text (`CENTER`) | Ya | `1A2b3C...` | ID File Google Drive SK Penempatan (**Opsional**). |
+| 21 | `StatusPenempatan` | Enum | Text (`CENTER`) | Ya | `PUSAT_POA` | `PUSAT_POA` (Organik Dit. POA) atau `DIPERBANTUKAN_UPT` (AKP Pusat diperbantukan di UPT berdasar ST/SK). |
+| 22 | `KapalPenempatan` | Text | Text (`LEFT`) | Ya | `KP. HIU 01` | Nama/ID kapal tempat bertugas saat ini (tersinkron otomatis dari NAKHODA). |
+| 23 | `UkuranBaju` | Enum | Text (`CENTER`) | Ya | `L` | Opsional: `S`, `M`, `L`, `XL`, `XXL`, `XXXL`. |
+| 24 | `UkuranSepatu` | Text | Plain Text `@` (`CENTER`) | Ya | `42` | Opsional: `37` s.d. `46`. |
+| 25 | `SumberSinkronisasi`| Enum | Text (`CENTER`) | Ya | `PUSH_NAKHODA` | `MANUAL_TU` atau `PUSH_NAKHODA`. |
+| 26 | `StatusKelengkapanTU`| Enum | Text (`CENTER`) | Ya | `DISPARITAS_NAKHODA` | `LENGKAP` atau `DISPARITAS_NAKHODA` (memicu banner notifikasi di SIKAP agar TU melengkapi nomenklatur/atribut TU). |
+| 27 | `CatatanDisparitas`| Text | Wrap Text (`LEFT`) | Ya | `Kiriman Nakhoda: Kelompok Jabatan [Juru Mudi - KELAS II] belum dilengkapi Jabatan Lengkap TU` | Rincian disparitas yang perlu ditindaklanjuti operator TU. |
+| 28 | `UpdatedAt` | DateTime | `yyyy-mm-dd hh:mm:ss` (`CENTER`) | Tidak | `2026-11-17 09:00:00` | Timestamp pembaruan data terakhir. |
+| 29 | `UpdatedBy` | Text | Text (`LEFT`) | Tidak | `USR-STAF-TU-001` | User atau sistem yang melakukan perubahan. |
+
+*(Catatan: Input `Pangkat / Golongan Ruang` dihapus dari form SIKAP karena dinamis mengikuti E-Pegawai pusat.)*
 
 ---
 
@@ -330,7 +349,10 @@ erDiagram
     TX_BMN_Penghapusan ||--|{ TX_BMN_Penghapusan_Detail : contains
 ```
 
-### Aturan Cascade & Integritas:
+### Aturan Cascade, Integritas, & Format Fisik Spreadsheet (`SheetFormatter`)
 1. **Proteksi Hapus Aset (`TX_BMN_Aset`):** Aset fisik yang telah terhubung ke berkas usulan penghapusan aktif (`TX_BMN_Penghapusan_Detail`) berstatus `DALAM_PENGHAPUSAN` dan tidak dapat diubah kondisinya maupun didaftarkan ke berkas usulan lain.
 2. **Karantina Otomatis:** Saat usulan penghapusan disetujui tuntas (`BAST_SELESAI`), seluruh relasi di `TX_BMN_Aset` terkunci permanen pada status `DIHAPUS`.
 3. **Rollback Bersyarat:** Jika berkas di `TX_BMN_Penghapusan` dianulir (`Status = 'VOID'`) atau ditolak oleh Kemenkeu (`Tahap = 'DITOLAK'`), sistem otomatis memulihkan seluruh aset anak di `TX_BMN_Aset` kembali ke status `AKTIF`.
+4. **Standar Google Sheet Formal & *Human-Readable* (`applyFormalSheetFormatting`):**
+   - Seluruh sheet di `RadarPOA_SIKAP_DB` diformat dengan header resmi (`#0F172A`, teks putih tebal, tinggi `34px`, baris beku `setFrozenRows(1)`), baris data `26px` *zebra banding* (`#FFFFFF` / `#F8FAFC`), garis batas `#E2E8F0`, serta lebar kolom proporsional.
+   - Kolom kode angka panjang (`NIP`, `NomorIdentitas`, `NomorSertifikat`, `KodeBarang`, `NUP`, `UkuranSepatu`) wajib berformat Plain Text (`@`) agar tidak berubah menjadi notasi ilmiah, sedangkan tanggal memakai ISO bersih `yyyy-mm-dd`.

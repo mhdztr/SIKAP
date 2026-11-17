@@ -108,20 +108,29 @@ Sub-modul ini mengelola siklus hidup pengadaan barang, jasa konsultansi, konstru
 
 ---
 
-### 3.3 Sub-Modul [TU-C]: Manajemen Kepegawaian & Headcount
-Sub-modul ini memantau komposisi, ketersediaan, dan mutasi aparatur sipil dan personil pendukung di Subbag Tata Usaha.
+### 3.3 Sub-Modul [TU-C]: Manajemen Kepegawaian, Direktori Induk POA & Sinkronisasi NAKHODA
+Sub-modul ini memantau komposisi headcount, direktori induk personel Dit. POA (`DIT_POA`, `AWAK_KAPAL_ARMADA`, `EKSPANSI`), serta menerima sinkronisasi dua arah dari tim Pengawakan (**NAKHODA**).
 
 #### 5 Kategori Aparatur Standar Pemerintah:
 1. `PNS`: Pegawai Negeri Sipil tetap.
-2. `P3K`: Pegawai Pemerintah dengan Perjanjian Kerja (Penuh Waktu).
+2. `P3K`: Pegawai Pemerintah dengan Perjanjian Kerja (Penuh Waktu — selaras dengan `P3K` di Nakhoda).
 3. `P3K_PARUH_WAKTU`: PPPK Paruh Waktu sesuai kebijakan reformasi birokrasi KemenPAN-RB.
-4. `PJLP`: Penyedia Jasa Lainnya Perorangan / Tenaga Honorer / Pramubakti.
+4. `PJLP`: Penyedia Jasa Lainnya Perorangan / Tenaga Honorer / Pramubakti / Oiler / Koki Kapal.
 5. `MAGANG`: Peserta Magang Resmi Perguruan Tinggi / Taruna PKL Poltek KP.
 
-#### Logika Snapshot Mingguan:
-- Data kepegawaian disimpan berbasis periode snapshot (`YYYY-MM-WW`).
-- Sistem menerapkan *carry-forward otomatis*: jika pada minggu berjalan belum ada mutasi atau perubahan personil, sistem secara otomatis merefleksikan komposisi headcount dari periode aktif terakhir tanpa mengharuskan input ulang.
-- Jika terjadi mutasi (pensiun, promosi, penerimaan personil baru), form submit snapshot akan mencatat jumlah terbaru beserta catatan keterangan mutasi di `Keterangan`.
+#### Logika Snapshot Mingguan & Filter Periode Berbasis Kalender:
+- Data headcount disimpan berbasis periode snapshot (`YYYY-MM-WW`) dengan *carry-forward otomatis*.
+- **Filter Periode Dinamis (Anti-Ketik Manual):** Antarmuka kepegawaian menyediakan pemilih periode **`Semua Periode`**, **`TW I` (1 Jan–31 Mar)**, **`TW II` (1 Apr–30 Jun)**, **`TW III` (1 Jul–30 Sep)**, **`TW IV` (1 Okt–31 Des)**, **`Semester I` (1 Jan–30 Jun)**, **`Semester II` (1 Jul–31 Des)**, serta **`Rentang Kalender`** dengan pemilih tanggal kalender wajib (`type="date"` terproteksi `onkeydown="return false"`).
+
+#### Aturan Profil Personel Master (`Master_Pegawai_POA`):
+- **Nama Lengkap Kanonik:** Wajib **HURUF BESAR (`A-Z` dan spasi tunggal saja)** tanpa gelar, tanpa tanda petik (`'`, `` ` ``, `’`), titik, koma, atau angka (`"MA'RUF, S.Pi."` $\rightarrow$ `"MARUF"`).
+- **Aturan Kondisional `NIP`:**
+  - `PNS`, `P3K`, `P3K_PARUH_WAKTU`: **`NIP` WAJIB diisi 18 digit angka**.
+  - `PJLP` & `MAGANG`: **`NIP` TIDAK WAJIB** (kolom disembunyikan/dinonaktifkan karena tidak memiliki NIP).
+- **Penghapusan `Pangkat / Golongan Ruang`:** Dropdown Golongan PNS/P3K dihapus dari form SIKAP karena sifatnya dinamis mengikuti E-Pegawai pusat.
+- **Relaksasi `NIK` & Upload SK Penempatan / Surat Tugas:** `NomorIdentitas` (NIK) dan berkas **Dokumen SK Penempatan / Surat Tugas** bersifat **opsional (*diisi bila ada*)** agar input data tidak terhambat kelengkapan berkas.
+- **Dukungan Jabatan Kapal PJLP & Penempatan UPT:** Personel `PJLP` dan `P3K_PARUH_WAKTU` pada lingkup `AWAK_KAPAL_ARMADA` dapat memilih kelompok jabatan kapal termasuk **`Juru Masak (Koki)`** dan **`Juru Minyak (Oiler)`** beserta rumpun (`AWAK_DEK` / `AWAK_MESIN`). Mencatat atribut `StatusPenempatan` (`PUSAT_POA` vs `DIPERBANTUKAN_UPT`), `KapalPenempatan`, `UkuranBaju` (`S`–`XXXL`), dan `UkuranSepatu` (`37`–`46`).
+- **Mekanisme Notifikasi Disparitas Data Kiriman NAKHODA:** Karena operator Pengawakan (NAKHODA) tidak menginput `JabatanLengkap` dan melakukan mutasi penempatan/jabatan lebih cepat, setiap baris kiriman atau perubahan dari NAKHODA otomatis ditandai `StatusKelengkapanTU = 'DISPARITAS_NAKHODA'`. SIKAP menampilkan **Banner Peringatan & Filter Cepat "Data Perlu Dilengkapi TU"** beserta tombol aksi **`Lengkapi`** (dilengkapi generator otomatis `JabatanLengkap`) hingga Subbag TU memverifikasinya menjadi `LENGKAP`.
 
 ---
 

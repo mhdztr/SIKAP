@@ -99,10 +99,11 @@ Menghilangkan sepenuhnya left-sidebar statis warisan armada Nautika yang hampa/k
    - Visualisasi siklus 6 tahap pekerjaan (`PERSIAPAN` → `PEMILIHAN` → `KONTRAK` → `PELAKSANAAN` → `BAST` → `SELESAI`).
    - Pemantauan realisasi fisik vs keuangan terhadap nilai kontrak rekanan.
    - Akses bukti fisik dan dokumen kontrak PDF.
-3. **[TU-C] Manajemen Kepegawaian & Headcount:**
+3. **[TU-C] Manajemen Kepegawaian, Direktori Induk & Sinkronisasi NAKHODA:**
    - Snapshot komposisi 5 kategori aparatur (`PNS`, `P3K`, `P3K_PARUH_WAKTU`, `PJLP`, `MAGANG`).
-   - Kartu ringkasan distribusi SDM aparatur TU.
-   - Form pembaruan snapshot mingguan berbasis carry-forward.
+   - Kartu ringkasan distribusi SDM aparatur TU serta **Banner Notifikasi Disparitas Kiriman NAKHODA (`#tu-nakhoda-disparity-banner`)** bila ada data awak/jabatan kiriman Nakhoda yang belum dilengkapi TU.
+   - Filter periode dinamis berbasis **Preset Dropdown (`TW I`–`TW IV`, `Semester I`–`II`)** dan **Calendar Picker wajib** (`onkeydown="return false"`).
+   - Form profil personel: Nama **HURUF BESAR** non-simbol, tanpa dropdown Golongan, aturan kondisional **NIP wajib 18 digit untuk ASN dan disembunyikan untuk PJLP/Magang**, serta opsi **Ukuran Baju & Sepatu**.
 4. **[TU-D] Inventaris Aset Fisik BMN Granular (Anti-Jebret):**
    - Registrasi aset individual per-unit fisik (1 baris = 1 fisik unit riil).
    - Komponen ekstraksi geotagging EXIF foto mentah dan tombol fallback GPS browser.
@@ -172,6 +173,10 @@ Menggunakan container toast terpusat di kanan bawah `#n-toaster`:
 - Container `#bmn-upt-map` berbingkai sudut konsentris `var(--n-radius-md)`.
 - Menggunakan layer basemap Positron/Carto Voyager yang bersih dan minimalis.
 - Marker koordinat aset dan stasiun UPT menampilkan popup informatif berisi nama barang, kode NUP, nilai buku, dan jarak Haversine presisi.
+
+### 6.4 Banner Notifikasi Disparitas NAKHODA & Pemilih Kalender Anti-Ketik Manual
+- **Banner Disparitas (`#tu-nakhoda-disparity-banner`):** Tampil di atas daftar pegawai dengan aksen peringatan Amber (`#D97706`) saat terdapat baris berstatus `DISPARITAS_NAKHODA`, memuat jumlah data terdampak, rincian perbedaan dari Nakhoda, dan tombol filter cepat tier MD (*"Tampilkan Perlu Dilengkapi"*). Baris tabel terkait mendapat pill **`Perlu Dilengkapi TU`** serta aksi tier SM **`Lengkapi`**.
+- **Pemilih Tanggal Kalender:** Seluruh `<input type="date">` pada filter TW/Rentang Tanggal dan form kepegawaian menggunakan `onkeydown="return false"`, `onpaste="return false"`, dan pemanggilan `showPicker()` saat diklik agar pengguna selalu memilih dari kalender, bukan mengetik manual.
 
 ---
 

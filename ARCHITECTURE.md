@@ -100,10 +100,12 @@ Seluruh komunikasi antara antarmuka web dan server Google Apps Script menggunaka
 - `tataUsaha_submitPaket(token, payload)`: Menyimpan atau memperbarui progres siklus 6 tahap pekerjaan pengadaan.
 - `tataUsaha_anulirPaket(token, params)`: Membatalkan rekaman progres paket dengan alasan wajib.
 
-### 3.3 Sub-Modul C (Manajemen Kepegawaian)
+### 3.3 Sub-Modul C (Manajemen Kepegawaian, Direktori Induk POA & Sinkronisasi NAKHODA)
 - `tataUsaha_getPegawai(token, filter)`: Mengambil komposisi snapshot terkini dari 5 kategori aparatur beserta riwayat mutasi.
 - `tataUsaha_submitPegawai(token, params)`: Mengirimkan pembaruan snapshot mingguan personil aparatur.
 - `tataUsaha_anulirPegawai(token, params)`: Membatalkan snapshot kepegawaian periode tertentu.
+- `tataUsaha_getKompetensi(token, params)`: Mengambil daftar master pegawai POA (`Master_Pegawai_POA`), standar SKJ, progres sertifikat, filter periode (`TW1`–`TW4`, `SEM1`–`SEM2`, `CUSTOM` kalender), filter `StatusPenempatan` (`DIPERBANTUKAN_UPT`), serta menghitung **antrean disparitas kiriman NAKHODA (`disparitasCount`, `disparitasList`)**.
+- `tataUsaha_savePegawaiMaster(token, payload)`: Menyimpan/memperbarui profil pegawai dengan normalisasi nama kanonik (`sanitizeNamaPersonel`), validasi kondisional **NIP wajib 18 digit untuk `PNS`/`P3K`/`P3K_PARUH_WAKTU` dan non-wajib untuk `PJLP`/`MAGANG`**, relaksasi opsional NIK/SK, penghapusan Golongan, dukungan jabatan kapal PJLP (`Juru Masak` / `Juru Minyak`), resolusi otomatis status `StatusKelengkapanTU = 'LENGKAP'`, serta pemformatan sheet formal `applyFormalSheetFormatting()`.
 
 ### 3.4 Sub-Modul D (Inventaris Fisik BMN Granular)
 - `bmn_getMasters(token)`: Memuat daftar katalog kategori BMN dan master lokasi UPT PSDKP.
@@ -230,8 +232,13 @@ Setiap file yang berhasil disimpan ke Drive otomatis diindeks pada tabel `TX_Evi
 
 ---
 
-## 8. Mekanisme Self-Healing Database
+## 8. Mekanisme Self-Healing Database, Integrasi NAKHODA & Pemformatan Sheet Formal
 Untuk mencegah error saat instalasi baru atau perpindahan environment Spreadsheet, modul [data/SheetAccess.js](file:///home/pinefeast/Projects/SIKAP/data/SheetAccess.js) mengimplementasikan fungsi [openTuSheet(sheetName)](file:///home/pinefeast/Projects/SIKAP/data/SheetAccess.js#L102):
 1. Membaca Script Property `TU_SS_ID` atau `SIKAP_SS_ID`.
 2. Jika belum ada atau spreadsheet terhapus, fungsi [ensureTuSpreadsheet()](file:///home/pinefeast/Projects/SIKAP/data/SheetAccess.js#L117) otomatis membuat spreadsheet baru dengan nama `RadarPOA_SIKAP_DB` dan menyimpan ID-nya ke Script Properties.
-3. Saat sebuah sheet dibuka, jika sheet tersebut belum ada, [_autoCreateTuSheet()](file:///home/pinefeast/Projects/SIKAP/data/SheetAccess.js#L165) langsung menginisialisasi sheet tersebut dengan baris header standar relasional lengkap dengan formatting tebal dan baris beku (*frozen header row*).
+3. Saat sebuah sheet dibuka, jika sheet tersebut belum ada, [_autoCreateTuSheet()](file:///home/pinefeast/Projects/SIKAP/data/SheetAccess.js#L165) langsung menginisialisasi sheet tersebut dengan baris header standar relasional.
+4. **`applyFormalSheetFormatting(sheet, sheetName)`:** Mengatur tampilan spreadsheet agar formal, rapi, dan *human-readable* bagi pembaca langsung di Google Sheets:
+   - Header Baris 1: Latar `#0F172A`, teks putih `#FFFFFF` tebal, tinggi `34px`, dan baris beku (`setFrozenRows(1)`).
+   - Data Baris 2+: Tinggi `26px`, *zebra banding* (`#FFFFFF` / `#F8FAFC`), border `#E2E8F0`, perataan vertikal `MIDDLE`.
+   - Format Teks Murni (`@`) pada kolom `NIP`, `NomorIdentitas`, `NomorSertifikat`, `KodeBarang`, `NUP` untuk mencegah konversi notasi ilmiah (`1.985E+17`), format tanggal ISO bersih `yyyy-mm-dd`, serta lebar kolom proporsional.
+5. **Sinkronisasi Masuk dari NAKHODA (`_pushAwakToSikap`):** Saat aplikasi **NAKHODA** menulis atau memperbarui awak di `Master_Pegawai_POA` (karena pergerakan awak & penempatan SK UPT terjadi lebih cepat di Pengawakan), SIKAP mendeteksi penanda `StatusKelengkapanTU = 'DISPARITAS_NAKHODA'` beserta `CatatanDisparitas` dan menampilkannya pada banner peringatan di Sub-Modul C sampai operator TU melengkapi/mengonfirmasi data tersebut menjadi `LENGKAP`.
