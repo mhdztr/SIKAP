@@ -1321,9 +1321,9 @@
 
     var rangeInputs =
       '<div class="filter-inputs" id="filter-range" ' + (f.mode !== 'range' ? 'style="display:none"' : '') + '>' +
-      '<input type="date" class="filter-date" value="' + (f.dateFrom || '') + '" onchange="_setFilterFrom(this.value)">' +
+      '<input type="date" class="filter-date" value="' + (f.dateFrom || '') + '" onkeydown="return false" onpaste="return false" onclick="try{this.showPicker()}catch(e){}" onchange="_setFilterFrom(this.value)">' +
       '<span class="filter-sep">s.d.</span>' +
-      '<input type="date" class="filter-date" value="' + (f.dateTo || '') + '"   onchange="_setFilterTo(this.value)">' +
+      '<input type="date" class="filter-date" value="' + (f.dateTo || '') + '" onkeydown="return false" onpaste="return false" onclick="try{this.showPicker()}catch(e){}" onchange="_setFilterTo(this.value)">' +
       '</div>';
 
     return mode + '<div class="filter-mode-sep"></div>' + monthlyInputs + rangeInputs;
@@ -5147,10 +5147,19 @@
   function _tuLoadKompetensi(force) {
     if (!force && _TU.kompetensiData) {
       _tuPopulatePegawaiFilterOptions(_TU.kompetensiData.filters);
+      _tuRenderDisparitasBanner(_TU.kompetensiData);
       _tuApplyPegawaiFilters();
       _tuRenderKompetensiAnalytics(_TU.kompetensiData);
       return;
     }
+
+    var kp = _TU.kompPeriode || { periodeMode: 'ALL', tahun: new Date().getFullYear(), startDate: '', endDate: '' };
+    var filterPayload = Object.assign({}, APP.filter || {}, {
+      periodeMode: kp.periodeMode || 'ALL',
+      tahun: kp.tahun || new Date().getFullYear(),
+      startDate: kp.startDate || '',
+      endDate: kp.endDate || ''
+    });
 
     google.script.run
       .withSuccessHandler(function (res) {
@@ -5160,6 +5169,7 @@
         }
         _TU.kompetensiData = res.data;
         _tuPopulatePegawaiFilterOptions(res.data.filters);
+        _tuRenderDisparitasBanner(res.data);
         _tuApplyPegawaiFilters();
         _tuRenderKompetensiAnalytics(res.data);
         if (_TU.pegawaiData) {
@@ -5169,7 +5179,76 @@
       .withFailureHandler(function (err) {
         _msg('tu-peg-dir-msg', 'error', 'Koneksi gagal saat memuat standar kompetensi.');
       })
-      .tataUsaha_getKompetensi(APP.token, APP.filter);
+      .tataUsaha_getKompetensi(APP.token, filterPayload);
+  }
+
+  function _tuRenderDisparitasBanner(d) {
+    var banner = document.getElementById('tu-nakhoda-disparity-banner');
+    if (!banner) return;
+    var count = (d && d.disparitasCount) || 0;
+    var list = (d && d.disparitasList) || [];
+    if (count <= 0) {
+      banner.classList.add('n-hidden');
+      return;
+    }
+    banner.classList.remove('n-hidden');
+    var titleEl = document.getElementById('tu-disparity-title');
+    var descEl = document.getElementById('tu-disparity-desc');
+    var sumEl = document.getElementById('tu-disparity-summary-list');
+    if (titleEl) titleEl.textContent = count + ' Personel Kiriman NAKHODA Perlu Verifikasi & Pelengkapan TU';
+    if (descEl) descEl.textContent = 'Terdapat penambahan/pembaruan awak kapal dari aplikasi NAKHODA yang memerlukan verifikasi nomenklatur Jabatan Lengkap atau kelengkapan data TU.';
+    if (sumEl) {
+      var preview = list.slice(0, 4).map(function (it) {
+        return '<span style="display:inline-block; margin-right:10px;"><strong>' + _esc(it.nama) + '</strong> (' + _esc(it.kelompokJabatan || '-') + (it.kapalPenempatan ? ' · ' + _esc(it.kapalPenempatan) : '') + ')</span>';
+      }).join('');
+      if (list.length > 4) preview += '<span>dan ' + (list.length - 4) + ' personel lainnya.</span>';
+      sumEl.innerHTML = preview;
+    }
+  }
+
+  function _tuFilterDisparitasNakhoda() {
+    var penSel = document.getElementById('tu-filter-penempatan');
+    if (penSel) penSel.value = 'DISPARITAS_NAKHODA';
+    if (!_TU.pegawaiFilter) _TU.pegawaiFilter = {};
+    _TU.pegawaiFilter.seg = 'ALL';
+    _TU.pegawaiFilter.search = '';
+    var sInp = document.getElementById('tu-peg-search-input');
+    if (sInp) sInp.value = '';
+    var btns = document.querySelectorAll('.tu-peg-seg-btn');
+    btns.forEach(function (b) {
+      b.classList.toggle('active', b.getAttribute('data-peg-seg') === 'ALL');
+    });
+    _tuFilterChange();
+    var sec = document.getElementById('tu-section-pelatihan');
+    if (sec) sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function _tuKompPeriodeChange() {
+    var modeSel = document.getElementById('tu-komp-filter-periode');
+    var tahunSel = document.getElementById('tu-komp-filter-tahun');
+    var rangeWrap = document.getElementById('tu-komp-range-wrap');
+    var dStart = document.getElementById('tu-komp-date-start');
+    var dEnd = document.getElementById('tu-komp-date-end');
+    var mode = modeSel ? modeSel.value : 'ALL';
+
+    if (tahunSel) {
+      var showYr = (mode !== 'ALL' && mode !== 'CUSTOM');
+      tahunSel.classList.toggle('n-hidden', !showYr);
+    }
+    if (rangeWrap) {
+      rangeWrap.classList.toggle('n-hidden', mode !== 'CUSTOM');
+    }
+
+    _TU.kompPeriode = {
+      periodeMode: mode,
+      tahun: tahunSel ? parseInt(tahunSel.value, 10) : new Date().getFullYear(),
+      startDate: dStart ? dStart.value : '',
+      endDate: dEnd ? dEnd.value : ''
+    };
+    if (mode === 'CUSTOM' && (!_TU.kompPeriode.startDate && !_TU.kompPeriode.endDate)) {
+      return;
+    }
+    _tuLoadKompetensi(true);
   }
 
   function _tuRenderKompetensiAnalytics(d) {
@@ -5192,16 +5271,17 @@
     var elPoa = document.getElementById('tu-peg-kpi-poa');
     var elAwak = document.getElementById('tu-peg-kpi-awak');
     if (elTotal && k.totalPersonel) elTotal.textContent = k.totalPersonel;
-    if (elPoa && k.totalDitPoa) elPoa.textContent = k.totalDitPoa;
-    if (elAwak && k.totalAwakArmada) elAwak.textContent = k.totalAwakArmada;
+    if (elPoa && k.totalDitPoa !== undefined) elPoa.textContent = k.totalDitPoa;
+    if (elAwak && k.totalAwakArmada !== undefined) elAwak.textContent = k.totalAwakArmada;
 
     var segBtns = document.querySelectorAll('.tu-peg-seg-btn');
     segBtns.forEach(function (b) {
       var seg = b.getAttribute('data-peg-seg');
-      if (seg === 'ALL' && k.totalPersonel) b.textContent = 'Semua (' + k.totalPersonel + ')';
-      else if (seg === 'DIT_POA' && k.totalDitPoa) b.textContent = 'Dit. POA (' + k.totalDitPoa + ')';
-      else if (seg === 'AWAK_DEK' && k.totalAwakDek) b.textContent = 'Awak Dek (' + k.totalAwakDek + ')';
-      else if (seg === 'AWAK_MESIN' && k.totalAwakMesin) b.textContent = 'Awak Mesin (' + k.totalAwakMesin + ')';
+      if (seg === 'ALL' && k.totalPersonel !== undefined) b.textContent = 'Semua (' + k.totalPersonel + ')';
+      else if (seg === 'DIT_POA' && k.totalDitPoa !== undefined) b.textContent = 'Dit. POA (' + k.totalDitPoa + ')';
+      else if (seg === 'AWAK_DEK' && k.totalAwakDek !== undefined) b.textContent = 'Awak Dek (' + k.totalAwakDek + ')';
+      else if (seg === 'AWAK_MESIN' && k.totalAwakMesin !== undefined) b.textContent = 'Awak Mesin (' + k.totalAwakMesin + ')';
+      else if (seg === 'PENUNJANG' && k.totalAwakPenunjang !== undefined) b.textContent = 'Penunjang (' + k.totalAwakPenunjang + ')';
     });
   }
 
@@ -5284,9 +5364,11 @@
     var uSelect = document.getElementById('tu-filter-unit');
     var sSelect = document.getElementById('tu-filter-status');
     var spSelect = document.getElementById('tu-filter-status-pegawai');
+    var penSelect = document.getElementById('tu-filter-penempatan');
     _TU.pegawaiFilter.unit = uSelect ? uSelect.value : '';
     _TU.pegawaiFilter.status = sSelect ? sSelect.value : '';
     _TU.pegawaiFilter.statusPegawai = spSelect ? spSelect.value : '';
+    _TU.pegawaiFilter.penempatan = penSelect ? penSelect.value : '';
     _TU.pegawaiFilter.page = 1;
     _tuApplyPegawaiFilters();
   }
@@ -5334,19 +5416,30 @@
 
       // Segmented filter
       if (f.seg === 'DIT_POA') {
-        if (pUnit !== 'Dit. POA' || p.rumpun === 'AWAK_DEK' || p.rumpun === 'AWAK_MESIN') return false;
+        if (pUnit !== 'Dit. POA' || p.rumpun === 'AWAK_DEK' || p.rumpun === 'AWAK_MESIN' || p.rumpun === 'PENUNJANG') return false;
       } else if (f.seg === 'AWAK') {
-        if (p.rumpun !== 'AWAK_DEK' && p.rumpun !== 'AWAK_MESIN' && p.lingkupData !== 'AWAK_KAPAL_ARMADA') return false;
+        if (p.rumpun !== 'AWAK_DEK' && p.rumpun !== 'AWAK_MESIN' && p.rumpun !== 'PENUNJANG' && p.lingkupData !== 'AWAK_KAPAL_ARMADA') return false;
       } else if (f.seg === 'AWAK_DEK') {
         if (p.rumpun !== 'AWAK_DEK') return false;
       } else if (f.seg === 'AWAK_MESIN') {
         if (p.rumpun !== 'AWAK_MESIN') return false;
+      } else if (f.seg === 'PENUNJANG') {
+        if (p.rumpun !== 'PENUNJANG') return false;
       }
 
       // Search filter
       if (f.search) {
-        var haystack = ((p.nama || '') + ' ' + (p.nip || '') + ' ' + (p.jabatanLengkap || '') + ' ' + pUnit + ' ' + (p.kelompokJabatan || '') + ' ' + (p.statusKepegawaian || '') + ' ' + (p.institusiAsal || '') + ' ' + (p.subJenisSDM || '')).toLowerCase();
+        var haystack = ((p.nama || '') + ' ' + (p.nip || '') + ' ' + (p.jabatanLengkap || '') + ' ' + pUnit + ' ' + (p.kelompokJabatan || '') + ' ' + (p.statusKepegawaian || '') + ' ' + (p.kapalPenempatan || '') + ' ' + (p.catatanDisparitas || '') + ' ' + (p.institusiAsal || '') + ' ' + (p.subJenisSDM || '')).toLowerCase();
         if (haystack.indexOf(f.search) === -1) return false;
+      }
+
+      // Filter Penempatan & Disparitas Nakhoda
+      if (f.penempatan) {
+        if (f.penempatan === 'DISPARITAS_NAKHODA') {
+          if (p.statusKelengkapanTU !== 'DISPARITAS_NAKHODA') return false;
+        } else if (p.statusPenempatan !== f.penempatan) {
+          return false;
+        }
       }
 
       // Status Kepegawaian filter (PNS, P3K, PJLP, MAGANG, NON_ASN)
@@ -5429,6 +5522,9 @@
       } else if (p.rumpun === 'AWAK_MESIN') {
         rumpunLabel = 'Awak Mesin';
         rumpunClass = 'background:#FEF3C7; color:#B45309;';
+      } else if (p.rumpun === 'PENUNJANG') {
+        rumpunLabel = 'Penunjang Kapal';
+        rumpunClass = 'background:#FCE7F3; color:#9D174D;';
       } else if (p.rumpun === 'PENGAWAS') {
         rumpunLabel = 'Pengawas';
         rumpunClass = 'background:#EEF2FF; color:#4338CA;';
@@ -5436,11 +5532,13 @@
 
       var sPeg = String(p.statusKepegawaian || '').toUpperCase();
       if (!sPeg) {
-        sPeg = (pUnit === 'Dit. POA' && p.rumpun !== 'AWAK_DEK' && p.rumpun !== 'AWAK_MESIN') ? 'PNS' : (p.nip && p.nip !== '-' ? 'PNS' : 'NON_ASN');
+        sPeg = (pUnit === 'Dit. POA' && p.rumpun !== 'AWAK_DEK' && p.rumpun !== 'AWAK_MESIN' && p.rumpun !== 'PENUNJANG') ? 'PNS' : (p.nip && p.nip !== '-' ? 'PNS' : 'PJLP');
       }
       var sPegBadge = '<span class="badge" style="background:#EBF5FF; color:#1E429F; font-size:.6875rem; font-weight:600;">PNS</span>';
-      if (sPeg === 'P3K' || sPeg === 'P3K_PARUH_WAKTU') {
+      if (sPeg === 'P3K') {
         sPegBadge = '<span class="badge" style="background:#FDF2F8; color:#9D174D; font-size:.6875rem; font-weight:600;">P3K</span>';
+      } else if (sPeg === 'P3K_PARUH_WAKTU') {
+        sPegBadge = '<span class="badge" style="background:#FDF2F8; color:#9D174D; font-size:.6875rem; font-weight:600;">P3K Paruh Waktu</span>';
       } else if (sPeg === 'PJLP') {
         sPegBadge = '<span class="badge" style="background:#F3F4F6; color:#374151; font-size:.6875rem; font-weight:600;">PJLP</span>';
       } else if (sPeg === 'MAGANG') {
@@ -5453,7 +5551,12 @@
         sPegBadge = '<span class="badge" style="background:#F3F4F6; color:#4B5563; font-size:.6875rem; font-weight:600;">Non-ASN</span>';
       }
 
-      // Detail tambahan di bawah nama (NIP / Asal Kampus / Durasi)
+      var isDisparitas = (p.statusKelengkapanTU === 'DISPARITAS_NAKHODA');
+      var disparitasBadgeHtml = isDisparitas
+        ? '<span class="badge" style="background:#FEF3C7; color:#92400E; font-size:.6875rem; font-weight:700; border:1px solid #FCD34D;">Perlu Dilengkapi TU</span>'
+        : '';
+
+      // Detail tambahan di bawah nama (NIP / Asal Kampus / Durasi / Disparitas)
       var subDetailHtml = '';
       if (sPeg === 'MAGANG') {
         var institusiText = p.institusiAsal ? _esc(p.institusiAsal) : 'Mahasiswa/Siswa';
@@ -5463,20 +5566,23 @@
           institusiText + durasiText +
           '</div>';
       } else if (sPeg === 'PJLP') {
-        var subTugas = p.subJenisSDM ? _esc(p.subJenisSDM) : 'Tenaga Kontrak';
+        var subTugas = p.subJenisSDM ? _esc(p.subJenisSDM) : (p.kelompokJabatan ? _esc(p.kelompokJabatan) : 'Tenaga Kontrak');
         var durasiSpk = (p.tanggalMulai && p.tanggalSelesai) ? (' · <span class="tnum">' + _esc(p.tanggalMulai) + ' s.d ' + _esc(p.tanggalSelesai) + '</span>') : '';
         subDetailHtml = '<div style="font-size:.75rem; color:var(--n-text-muted); margin-top:2px;">' +
-          (p.nomorIdentitas ? 'KTP: <span class="tnum">' + _esc(p.nomorIdentitas) + '</span> · ' : '') +
+          (p.nomorIdentitas ? 'NIK: <span class="tnum">' + _esc(p.nomorIdentitas) + '</span> · ' : 'Non-NIP · ') +
           subTugas + durasiSpk +
           '</div>';
       } else {
         subDetailHtml = '<div style="font-size:.75rem; color:var(--n-text-muted);" class="tnum">NIP: ' + (p.nip && p.nip !== '-' ? _esc(p.nip) : 'Belum Terdata') + '</div>';
       }
+      if (isDisparitas && p.catatanDisparitas) {
+        subDetailHtml += '<div style="font-size:.72rem; color:#B45309; margin-top:2px;">' + _esc(p.catatanDisparitas) + '</div>';
+      }
 
       var pct = p.pctKompetensi || 0;
       var barColor = pct >= 80 ? '#059669' : (pct >= 40 ? '#D97706' : '#DC2626');
 
-      var isNonSkj = (p.isNonSkj || sPeg === 'MAGANG' || sPeg === 'PJLP');
+      var isNonSkj = (p.isNonSkj !== undefined ? !!p.isNonSkj : (sPeg === 'MAGANG'));
       var stdCellHtml = '';
       var certCellHtml = '';
       var actionBtnHtml = '';
@@ -5495,12 +5601,12 @@
           certCellHtml = '<span style="color:var(--n-text-muted); font-size:.75rem;">—</span>';
         }
 
-        actionBtnHtml = '<button type="button" class="btn-outline ctl-sm" onclick="_tuOpenPegawaiMasterModal(\'' + _esc(p.pegawaiId) + '\')">' +
+        actionBtnHtml = '<button type="button" class="' + (isDisparitas ? 'btn-primary' : 'btn-outline') + ' ctl-sm" onclick="_tuOpenPegawaiMasterModal(\'' + _esc(p.pegawaiId) + '\')">' +
           '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">' +
           '<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>' +
           '<path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>' +
           '</svg>' +
-          '<span>Edit Profil</span>' +
+          '<span>' + (isDisparitas ? 'Lengkapi' : 'Edit Profil') + '</span>' +
           '</button>';
       } else {
         stdCellHtml = '<div style="display:flex; justify-content:space-between; align-items:center; font-size:.75rem; margin-bottom:3px;">' +
@@ -5515,13 +5621,25 @@
           p.totalEvidence + ' Berkas' +
           '</span>';
 
-        actionBtnHtml = '<button type="button" class="btn-primary ctl-sm" onclick="_tuOpenPegawaiDetailModal(\'' + _esc(p.pegawaiId) + '\')">' +
-          '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">' +
-          '<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>' +
-          '<path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>' +
-          '</svg>' +
-          '<span>Lengkapi Pelatihan</span>' +
-          '</button>';
+        if (isDisparitas) {
+          actionBtnHtml = '<button type="button" class="btn-primary ctl-sm" onclick="_tuOpenPegawaiMasterModal(\'' + _esc(p.pegawaiId) + '\')">' +
+            '<span>Lengkapi</span>' +
+            '</button>' +
+            '<button type="button" class="btn-outline ctl-sm" title="Checklist Sertifikat" onclick="_tuOpenPegawaiDetailModal(\'' + _esc(p.pegawaiId) + '\')">' +
+            '<span>Diklat</span>' +
+            '</button>';
+        } else {
+          actionBtnHtml = '<button type="button" class="btn-primary ctl-sm" onclick="_tuOpenPegawaiDetailModal(\'' + _esc(p.pegawaiId) + '\')">' +
+            '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">' +
+            '<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>' +
+            '<path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>' +
+            '</svg>' +
+            '<span>Lengkapi Pelatihan</span>' +
+            '</button>' +
+            '<button type="button" class="btn-outline ctl-sm" title="Edit Profil Personel" onclick="_tuOpenPegawaiMasterModal(\'' + _esc(p.pegawaiId) + '\')">' +
+            '<span>Edit</span>' +
+            '</button>';
+        }
       }
 
       var jabatanCellHtml = '';
@@ -5530,26 +5648,35 @@
           '<div style="font-size:.72rem; color:var(--n-text-muted); margin-top:2px;">' +
           _esc(p.institusiAsal || 'Mahasiswa / Siswa SMK') +
           '</div>';
-      } else if (sPeg === 'PJLP') {
-        jabatanCellHtml = '<div style="font-size:.8125rem; font-weight:600; color:var(--n-text-primary);">' + _esc(p.subJenisSDM || p.jabatanLengkap || 'Tenaga Pendukung') + '</div>' +
-          '<div style="font-size:.72rem; color:var(--n-text-muted); margin-top:2px;">Tenaga Kontrak Non-ASN</div>';
-      } else if (sPeg === 'P3K_PARUH_WAKTU') {
-        jabatanCellHtml = '<div style="font-size:.8125rem; font-weight:600; color:var(--n-text-primary);">' + _esc(p.jabatanLengkap || 'P3K Paruh Waktu') + '</div>' +
-          '<div style="font-size:.72rem; color:var(--n-text-muted); margin-top:2px;">Aparatur Sipil Negara (Paruh Waktu)</div>';
       } else {
-        jabatanCellHtml = '<div style="font-size:.8125rem; font-weight:600; color:var(--n-text-primary);">' + _esc(p.jabatanLengkap) + '</div>' +
-          '<div style="display:flex; align-items:center; gap:6px; margin-top:2px;">' +
+        jabatanCellHtml = '<div style="font-size:.8125rem; font-weight:600; color:var(--n-text-primary);">' + _esc(p.jabatanLengkap || p.kelompokJabatan || '-') + '</div>' +
+          '<div style="display:flex; align-items:center; gap:6px; margin-top:2px; flex-wrap:wrap;">' +
           '<span class="badge" style="' + rumpunClass + ' font-size:.6875rem;">' + _esc(rumpunLabel) + '</span>' +
-          '<span style="font-size:.6875rem; color:var(--n-text-muted);">' + _esc(p.kelompokJabatan) + '</span>' +
+          '<span style="font-size:.6875rem; color:var(--n-text-muted);">' + _esc(p.kelompokJabatan || p.subJenisSDM || '-') + '</span>' +
+          '</div>';
+      }
+
+      var unitMetaHtml = '<div>' + _esc(pUnit) + '</div>';
+      if (p.statusPenempatan === 'DIPERBANTUKAN_UPT') {
+        unitMetaHtml += '<div style="margin-top:2px;"><span class="badge" style="background:#EFF6FF; color:#1D4ED8; font-size:.65rem; font-weight:600;">Diperbantukan UPT</span></div>';
+      }
+      if (p.kapalPenempatan) {
+        unitMetaHtml += '<div style="font-size:.72rem; color:var(--n-text-muted); margin-top:2px;">Kapal: ' + _esc(p.kapalPenempatan) + '</div>';
+      }
+      if (p.ukuranBaju || p.ukuranSepatu) {
+        unitMetaHtml += '<div style="font-size:.7rem; color:var(--n-text-muted); margin-top:2px;" class="tnum">' +
+          (p.ukuranBaju ? 'Baju ' + _esc(p.ukuranBaju) : '') +
+          (p.ukuranBaju && p.ukuranSepatu ? ' · ' : '') +
+          (p.ukuranSepatu ? 'Sepatu ' + _esc(p.ukuranSepatu) : '') +
           '</div>';
       }
 
       html += '<tr>' +
         '<td style="text-align:center; font-size:.8125rem;" class="tnum">' + (startIdx + idx + 1) + '</td>' +
         '<td>' +
-        '<div style="display:flex; align-items:center; gap:6px;">' +
+        '<div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">' +
         '<span style="font-weight:700; font-size:.875rem; color:var(--n-text-primary);">' + _esc(p.nama) + '</span>' +
-        sPegBadge +
+        sPegBadge + disparitasBadgeHtml +
         '</div>' +
         subDetailHtml +
         '</td>' +
@@ -5557,7 +5684,7 @@
         jabatanCellHtml +
         '</td>' +
         '<td style="font-size:.8125rem; color:var(--n-text-secondary);">' +
-        _esc(pUnit) +
+        unitMetaHtml +
         '</td>' +
         '<td>' +
         stdCellHtml +
@@ -5933,67 +6060,104 @@
     'Teknisi Sarana dan Prasarana'
   ];
   var _TU_AWAK_GROUPS = [
-    'Nahkoda', 'Mualim I', 'Mualim II', 'Mualim III', 'Kepala Kamar Mesin (KKM)',
-    'Masinis I', 'Masinis II', 'Masinis III', 'Juru Mudi', 'Juru Minyak (Oiler)',
-    'Juru Mesin', 'Kelasi', 'Operator Radio (Markonis)', 'Juru Masak'
+    'Nahkoda', 'Mualim', 'Mualim I', 'Mualim II', 'Mualim III',
+    'Kepala Kamar Mesin Kapal', 'KKM', 'Masinis', 'Masinis I', 'Masinis II', 'Masinis III',
+    'Markonis', 'Serang', 'Juru Mudi', 'Juru Minyak', 'Juru Minyak (Oiler)',
+    'Kelasi Kapal', 'Kelasi', 'Juru Masak', 'PJLP'
   ];
+
+  function _tuSanitizeNamaClient(raw) {
+    return String(raw || '').toUpperCase().replace(/[^A-Z\s]/g, ' ').replace(/\s+/g, ' ').trim();
+  }
+
+  function _tuAutoGenerateJabatan() {
+    var grpEl = document.getElementById('tu-m-kelompok');
+    var tgkEl = document.getElementById('tu-m-tingkat');
+    var jabEl = document.getElementById('tu-m-jabatan-lengkap');
+    if (!jabEl) return;
+    var grp = grpEl ? grpEl.value : '';
+    var tgk = tgkEl ? tgkEl.value : '';
+    if (!grp) return;
+    var tgkMap = {
+      KELAS_I: 'Kapal Kelas I Kapal Pengawas Kelautan dan Perikanan',
+      KELAS_II: 'Kapal Kelas II Kapal Pengawas Kelautan dan Perikanan',
+      KELAS_III: 'Kapal Kelas III Kapal Pengawas Kelautan dan Perikanan',
+      KELAS_IV: 'Kapal Kelas IV Kapal Pengawas Kelautan dan Perikanan',
+      KELAS_V: 'Kapal Kelas V Kapal Pengawas Kelautan dan Perikanan',
+      AHLI_MADYA: 'Ahli Madya',
+      AHLI_MUDA: 'Ahli Muda',
+      AHLI_PERTAMA: 'Ahli Pertama',
+      TERAMPIL: 'Terampil'
+    };
+    jabEl.value = tgkMap[tgk] ? (grp + ' ' + tgkMap[tgk]) : grp;
+  }
 
   function _tuOnStatusPegawaiChange() {
     var sel = document.getElementById('tu-m-status-pegawai');
     var st = sel ? sel.value : 'PNS';
 
-    var secPns = document.getElementById('tu-form-sec-pns');
     var secP3k = document.getElementById('tu-form-sec-p3k');
     var secP3kPw = document.getElementById('tu-form-sec-p3k-pw');
     var secPjlp = document.getElementById('tu-form-sec-pjlp');
     var secMagang = document.getElementById('tu-form-sec-magang');
     var secJabatan = document.getElementById('tu-form-sec-jabatan-kompetensi');
 
-    if (secPns) secPns.style.display = (st === 'PNS') ? 'block' : 'none';
     if (secP3k) secP3k.style.display = (st === 'P3K') ? 'block' : 'none';
     if (secP3kPw) secP3kPw.style.display = (st === 'P3K_PARUH_WAKTU') ? 'block' : 'none';
     if (secPjlp) secPjlp.style.display = (st === 'PJLP') ? 'block' : 'none';
     if (secMagang) secMagang.style.display = (st === 'MAGANG') ? 'block' : 'none';
 
-    // Magang, PJLP, dan P3K Paruh Waktu sama sekali TIDAK memerlukan Kelompok Standar Jabatan / Jenjang PNS
+    // Magang tidak membutuhkan Kelompok Jabatan / Baju / Sepatu; PJLP & P3K Paruh Waktu tetap tampil (termasuk Juru Masak & Oiler kapal)
     if (secJabatan) {
-      secJabatan.style.display = (st === 'MAGANG' || st === 'PJLP' || st === 'P3K_PARUH_WAKTU') ? 'none' : 'block';
+      secJabatan.style.display = (st === 'MAGANG') ? 'none' : 'block';
     }
 
-    var tingkatSelect = document.getElementById('tu-m-tingkat');
-    var kelompokSelect = document.getElementById('tu-m-kelompok');
+    // Aturan kondisional NIP: Wajib 18 digit untuk PNS/P3K/P3K_PARUH_WAKTU; nonaktif untuk PJLP & MAGANG
+    var nipInput = document.getElementById('tu-m-nip');
+    var nipLabel = document.getElementById('tu-m-nip-label');
+    var nipHint = document.getElementById('tu-m-nip-hint');
+    var nipReq = document.getElementById('tu-m-nip-req');
+    var needsNip = (st === 'PNS' || st === 'P3K' || st === 'P3K_PARUH_WAKTU');
+    if (nipInput) {
+      nipInput.disabled = !needsNip;
+      nipInput.required = needsNip;
+      if (!needsNip) {
+        nipInput.value = '';
+        nipInput.placeholder = 'Tidak berlaku untuk PJLP / Magang';
+      } else {
+        nipInput.placeholder = '18 digit NIP (PNS / P3K / P3K Paruh Waktu)';
+      }
+    }
+    if (nipLabel) {
+      nipLabel.innerHTML = needsNip
+        ? 'NIP (Wajib 18 Digit Angka) <span id="tu-m-nip-req" style="color:var(--n-crit)">*</span>'
+        : 'NIP (Tidak Wajib untuk Non-ASN / PJLP) <span id="tu-m-nip-req" style="display:none;">*</span>';
+    }
+    if (nipHint) {
+      nipHint.textContent = needsNip
+        ? 'Wajib 18 digit untuk PNS, P3K, dan P3K Paruh Waktu.'
+        : 'Dinonaktifkan otomatis — PJLP dan Magang tidak memiliki NIP.';
+    }
 
-    if (st === 'MAGANG' || st === 'PJLP' || st === 'P3K_PARUH_WAKTU') {
+    var kelompokSelect = document.getElementById('tu-m-kelompok');
+    if (st === 'MAGANG') {
       if (kelompokSelect) kelompokSelect.value = '';
       return;
     }
 
-    if (st === 'PNS') {
-      if (tingkatSelect) {
-        tingkatSelect.innerHTML =
-          '<option value="NON_JENJANG">Non-Jenjang / Struktural / Pelaksana</option>' +
-          '<option value="AHLI_MADYA">Ahli Madya</option>' +
-          '<option value="AHLI_MUDA">Ahli Muda</option>' +
-          '<option value="AHLI_PERTAMA">Ahli Pertama</option>' +
-          '<option value="TERAMPIL">Terampil / Pelaksana</option>';
-      }
-      if (kelompokSelect) {
-        var pnsHtml = '<option value="">-- Pilih Kelompok Jabatan PNS --</option>';
-        _TU_PNS_GROUPS.forEach(function (g) { pnsHtml += '<option value="' + _esc(g) + '">' + _esc(g) + '</option>'; });
-        kelompokSelect.innerHTML = pnsHtml;
-      }
-    } else if (st === 'P3K') {
-      if (tingkatSelect) {
-        tingkatSelect.innerHTML =
-          '<option value="NON_JENJANG">Non-Jenjang (Sesuai SK P3K)</option>' +
-          '<option value="AHLI_PERTAMA">Ahli Pertama</option>' +
-          '<option value="TERAMPIL">Terampil / Pelaksana</option>';
-      }
-      if (kelompokSelect) {
-        var p3kHtml = '<option value="">-- Pilih Jabatan Fungsional P3K --</option>';
-        _TU_PNS_GROUPS.forEach(function (g) { p3kHtml += '<option value="' + _esc(g) + '">' + _esc(g) + '</option>'; });
-        kelompokSelect.innerHTML = p3kHtml;
-      }
+    if (kelompokSelect) {
+      var prevVal = kelompokSelect.value;
+      var allGroups = [];
+      var seenG = {};
+      _TU_PNS_GROUPS.concat(_TU_AWAK_GROUPS).forEach(function (g) {
+        if (!seenG[g]) { seenG[g] = true; allGroups.push(g); }
+      });
+      var gHtml = '<option value="">-- Pilih Kelompok Jabatan --</option>';
+      allGroups.forEach(function (g) {
+        gHtml += '<option value="' + _esc(g) + '">' + _esc(g) + '</option>';
+      });
+      kelompokSelect.innerHTML = gHtml;
+      if (prevVal) kelompokSelect.value = prevVal;
     }
   }
 
@@ -6112,20 +6276,20 @@
     var titleEl = document.getElementById('tu-master-modal-title');
     var pidInput = document.getElementById('tu-m-pegawai-id');
     var namaInput = document.getElementById('tu-m-nama');
+    var nipInput = document.getElementById('tu-m-nip');
     var unitInput = document.getElementById('tu-m-unit');
     var sPegSelect = document.getElementById('tu-m-status-pegawai');
     var lingkupSelect = document.getElementById('tu-m-lingkup');
+    var statusPenempatanSelect = document.getElementById('tu-m-status-penempatan');
+    var kapalInput = document.getElementById('tu-m-kapal');
     var kelompokSelect = document.getElementById('tu-m-kelompok');
     var tingkatSelect = document.getElementById('tu-m-tingkat');
     var jabatanInput = document.getElementById('tu-m-jabatan-lengkap');
+    var bajuSelect = document.getElementById('tu-m-ukuran-baju');
+    var sepatuSelect = document.getElementById('tu-m-ukuran-sepatu');
     var catatanInput = document.getElementById('tu-m-catatan');
 
-    var nipPns = document.getElementById('tu-m-nip-pns');
-    var golPns = document.getElementById('tu-m-golongan-pns');
-
-    var nipP3k = document.getElementById('tu-m-nip-p3k');
     var skP3k = document.getElementById('tu-m-sk-p3k');
-    var golP3k = document.getElementById('tu-m-gol-p3k');
     var mulaiP3k = document.getElementById('tu-m-mulai-p3k');
     var selesaiP3k = document.getElementById('tu-m-selesai-p3k');
 
@@ -6157,8 +6321,8 @@
       var lbl = document.getElementById(prefix + '-picker-lbl');
       var sub = document.getElementById(prefix + '-picker-sub');
       var res = document.getElementById(prefix + '-ocr-result');
-      if (lbl) lbl.textContent = 'Pilih Berkas Dokumen (PDF / Scan)';
-      if (sub) sub.textContent = 'Sistem otomatis membaca nomor & masa berlaku';
+      if (lbl) lbl.textContent = 'Pilih Berkas Dokumen (Opsional)';
+      if (sub) sub.textContent = 'Sistem otomatis membaca nomor bila diunggah';
       if (res) { res.style.display = 'none'; res.innerHTML = ''; }
     });
 
@@ -6167,39 +6331,74 @@
       if (peg) {
         var pUnit = String(peg.unitKerja || '').trim();
         var uLow = pUnit.toLowerCase();
-        if (uLow === 'dit. poa' || uLow === 'dit poa' || uLow.indexOf('pengendalian operasi armada') !== -1 || (uLow.indexOf('poa') !== -1 && uLow.indexOf('armada') === -1)) {
+        if (uLow === 'dit. poa' || uLow === 'dit poa' || uLow.indexOf('pengendalian operasi armada') !== -1 || (uLow.indexOf('poa') !== -1 && uLow.indexOf('armada') === -1 && uLow.indexOf('diperbantukan') === -1)) {
           pUnit = 'Dit. POA';
         }
-        var sPegVal = peg.statusKepegawaian || (pUnit === 'Dit. POA' && peg.rumpun !== 'AWAK_DEK' && peg.rumpun !== 'AWAK_MESIN' ? 'PNS' : 'NON_ASN');
+        var sPegVal = peg.statusKepegawaian || (pUnit === 'Dit. POA' && peg.rumpun !== 'AWAK_DEK' && peg.rumpun !== 'AWAK_MESIN' ? 'PNS' : 'PJLP');
 
-        if (titleEl) titleEl.textContent = 'Edit Profil Personel';
+        if (titleEl) {
+          titleEl.textContent = peg.statusKelengkapanTU === 'DISPARITAS_NAKHODA'
+            ? 'Lengkapi & Verifikasi Disparitas Kiriman NAKHODA'
+            : 'Edit Profil Personel';
+        }
         if (pidInput) pidInput.value = peg.pegawaiId;
-        if (namaInput) namaInput.value = peg.nama;
-        if (unitInput) unitInput.value = pUnit;
+        if (namaInput) namaInput.value = _tuSanitizeNamaClient(peg.nama);
         if (sPegSelect) sPegSelect.value = sPegVal;
+        _tuOnStatusPegawaiChange();
+
+        if (nipInput) nipInput.value = (peg.nip && peg.nip !== '-') ? peg.nip : '';
+        if (unitInput) {
+          var hasOpt = false;
+          for (var uo = 0; uo < unitInput.options.length; uo++) {
+            if (unitInput.options[uo].value === pUnit) { hasOpt = true; break; }
+          }
+          if (!hasOpt && pUnit) {
+            var extraOpt = document.createElement('option');
+            extraOpt.value = pUnit;
+            extraOpt.textContent = pUnit;
+            unitInput.appendChild(extraOpt);
+          }
+          unitInput.value = pUnit;
+        }
         if (lingkupSelect) lingkupSelect.value = peg.lingkupData || 'DIT_POA';
-        if (kelompokSelect) kelompokSelect.value = peg.kelompokJabatan;
-        if (tingkatSelect) tingkatSelect.value = peg.tingkatKelas || 'NON_JENJANG';
-        if (jabatanInput) jabatanInput.value = peg.jabatanLengkap;
+        if (statusPenempatanSelect) statusPenempatanSelect.value = peg.statusPenempatan || 'PUSAT_POA';
+        if (kapalInput) kapalInput.value = peg.kapalPenempatan || '';
+        if (kelompokSelect) {
+          var kVal = peg.kelompokJabatan || '';
+          var hasK = false;
+          for (var ko = 0; ko < kelompokSelect.options.length; ko++) {
+            if (kelompokSelect.options[ko].value === kVal) { hasK = true; break; }
+          }
+          if (!hasK && kVal) {
+            var kOpt = document.createElement('option');
+            kOpt.value = kVal;
+            kOpt.textContent = kVal;
+            kelompokSelect.appendChild(kOpt);
+          }
+          kelompokSelect.value = kVal;
+        }
+        if (tingkatSelect) {
+          var tVal = String(peg.tingkatKelas || 'NON_KELAS').replace(/\s+/g, '_').toUpperCase();
+          if (tVal === 'NON_JENJANG') tVal = 'NON_KELAS';
+          tingkatSelect.value = tVal;
+        }
+        if (jabatanInput) jabatanInput.value = peg.jabatanLengkap || '';
+        if (bajuSelect) bajuSelect.value = peg.ukuranBaju || '';
+        if (sepatuSelect) sepatuSelect.value = peg.ukuranSepatu || '';
         if (catatanInput) catatanInput.value = peg.catatanTambahan || '';
 
-        if (nipPns) nipPns.value = (peg.nip && peg.nip !== '-') ? peg.nip : '';
-        if (golPns) golPns.value = peg.tingkatKelas || '';
-
-        if (nipP3k) nipP3k.value = (peg.nip && peg.nip !== '-') ? peg.nip : '';
         if (skP3k) skP3k.value = peg.nomorIdentitas || '';
-        if (golP3k) golP3k.value = peg.tingkatKelas || 'Golongan IX';
         if (mulaiP3k) mulaiP3k.value = peg.tanggalMulai || '';
         if (selesaiP3k) selesaiP3k.value = peg.tanggalSelesai || '';
 
-        if (nikP3kPw) nikP3kPw.value = peg.nomorIdentitas || (peg.nip && peg.nip !== '-' ? peg.nip : '');
-        if (jamP3kPw) jamP3kPw.value = peg.catatanTambahan || '';
+        if (nikP3kPw) nikP3kPw.value = peg.nomorIdentitas || '';
+        if (jamP3kPw) jamP3kPw.value = peg.subJenisSDM || '';
         if (mulaiP3kPw) mulaiP3kPw.value = peg.tanggalMulai || '';
         if (selesaiP3kPw) selesaiP3kPw.value = peg.tanggalSelesai || '';
 
         if (nikPjlp) nikPjlp.value = peg.nomorIdentitas || '';
-        if (bidangPjlp) bidangPjlp.value = peg.subJenisSDM || 'Tenaga Administrasi Perkantoran';
-        if (spkPjlp) spkPjlp.value = peg.catatanTambahan || '';
+        if (bidangPjlp && peg.subJenisSDM) bidangPjlp.value = peg.subJenisSDM;
+        if (spkPjlp) spkPjlp.value = '';
         if (mulaiPjlp) mulaiPjlp.value = peg.tanggalMulai || '';
         if (selesaiPjlp) selesaiPjlp.value = peg.tanggalSelesai || '';
 
@@ -6210,6 +6409,10 @@
         if (mentorMagang) mentorMagang.value = peg.mentorPembimbing || '';
         if (mulaiMagang) mulaiMagang.value = peg.tanggalMulai || '';
         if (selesaiMagang) selesaiMagang.value = peg.tanggalSelesai || '';
+
+        if (peg.statusKelengkapanTU === 'DISPARITAS_NAKHODA' && peg.catatanDisparitas) {
+          _msg('tu-master-form-msg', 'warning', peg.catatanDisparitas);
+        }
 
         if (peg.dokumenSkUrl) {
           var pref = sPegVal === 'P3K' ? 'tu-p3k' : (sPegVal === 'P3K_PARUH_WAKTU' ? 'tu-p3kpw' : (sPegVal === 'PJLP' ? 'tu-pjlp' : 'tu-magang'));
@@ -6222,7 +6425,6 @@
           }
         }
 
-        _tuOnStatusPegawaiChange();
         openModal('modal-tu-pegawai-master');
         return;
       }
@@ -6232,17 +6434,18 @@
     if (titleEl) titleEl.textContent = 'Pendaftaran Personel Baru';
     if (pidInput) pidInput.value = '';
     if (namaInput) namaInput.value = '';
+    if (nipInput) nipInput.value = '';
     if (unitInput) unitInput.value = 'Dit. POA';
     if (sPegSelect) sPegSelect.value = 'PNS';
     if (lingkupSelect) lingkupSelect.value = 'DIT_POA';
-    if (kelompokSelect) kelompokSelect.value = '';
-    if (tingkatSelect) tingkatSelect.value = 'NON_JENJANG';
+    if (statusPenempatanSelect) statusPenempatanSelect.value = 'PUSAT_POA';
+    if (kapalInput) kapalInput.value = '';
+    if (tingkatSelect) tingkatSelect.value = 'NON_KELAS';
     if (jabatanInput) jabatanInput.value = '';
+    if (bajuSelect) bajuSelect.value = '';
+    if (sepatuSelect) sepatuSelect.value = '';
     if (catatanInput) catatanInput.value = '';
 
-    if (nipPns) nipPns.value = '';
-    if (golPns) golPns.value = '';
-    if (nipP3k) nipP3k.value = '';
     if (skP3k) skP3k.value = '';
     if (mulaiP3k) mulaiP3k.value = '';
     if (selesaiP3k) selesaiP3k.value = '';
@@ -6262,6 +6465,7 @@
     if (selesaiMagang) selesaiMagang.value = '';
 
     _tuOnStatusPegawaiChange();
+    if (kelompokSelect) kelompokSelect.value = '';
     openModal('modal-tu-pegawai-master');
   }
 
@@ -6271,21 +6475,41 @@
     _msg(msgElId, null);
 
     var pid = (document.getElementById('tu-m-pegawai-id') || {}).value;
-    var nama = ((document.getElementById('tu-m-nama') || {}).value || '').trim();
+    var namaRaw = ((document.getElementById('tu-m-nama') || {}).value || '');
+    var nama = _tuSanitizeNamaClient(namaRaw);
+    var nipEl = document.getElementById('tu-m-nip');
     var unit = ((document.getElementById('tu-m-unit') || {}).value || '').trim();
     var uLow = unit.toLowerCase();
-    if (uLow === 'dit. poa' || uLow === 'dit poa' || uLow.indexOf('pengendalian operasi armada') !== -1 || (uLow.indexOf('poa') !== -1 && uLow.indexOf('armada') === -1)) {
+    if (uLow === 'dit. poa' || uLow === 'dit poa' || uLow.indexOf('pengendalian operasi armada') !== -1 || (uLow.indexOf('poa') !== -1 && uLow.indexOf('armada') === -1 && uLow.indexOf('diperbantukan') === -1)) {
       unit = 'Dit. POA';
     }
     var statusPeg = (document.getElementById('tu-m-status-pegawai') || {}).value || 'PNS';
     var lingkup = (document.getElementById('tu-m-lingkup') || {}).value || 'DIT_POA';
-    if (unit === 'Dit. POA') lingkup = 'DIT_POA';
-    var kelompok = (document.getElementById('tu-m-kelompok') || {}).value;
-    var tingkat = (document.getElementById('tu-m-tingkat') || {}).value || 'NON_JENJANG';
+    var statusPenempatan = (document.getElementById('tu-m-status-penempatan') || {}).value || 'PUSAT_POA';
+    var kapalPenempatan = ((document.getElementById('tu-m-kapal') || {}).value || '').trim();
+    if (unit === 'Dit. POA' && lingkup !== 'AWAK_KAPAL_ARMADA') lingkup = 'DIT_POA';
+    var kelompok = (document.getElementById('tu-m-kelompok') || {}).value || '';
+    var tingkat = (document.getElementById('tu-m-tingkat') || {}).value || 'NON_KELAS';
     var jabatan = ((document.getElementById('tu-m-jabatan-lengkap') || {}).value || '').trim();
+    var ukuranBaju = (document.getElementById('tu-m-ukuran-baju') || {}).value || '';
+    var ukuranSepatu = (document.getElementById('tu-m-ukuran-sepatu') || {}).value || '';
     var catatan = ((document.getElementById('tu-m-catatan') || {}).value || '').trim();
 
-    var nip = '-';
+    if (!nama) {
+      _msg(msgElId, 'error', 'Nama lengkap wajib diisi menggunakan huruf kapital A-Z.');
+      return;
+    }
+
+    var nip = '';
+    var requiresNip = (statusPeg === 'PNS' || statusPeg === 'P3K' || statusPeg === 'P3K_PARUH_WAKTU');
+    if (requiresNip) {
+      nip = ((nipEl && nipEl.value) || '').replace(/[^0-9]/g, '');
+      if (!/^\d{18}$/.test(nip)) {
+        _msg(msgElId, 'error', 'NIP wajib terdiri dari tepat 18 digit angka untuk personel PNS, P3K, dan P3K Paruh Waktu.');
+        return;
+      }
+    }
+
     var subJenis = '';
     var noIdentitas = '';
     var asalKampus = '';
@@ -6293,31 +6517,14 @@
     var tglSelesai = '';
     var mentor = '';
 
-    if (statusPeg === 'PNS') {
-      nip = ((document.getElementById('tu-m-nip-pns') || {}).value || '').trim();
-      tingkat = (document.getElementById('tu-m-golongan-pns') || {}).value || tingkat;
-      if (!nip || !/^\d{18}$/.test(nip)) {
-        _msg(msgElId, 'error', 'NIP PNS wajib terdiri dari 18 digit angka.');
-        return;
-      }
-    } else if (statusPeg === 'P3K') {
-      nip = ((document.getElementById('tu-m-nip-p3k') || {}).value || '').trim();
-      if (nip && nip !== '-' && !/^\d{18}$/.test(nip)) {
-        _msg(msgElId, 'error', 'NIP PPPK/P3K wajib terdiri dari 18 digit angka.');
-        return;
-      }
+    if (statusPeg === 'P3K') {
       noIdentitas = ((document.getElementById('tu-m-sk-p3k') || {}).value || '').trim();
-      tingkat = (document.getElementById('tu-m-gol-p3k') || {}).value || tingkat;
       tglMulai = (document.getElementById('tu-m-mulai-p3k') || {}).value || '';
       tglSelesai = (document.getElementById('tu-m-selesai-p3k') || {}).value || '';
     } else if (statusPeg === 'P3K_PARUH_WAKTU') {
       noIdentitas = ((document.getElementById('tu-m-nik-p3k-pw') || {}).value || '').trim();
-      if (noIdentitas && !/^\d{16}$/.test(noIdentitas)) {
-        _msg(msgElId, 'error', 'NIK KTP P3K Paruh Waktu wajib terdiri dari 16 digit angka.');
-        return;
-      }
       var alokasiJam = ((document.getElementById('tu-m-jam-p3k-pw') || {}).value || '').trim();
-      if (alokasiJam) catatan = (catatan ? catatan + ' | ' : '') + 'Alokasi: ' + alokasiJam;
+      subJenis = alokasiJam;
       tglMulai = (document.getElementById('tu-m-mulai-p3k-pw') || {}).value || '';
       tglSelesai = (document.getElementById('tu-m-selesai-p3k-pw') || {}).value || '';
     } else if (statusPeg === 'PJLP') {
@@ -6327,13 +6534,10 @@
       if (noSpk) catatan = (catatan ? catatan + ' | ' : '') + 'No SPK: ' + noSpk;
       tglMulai = (document.getElementById('tu-m-mulai-pjlp') || {}).value || '';
       tglSelesai = (document.getElementById('tu-m-selesai-pjlp') || {}).value || '';
-      if (!noIdentitas || !/^\d{16}$/.test(noIdentitas)) {
-        _msg(msgElId, 'error', 'NIK KTP PJLP wajib terdiri dari 16 digit angka.');
-        return;
+      if (!kelompok) {
+        kelompok = (lingkup === 'AWAK_KAPAL_ARMADA' || subJenis.indexOf('Awak Kapal') !== -1) ? 'Juru Masak' : 'PJLP';
       }
-      kelompok = 'PJLP';
-      tingkat = 'NON_JENJANG';
-      if (!jabatan) jabatan = 'PJLP - ' + subJenis;
+      if (!jabatan) jabatan = kelompok + (subJenis ? ' (' + subJenis + ')' : '');
     } else if (statusPeg === 'MAGANG') {
       subJenis = (document.getElementById('tu-m-jenis-magang') || {}).value || 'Magang Mandiri (Mahasiswa)';
       noIdentitas = ((document.getElementById('tu-m-nim-magang') || {}).value || '').trim();
@@ -6348,7 +6552,7 @@
         return;
       }
       kelompok = 'Non-Kompetensi';
-      tingkat = 'NON_JENJANG';
+      tingkat = 'NON_KELAS';
       if (!jabatan) jabatan = 'Peserta ' + subJenis + ' (' + asalKampus + (prodi ? ' - ' + prodi : '') + ')';
     }
 
@@ -6357,8 +6561,8 @@
       return;
     }
 
-    if (!nama || !unit) {
-      _msg(msgElId, 'error', 'Nama dan Unit Kerja wajib diisi.');
+    if (!unit) {
+      _msg(msgElId, 'error', 'Unit Kerja wajib diisi.');
       return;
     }
     if (!kelompok && statusPeg !== 'MAGANG' && statusPeg !== 'PJLP') {
@@ -6369,13 +6573,17 @@
     var payload = {
       pegawaiId: pid,
       nama: nama,
-      nip: nip || '-',
+      nip: nip,
       unitKerja: unit,
       statusKepegawaian: statusPeg,
       lingkupData: lingkup,
-      kelompokJabatan: kelompok || (statusPeg === 'MAGANG' ? 'Non-Kompetensi' : 'PJLP'),
-      tingkatKelas: tingkat || 'NON_JENJANG',
+      statusPenempatan: statusPenempatan,
+      kapalPenempatan: kapalPenempatan,
+      kelompokJabatan: kelompok,
+      tingkatKelas: tingkat || 'NON_KELAS',
       jabatanLengkap: jabatan || kelompok,
+      ukuranBaju: ukuranBaju,
+      ukuranSepatu: ukuranSepatu,
       subJenisSDM: subJenis,
       nomorIdentitas: noIdentitas,
       institusiAsal: asalKampus,

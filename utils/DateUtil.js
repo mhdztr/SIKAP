@@ -147,8 +147,73 @@ function utils_getTrendMonths(filter) {
   return out;
 }
 
-// ── HELPER INTERNAL ───────────────────────────────────────
+// ── HELPER INTERNAL & PERIODE WINDOW (TW / SEMESTER / KALENDER) ──
+
+/**
+ * Menerjemahkan parameter filter periode (TW1-TW4, SEM1-SEM2, CUSTOM kalender, ALL)
+ * menjadi rentang tanggal ISO [startDateStr, endDateStr] yang terstruktur.
+ *
+ * @param {Object} [params] { periodeMode, tahun, startDate, endDate }
+ * @returns {{ mode: string, tahun: number, startDateStr: string, endDateStr: string, label: string }}
+ */
+function resolvePeriodeWindow(params) {
+  var p = params || {};
+  var mode = String(p.periodeMode || p.mode || 'ALL').toUpperCase().trim();
+  var now = new Date();
+  var tahun = parseInt(p.tahun, 10) || now.getFullYear();
+
+  var startStr = '';
+  var endStr = '';
+  var label = 'Semua Periode';
+
+  if (mode === 'TW1') {
+    startStr = tahun + '-01-01';
+    endStr = tahun + '-03-31';
+    label = 'TW I ' + tahun + ' (1 Jan - 31 Mar)';
+  } else if (mode === 'TW2') {
+    startStr = tahun + '-04-01';
+    endStr = tahun + '-06-30';
+    label = 'TW II ' + tahun + ' (1 Apr - 30 Jun)';
+  } else if (mode === 'TW3') {
+    startStr = tahun + '-07-01';
+    endStr = tahun + '-09-30';
+    label = 'TW III ' + tahun + ' (1 Jul - 30 Sep)';
+  } else if (mode === 'TW4') {
+    startStr = tahun + '-10-01';
+    endStr = tahun + '-12-31';
+    label = 'TW IV ' + tahun + ' (1 Okt - 31 Des)';
+  } else if (mode === 'SEM1') {
+    startStr = tahun + '-01-01';
+    endStr = tahun + '-06-30';
+    label = 'Semester I ' + tahun + ' (1 Jan - 30 Jun)';
+  } else if (mode === 'SEM2') {
+    startStr = tahun + '-07-01';
+    endStr = tahun + '-12-31';
+    label = 'Semester II ' + tahun + ' (1 Jul - 31 Des)';
+  } else if (mode === 'CUSTOM') {
+    startStr = String(p.startDate || '').trim();
+    endStr = String(p.endDate || '').trim();
+    if (!startStr && endStr) startStr = endStr;
+    if (startStr && !endStr) endStr = startStr;
+    label = (startStr || '...') + ' s.d. ' + (endStr || '...');
+  }
+
+  return {
+    mode: mode,
+    tahun: tahun,
+    startDateStr: startStr,
+    endDateStr: endStr,
+    label: label
+  };
+}
 
 function _pad(n) {
   return n < 10 ? '0' + n : String(n);
+}
+
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = {
+    dateToPeriode: dateToPeriode,
+    resolvePeriodeWindow: resolvePeriodeWindow
+  };
 }

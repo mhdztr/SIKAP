@@ -241,6 +241,8 @@ function _autoCreateTuSheet(ss, sheetName) {
       'JabatanLengkap', 'TingkatKelas', 'KategoriRumpun', 'StatusKepegawaian', 'StatusAktif',
       'SubJenisSDM', 'NomorIdentitas', 'InstitusiAsal', 'TanggalMulai', 'TanggalSelesai',
       'MentorPembimbing', 'CatatanTambahan', 'DokumenSK_URL', 'DokumenSK_EvidenceID',
+      'StatusPenempatan', 'KapalPenempatan', 'UkuranBaju', 'UkuranSepatu',
+      'SumberSinkronisasi', 'StatusKelengkapanTU', 'CatatanDisparitas',
       'UpdatedAt', 'UpdatedBy'
     ];
   } else if (sheetName === SHEET_TU.STANDAR_PELATIHAN) {
@@ -312,11 +314,8 @@ function _autoCreateTuSheet(ss, sheetName) {
   }
 
   var created = ss.insertSheet(sheetName);
-  created.getRange(1, 1, 1, headers.length)
-    .setValues([headers])
-    .setFontWeight('bold')
-    .setBackground('#E8EAF6');
-  created.setFrozenRows(1);
+  created.getRange(1, 1, 1, headers.length).setValues([headers]);
+  applyFormalSheetFormatting(created, sheetName);
   Logger.log('[_autoCreateTuSheet] Sheet ' + sheetName + ' dibuat otomatis di database TU.');
   return created;
 }
@@ -556,8 +555,7 @@ function ensureTuColumn(sheetName, colName) {
   var newCol = lastCol + 1;
   var cell = sheet.getRange(1, newCol);
   cell.setValue(colName);
-  cell.setFontWeight('bold');
-  cell.setBackground('#E8EAF6');
+  applyFormalSheetFormatting(sheet, sheetName);
   Logger.log('[ensureTuColumn] Kolom ' + colName + ' ditambahkan ke ' + sheetName + ' (kolom ' + newCol + ').');
 }
 
@@ -570,6 +568,8 @@ function ensurePegawaiMasterColumns() {
     'JabatanLengkap', 'TingkatKelas', 'KategoriRumpun', 'StatusKepegawaian', 'StatusAktif',
     'SubJenisSDM', 'NomorIdentitas', 'InstitusiAsal', 'TanggalMulai', 'TanggalSelesai',
     'MentorPembimbing', 'CatatanTambahan', 'DokumenSK_URL', 'DokumenSK_EvidenceID',
+    'StatusPenempatan', 'KapalPenempatan', 'UkuranBaju', 'UkuranSepatu',
+    'SumberSinkronisasi', 'StatusKelengkapanTU', 'CatatanDisparitas',
     'UpdatedAt', 'UpdatedBy'
   ];
   for (var i = 0; i < requiredCols.length; i++) {
@@ -609,6 +609,7 @@ function ensurePegawaiMasterColumns() {
         range.setValues(values);
         Logger.log('[ensurePegawaiMasterColumns] Berhasil memperbaiki pergeseran kolom status pada Master_Pegawai_POA.');
       }
+      applyFormalSheetFormatting(sheet, SHEET_TU.PEGAWAI_MASTER);
     }
   } catch (errRepair) {
     Logger.log('[ensurePegawaiMasterColumns] Notice repair: ' + errRepair.message);
@@ -862,8 +863,9 @@ function bumpTxVersion(sheetName) {
 function appendRowData(sheet, dataObj) {
   var headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
   var row = headers.map(function (h) {
-    var val = dataObj[h];
-    return (val === undefined || val === null) ? '' : val;
+    var colName = String(h || '').trim();
+    var val = dataObj[colName];
+    return _normalizeSikapWriteValue(colName, val);
   });
   sheet.appendRow(row);
   bumpTxVersion(sheet.getName ? sheet.getName() : 'Transaksi');
@@ -882,11 +884,204 @@ function updateRowCells(sheet, rowIndex, updates) {
   Object.keys(updates).forEach(function (colName) {
     var colIndex = headers.indexOf(colName) + 1; // 1-based
     if (colIndex > 0) {
-      sheet.getRange(rowIndex, colIndex).setValue(updates[colName]);
+      sheet.getRange(rowIndex, colIndex).setValue(_normalizeSikapWriteValue(colName, updates[colName]));
     }
   });
   bumpTxVersion(sheet.getName ? sheet.getName() : 'Transaksi');
   SpreadsheetApp.flush();
+}
+
+// ===========================================================================
+// SANITIZER NAMA KANONIK & FORMATTER GOOGLE SHEET FORMAL
+// ===========================================================================
+
+/**
+ * Membersihkan & menormalisasi nama personel menjadi HURUF BESAR (A-Z dan spasi tunggal saja):
+ * menghapus gelar depan/belakang, tanda petik/apostrof ("Ma'ruf" -> "MARUF"), titik, koma, tanda hubung, dan angka.
+ * Identik dengan aturan kanonik NAKHODA.
+ *
+ * @param {string} rawNama
+ * @returns {string}
+ */
+function sanitizeNamaPersonel(rawNama) {
+  if (!rawNama || typeof rawNama !== 'string') return '';
+  var s = String(rawNama).toUpperCase().trim();
+
+  for (var i = 0; i < 3; i++) {
+    s = s.replace(/^(?:CAPT|PROF|DR|DRS|DRA|IR|HJ|H)(?:\.|\s+)+(?=[A-Z])/i, '');
+  }
+
+  s = s.replace(/,\s*(?:S\.?|M\.?|A\.?|D\.?|P\.?|B\.?|L\.?|DR|IR|SE|SH|ST|MM|MH|MSI|MT|SP|ANT|ATT).*$/i, '');
+  s = s.replace(/,\s*[A-Z.\s]{2,15}$/, function (m) {
+    return /\b(?:AMD|SST|STR|SPI|SIK|SKEL|SPD|SKOM|SSOS|SPKP|MMAR|MSI|SE|SH|ST|SP|MM|MH)\b/.test(m.replace(/\./g, '')) ? '' : m;
+  });
+
+  for (var j = 0; j < 2; j++) {
+    s = s.replace(/\s+(?:A\.?\s*MD(?:\.?\s*PI)?|S\.?\s*ST(?:\.?\s*PI)?|S\.?\s*TR(?:\.?\s*PI)?|S\.?\s*PI|S\.?\s*IK|S\.?\s*KEL|S\.?\s*PKP|S\.?\s*KOM|S\.?\s*SOS|S\.?\s*PD|S\.?\s*H|S\.?\s*E|S\.?\s*T|S\.?\s*P|M\.?\s*MAR|M\.?\s*SI|M\.?\s*M|M\.?\s*H|ANT[\s-]*[IV1-4]+|ATT[\s-]*[IV1-4]+)\.?$/i, '');
+  }
+
+  s = s.replace(/['’`´]/g, '');
+  s = s.replace(/[^A-Z\s]/g, ' ');
+  return s.replace(/\s+/g, ' ').trim();
+}
+
+var _SIKAP_FMT_WIDTHS = {
+  PegawaiID: 115, NIP: 165, NomorIdentitas: 165, NomorSertifikat: 165,
+  Nama: 240, UnitKerja: 230, LingkupData: 155, KelompokJabatan: 165,
+  JabatanLengkap: 260, TingkatKelas: 120, KategoriRumpun: 135, StatusKepegawaian: 155,
+  StatusAktif: 120, SubJenisSDM: 165, InstitusiAsal: 200,
+  TanggalMulai: 120, TanggalSelesai: 120, BerlakuSampai: 120,
+  MentorPembimbing: 200, CatatanTambahan: 280, DokumenSK_URL: 220, DokumenSK_EvidenceID: 155,
+  StatusPenempatan: 165, KapalPenempatan: 175, UkuranBaju: 105, UkuranSepatu: 110,
+  SumberSinkronisasi: 155, StatusKelengkapanTU: 170, CatatanDisparitas: 320,
+  KodeBarang: 130, NUP: 90, RowID: 145, Periode: 115, Status: 115,
+  UpdatedAt: 155, UpdatedBy: 145, Timestamp: 155
+};
+
+var _SIKAP_FMT_PLAIN_TEXT = {
+  PegawaiID: true, NIP: true, NomorIdentitas: true, NomorSertifikat: true,
+  UkuranSepatu: true, KodeBarang: true, NUP: true, RowID: true, RecordID: true,
+  KodePelatihan: true, AsetID: true, PenghapusanID: true, EvidenceID: true
+};
+
+var _SIKAP_FMT_ISO_DATES = {
+  TanggalMulai: true, TanggalSelesai: true, BerlakuSampai: true,
+  TanggalPerolehan: true, TanggalVerifikasi: true, TglPajakTahunan: true,
+  TglStnkLimaTahunan: true, TanggalSuratUsulan: true, TanggalSuratPersetujuan: true, TanggalSK: true
+};
+
+var _SIKAP_FMT_TIMESTAMPS = {
+  UpdatedAt: true, Timestamp: true, UploadedAt: true, VoidedAt: true
+};
+
+var _SIKAP_FMT_CENTER = {
+  PegawaiID: true, NIP: true, NomorIdentitas: true, TingkatKelas: true,
+  KategoriRumpun: true, StatusKepegawaian: true, StatusAktif: true, Status: true,
+  TanggalMulai: true, TanggalSelesai: true, BerlakuSampai: true,
+  StatusPenempatan: true, UkuranBaju: true, UkuranSepatu: true,
+  SumberSinkronisasi: true, StatusKelengkapanTU: true, UpdatedAt: true
+};
+
+var _SIKAP_FMT_WRAP = {
+  CatatanTambahan: true, CatatanDisparitas: true, JabatanLengkap: true,
+  Keterangan: true, VoidReason: true, Catatan: true
+};
+
+function _formatSikapIsoDate(val) {
+  if (!val && val !== 0) return '';
+  if (val instanceof Date && !isNaN(val.getTime())) {
+    if (typeof Utilities !== 'undefined' && Utilities && typeof Utilities.formatDate === 'function') {
+      return Utilities.formatDate(val, 'GMT+7', 'yyyy-MM-dd');
+    }
+    var y = val.getFullYear();
+    var m = val.getMonth() + 1;
+    var d = val.getDate();
+    return y + '-' + (m < 10 ? '0' + m : m) + '-' + (d < 10 ? '0' + d : d);
+  }
+  var s = String(val).trim();
+  if (/^\d{4}-\d{2}-\d{2}/.test(s)) return s.substring(0, 10);
+  return s;
+}
+
+function _normalizeSikapWriteValue(colName, val) {
+  if (val === undefined || val === null) return '';
+  if (_SIKAP_FMT_ISO_DATES[colName] && val !== '') return _formatSikapIsoDate(val);
+  if (_SIKAP_FMT_PLAIN_TEXT[colName] && val !== '') return String(val);
+  return val;
+}
+
+/**
+ * Menerapkan standar Google Sheet formal & human-readable pada SIKAP:
+ * - Header Navy/Slate (#0F172A untuk Master, #1E293B untuk Transaksi), teks putih tebal, 34px, baris beku
+ * - Baris data 26px, zebra banding (#FFFFFF / #F8FAFC), border #E2E8F0, vertikal middle
+ * - Format Plain Text '@' pada NIP/NIK/NomorSertifikat/UkuranSepatu agar bebas notasi ilmiah
+ * - Tanggal ISO yyyy-mm-dd & lebar kolom proporsional
+ */
+function applyFormalSheetFormatting(sheet, sheetName) {
+  try {
+    if (!sheet || typeof sheet.getLastColumn !== 'function') return;
+    var lastCol = sheet.getLastColumn();
+    var lastRow = typeof sheet.getLastRow === 'function' ? sheet.getLastRow() : 1;
+    if (lastCol < 1 || lastRow < 1) return;
+
+    var name = String(sheetName || (typeof sheet.getName === 'function' ? sheet.getName() : '')).trim();
+    var isMaster = name.indexOf('Master') === 0 || name === 'Users' || name === 'Divisi' || name === 'Opsi';
+    var headerBg = isMaster ? '#0F172A' : '#1E293B';
+
+    var headers = sheet.getRange(1, 1, 1, lastCol).getValues()[0] || [];
+    var headerRange = sheet.getRange(1, 1, 1, lastCol);
+
+    if (typeof headerRange.setBackground === 'function') headerRange.setBackground(headerBg);
+    if (typeof headerRange.setFontColor === 'function') headerRange.setFontColor('#FFFFFF');
+    if (typeof headerRange.setFontFamily === 'function') headerRange.setFontFamily('Arial');
+    if (typeof headerRange.setFontSize === 'function') headerRange.setFontSize(10);
+    if (typeof headerRange.setFontWeight === 'function') headerRange.setFontWeight('bold');
+    if (typeof headerRange.setVerticalAlignment === 'function') headerRange.setVerticalAlignment('middle');
+    if (typeof headerRange.setWrap === 'function') headerRange.setWrap(true);
+    if (typeof sheet.setFrozenRows === 'function') sheet.setFrozenRows(1);
+    if (typeof sheet.setRowHeight === 'function') sheet.setRowHeight(1, 34);
+
+    for (var c = 0; c < headers.length; c++) {
+      var h = String(headers[c] || '').trim();
+      var colIdx = c + 1;
+      if (typeof sheet.setColumnWidth === 'function') {
+        sheet.setColumnWidth(colIdx, _SIKAP_FMT_WIDTHS[h] || 145);
+      }
+      var hCell = sheet.getRange(1, colIdx);
+      if (typeof hCell.setHorizontalAlignment === 'function') {
+        hCell.setHorizontalAlignment(_SIKAP_FMT_CENTER[h] ? 'center' : 'left');
+      }
+    }
+
+    if (lastRow < 2) return;
+    var numRows = lastRow - 1;
+    var dataRange = sheet.getRange(2, 1, numRows, lastCol);
+
+    if (typeof dataRange.setFontFamily === 'function') dataRange.setFontFamily('Arial');
+    if (typeof dataRange.setFontSize === 'function') dataRange.setFontSize(10);
+    if (typeof dataRange.setFontColor === 'function') dataRange.setFontColor('#0F172A');
+    if (typeof dataRange.setVerticalAlignment === 'function') dataRange.setVerticalAlignment('middle');
+    if (typeof dataRange.setBorder === 'function') {
+      dataRange.setBorder(true, true, true, true, true, true, '#E2E8F0', null);
+    }
+
+    if (typeof dataRange.setBackgrounds === 'function') {
+      var bgs = [];
+      for (var r = 0; r < numRows; r++) {
+        var rowBg = (r % 2 === 1) ? '#F8FAFC' : '#FFFFFF';
+        var rowColors = [];
+        for (var k = 0; k < lastCol; k++) rowColors.push(rowBg);
+        bgs.push(rowColors);
+      }
+      dataRange.setBackgrounds(bgs);
+    }
+
+    if (typeof sheet.setRowHeights === 'function') {
+      sheet.setRowHeights(2, numRows, 26);
+    }
+
+    for (var ci = 0; ci < headers.length; ci++) {
+      var colName = String(headers[ci] || '').trim();
+      var colRange = sheet.getRange(2, ci + 1, numRows, 1);
+
+      if (_SIKAP_FMT_PLAIN_TEXT[colName] && typeof colRange.setNumberFormat === 'function') {
+        colRange.setNumberFormat('@');
+      } else if (_SIKAP_FMT_ISO_DATES[colName] && typeof colRange.setNumberFormat === 'function') {
+        colRange.setNumberFormat('yyyy-mm-dd');
+      } else if (_SIKAP_FMT_TIMESTAMPS[colName] && typeof colRange.setNumberFormat === 'function') {
+        colRange.setNumberFormat('yyyy-mm-dd hh:mm:ss');
+      }
+
+      if (typeof colRange.setHorizontalAlignment === 'function') {
+        colRange.setHorizontalAlignment(_SIKAP_FMT_CENTER[colName] ? 'center' : 'left');
+      }
+      if (typeof colRange.setWrap === 'function') {
+        colRange.setWrap(!!_SIKAP_FMT_WRAP[colName]);
+      }
+    }
+  } catch (eFmt) {
+    Logger.log('[applyFormalSheetFormatting] Notice: ' + eFmt.message);
+  }
 }
 
 // ===========================================================================
@@ -1076,5 +1271,12 @@ function logAudit(userId, aksi, sheetTarget, rowIdTarget, alasanOrDetail) {
   } catch (e) {
     Logger.log('[logAudit] ' + e.message);
   }
+}
+
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = {
+    sanitizeNamaPersonel: sanitizeNamaPersonel,
+    applyFormalSheetFormatting: applyFormalSheetFormatting
+  };
 }
 

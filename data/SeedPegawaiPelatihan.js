@@ -822,6 +822,22 @@ var STANDAR_PELATIHAN_RESMI = {
       "wajib": true
     }
   ],
+  "Juru Masak": [
+    {
+      "kode": "TRN-JMK-01",
+      "nama": "Basic Safety Training Fisheries (BST / BST-F)",
+      "kat": "SERTIFIKASI_LAUT",
+      "tingkat": "ALL",
+      "wajib": true
+    },
+    {
+      "kode": "TRN-JMK-02",
+      "nama": "Hygiene Sanitasi Makanan & Keselamatan Dapur Kapal (Food Handling)",
+      "kat": "TEKNIS",
+      "tingkat": "ALL",
+      "wajib": true
+    }
+  ],
   "Struktural": [
     {
       "kode": "TRN-STR-01",
@@ -9537,7 +9553,7 @@ function ensurePegawaiPelatihanSeeded(force) {
   var seededPegawai = 0;
   var seededStandar = 0;
 
-  // 1. Seed Master Standar Pelatihan (38 kelompok jabatan)
+  // 1. Seed Master Standar Pelatihan (termasuk Juru Masak)
   if (sLast <= 1 || force) {
     if (force && sLast > 1) {
       sSheet.getRange(2, 1, sLast - 1, sSheet.getLastColumn()).clearContent();
@@ -9564,6 +9580,32 @@ function ensurePegawaiPelatihanSeeded(force) {
       sSheet.getRange(2, 1, sRows.length, sRows[0].length).setValues(sRows);
       seededStandar = sRows.length;
     }
+  } else {
+    // Self-heal kurikulum Juru Masak pada database yang sudah ter-seed sebelumnya
+    try {
+      var existingCodes = {};
+      var curS = sSheet.getRange(2, 1, sLast - 1, 1).getValues();
+      for (var sc = 0; sc < curS.length; sc++) {
+        existingCodes[String(curS[sc][0] || '').trim()] = true;
+      }
+      var jmkItems = STANDAR_PELATIHAN_RESMI['Juru Masak'] || [];
+      var missingJmk = [];
+      for (var jm = 0; jm < jmkItems.length; jm++) {
+        if (!existingCodes[jmkItems[jm].kode]) {
+          missingJmk.push([
+            jmkItems[jm].kode, 'Juru Masak', jmkItems[jm].tingkat || 'ALL',
+            jmkItems[jm].kat || 'TEKNIS', jmkItems[jm].nama, !!jmkItems[jm].wajib, jm + 1
+          ]);
+        }
+      }
+      if (missingJmk.length > 0) {
+        sSheet.getRange(sLast + 1, 1, missingJmk.length, 7).setValues(missingJmk);
+      }
+    } catch (eJmk) {}
+  }
+
+  if (typeof ensurePegawaiMasterColumns === 'function') {
+    ensurePegawaiMasterColumns();
   }
 
   // 2. Seed Master Pegawai POA & Awak Kapal (504 Personel)
@@ -9576,10 +9618,14 @@ function ensurePegawaiPelatihanSeeded(force) {
     for (var p = 0; p < SEED_PEGAWAI_POA_AWAK.length; p++) {
       var peg = SEED_PEGAWAI_POA_AWAK[p];
       var sPeg = peg.statusKepegawaian || ((peg.unit === 'Dit. POA' || peg.lingkup === 'DIT_POA') ? 'PNS' : (peg.nip && peg.nip !== '-' ? 'PNS' : 'NON_ASN'));
+      if (sPeg === 'PPPK_FUNGSIONAL' || sPeg === 'PPPK_PELAKSANA') sPeg = 'P3K';
+      if (sPeg === 'PPPK_PARUH_WAKTU') sPeg = 'P3K_PARUH_WAKTU';
+      var cleanNama = typeof sanitizeNamaPersonel === 'function' ? sanitizeNamaPersonel(peg.nama) : String(peg.nama || '').toUpperCase().trim();
+      var stPenempatan = peg.statusPenempatan || ((String(peg.unit || '').toLowerCase().indexOf('pangkalan') !== -1 || String(peg.unit || '').toLowerCase().indexOf('stasiun') !== -1) ? 'DIPERBANTUKAN_UPT' : 'PUSAT_POA');
       pRows.push([
         peg.pegawaiId,
-        peg.nip || '-',
-        peg.nama,
+        (sPeg === 'PJLP' || sPeg === 'MAGANG') ? '' : (peg.nip || ''),
+        cleanNama,
         peg.unit,
         peg.lingkup,
         peg.kelompokJabatan,
@@ -9597,6 +9643,13 @@ function ensurePegawaiPelatihanSeeded(force) {
         peg.catatanTambahan || '',
         peg.dokumenSkUrl || '',
         peg.dokumenSkEvidenceId || '',
+        stPenempatan,
+        peg.kapalPenempatan || '',
+        peg.ukuranBaju || '',
+        peg.ukuranSepatu || '',
+        'MANUAL_TU',
+        'LENGKAP',
+        '',
         nowStr,
         'SYSTEM_SEED'
       ]);
@@ -9605,6 +9658,12 @@ function ensurePegawaiPelatihanSeeded(force) {
       pSheet.getRange(2, 1, pRows.length, pRows[0].length).setValues(pRows);
       seededPegawai = pRows.length;
     }
+  }
+
+  if (typeof applyFormalSheetFormatting === 'function') {
+    applyFormalSheetFormatting(sSheet, SHEET_TU.STANDAR_PELATIHAN);
+    applyFormalSheetFormatting(pSheet, SHEET_TU.PEGAWAI_MASTER);
+    applyFormalSheetFormatting(tSheet, SHEET_TU.PELATIHAN_PEGAWAI);
   }
 
   return {

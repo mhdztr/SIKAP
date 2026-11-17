@@ -1206,7 +1206,6 @@
           </button>
         </div>
       </div>
-      ``
 
       <!-- KPI Row 7 Kartu (Sebaris, Tanpa Subtext): Total, Dit. POA, Awak Kapal, P3K Penuh, P3K Paruh Waktu, PJLP, Magang -->
       <div class="tu-pegawai-kpi-grid-7" id="tu-pegawai-kpi-strip">
@@ -1314,6 +1313,36 @@
       </div>
     </div>
 
+    <!-- Banner Notifikasi Disparitas Data Kiriman NAKHODA (DESIGN.md §6.4) -->
+    <div id="tu-nakhoda-disparity-banner" class="n-card n-hidden"
+      style="margin-bottom:14px; padding:14px 18px; background:#FFFBEB; border:1px solid #FCD34D; border-left:4px solid #D97706;">
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px; flex-wrap:wrap;">
+        <div style="display:flex; align-items:flex-start; gap:10px; flex:1; min-width:260px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#B45309" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0; margin-top:2px;">
+            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+            <line x1="12" y1="9" x2="12" y2="13"></line>
+            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+          </svg>
+          <div>
+            <div style="font-size:.875rem; font-weight:700; color:#92400E;" id="tu-disparity-title">
+              Disparitas Data Kiriman Aplikasi NAKHODA Perlu Dilengkapi TU
+            </div>
+            <div style="font-size:.8125rem; color:#78350F; margin-top:3px;" id="tu-disparity-desc">
+              Terdapat pembaruan personel atau penempatan kapal dari Pengawakan yang belum dilengkapi nomenklatur formal TU.
+            </div>
+            <div id="tu-disparity-summary-list" style="margin-top:6px; font-size:.75rem; color:#78350F;"></div>
+          </div>
+        </div>
+        <div class="ctl-row">
+          <button type="button" class="btn-outline ctl-md" style="border-color:#D97706; color:#92400E; background:#FFFFFF;"
+            onclick="_tuFilterDisparitasNakhoda()">
+            Tampilkan Perlu Dilengkapi
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- ───────────────────────────────────────────────────────── -->
     <!-- SECTION 2: PELENGKAPAN STANDAR KOMPETENSI & PELATIHAN      -->
     <!-- ───────────────────────────────────────────────────────── -->
@@ -1352,7 +1381,7 @@
         </div>
 
         <!-- Filter Sub-Toolbar (Standardized Apple HIG Tier MD) -->
-        <div class="table-toolbar">
+        <div class="table-toolbar" style="gap:10px;">
           <div class="table-toolbar-left">
             <div class="n-seg">
               <button type="button" class="tu-peg-seg-btn active" data-peg-seg="ALL"
@@ -1363,17 +1392,39 @@
                 onclick="_tuSetPegawaiSeg('AWAK_DEK')">Awak Dek (249)</button>
               <button type="button" class="tu-peg-seg-btn" data-peg-seg="AWAK_MESIN"
                 onclick="_tuSetPegawaiSeg('AWAK_MESIN')">Awak Mesin (147)</button>
+              <button type="button" class="tu-peg-seg-btn" data-peg-seg="PENUNJANG"
+                onclick="_tuSetPegawaiSeg('PENUNJANG')">Penunjang (0)</button>
             </div>
           </div>
-          <div class="table-toolbar-right">
+          <div class="table-toolbar-right" style="flex-wrap:wrap; gap:8px;">
             <div class="ctl-search">
               <svg class="ctl-search-ico" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                 stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="11" cy="11" r="8"></circle>
                 <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
               </svg>
-              <input type="text" id="tu-peg-search-input" placeholder="Cari nama, NIP, jabatan..."
+              <input type="text" id="tu-peg-search-input" placeholder="Cari nama, NIP, kapal..."
                 oninput="_tuDebouncedPegawaiSearch()">
+            </div>
+            <select id="tu-komp-filter-periode" class="ctl-select" onchange="_tuKompPeriodeChange()" aria-label="Filter periode TW atau kalender">
+              <option value="ALL">Semua Periode</option>
+              <option value="TW1">TW I (Jan - Mar)</option>
+              <option value="TW2">TW II (Apr - Jun)</option>
+              <option value="TW3">TW III (Jul - Sep)</option>
+              <option value="TW4">TW IV (Okt - Des)</option>
+              <option value="SEM1">Semester I (Jan - Jun)</option>
+              <option value="SEM2">Semester II (Jul - Des)</option>
+              <option value="CUSTOM">Rentang Kalender...</option>
+            </select>
+            <select id="tu-komp-filter-tahun" class="ctl-select n-hidden" onchange="_tuKompPeriodeChange()" aria-label="Tahun filter periode">
+              <option value="2025">2025</option>
+              <option value="2026" selected>2026</option>
+              <option value="2027">2027</option>
+            </select>
+            <div id="tu-komp-range-wrap" class="n-hidden" style="display:flex; align-items:center; gap:6px;">
+              <input type="date" id="tu-komp-date-start" class="ctl-md tnum" onkeydown="return false" onpaste="return false" onclick="try{this.showPicker()}catch(e){}" onchange="_tuKompPeriodeChange()" aria-label="Tanggal mulai filter kalender">
+              <span style="font-size:.75rem; color:var(--n-text-muted);">s.d.</span>
+              <input type="date" id="tu-komp-date-end" class="ctl-md tnum" onkeydown="return false" onpaste="return false" onclick="try{this.showPicker()}catch(e){}" onchange="_tuKompPeriodeChange()" aria-label="Tanggal selesai filter kalender">
             </div>
             <select id="tu-filter-status-pegawai" class="ctl-select" onchange="_tuFilterChange()">
               <option value="">Semua Status SDM</option>
@@ -1382,6 +1433,12 @@
               <option value="P3K_PARUH_WAKTU">P3K Paruh Waktu</option>
               <option value="PJLP">PJLP / Tenaga Kontrak</option>
               <option value="MAGANG">Magang / Siswa PKL</option>
+            </select>
+            <select id="tu-filter-penempatan" class="ctl-select" onchange="_tuFilterChange()">
+              <option value="">Semua Penempatan &amp; Sinkron</option>
+              <option value="PUSAT_POA">Organik Dit. POA Pusat</option>
+              <option value="DIPERBANTUKAN_UPT">Diperbantukan di UPT</option>
+              <option value="DISPARITAS_NAKHODA">Disparitas Nakhoda (Perlu Dilengkapi)</option>
             </select>
             <select id="tu-filter-unit" class="ctl-select" onchange="_tuFilterChange()">
               <option value="">Semua Unit Kerja</option>
@@ -1652,8 +1709,9 @@
                     placeholder="Contoh: 62.01.2023.001928">
                 </div>
                 <div class="form-grp" style="margin-bottom:0;">
-                  <label for="tu-sert-expired">Berlaku Sampai (Khusus Laut)</label>
-                  <input type="date" id="tu-sert-expired" class="ctl-md tnum" style="width:100%;">
+                  <label for="tu-sert-expired">Berlaku Sampai (Pilih Kalender)</label>
+                  <input type="date" id="tu-sert-expired" class="ctl-md tnum" style="width:100%;"
+                    onkeydown="return false" onpaste="return false" onclick="try{this.showPicker()}catch(e){}">
                 </div>
               </div>
             </div>
@@ -1792,10 +1850,21 @@
 
               <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-top:12px;">
                 <div class="form-grp" style="margin-bottom:0;">
-                  <label for="tu-m-nama">Nama Lengkap &amp; Gelar <span style="color:var(--n-crit)">*</span></label>
-                  <input type="text" id="tu-m-nama" class="ctl-md" style="width:100%;"
-                    placeholder="Contoh: Budi Santoso, S.St.Pi" required>
+                  <label for="tu-m-nama">Nama Lengkap (HURUF BESAR, Tanpa Gelar &amp; Simbol) <span style="color:var(--n-crit)">*</span></label>
+                  <input type="text" id="tu-m-nama" class="ctl-md" style="width:100%; text-transform:uppercase;"
+                    placeholder="Contoh: BUDI SANTOSO atau MARUF"
+                    oninput="this.value=this.value.toUpperCase().replace(/[^A-Z\s]/g,'').replace(/\s{2,}/g,' ')" required>
                 </div>
+                <div class="form-grp" style="margin-bottom:0;" id="tu-m-nip-wrap">
+                  <label for="tu-m-nip" id="tu-m-nip-label">NIP (Wajib 18 Digit Angka) <span id="tu-m-nip-req" style="color:var(--n-crit)">*</span></label>
+                  <input type="text" id="tu-m-nip" class="ctl-md tnum" style="width:100%;"
+                    placeholder="18 digit NIP (PNS / P3K / P3K Paruh Waktu)" maxlength="18"
+                    oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,18)">
+                  <div id="tu-m-nip-hint" style="font-size:.7rem; color:var(--n-text-muted); margin-top:2px;">Wajib 18 digit untuk PNS, P3K, dan P3K Paruh Waktu.</div>
+                </div>
+              </div>
+
+              <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:12px; margin-top:12px;">
                 <div class="form-grp" style="margin-bottom:0;">
                   <label for="tu-m-lingkup">Cakupan Lingkup Data</label>
                   <select id="tu-m-lingkup" class="ctl-md" style="width:100%;">
@@ -1804,51 +1873,22 @@
                     <option value="EKSPANSI">Ekspansi Unit Lain</option>
                   </select>
                 </div>
-              </div>
-            </div>
-
-            <!-- DYNAMIC SECTION 1: PNS -->
-            <div id="tu-form-sec-pns" class="form-section-card" style="margin-top:14px;">
-              <div class="form-section-hd">
-                <span class="form-section-title">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                    stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                    <circle cx="12" cy="7" r="4"></circle>
-                  </svg>
-                  <span>Data Aparatur Sipil Negara (PNS)</span>
-                </span>
-                <span class="form-section-badge" style="background:#EBF5FF; color:#1E429F;">PNS</span>
-              </div>
-              <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
                 <div class="form-grp" style="margin-bottom:0;">
-                  <label for="tu-m-nip-pns">NIP (Nomor Induk Pegawai 18 Digit) <span
-                      style="color:var(--n-crit)">*</span></label>
-                  <input type="text" id="tu-m-nip-pns" class="ctl-md tnum" style="width:100%;"
-                    placeholder="Contoh: 198506152010121002" maxlength="18">
-                </div>
-                <div class="form-grp" style="margin-bottom:0;">
-                  <label for="tu-m-golongan-pns">Pangkat / Golongan Ruang</label>
-                  <select id="tu-m-golongan-pns" class="ctl-md" style="width:100%;">
-                    <option value="">-- Pilih Golongan --</option>
-                    <option value="II/a">Pengatur Muda (II/a)</option>
-                    <option value="II/b">Pengatur Muda Tk.I (II/b)</option>
-                    <option value="II/c">Pengatur (II/c)</option>
-                    <option value="II/d">Pengatur Tk.I (II/d)</option>
-                    <option value="III/a">Penata Muda (III/a)</option>
-                    <option value="III/b">Penata Muda Tk.I (III/b)</option>
-                    <option value="III/c">Penata (III/c)</option>
-                    <option value="III/d">Penata Tk.I (III/d)</option>
-                    <option value="IV/a">Pembina (IV/a)</option>
-                    <option value="IV/b">Pembina Tk.I (IV/b)</option>
-                    <option value="IV/c">Pembina Utama Muda (IV/c)</option>
-                    <option value="IV/d">Pembina Utama Madya (IV/d)</option>
+                  <label for="tu-m-status-penempatan">Status Penempatan</label>
+                  <select id="tu-m-status-penempatan" class="ctl-md" style="width:100%;">
+                    <option value="PUSAT_POA">Organik Dit. POA Pusat</option>
+                    <option value="DIPERBANTUKAN_UPT">AKP Pusat Diperbantukan di UPT</option>
                   </select>
                 </div>
+                <div class="form-grp" style="margin-bottom:0;">
+                  <label for="tu-m-kapal">Kapal Penempatan (Opsional)</label>
+                  <input type="text" id="tu-m-kapal" class="ctl-md" style="width:100%;"
+                    placeholder="Contoh: KP. Orca 01 / KP. Hiu 01">
+                </div>
               </div>
             </div>
 
-            <!-- DYNAMIC SECTION 2: P3K PENUH WAKTU -->
+            <!-- DYNAMIC SECTION 2: P3K PENUH WAKTU (Tanpa Golongan, SK Opsional) -->
             <div id="tu-form-sec-p3k" class="form-section-card" style="margin-top:14px; display:none;">
               <div class="form-section-hd">
                 <span class="form-section-title">
@@ -1859,27 +1899,10 @@
                   </svg>
                   <span>Data Perjanjian Kerja P3K Penuh Waktu</span>
                 </span>
-                <span class="form-section-badge" style="background:#FDF2F8; color:#9D174D;">P3K</span>
+                <span class="form-section-badge" style="background:#FDF2F8; color:#9D174D;">P3K (NIP di Kolom Atas)</span>
               </div>
-              <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
-                <div class="form-grp" style="margin-bottom:0;">
-                  <label for="tu-m-nip-p3k">Nomor Induk P3K (NI P3K)</label>
-                  <input type="text" id="tu-m-nip-p3k" class="ctl-md tnum" style="width:100%;"
-                    placeholder="Contoh: 199001012023211001" maxlength="18">
-                </div>
-                <div class="form-grp" style="margin-bottom:0;">
-                  <label for="tu-m-gol-p3k">Golongan P3K</label>
-                  <select id="tu-m-gol-p3k" class="ctl-md" style="width:100%;">
-                    <option value="Golongan V">Golongan V (SMA/Sederajat)</option>
-                    <option value="Golongan VII">Golongan VII (D-III)</option>
-                    <option value="Golongan IX">Golongan IX (S-1 / D-IV)</option>
-                    <option value="Golongan X">Golongan X (S-2)</option>
-                    <option value="Golongan XI">Golongan XI (S-3)</option>
-                  </select>
-                </div>
-              </div>
-              <div class="form-grp" style="margin-top:12px; margin-bottom:0;">
-                <label>Dokumen SK Pengangkatan P3K <span style="color:var(--n-crit)">*</span></label>
+              <div class="form-grp" style="margin-bottom:0;">
+                <label>Dokumen SK Penempatan / Pengangkatan P3K (Opsional — diisi bila ada)</label>
                 <div class="n-file-picker-card" id="tu-p3k-picker"
                   onclick="document.getElementById('tu-m-doc-p3k').click()">
                   <input type="file" id="tu-m-doc-p3k" accept=".pdf,image/*" style="display:none;"
@@ -1894,9 +1917,8 @@
                     </svg>
                   </div>
                   <div class="n-file-picker-txt">
-                    <div class="n-file-picker-main" id="tu-p3k-picker-lbl">Pilih Berkas SK P3K (PDF / Scan Gambar)</div>
-                    <div class="n-file-picker-sub" id="tu-p3k-picker-sub">Sistem otomatis membaca nomor SK dan masa
-                      berlaku dokumen</div>
+                    <div class="n-file-picker-main" id="tu-p3k-picker-lbl">Pilih Berkas SK Penempatan / P3K (Opsional)</div>
+                    <div class="n-file-picker-sub" id="tu-p3k-picker-sub">Sistem otomatis membaca nomor SK bila diunggah</div>
                   </div>
                 </div>
                 <input type="hidden" id="tu-m-sk-p3k" value="">
@@ -1904,12 +1926,14 @@
               </div>
               <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-top:12px;">
                 <div class="form-grp" style="margin-bottom:0;">
-                  <label for="tu-m-mulai-p3k">Mulai Kontrak (TMT Awal)</label>
-                  <input type="date" id="tu-m-mulai-p3k" class="ctl-md" style="width:100%;">
+                  <label for="tu-m-mulai-p3k">Mulai Kontrak / TMT (Pilih Kalender)</label>
+                  <input type="date" id="tu-m-mulai-p3k" class="ctl-md" style="width:100%;"
+                    onkeydown="return false" onpaste="return false" onclick="try{this.showPicker()}catch(e){}">
                 </div>
                 <div class="form-grp" style="margin-bottom:0;">
-                  <label for="tu-m-selesai-p3k">Berakhir Kontrak (TMT Akhir)</label>
-                  <input type="date" id="tu-m-selesai-p3k" class="ctl-md" style="width:100%;">
+                  <label for="tu-m-selesai-p3k">Berakhir Kontrak / TMT (Pilih Kalender)</label>
+                  <input type="date" id="tu-m-selesai-p3k" class="ctl-md" style="width:100%;"
+                    onkeydown="return false" onpaste="return false" onclick="try{this.showPicker()}catch(e){}">
                 </div>
               </div>
             </div>
@@ -1923,15 +1947,15 @@
                     <circle cx="12" cy="12" r="10"></circle>
                     <polyline points="12 6 12 12 16 14"></polyline>
                   </svg>
-                  <span>Data P3K Paruh Waktu (Part-Time PPPK)</span>
+                  <span>Data P3K Paruh Waktu (NIP 18 Digit di Kolom Atas)</span>
                 </span>
                 <span class="form-section-badge" style="background:#FDF2F8; color:#9D174D;">Paruh Waktu</span>
               </div>
               <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
                 <div class="form-grp" style="margin-bottom:0;">
-                  <label for="tu-m-nik-p3k-pw">NIK / No. Registrasi</label>
+                  <label for="tu-m-nik-p3k-pw">NIK / No. Registrasi (Opsional)</label>
                   <input type="text" id="tu-m-nik-p3k-pw" class="ctl-md tnum" style="width:100%;"
-                    placeholder="16 digit NIK KTP">
+                    placeholder="16 digit NIK KTP (bila ada)">
                 </div>
                 <div class="form-grp" style="margin-bottom:0;">
                   <label for="tu-m-jam-p3k-pw">Alokasi Waktu Kerja</label>
@@ -1940,7 +1964,7 @@
                 </div>
               </div>
               <div class="form-grp" style="margin-top:12px; margin-bottom:0;">
-                <label>Dokumen Keputusan / Perjanjian Paruh Waktu <span style="color:var(--n-crit)">*</span></label>
+                <label>Dokumen SK Penempatan / Perjanjian Paruh Waktu (Opsional — diisi bila ada)</label>
                 <div class="n-file-picker-card" id="tu-p3kpw-picker"
                   onclick="document.getElementById('tu-m-doc-p3kpw').click()">
                   <input type="file" id="tu-m-doc-p3kpw" accept=".pdf,image/*" style="display:none;"
@@ -1955,10 +1979,8 @@
                     </svg>
                   </div>
                   <div class="n-file-picker-txt">
-                    <div class="n-file-picker-main" id="tu-p3kpw-picker-lbl">Pilih Berkas Keputusan P3K PW (PDF / Scan)
-                    </div>
-                    <div class="n-file-picker-sub" id="tu-p3kpw-picker-sub">Sistem otomatis membaca nomor keputusan
-                      &amp; masa berlaku</div>
+                    <div class="n-file-picker-main" id="tu-p3kpw-picker-lbl">Pilih Berkas Keputusan P3K PW (Opsional)</div>
+                    <div class="n-file-picker-sub" id="tu-p3kpw-picker-sub">Sistem otomatis membaca nomor keputusan bila diunggah</div>
                   </div>
                 </div>
                 <input type="hidden" id="tu-m-sk-p3kpw" value="">
@@ -1966,12 +1988,14 @@
               </div>
               <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-top:12px;">
                 <div class="form-grp" style="margin-bottom:0;">
-                  <label for="tu-m-mulai-p3k-pw">Mulai Kontrak</label>
-                  <input type="date" id="tu-m-mulai-p3k-pw" class="ctl-md" style="width:100%;">
+                  <label for="tu-m-mulai-p3k-pw">Mulai Kontrak (Pilih Kalender)</label>
+                  <input type="date" id="tu-m-mulai-p3k-pw" class="ctl-md" style="width:100%;"
+                    onkeydown="return false" onpaste="return false" onclick="try{this.showPicker()}catch(e){}">
                 </div>
                 <div class="form-grp" style="margin-bottom:0;">
-                  <label for="tu-m-selesai-p3k-pw">Selesai Kontrak</label>
-                  <input type="date" id="tu-m-selesai-p3k-pw" class="ctl-md" style="width:100%;">
+                  <label for="tu-m-selesai-p3k-pw">Selesai Kontrak (Pilih Kalender)</label>
+                  <input type="date" id="tu-m-selesai-p3k-pw" class="ctl-md" style="width:100%;"
+                    onkeydown="return false" onpaste="return false" onclick="try{this.showPicker()}catch(e){}">
                 </div>
               </div>
             </div>
@@ -1987,31 +2011,31 @@
                     <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
                     <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
                   </svg>
-                  <span>Data PJLP / Tenaga Jasa Lainnya Perorangan</span>
+                  <span>Data PJLP / Awak Kapal Kontrak Non-ASN (Tanpa NIP)</span>
                 </span>
                 <span class="form-section-badge" style="background:#F3F4F6; color:#374151;">PJLP</span>
               </div>
               <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
                 <div class="form-grp" style="margin-bottom:0;">
-                  <label for="tu-m-nik-pjlp">NIK KTP (16 Digit) <span style="color:var(--n-crit)">*</span></label>
+                  <label for="tu-m-nik-pjlp">NIK KTP (Opsional — diisi bila ada)</label>
                   <input type="text" id="tu-m-nik-pjlp" class="ctl-md tnum" style="width:100%;"
-                    placeholder="Contoh: 3171012304950001" maxlength="16">
+                    placeholder="16 digit NIK KTP (opsional)" maxlength="16">
                 </div>
                 <div class="form-grp" style="margin-bottom:0;">
-                  <label for="tu-m-bidang-pjlp">Bidang Tugas PJLP <span style="color:var(--n-crit)">*</span></label>
+                  <label for="tu-m-bidang-pjlp">Bidang Tugas PJLP</label>
                   <select id="tu-m-bidang-pjlp" class="ctl-md" style="width:100%;">
+                    <option value="Awak Kapal Non-ASN (ABK Kontrak)">Awak Kapal Non-ASN (Juru Masak / Oiler / Kelasi)</option>
                     <option value="Tenaga Administrasi Perkantoran">Tenaga Administrasi Perkantoran</option>
                     <option value="Tenaga Pengemudi (Driver)">Tenaga Pengemudi (Driver)</option>
                     <option value="Tenaga Keamanan (Satpam)">Tenaga Keamanan (Satpam)</option>
                     <option value="Tenaga Kebersihan (Pramubakti)">Tenaga Kebersihan (Pramubakti)</option>
                     <option value="Tenaga IT &amp; Jaringan">Tenaga IT &amp; Jaringan</option>
                     <option value="Tenaga Teknis / Mekanik">Tenaga Teknis / Mekanik</option>
-                    <option value="Awak Kapal Non-ASN (ABK Kontrak)">Awak Kapal Non-ASN (ABK Kontrak)</option>
                   </select>
                 </div>
               </div>
               <div class="form-grp" style="margin-top:12px; margin-bottom:0;">
-                <label>Dokumen Berkas SPK / Kontrak Kerja <span style="color:var(--n-crit)">*</span></label>
+                <label>Dokumen Berkas SPK / Surat Tugas Penempatan (Opsional — diisi bila ada)</label>
                 <div class="n-file-picker-card" id="tu-pjlp-picker"
                   onclick="document.getElementById('tu-m-doc-pjlp').click()">
                   <input type="file" id="tu-m-doc-pjlp" accept=".pdf,image/*" style="display:none;"
@@ -2026,9 +2050,8 @@
                     </svg>
                   </div>
                   <div class="n-file-picker-txt">
-                    <div class="n-file-picker-main" id="tu-pjlp-picker-lbl">Pilih Berkas SPK (PDF / Scan Gambar)</div>
-                    <div class="n-file-picker-sub" id="tu-pjlp-picker-sub">Sistem otomatis membaca Nomor SPK &amp; masa
-                      berlaku kontrak</div>
+                    <div class="n-file-picker-main" id="tu-pjlp-picker-lbl">Pilih Berkas SPK / Surat Tugas (Opsional)</div>
+                    <div class="n-file-picker-sub" id="tu-pjlp-picker-sub">Sistem otomatis membaca Nomor SPK bila diunggah</div>
                   </div>
                 </div>
                 <input type="hidden" id="tu-m-spk-pjlp" value="">
@@ -2036,12 +2059,14 @@
               </div>
               <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-top:12px;">
                 <div class="form-grp" style="margin-bottom:0;">
-                  <label for="tu-m-mulai-pjlp">Mulai SPK</label>
-                  <input type="date" id="tu-m-mulai-pjlp" class="ctl-md" style="width:100%;">
+                  <label for="tu-m-mulai-pjlp">Mulai SPK (Pilih Kalender)</label>
+                  <input type="date" id="tu-m-mulai-pjlp" class="ctl-md" style="width:100%;"
+                    onkeydown="return false" onpaste="return false" onclick="try{this.showPicker()}catch(e){}">
                 </div>
                 <div class="form-grp" style="margin-bottom:0;">
-                  <label for="tu-m-selesai-pjlp">Selesai SPK</label>
-                  <input type="date" id="tu-m-selesai-pjlp" class="ctl-md" style="width:100%;">
+                  <label for="tu-m-selesai-pjlp">Selesai SPK (Pilih Kalender)</label>
+                  <input type="date" id="tu-m-selesai-pjlp" class="ctl-md" style="width:100%;"
+                    onkeydown="return false" onpaste="return false" onclick="try{this.showPicker()}catch(e){}">
                 </div>
               </div>
             </div>
@@ -2070,7 +2095,7 @@
                   </select>
                 </div>
                 <div class="form-grp" style="margin-bottom:0;">
-                  <label for="tu-m-nim-magang">NIM / NISN / No. Identitas Siswa</label>
+                  <label for="tu-m-nim-magang">NIM / NISN / No. Identitas (Opsional)</label>
                   <input type="text" id="tu-m-nim-magang" class="ctl-md tnum" style="width:100%;"
                     placeholder="NIM atau NISN">
                 </div>
@@ -2091,8 +2116,7 @@
               </div>
 
               <div class="form-grp" style="margin-top:12px; margin-bottom:0;">
-                <label>Surat Pengantar Kampus / Sekolah / Surat Tugas Magang <span
-                    style="color:var(--n-crit)">*</span></label>
+                <label>Surat Pengantar Kampus / Sekolah / Surat Tugas Magang (Opsional — diisi bila ada)</label>
                 <div class="n-file-picker-card" id="tu-magang-picker"
                   onclick="document.getElementById('tu-m-doc-magang').click()">
                   <input type="file" id="tu-m-doc-magang" accept=".pdf,image/*" style="display:none;"
@@ -2104,10 +2128,8 @@
                     </svg>
                   </div>
                   <div class="n-file-picker-txt">
-                    <div class="n-file-picker-main" id="tu-magang-picker-lbl">Pilih Surat Tugas / Pengantar (PDF / Scan)
-                    </div>
-                    <div class="n-file-picker-sub" id="tu-magang-picker-sub">Sistem otomatis membaca nomor surat &amp;
-                      periode magang</div>
+                    <div class="n-file-picker-main" id="tu-magang-picker-lbl">Pilih Surat Tugas / Pengantar (Opsional)</div>
+                    <div class="n-file-picker-sub" id="tu-magang-picker-sub">Sistem otomatis membaca nomor surat bila diunggah</div>
                   </div>
                 </div>
                 <input type="hidden" id="tu-m-docno-magang" value="">
@@ -2122,12 +2144,14 @@
                 </div>
                 <div class="form-grp" style="margin-bottom:0;">
                   <label for="tu-m-mulai-magang">Tanggal Mulai Magang <span style="color:var(--n-crit)">*</span></label>
-                  <input type="date" id="tu-m-mulai-magang" class="ctl-md" style="width:100%;">
+                  <input type="date" id="tu-m-mulai-magang" class="ctl-md" style="width:100%;"
+                    onkeydown="return false" onpaste="return false" onclick="try{this.showPicker()}catch(e){}">
                 </div>
                 <div class="form-grp" style="margin-bottom:0;">
                   <label for="tu-m-selesai-magang">Tanggal Selesai Magang <span
                       style="color:var(--n-crit)">*</span></label>
-                  <input type="date" id="tu-m-selesai-magang" class="ctl-md" style="width:100%;">
+                  <input type="date" id="tu-m-selesai-magang" class="ctl-md" style="width:100%;"
+                    onkeydown="return false" onpaste="return false" onclick="try{this.showPicker()}catch(e){}">
                 </div>
               </div>
               <div style="font-size:.75rem; color:var(--n-text-muted); margin-top:8px;">
@@ -2136,7 +2160,7 @@
               </div>
             </div>
 
-            <!-- Standard Section: Jabatan & Standar Pelatihan (Hanya untuk ASN & Awak Kapal) -->
+            <!-- Standard Section: Jabatan, Standar Pelatihan & Ukuran Logistik -->
             <div id="tu-form-sec-jabatan-kompetensi" class="form-section-card is-white" style="margin-top:14px;">
               <div class="form-section-hd">
                 <span class="form-section-title">
@@ -2146,22 +2170,27 @@
                     <polyline points="2 17 12 22 22 17"></polyline>
                     <polyline points="2 12 12 17 22 12"></polyline>
                   </svg>
-                  <span id="tu-sec-jabatan-title">Jabatan &amp; Standar Kompetensi ASN</span>
+                  <span id="tu-sec-jabatan-title">Jabatan, Kurikulum &amp; Perlengkapan Kerja</span>
                 </span>
-                <span class="form-section-badge" id="tu-sec-jabatan-badge">Standar Kurikulum</span>
+                <span class="form-section-badge" id="tu-sec-jabatan-badge">TU &amp; Awak Kapal</span>
               </div>
 
               <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
                 <div class="form-grp" style="margin-bottom:0;">
-                  <label for="tu-m-kelompok">Kelompok Standar Jabatan</label>
+                  <label for="tu-m-kelompok">Kelompok Jabatan</label>
                   <select id="tu-m-kelompok" class="ctl-md" style="width:100%;">
                     <!-- Populated via JS -->
                   </select>
                 </div>
                 <div class="form-grp" style="margin-bottom:0;">
-                  <label for="tu-m-tingkat">Tingkat / Jenjang Jabatan</label>
+                  <label for="tu-m-tingkat">Kelas Kapal / Jenjang Jabatan</label>
                   <select id="tu-m-tingkat" class="ctl-md" style="width:100%;">
-                    <option value="NON_JENJANG">Non-Jenjang / Pelaksana / Struktural</option>
+                    <option value="NON_KELAS">Non-Kelas / Struktural</option>
+                    <option value="KELAS_I">Kapal Kelas I</option>
+                    <option value="KELAS_II">Kapal Kelas II</option>
+                    <option value="KELAS_III">Kapal Kelas III</option>
+                    <option value="KELAS_IV">Kapal Kelas IV</option>
+                    <option value="KELAS_V">Kapal Kelas V</option>
                     <option value="AHLI_MADYA">Ahli Madya</option>
                     <option value="AHLI_MUDA">Ahli Muda</option>
                     <option value="AHLI_PERTAMA">Ahli Pertama</option>
@@ -2171,15 +2200,51 @@
               </div>
 
               <div class="form-grp" style="margin-top:12px; margin-bottom:0;">
-                <label for="tu-m-jabatan-lengkap">Nama Jabatan / Posisi Penugasan</label>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                  <label for="tu-m-jabatan-lengkap" style="margin-bottom:0;">Nama Jabatan Lengkap Formal TU</label>
+                  <button type="button" class="btn-outline ctl-sm" onclick="_tuAutoGenerateJabatan()">
+                    Generate Otomatis
+                  </button>
+                </div>
                 <input type="text" id="tu-m-jabatan-lengkap" class="ctl-md" style="width:100%;"
-                  placeholder="Contoh: Pengawas Perikanan Ahli Muda / Analis Kebijakan">
+                  placeholder="Contoh: Juru Mudi Kapal Pengawas Kelas II / Pengawas Perikanan Ahli Muda">
+              </div>
+
+              <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-top:12px;">
+                <div class="form-grp" style="margin-bottom:0;">
+                  <label for="tu-m-ukuran-baju">Ukuran Baju Kerja / Pakaian Dinas (Opsional)</label>
+                  <select id="tu-m-ukuran-baju" class="ctl-md" style="width:100%;">
+                    <option value="">-- Belum Diisi --</option>
+                    <option value="S">S</option>
+                    <option value="M">M</option>
+                    <option value="L">L</option>
+                    <option value="XL">XL</option>
+                    <option value="XXL">XXL</option>
+                    <option value="XXXL">XXXL</option>
+                  </select>
+                </div>
+                <div class="form-grp" style="margin-bottom:0;">
+                  <label for="tu-m-ukuran-sepatu">Ukuran Sepatu Dinas / Safety (Opsional)</label>
+                  <select id="tu-m-ukuran-sepatu" class="ctl-md tnum" style="width:100%;">
+                    <option value="">-- Belum Diisi --</option>
+                    <option value="37">37</option>
+                    <option value="38">38</option>
+                    <option value="39">39</option>
+                    <option value="40">40</option>
+                    <option value="41">41</option>
+                    <option value="42">42</option>
+                    <option value="43">43</option>
+                    <option value="44">44</option>
+                    <option value="45">45</option>
+                    <option value="46">46</option>
+                  </select>
+                </div>
               </div>
 
               <div class="form-grp" style="margin-top:12px; margin-bottom:0;">
                 <label for="tu-m-catatan">Catatan Tambahan / Keterangan</label>
                 <input type="text" id="tu-m-catatan" class="ctl-md" style="width:100%;"
-                  placeholder="Catatan penugasan, keahlian khusus, atau SK penempatan">
+                  placeholder="Catatan penugasan, keahlian khusus, atau nomor SK penempatan">
               </div>
             </div>
 
