@@ -438,11 +438,15 @@
 
           <!-- Live Sync Pill -->
           <div id="sync-indicator" class="sync-indicator" onclick="_triggerManualSync()" title="Data tersinkron dengan server. Klik untuk periksa pembaruan.">
-            <span class="sync-dot-live"></span>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--n-status-success)" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
             <span class="sync-indicator-text">Tersinkron</span>
             <div class="sync-popover" id="sync-popover">
               <div class="sync-pop-head">
-                <span class="sync-pop-dot"></span>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--n-status-success)" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
                 <span class="sync-pop-status">Sistem Tersinkron</span>
               </div>
               <div class="sync-pop-data" id="sync-pop-data">Data per: &mdash;</div>

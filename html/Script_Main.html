@@ -4030,19 +4030,32 @@
     var el = document.querySelector('#page-content #tu-kpi-strip') || document.getElementById('tu-kpi-strip');
     if (!el) return;
 
-    var progSP2D = Math.min(Math.max(d.pctSerapanNasional !== undefined ? d.pctSerapanNasional : (d.pctSP2D || 0), 0), 100);
-    var progAkrual = Math.min(Math.max(d.pctAkrual || 0, 0), 100);
-    var selisih = Math.abs((d.realisasiAkrual || 0) - (d.realisasiSP2D || 0));
-    var isKasLebihBesar = (d.realisasiSP2D || 0) >= (d.realisasiAkrual || 0);
-    var hasPagu = Number(d.paguTotal || 0) > 0;
+    var paguTotal = Number(d.paguTotal || 0);
+    var paguReguler = Number(d.paguReguler || 0);
+    var paguABT = Number(d.paguABT || 0);
+    var realSP2D = Number(d.realisasiSP2D !== undefined ? d.realisasiSP2D : (d.sp2dTotal || 0));
+    var realAkrual = Number(d.realisasiAkrual !== undefined ? d.realisasiAkrual : (d.akrualTotal || 0));
+    var sisaSP2D = Number(d.sisaSP2D !== undefined ? d.sisaSP2D : (d.sisaPagu !== undefined ? d.sisaPagu : (paguTotal - realSP2D)));
+    var sisaAkrual = Number(d.sisaAkrual !== undefined ? d.sisaAkrual : (paguTotal - realAkrual));
+
+    var rawPctSP2D = d.pctSerapanNasional !== undefined ? d.pctSerapanNasional : (d.persenSP2D !== undefined ? d.persenSP2D : (d.pctSP2D || 0));
+    var rawPctAkrual = d.pctAkrual !== undefined ? d.pctAkrual : (d.persenAkrual || 0);
+    var progSP2D = Math.min(Math.max(rawPctSP2D, 0), 100);
+    var progAkrual = Math.min(Math.max(rawPctAkrual, 0), 100);
+
+    var selisih = Math.abs(realAkrual - realSP2D);
+    var isKasLebihBesar = realSP2D >= realAkrual;
+    var hasPagu = paguTotal > 0;
     var paguBtnLabel = hasPagu ? 'Revisi Pagu DIPA' : 'Input Pagu Awal';
     var paguBtnIcon = hasPagu
       ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>'
       : '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg>';
 
+    var statusText = sisaSP2D < 0 ? 'Pagu Defisit' : 'Likuiditas Kas Aman';
+    var statusCls = sisaSP2D < 0 ? 'text-crit' : 'text-emerald';
+
     var html = '' +
       '<div class="sikap-treasury-cockpit">' +
-      '<!-- Top Command Bar: Title, Status Badges, Separate Pagu & Realisasi Buttons -->' +
       '<div class="treasury-header">' +
       '<div class="treasury-title-group">' +
       '<h2 class="treasury-title">Dasbor Penyerapan Anggaran &amp; Kas Negara</h2>' +
@@ -4060,108 +4073,97 @@
       '</div>' +
       '</div>' +
 
-      '<!-- 4-Card Executive Metric Grid (Ground-Up, Distinct Layout) -->' +
-      '<div class="treasury-kpi-grid">' +
-      '<!-- Card 1: Total Alokasi Pagu DIPA -->' +
-      '<div class="treasury-kpi-card">' +
+      '<!-- Unified APBN Executive Ledger Panel (Single Card, Hairline Dividers) -->' +
+      '<div class="treasury-ledger-shell">' +
+      '<div class="treasury-ledger-top">' +
+
+      '<div class="treasury-ledger-cell">' +
       '<div class="treasury-kpi-label">Total Alokasi Pagu DIPA</div>' +
-      '<div class="treasury-kpi-val">' + _rupiah(d.paguTotal) + '</div>' +
+      '<div class="treasury-kpi-val">' + _rupiah(paguTotal) + '</div>' +
       '<div class="treasury-ledger-list">' +
       '<div class="treasury-ledger-item">' +
-      '<span class="ledger-dot"></span>' +
-      '<span class="ledger-label">DIPA Induk (Reguler):</span>' +
-      '<span class="ledger-value">' + _rupiah(d.paguReguler) + '</span>' +
+      '<span class="ledger-swatch"></span>' +
+      '<span class="ledger-label">DIPA Reguler:</span>' +
+      '<span class="ledger-value">' + _rupiah(paguReguler) + '</span>' +
       '</div>' +
       '<div class="treasury-ledger-item">' +
-      '<span class="ledger-dot ledger-dot-soft"></span>' +
-      '<span class="ledger-label">Belanja Tambahan (ABT):</span>' +
-      '<span class="ledger-value">' + _rupiah(d.paguABT) + '</span>' +
+      '<span class="ledger-swatch ledger-swatch-soft"></span>' +
+      '<span class="ledger-label">Tambahan (ABT):</span>' +
+      '<span class="ledger-value">' + _rupiah(paguABT) + '</span>' +
       '</div>' +
       '</div>' +
       '</div>' +
 
-      '<!-- Card 2: Realisasi Kas SP2D -->' +
-      '<div class="treasury-kpi-card">' +
+      '<div class="treasury-ledger-cell">' +
       '<div class="treasury-kpi-label">Realisasi Kas Negara (SP2D)</div>' +
       '<div class="treasury-pct-row">' +
-      '<span class="treasury-pct text-emerald">' + (d.pctSerapanNasional !== undefined ? d.pctSerapanNasional : (d.pctSP2D || 0)) + '%</span>' +
-      '<span class="treasury-nominal">' + _rupiah(d.realisasiSP2D) + '</span>' +
+      '<span class="treasury-pct text-emerald">' + rawPctSP2D + '%</span>' +
+      '<span class="treasury-nominal">' + _rupiah(realSP2D) + '</span>' +
       '</div>' +
       '<div class="treasury-progress-track">' +
       '<div class="treasury-progress-bar" style="width:' + progSP2D + '%;"></div>' +
       '</div>' +
       '<div class="treasury-card-foot">' +
       '<span>Sisa Pagu Kas:</span>' +
-      '<span class="treasury-foot-val ' + (d.sisaSP2D < 0 ? 'text-crit' : 'text-emerald') + '">' + _rupiah(d.sisaSP2D) + '</span>' +
+      '<span class="treasury-foot-val ' + (sisaSP2D < 0 ? 'text-crit' : 'text-emerald') + '">' + _rupiah(sisaSP2D) + '</span>' +
       '</div>' +
       '</div>' +
 
-      '<!-- Card 3: Capaian Komitmen Akrual -->' +
-      '<div class="treasury-kpi-card">' +
+      '<div class="treasury-ledger-cell">' +
       '<div class="treasury-kpi-label">Capaian Komitmen Fisik (Akrual)</div>' +
       '<div class="treasury-pct-row">' +
-      '<span class="treasury-pct text-emerald" style="opacity:0.85;">' + (d.pctAkrual || 0) + '%</span>' +
-      '<span class="treasury-nominal">' + _rupiah(d.realisasiAkrual) + '</span>' +
+      '<span class="treasury-pct text-emerald" style="opacity:0.85;">' + rawPctAkrual + '%</span>' +
+      '<span class="treasury-nominal">' + _rupiah(realAkrual) + '</span>' +
       '</div>' +
       '<div class="treasury-progress-track">' +
       '<div class="treasury-progress-bar treasury-bar-soft" style="width:' + progAkrual + '%;"></div>' +
       '</div>' +
       '<div class="treasury-card-foot">' +
-      '<span>Sisa Komitmen Fisik:</span>' +
-      '<span class="treasury-foot-val">' + _rupiah(d.sisaAkrual) + '</span>' +
+      '<span>Sisa Komitmen:</span>' +
+      '<span class="treasury-foot-val">' + _rupiah(sisaAkrual) + '</span>' +
       '</div>' +
       '</div>' +
 
-      '<!-- Card 4: Kesiapan Fiskal & Likuiditas -->' +
-      '<div class="treasury-kpi-card">' +
-      '<div class="treasury-kpi-label">Status Likuiditas &amp; Fiskal</div>' +
-      '<div class="treasury-status-badge ' + (d.sisaSP2D < 0 ? 'status-deficit' : 'status-safe') + '">' +
-      '<span class="status-indicator-dot"></span>' +
-      '<span>' + (d.sisaSP2D < 0 ? 'Pagu Defisit' : 'Likuiditas Kas Aman') + '</span>' +
+      '<div class="treasury-ledger-cell">' +
+      '<div class="treasury-kpi-label">Status Likuiditas &amp; Selisih Kas</div>' +
+      '<div class="treasury-kpi-val ' + statusCls + '" style="font-size:1.05rem;">' + statusText + '</div>' +
+      '<div class="treasury-ledger-list">' +
+      '<div class="treasury-ledger-item">' +
+      '<span class="ledger-label">Selisih vs Komitmen:</span>' +
+      '<span class="ledger-value">' + _rupiah(selisih) + '</span>' +
       '</div>' +
-      '<div class="treasury-delta-box">' +
-      '<div class="delta-header">Selisih Kas vs Komitmen:</div>' +
-      '<div class="delta-value">' + _rupiah(selisih) + '</div>' +
-      '<div class="delta-desc">' + (isKasLebihBesar ? 'Kas KPPN mendahului akrual' : 'Akrual fisik mendahului kas') + '</div>' +
+      '<div class="treasury-ledger-item">' +
+      '<span class="ledger-label" style="font-size:0.72rem;">' + (isKasLebihBesar ? 'Kas KPPN mendahului akrual' : 'Akrual fisik mendahului kas') + '</span>' +
       '</div>' +
       '</div>' +
       '</div>' +
 
-      '<!-- Skema Komparasi DIPA Induk vs Belanja Tambahan (ABT) -->' +
-      '<div class="treasury-schema-row">' +
-      '<div class="schema-card">' +
-      '<div class="schema-card-head">' +
-      '<span class="schema-badge">DIPA Induk (Reguler)</span>' +
+      '</div>' +
+
+      '<div class="treasury-ledger-split">' +
+      '<div class="treasury-ledger-sub">' +
+      '<div style="display:flex; align-items:center; gap:8px;">' +
+      '<span class="schema-badge">DIPA Reguler</span>' +
       '<span class="schema-stat">Serapan: <strong>' + (d.pctSP2D_Reguler || 0) + '%</strong></span>' +
       '</div>' +
-      '<div class="schema-metrics">' +
-      '<div class="schema-col">' +
-      '<span class="schema-lbl">Realisasi SP2D</span>' +
-      '<span class="schema-val">' + _rupiah(d.realisasiSP2D_Reguler || 0) + '</span>' +
-      '</div>' +
-      '<div class="schema-col">' +
-      '<span class="schema-lbl">Sisa Pagu Kas</span>' +
-      '<span class="schema-val">' + _rupiah(d.sisaSP2D_Reguler || 0) + '</span>' +
-      '</div>' +
+      '<div class="treasury-ledger-sub-stats">' +
+      '<div class="schema-col"><span class="schema-lbl">Realisasi SP2D</span><span class="schema-val">' + _rupiah(d.realisasiSP2D_Reguler || 0) + '</span></div>' +
+      '<div class="schema-col"><span class="schema-lbl">Sisa Pagu Kas</span><span class="schema-val">' + _rupiah(d.sisaSP2D_Reguler || 0) + '</span></div>' +
       '</div>' +
       '</div>' +
 
-      '<div class="schema-card">' +
-      '<div class="schema-card-head">' +
+      '<div class="treasury-ledger-sub">' +
+      '<div style="display:flex; align-items:center; gap:8px;">' +
       '<span class="schema-badge schema-badge-abt">Belanja Tambahan (ABT)</span>' +
       '<span class="schema-stat">Serapan: <strong>' + (d.pctSP2D_ABT || 0) + '%</strong></span>' +
       '</div>' +
-      '<div class="schema-metrics">' +
-      '<div class="schema-col">' +
-      '<span class="schema-lbl">Realisasi SP2D</span>' +
-      '<span class="schema-val">' + _rupiah(d.realisasiSP2D_ABT || 0) + '</span>' +
-      '</div>' +
-      '<div class="schema-col">' +
-      '<span class="schema-lbl">Sisa Pagu ABT</span>' +
-      '<span class="schema-val">' + _rupiah(d.sisaSP2D_ABT || 0) + '</span>' +
+      '<div class="treasury-ledger-sub-stats">' +
+      '<div class="schema-col"><span class="schema-lbl">Realisasi SP2D</span><span class="schema-val">' + _rupiah(d.realisasiSP2D_ABT || 0) + '</span></div>' +
+      '<div class="schema-col"><span class="schema-lbl">Sisa Pagu ABT</span><span class="schema-val">' + _rupiah(d.sisaSP2D_ABT || 0) + '</span></div>' +
       '</div>' +
       '</div>' +
       '</div>' +
+
       '</div>' +
       '</div>';
 
@@ -6848,8 +6850,11 @@
     if (!wrap) return;
 
     if (!items || items.length === 0) {
-      wrap.innerHTML = '<div style="padding:32px; text-align:center; color:var(--n-text-muted); font-size:.875rem;">' +
-        'Tidak ada data paket pekerjaan yang sesuai filter.</div>';
+      wrap.innerHTML = '<div style="padding:36px 20px; text-align:center; color:var(--n-text-muted); font-size:.875rem;">' +
+        '<div style="font-weight:700; color:var(--n-text-primary); margin-bottom:4px;">Belum ada paket pekerjaan tercatat</div>' +
+        '<div style="margin-bottom:14px;">Catat progres paket pengadaan baru untuk memantau tahapan persiapan hingga BAST.</div>' +
+        '<button type="button" class="btn-primary ctl-md" onclick="_tuOpenPaketModal()">+ Catat Progres Paket</button>' +
+        '</div>';
       return;
     }
 
@@ -7586,11 +7591,15 @@
       }
     }
 
-    // Update total unit badge di header tabel
+    // Update total unit badge di header tabel & segmen Buku/Reguler
     var elBadgeUnit = document.getElementById('bmn-badge-total-unit');
     if (elBadgeUnit) {
       elBadgeUnit.textContent = (d.totalUnit || 0) + ' unit';
     }
+    var segBukuEl = document.getElementById('bmn-seg-count-buku');
+    var segRegEl = document.getElementById('bmn-seg-count-reg');
+    if (segBukuEl) segBukuEl.textContent = d.pencatatan ? (d.pencatatan.buku.count || 0) : 0;
+    if (segRegEl) segRegEl.textContent = d.pencatatan ? (d.pencatatan.reguler.count || 0) : 0;
 
     // Update Rekapitulasi Kondisi Fisik (Filter Strip)
     var bBaik = document.getElementById('bmn-sum-badge-baik');
@@ -7700,10 +7709,10 @@
         kBadge = '<span class="badge" style="background:#FEE2E2;color:#DC2626;">Rusak Berat</span>';
       }
 
-      // Klasifikasi Badge
+      // Klasifikasi Badge (Akun Belanja Modal 53 vs Persediaan/Barang 52)
       var pBadge = a.kategoriPencatatan === 'BUKU'
-        ? '<span class="badge" style="background:var(--n-primary-light);color:var(--n-primary);font-size:.7rem;">Buku (53)</span>'
-        : '<span class="badge" style="background:#F1F5F9;color:#475569;font-size:.7rem;">Reguler (52)</span>';
+        ? '<span class="badge" style="background:var(--n-primary-light);color:var(--n-primary);font-size:.7rem;">Buku (Akun 53)</span>'
+        : '<span class="badge" style="background:#F1F5F9;color:#475569;font-size:.7rem;">Reguler (Akun 52)</span>';
 
       // Umur & Masa Manfaat
       var umurStr = a.umurTahun + ' thn ' + a.umurBulan + ' bln';

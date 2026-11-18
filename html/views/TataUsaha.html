@@ -1195,16 +1195,6 @@
             Dit. POA &amp; Awak Kapal
           </span>
         </div>
-        <div class="ctl-row">
-          <button type="button" class="btn-outline" onclick="_tuLoadPegawai(true); _tuLoadKompetensi(true);">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
-              stroke-linecap="round" stroke-linejoin="round">
-              <polyline points="23 4 23 10 17 10"></polyline>
-              <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
-            </svg>
-            <span>Muat Ulang</span>
-          </button>
-        </div>
       </div>
 
       <!-- KPI Row 7 Kartu (Sebaris, Tanpa Subtext): Total, Dit. POA, Awak Kapal, P3K Penuh, P3K Paruh Waktu, PJLP, Magang -->
@@ -1291,20 +1281,17 @@
             </div>
           </div>
 
-          <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:10px; text-align:center;">
-            <div
-              style="padding:10px 8px; border-radius:8px; border:1px solid var(--n-border-hairline); background:var(--n-card-bg);">
+          <div class="tu-peg-sub-stats">
+            <div class="tu-peg-sub-stat">
               <div style="font-size:.75rem; color:var(--n-text-muted); margin-bottom:2px;">Bukti Sertifikat</div>
               <div class="tnum" style="font-weight:700; font-size:1rem; color:var(--n-primary);"
                 id="tu-kompetensi-kpi-files">0 Berkas</div>
             </div>
-            <div
-              style="padding:10px 8px; border-radius:8px; border:1px solid var(--n-border-hairline); background:var(--n-card-bg);">
+            <div class="tu-peg-sub-stat">
               <div style="font-size:.75rem; color:var(--n-text-muted); margin-bottom:2px;">Personel Aktif</div>
-              <div class="tnum" style="font-weight:700; font-size:1rem;" id="tu-kompetensi-kpi-personel">504 Orang</div>
+              <div class="tnum" style="font-weight:700; font-size:1rem;" id="tu-kompetensi-kpi-personel">0 Orang</div>
             </div>
-            <div
-              style="padding:10px 8px; border-radius:8px; border:1px solid var(--n-border-hairline); background:var(--n-card-bg);">
+            <div class="tu-peg-sub-stat">
               <div style="font-size:.75rem; color:var(--n-text-muted); margin-bottom:2px;">Kelompok Standar</div>
               <div class="tnum" style="font-weight:700; font-size:1rem;" id="tu-kompetensi-kpi-groups">38 Jabatan</div>
             </div>
@@ -2639,23 +2626,23 @@
       <div class="content-section" style="margin-bottom:14px;" id="bmn-summary-banner-wrap">
         <div class="bmn-rekap-grid">
           <div class="bmn-rekap-chips">
-            <div class="bmn-rekap-card is-active" id="bmn-sum-card-ALL" data-kondisi="ALL" role="button" tabindex="0" onclick="_bmnFilterByKondisi('ALL')">
+            <div class="bmn-rekap-card is-active" id="bmn-sum-card-ALL" data-kondisi="ALL" role="button" tabindex="0" onclick="_bmnFilterByKondisi('ALL')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}">
               <span class="bmn-rekap-title">Semua Kondisi</span>
             </div>
 
-            <div class="bmn-rekap-card is-baik" id="bmn-sum-card-BAIK" data-kondisi="BAIK" role="button" tabindex="0" onclick="_bmnFilterByKondisi('BAIK')">
+            <div class="bmn-rekap-card is-baik" id="bmn-sum-card-BAIK" data-kondisi="BAIK" role="button" tabindex="0" onclick="_bmnFilterByKondisi('BAIK')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}">
               <span class="bmn-rekap-title">Baik</span>
               <span class="bmn-rekap-count" id="bmn-sum-count-baik">0 unit</span>
               <span class="bmn-rekap-badge badge-baik" id="bmn-sum-badge-baik">0%</span>
             </div>
 
-            <div class="bmn-rekap-card is-rr" id="bmn-sum-card-RUSAK_RINGAN" data-kondisi="RUSAK_RINGAN" role="button" tabindex="0" onclick="_bmnFilterByKondisi('RUSAK_RINGAN')">
+            <div class="bmn-rekap-card is-rr" id="bmn-sum-card-RUSAK_RINGAN" data-kondisi="RUSAK_RINGAN" role="button" tabindex="0" onclick="_bmnFilterByKondisi('RUSAK_RINGAN')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}">
               <span class="bmn-rekap-title">Rusak Ringan</span>
               <span class="bmn-rekap-count" id="bmn-sum-count-rr">0 unit</span>
               <span class="bmn-rekap-badge badge-rr" id="bmn-sum-badge-rr">0%</span>
             </div>
 
-            <div class="bmn-rekap-card is-rb" id="bmn-sum-card-RUSAK_BERAT" data-kondisi="RUSAK_BERAT" role="button" tabindex="0" onclick="_bmnFilterByKondisi('RUSAK_BERAT')">
+            <div class="bmn-rekap-card is-rb" id="bmn-sum-card-RUSAK_BERAT" data-kondisi="RUSAK_BERAT" role="button" tabindex="0" onclick="_bmnFilterByKondisi('RUSAK_BERAT')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}">
               <span class="bmn-rekap-title">Rusak Berat</span>
               <span class="bmn-rekap-count" id="bmn-sum-count-rb">0 unit</span>
               <span class="bmn-rekap-badge badge-rb" id="bmn-sum-badge-rb">0%</span>
@@ -2690,14 +2677,15 @@
                 <button type="button" class="bmn-seg-btn active" data-bmn-pencatatan="ALL"
                   onclick="_bmnSetPencatatan('ALL')">Semua Aset</button>
                 <button type="button" class="bmn-seg-btn" data-bmn-pencatatan="BUKU"
-                  onclick="_bmnSetPencatatan('BUKU')">Buku (53)</button>
+                  onclick="_bmnSetPencatatan('BUKU')">Buku (<span id="bmn-seg-count-buku">0</span>)</button>
                 <button type="button" class="bmn-seg-btn" data-bmn-pencatatan="REGULER"
-                  onclick="_bmnSetPencatatan('REGULER')">Reguler (52)</button>
+                  onclick="_bmnSetPencatatan('REGULER')">Reguler (<span id="bmn-seg-count-reg">0</span>)</button>
               </div>
             </div>
 
             <!-- Filter Dropdowns & Live Search -->
             <div class="table-toolbar-right">
+              <input type="hidden" id="bmn-filter-kondisi" value="ALL">
               <div class="ctl-search">
                 <svg class="ctl-search-ico" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                   stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
@@ -2707,13 +2695,6 @@
                 <input type="text" id="bmn-search-input" placeholder="Cari kode, NUP, nama..."
                   oninput="_bmnDebouncedSearch()">
               </div>
-
-              <select id="bmn-filter-kondisi" class="ctl-select" onchange="_bmnFilterChange()">
-                <option value="ALL">Semua Kondisi</option>
-                <option value="BAIK">Baik</option>
-                <option value="RUSAK_RINGAN">Rusak Ringan</option>
-                <option value="RUSAK_BERAT">Rusak Berat</option>
-              </select>
 
               <select id="bmn-filter-upt" class="ctl-select" onchange="_bmnFilterChange()" style="max-width:180px;">
                 <option value="ALL">Semua Lokasi UPT</option>
