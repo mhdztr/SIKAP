@@ -7209,18 +7209,24 @@
       '<div style="width:' + pct + '%;height:100%;background:var(--n-primary);border-radius:999px;"></div>' +
       '</div></div>';
 
-    var badges = '<span class="badge">' + _esc(it.tahap || '—') + '</span>' +
-      '<span class="status-badge ' + (it.status === 'VOID' ? 'dianulir' : 'aktif') + '">' + _esc(it.status || 'ACTIVE') + '</span>';
+    var tahapBadgeCls = it.tahap === 'SELESAI' ? 'badge badge-success' : (it.tahap === 'PELAKSANAAN' || it.tahap === 'BAST' ? 'badge badge-warning' : 'badge badge-neutral');
+    var badges = '<span class="' + tahapBadgeCls + '">' + _esc(it.tahap || '—') + '</span>' +
+      '<span class="badge ' + (it.status === 'VOID' ? 'badge-critical' : 'badge-success') + '">' + _esc(it.status || 'ACTIVE') + '</span>';
 
     var canWrite = APP.user && (APP.user.role === 'ADMIN_POA' || APP.user.role === 'SUPERADMIN' || APP.user.divisiId === 'DIV-TU');
     var canVoid = APP.user && (APP.user.role === 'ADMIN_POA' || APP.user.role === 'SUPERADMIN' || (APP.user.role === 'PENGINPUT' && APP.user.divisiId === 'DIV-TU'));
     var rowEsc = _esc(it.rowId).replace(/'/g, "\\'");
     var actHtml = '';
-    if (it.evidenceUrl) {
-      actHtml += '<a href="' + _esc(it.evidenceUrl) + '" target="_blank" rel="noopener noreferrer" class="btn-outline" style="text-decoration:none;">Buka Dokumen</a>';
-    }
     if (it.status !== 'VOID' && canVoid) {
       actHtml += '<button type="button" class="btn-danger" onclick="_hdClose(); _tuAnulirPaket(\'' + rowEsc + '\')">Anulir</button>';
+    }
+    if (it.evidenceUrl) {
+      actHtml += '<a href="' + _esc(it.evidenceUrl) + '" target="_blank" rel="noopener noreferrer" class="btn-outline" style="text-decoration:none;">' +
+        '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+        '<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>' +
+        '<polyline points="15 3 21 3 21 9"></polyline>' +
+        '<line x1="10" y1="14" x2="21" y2="3"></line>' +
+        '</svg>Buka Dokumen</a>';
     }
     if (it.status !== 'VOID' && canWrite) {
       actHtml += '<button type="button" class="btn-primary" onclick="_hdClose(); _tuOpenPaketModal(\'' + rowEsc + '\')">Update Progres</button>';

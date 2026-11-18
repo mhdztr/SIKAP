@@ -231,6 +231,8 @@ a[role="button"]:active,
 .btn-primary:active,
 .btn-outline:active,
 .btn-ghost:active,
+.btn-danger:active,
+.btn-danger-solid:active,
 .btn-mini:active,
 .tu-subnav-btn:active,
 .nav-item:active {
@@ -717,6 +719,7 @@ select.n-input {
 .ctl-lg .btn-primary,
 .ctl-lg .btn-outline,
 .ctl-lg .btn-ghost,
+.ctl-lg .btn-danger,
 .ctl-lg .btn-danger-solid,
 .ctl-lg input,
 .ctl-lg select,
@@ -732,6 +735,7 @@ select.n-input {
 .btn-primary,
 .btn-outline,
 .btn-ghost,
+.btn-danger,
 .btn-danger-solid,
 .ctl-row select,
 .ctl-row input {
@@ -745,6 +749,7 @@ select.n-input {
   justify-content: center;
   gap: 7px;
   white-space: nowrap;
+  cursor: pointer;
   transition: all 0.14s var(--ease-out);
 }
 
@@ -754,7 +759,8 @@ select.n-input {
 .btn-sm,
 .n-table .btn-mini,
 .n-table .btn-outline,
-.n-table .btn-ghost {
+.n-table .btn-ghost,
+.n-table .btn-danger {
   height: var(--ctl-h-sm) !important;
   padding: 0 var(--ctl-px-sm) !important;
   font-size: var(--ctl-fs-sm) !important;
@@ -796,6 +802,19 @@ select.n-input {
 .btn-ghost:hover {
   background: rgba(15, 23, 42, 0.05);
   color: var(--n-text-primary);
+}
+
+.btn-danger {
+  background: #FFF1F2;
+  color: #BE123C;
+  border: 1px solid rgba(225, 29, 72, 0.28);
+  box-shadow: 0 1px 2px rgba(225, 29, 72, 0.06);
+}
+
+.btn-danger:hover {
+  background: #FFE4E6;
+  border-color: rgba(225, 29, 72, 0.48);
+  color: #9F1239;
 }
 
 .btn-danger-solid {
@@ -2858,7 +2877,31 @@ select.n-input {
   align-items: center;
   flex-wrap: wrap;
   gap: 6px;
-  margin-top: 6px;
+  margin-top: 8px;
+}
+
+.hd-badges .badge:not([class*="badge-"]),
+.hd-badges .status-badge:not([class*="status-"]) {
+  background: var(--n-canvas-subtle);
+  color: var(--n-text-secondary);
+  border: 1px solid var(--n-border);
+}
+
+.n-modal-hd-scroll .n-table td {
+  padding-top: 9px;
+  padding-bottom: 9px;
+}
+
+.n-modal-hd .modal-foot-bar {
+  margin-top: 12px;
+  padding-top: 14px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+#hd-actions > .btn-danger:first-of-type,
+#hd-actions > .btn-danger-solid:first-of-type {
+  margin-right: auto;
 }
 
 .hd-k {
