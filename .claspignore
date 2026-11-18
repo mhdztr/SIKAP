@@ -10,12 +10,16 @@
 # (Pernah ter-push duluan dan bikin duplikat function di GAS editor → merah.)
 test.js
 test_pure.js
+tests/**
+*.test.js
 fix.py
 hotfix.py
 lint_ui.js
 # Data geospasial besar — di-fetch dari GitHub oleh frontend, bukan di-host GAS
 *.geojson
+.agent/**
 .agents/**
 .impeccable/
 .codex/
+skills/**
 skills-lock.json
