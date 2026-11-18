@@ -143,8 +143,8 @@ FASE PENGEMBANGAN SIKAP
     - Penghapusan dropdown Golongan PNS & P3K; pemilih tanggal wajib kalender (anti-ketik manual); penambahan input opsional Ukuran Baju, Ukuran Sepatu, dan Status Penempatan.
 - **Deliverables & Checklist:**
   - [x] Seluruh dokumen `.md` acuan SIKAP & NAKHODA tersinkronisasi.
-  - [ ] Banner notifikasi disparitas data Nakhoda aktif dan teruji saat push sync berlangsung.
-  - [ ] Aturan kondisional NIP (ASN wajib vs PJLP non-wajib), Calendar Picker, dan `node lint_ui.js` lolos 100% (`0 errors`).
+  - [x] Banner notifikasi disparitas data Nakhoda aktif dan teruji saat push sync berlangsung.
+  - [x] Aturan kondisional NIP (ASN wajib vs PJLP non-wajib), Calendar Picker, dan `node lint_ui.js` lolos 100% (`0 errors`).
 
 ---
 

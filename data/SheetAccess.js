@@ -907,7 +907,7 @@ function sanitizeNamaPersonel(rawNama) {
   if (!rawNama || typeof rawNama !== 'string') return '';
   var s = String(rawNama).toUpperCase().trim();
 
-  for (var i = 0; i < 3; i++) {
+  for (var i = 0; i < 5; i++) {
     s = s.replace(/^(?:CAPT|PROF|DR|DRS|DRA|IR|HJ|H)(?:\.|\s+)+(?=[A-Z])/i, '');
   }
 
