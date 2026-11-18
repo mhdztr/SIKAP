@@ -6,31 +6,112 @@
     2. Pengguna             — SUPERADMIN: ubah role/divisi/status, nonaktifkan, reset password
     3. Audit Log            — SUPERADMIN: baca jejak audit (admin_getAuditLog)
     4. Pengingat Mingguan    — SUPERADMIN: trigger Jumat 16:00 + kirim manual
-  Tab 2-4 disembunyikan client bila bukan SUPERADMIN (server tetap menolak).
+  Tab 2-4 disembunyikan client bila bukan SUPERADMIN (server menolak).
 -->
 <div id="view-tpl-kelola-akun" hidden>
 
   <div class="n-tabs" id="adn-tabs" style="margin-bottom:20px">
-    <button type="button" class="n-tab active" data-tab="persetujuan" onclick="_adnSwitch('persetujuan')">Persetujuan Registrasi</button>
-    <button type="button" class="n-tab" data-tab="pengguna" id="adn-tab-pengguna" onclick="_adnSwitch('pengguna')" hidden>Pengguna</button>
-    <button type="button" class="n-tab" data-tab="audit" id="adn-tab-audit" onclick="_adnSwitch('audit')" hidden>Audit Log</button>
-    <button type="button" class="n-tab" data-tab="reminder" id="adn-tab-reminder" onclick="_adnSwitch('reminder')" hidden>Pengingat Mingguan</button>
+    <button type="button" class="n-tab active" data-tab="persetujuan" onclick="_adnSwitch('persetujuan')">Persetujuan
+      Registrasi</button>
+    <button type="button" class="n-tab" data-tab="pengguna" id="adn-tab-pengguna" onclick="_adnSwitch('pengguna')"
+      hidden>Pengguna</button>
+    <button type="button" class="n-tab" data-tab="audit" id="adn-tab-audit" onclick="_adnSwitch('audit')" hidden>Audit
+      Log</button>
+    <button type="button" class="n-tab" data-tab="reminder" id="adn-tab-reminder" onclick="_adnSwitch('reminder')"
+      hidden>Pengingat Mingguan</button>
   </div>
 
   <!-- TAB 1 — PERSETUJUAN (wrap 'ka' didaftarkan di APPROVAL_WRAPS) -->
   <div id="adn-panel-persetujuan">
     <div class="content-section">
-      <div class="content-section-hd">Antrean Persetujuan</div>
+      <div class="content-section-hd hd-row">
+        <div>Antrean Persetujuan</div>
+        <div class="ctl-row">
+          <div class="ctl-search">
+            <svg class="ctl-search-ico" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input type="text" id="ka-approval-search" placeholder="Cari nama, email, unit kerja..." oninput="_adnFilterApprovals()">
+          </div>
+        </div>
+      </div>
       <div id="ka-approval-msg" class="n-msg"></div>
       <div class="n-card" style="padding:0;overflow-x:auto">
         <div id="ka-approval-table-wrap">
           <div class="n-table-wrap">
             <table class="table-skeleton n-table n-table-full">
-              <thead><tr><th><div class="sk-bar sk-bar-xs sk-w-70"></div></th><th><div class="sk-bar sk-bar-xs sk-w-70"></div></th><th><div class="sk-bar sk-bar-xs sk-w-70"></div></th><th><div class="sk-bar sk-bar-xs sk-w-70"></div></th><th><div class="sk-bar sk-bar-xs sk-w-70"></div></th></tr></thead>
+              <thead>
+                <tr>
+                  <th>
+                    <div class="sk-bar sk-bar-xs sk-w-70"></div>
+                  </th>
+                  <th>
+                    <div class="sk-bar sk-bar-xs sk-w-70"></div>
+                  </th>
+                  <th>
+                    <div class="sk-bar sk-bar-xs sk-w-70"></div>
+                  </th>
+                  <th>
+                    <div class="sk-bar sk-bar-xs sk-w-70"></div>
+                  </th>
+                  <th>
+                    <div class="sk-bar sk-bar-xs sk-w-70"></div>
+                  </th>
+                </tr>
+              </thead>
               <tbody>
-                <tr><td><div class="sk-bar sk-bar-sm sk-w-85"></div></td><td><div class="sk-bar sk-bar-sm sk-w-100"></div></td><td><div class="sk-bar sk-bar-sm sk-w-70"></div></td><td><div class="sk-bar sk-bar-sm sk-w-70"></div></td><td><div class="sk-bar sk-bar-sm sk-w-50"></div></td></tr>
-                <tr><td><div class="sk-bar sk-bar-sm sk-w-85"></div></td><td><div class="sk-bar sk-bar-sm sk-w-100"></div></td><td><div class="sk-bar sk-bar-sm sk-w-70"></div></td><td><div class="sk-bar sk-bar-sm sk-w-70"></div></td><td><div class="sk-bar sk-bar-sm sk-w-50"></div></td></tr>
-                <tr><td><div class="sk-bar sk-bar-sm sk-w-85"></div></td><td><div class="sk-bar sk-bar-sm sk-w-100"></div></td><td><div class="sk-bar sk-bar-sm sk-w-70"></div></td><td><div class="sk-bar sk-bar-sm sk-w-70"></div></td><td><div class="sk-bar sk-bar-sm sk-w-50"></div></td></tr>
+                <tr>
+                  <td>
+                    <div class="sk-bar sk-bar-sm sk-w-85"></div>
+                  </td>
+                  <td>
+                    <div class="sk-bar sk-bar-sm sk-w-100"></div>
+                  </td>
+                  <td>
+                    <div class="sk-bar sk-bar-sm sk-w-70"></div>
+                  </td>
+                  <td>
+                    <div class="sk-bar sk-bar-sm sk-w-70"></div>
+                  </td>
+                  <td>
+                    <div class="sk-bar sk-bar-sm sk-w-50"></div>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <div class="sk-bar sk-bar-sm sk-w-85"></div>
+                  </td>
+                  <td>
+                    <div class="sk-bar sk-bar-sm sk-w-100"></div>
+                  </td>
+                  <td>
+                    <div class="sk-bar sk-bar-sm sk-w-70"></div>
+                  </td>
+                  <td>
+                    <div class="sk-bar sk-bar-sm sk-w-70"></div>
+                  </td>
+                  <td>
+                    <div class="sk-bar sk-bar-sm sk-w-50"></div>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <div class="sk-bar sk-bar-sm sk-w-85"></div>
+                  </td>
+                  <td>
+                    <div class="sk-bar sk-bar-sm sk-w-100"></div>
+                  </td>
+                  <td>
+                    <div class="sk-bar sk-bar-sm sk-w-70"></div>
+                  </td>
+                  <td>
+                    <div class="sk-bar sk-bar-sm sk-w-70"></div>
+                  </td>
+                  <td>
+                    <div class="sk-bar sk-bar-sm sk-w-50"></div>
+                  </td>
+                </tr>
               </tbody>
             </table>
           </div>
@@ -44,6 +125,21 @@
     <div class="content-section">
       <div class="content-section-hd hd-row">
         <div>Manajemen Pengguna</div>
+        <div class="ctl-row">
+          <div class="ctl-search">
+            <svg class="ctl-search-ico" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input type="text" id="adn-users-search" placeholder="Cari nama, NIP, email, unit..." oninput="_adnRenderUsers()">
+          </div>
+          <select id="adn-users-filter-status" class="ctl-select" onchange="_adnRenderUsers()">
+            <option value="ALL">Semua Status</option>
+            <option value="AKTIF">Aktif</option>
+            <option value="NONAKTIF">Nonaktif</option>
+            <option value="PENDING">Pending</option>
+          </select>
+        </div>
       </div>
       <div class="n-info-static" style="margin-bottom:16px">
         Perubahan role, divisi, dan status akun dicatat di Audit Log. Menonaktifkan akun
@@ -55,11 +151,89 @@
         <div id="adn-users-wrap">
           <div class="n-table-wrap">
             <table class="table-skeleton n-table n-table-full">
-              <thead><tr><th><div class="sk-bar sk-bar-xs sk-w-70"></div></th><th><div class="sk-bar sk-bar-xs sk-w-70"></div></th><th><div class="sk-bar sk-bar-xs sk-w-70"></div></th><th><div class="sk-bar sk-bar-xs sk-w-70"></div></th><th><div class="sk-bar sk-bar-xs sk-w-70"></div></th><th><div class="sk-bar sk-bar-xs sk-w-70"></div></th></tr></thead>
+              <thead>
+                <tr>
+                  <th>
+                    <div class="sk-bar sk-bar-xs sk-w-70"></div>
+                  </th>
+                  <th>
+                    <div class="sk-bar sk-bar-xs sk-w-70"></div>
+                  </th>
+                  <th>
+                    <div class="sk-bar sk-bar-xs sk-w-70"></div>
+                  </th>
+                  <th>
+                    <div class="sk-bar sk-bar-xs sk-w-70"></div>
+                  </th>
+                  <th>
+                    <div class="sk-bar sk-bar-xs sk-w-70"></div>
+                  </th>
+                  <th>
+                    <div class="sk-bar sk-bar-xs sk-w-70"></div>
+                  </th>
+                </tr>
+              </thead>
               <tbody>
-                <tr><td><div class="sk-bar sk-bar-sm sk-w-85"></div></td><td><div class="sk-bar sk-bar-sm sk-w-100"></div></td><td><div class="sk-bar sk-bar-sm sk-w-70"></div></td><td><div class="sk-bar sk-bar-sm sk-w-70"></div></td><td><div class="sk-bar sk-bar-sm sk-w-50"></div></td><td><div class="sk-bar sk-bar-sm sk-w-50"></div></td></tr>
-                <tr><td><div class="sk-bar sk-bar-sm sk-w-85"></div></td><td><div class="sk-bar sk-bar-sm sk-w-100"></div></td><td><div class="sk-bar sk-bar-sm sk-w-70"></div></td><td><div class="sk-bar sk-bar-sm sk-w-70"></div></td><td><div class="sk-bar sk-bar-sm sk-w-50"></div></td><td><div class="sk-bar sk-bar-sm sk-w-50"></div></td></tr>
-                <tr><td><div class="sk-bar sk-bar-sm sk-w-85"></div></td><td><div class="sk-bar sk-bar-sm sk-w-100"></div></td><td><div class="sk-bar sk-bar-sm sk-w-70"></div></td><td><div class="sk-bar sk-bar-sm sk-w-70"></div></td><td><div class="sk-bar sk-bar-sm sk-w-50"></div></td><td><div class="sk-bar sk-bar-sm sk-w-50"></div></td></tr>
+                <tr>
+                  <td>
+                    <div class="sk-bar sk-bar-sm sk-w-85"></div>
+                  </td>
+                  <td>
+                    <div class="sk-bar sk-bar-sm sk-w-100"></div>
+                  </td>
+                  <td>
+                    <div class="sk-bar sk-bar-sm sk-w-70"></div>
+                  </td>
+                  <td>
+                    <div class="sk-bar sk-bar-sm sk-w-70"></div>
+                  </td>
+                  <td>
+                    <div class="sk-bar sk-bar-sm sk-w-50"></div>
+                  </td>
+                  <td>
+                    <div class="sk-bar sk-bar-sm sk-w-50"></div>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <div class="sk-bar sk-bar-sm sk-w-85"></div>
+                  </td>
+                  <td>
+                    <div class="sk-bar sk-bar-sm sk-w-100"></div>
+                  </td>
+                  <td>
+                    <div class="sk-bar sk-bar-sm sk-w-70"></div>
+                  </td>
+                  <td>
+                    <div class="sk-bar sk-bar-sm sk-w-70"></div>
+                  </td>
+                  <td>
+                    <div class="sk-bar sk-bar-sm sk-w-50"></div>
+                  </td>
+                  <td>
+                    <div class="sk-bar sk-bar-sm sk-w-50"></div>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <div class="sk-bar sk-bar-sm sk-w-85"></div>
+                  </td>
+                  <td>
+                    <div class="sk-bar sk-bar-sm sk-w-100"></div>
+                  </td>
+                  <td>
+                    <div class="sk-bar sk-bar-sm sk-w-70"></div>
+                  </td>
+                  <td>
+                    <div class="sk-bar sk-bar-sm sk-w-70"></div>
+                  </td>
+                  <td>
+                    <div class="sk-bar sk-bar-sm sk-w-50"></div>
+                  </td>
+                  <td>
+                    <div class="sk-bar sk-bar-sm sk-w-50"></div>
+                  </td>
+                </tr>
               </tbody>
             </table>
           </div>
@@ -73,18 +247,93 @@
     <div class="content-section">
       <div class="content-section-hd hd-row">
         <div>Jejak Audit</div>
-        <button class="btn-mini btn-ghost" onclick="_adnReloadAudit()">Muat Ulang</button>
+        <div class="ctl-row">
+          <div class="ctl-search">
+            <svg class="ctl-search-ico" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input type="text" id="adn-audit-search" placeholder="Cari pelaku, aksi, target, alasan..." oninput="_adnRenderAudit()">
+          </div>
+          <button type="button" class="btn-outline ctl-md" onclick="_adnReloadAudit()">Muat Ulang</button>
+        </div>
       </div>
       <div id="adn-audit-msg" class="n-msg"></div>
       <div class="n-card" style="padding:0;overflow-x:auto">
         <div id="adn-audit-wrap">
           <div class="n-table-wrap">
             <table class="table-skeleton n-table n-table-full">
-              <thead><tr><th><div class="sk-bar sk-bar-xs sk-w-70"></div></th><th><div class="sk-bar sk-bar-xs sk-w-70"></div></th><th><div class="sk-bar sk-bar-xs sk-w-70"></div></th><th><div class="sk-bar sk-bar-xs sk-w-70"></div></th><th><div class="sk-bar sk-bar-xs sk-w-70"></div></th></tr></thead>
+              <thead>
+                <tr>
+                  <th>
+                    <div class="sk-bar sk-bar-xs sk-w-70"></div>
+                  </th>
+                  <th>
+                    <div class="sk-bar sk-bar-xs sk-w-70"></div>
+                  </th>
+                  <th>
+                    <div class="sk-bar sk-bar-xs sk-w-70"></div>
+                  </th>
+                  <th>
+                    <div class="sk-bar sk-bar-xs sk-w-70"></div>
+                  </th>
+                  <th>
+                    <div class="sk-bar sk-bar-xs sk-w-70"></div>
+                  </th>
+                </tr>
+              </thead>
               <tbody>
-                <tr><td><div class="sk-bar sk-bar-sm sk-w-85"></div></td><td><div class="sk-bar sk-bar-sm sk-w-100"></div></td><td><div class="sk-bar sk-bar-sm sk-w-70"></div></td><td><div class="sk-bar sk-bar-sm sk-w-70"></div></td><td><div class="sk-bar sk-bar-sm sk-w-50"></div></td></tr>
-                <tr><td><div class="sk-bar sk-bar-sm sk-w-85"></div></td><td><div class="sk-bar sk-bar-sm sk-w-100"></div></td><td><div class="sk-bar sk-bar-sm sk-w-70"></div></td><td><div class="sk-bar sk-bar-sm sk-w-70"></div></td><td><div class="sk-bar sk-bar-sm sk-w-50"></div></td></tr>
-                <tr><td><div class="sk-bar sk-bar-sm sk-w-85"></div></td><td><div class="sk-bar sk-bar-sm sk-w-100"></div></td><td><div class="sk-bar sk-bar-sm sk-w-70"></div></td><td><div class="sk-bar sk-bar-sm sk-w-70"></div></td><td><div class="sk-bar sk-bar-sm sk-w-50"></div></td></tr>
+                <tr>
+                  <td>
+                    <div class="sk-bar sk-bar-sm sk-w-85"></div>
+                  </td>
+                  <td>
+                    <div class="sk-bar sk-bar-sm sk-w-100"></div>
+                  </td>
+                  <td>
+                    <div class="sk-bar sk-bar-sm sk-w-70"></div>
+                  </td>
+                  <td>
+                    <div class="sk-bar sk-bar-sm sk-w-70"></div>
+                  </td>
+                  <td>
+                    <div class="sk-bar sk-bar-sm sk-w-50"></div>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <div class="sk-bar sk-bar-sm sk-w-85"></div>
+                  </td>
+                  <td>
+                    <div class="sk-bar sk-bar-sm sk-w-100"></div>
+                  </td>
+                  <td>
+                    <div class="sk-bar sk-bar-sm sk-w-70"></div>
+                  </td>
+                  <td>
+                    <div class="sk-bar sk-bar-sm sk-w-70"></div>
+                  </td>
+                  <td>
+                    <div class="sk-bar sk-bar-sm sk-w-50"></div>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <div class="sk-bar sk-bar-sm sk-w-85"></div>
+                  </td>
+                  <td>
+                    <div class="sk-bar sk-bar-sm sk-w-100"></div>
+                  </td>
+                  <td>
+                    <div class="sk-bar sk-bar-sm sk-w-70"></div>
+                  </td>
+                  <td>
+                    <div class="sk-bar sk-bar-sm sk-w-70"></div>
+                  </td>
+                  <td>
+                    <div class="sk-bar sk-bar-sm sk-w-50"></div>
+                  </td>
+                </tr>
               </tbody>
             </table>
           </div>
@@ -107,10 +356,12 @@
         <div style="display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;">
           <div>
             <div style="font-weight:600;">Status Pengiriman Otomatis</div>
-            <div id="adn-reminder-status" style="font-size:.8125rem;color:var(--n-text-muted);margin-top:2px;">Memuat…</div>
+            <div id="adn-reminder-status" style="font-size:.8125rem;color:var(--n-text-muted);margin-top:2px;">Memuat…
+            </div>
           </div>
           <div class="ctl-row ctl-sm">
-            <button class="btn-primary" id="btn-adn-reminder-send" onclick="_adnSendReminderNow()">Kirim Sekarang</button>
+            <button class="btn-primary" id="btn-adn-reminder-send" onclick="_adnSendReminderNow()">Kirim
+              Sekarang</button>
             <button class="btn-outline" id="btn-adn-reminder-toggle" onclick="_adnToggleReminder()">Aktifkan</button>
           </div>
         </div>

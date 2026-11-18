@@ -2815,6 +2815,90 @@ select.n-input {
   line-height: 1.4;
 }
 
+/* Clickable Table Rows & Universal Record Inspector (#modal-hd) */
+.n-table tbody tr.n-row-clickable {
+  cursor: pointer;
+  transition: background 120ms ease;
+}
+
+.n-table tbody tr.n-row-clickable:hover td {
+  background: rgba(6, 78, 59, 0.045);
+}
+
+.n-table tbody tr.n-row-clickable:focus-visible {
+  outline: 2px solid var(--n-primary-accent);
+  outline-offset: -2px;
+}
+
+.n-modal-hd {
+  max-width: 700px;
+  display: flex;
+  flex-direction: column;
+  max-height: 88vh;
+}
+
+.n-modal-hd-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  padding-bottom: 14px;
+  margin-bottom: 14px;
+  border-bottom: 1px solid var(--n-border-hairline);
+}
+
+.n-modal-hd-scroll {
+  overflow-y: auto;
+  padding-right: 4px;
+  flex: 1 1 auto;
+}
+
+.hd-badges {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.hd-k {
+  width: 36%;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--n-text-muted);
+  vertical-align: top;
+}
+
+.hd-v {
+  font-size: 0.84rem;
+  font-weight: 500;
+  color: var(--n-text-primary);
+  word-break: break-word;
+}
+
+.hd-extra-card {
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--n-border-hairline);
+  background: var(--n-canvas-subtle);
+  margin-bottom: 14px;
+}
+
+.hd-json-pre {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--n-border-hairline);
+  background: #FFFFFF;
+  font-size: 0.74rem;
+  line-height: 1.45;
+  overflow-x: auto;
+  max-height: 210px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: var(--n-text-primary);
+}
+
 /* Structured Form Section Cards (Inside Wide Modals) */
 .form-section-card {
   background: var(--n-canvas-subtle);

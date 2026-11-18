@@ -561,16 +561,27 @@
 <div class="n-overlay n-hidden" id="modal-hd">
   <div class="n-modal n-modal-hd">
     <div class="n-modal-hd-head">
-      <h2 id="hd-title"></h2>
-      <button class="n-iconbtn-x" data-ico="x" title="Tutup" aria-label="Tutup" onclick="_hdClose()"></button>
+      <div>
+        <h2 id="hd-title">Detail Data</h2>
+        <div class="modal-hd-sub n-hidden" id="hd-subtitle"></div>
+        <div class="hd-badges n-hidden" id="hd-badges"></div>
+      </div>
+      <button type="button" class="btn-ghost" style="padding:4px;" title="Tutup" aria-label="Tutup" onclick="_hdClose()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
     </div>
     <div class="n-modal-hd-scroll">
+      <div id="hd-extra" class="n-hidden"></div>
       <table class="n-table"><tbody id="hd-body"></tbody></table>
-      <div class="content-section" style="margin-top:20px;">
+      <div class="content-section" id="hd-evidence-wrap" style="margin-top:18px;">
         <div class="content-section-hd hist-section-hd">Lampiran <span id="hd-evidence-manage"></span></div>
         <div id="hd-evidence"></div>
       </div>
     </div>
+    <div class="modal-foot-bar ctl-md" id="hd-actions" style="margin-top:14px;"></div>
   </div>
 </div>
 

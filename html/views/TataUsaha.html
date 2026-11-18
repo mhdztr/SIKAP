@@ -468,7 +468,18 @@
 
     <!-- ── TABEL RIWAYAT ANGGARAN ─────────────────────── -->
     <div id="tu-history-section" class="content-section">
-      <div class="content-section-hd">Riwayat Laporan Anggaran</div>
+      <div class="content-section-hd hd-row" style="gap:12px; flex-wrap:wrap;">
+        <div>Riwayat Laporan Anggaran</div>
+        <div class="ctl-row">
+          <div class="ctl-search">
+            <svg class="ctl-search-ico" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input type="text" id="tu-history-search" placeholder="Cari periode, catatan, status..." oninput="_tuFilterHistory()">
+          </div>
+        </div>
+      </div>
       <div id="tu-history-msg" class="n-msg"></div>
       <div class="n-card" style="padding:0;overflow-x:auto;" id="tu-history-wrap">
         <div class="n-table-wrap">
@@ -2436,8 +2447,15 @@
             <div style="display:flex; justify-content:space-between; align-items:center; padding:14px 20px; border-bottom:1px solid var(--n-border-hairline); gap:12px; flex-wrap:wrap;">
               <h3 style="margin:0; font-size:0.95rem; font-weight:700; color:var(--n-text-primary);">Posisi BMN di Neraca</h3>
               <div class="ctl-row">
-                <button type="button" class="btn-outline ctl-sm" onclick="_simanpoaLoadWorkspace(true)">Muat Ulang</button>
-                <button type="button" class="btn-primary ctl-sm" onclick="_simanpoaOpenSaktiSyncModal('NERACA')">Unggah Neraca</button>
+                <div class="ctl-search">
+                  <svg class="ctl-search-ico" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                  </svg>
+                  <input type="text" id="simanpoa-nrc-search" placeholder="Cari kode akun / uraian neraca..." oninput="_simanpoaFilterNeraca()">
+                </div>
+                <button type="button" class="btn-outline ctl-md" onclick="_simanpoaLoadWorkspace(true)">Muat Ulang</button>
+                <button type="button" class="btn-primary ctl-md" onclick="_simanpoaOpenSaktiSyncModal('NERACA')">Unggah Neraca</button>
               </div>
             </div>
             <div style="overflow-x:auto;">
@@ -2566,6 +2584,21 @@
           <div class="n-card" style="padding:0; overflow:hidden;">
             <div style="display:flex; justify-content:space-between; align-items:center; padding:14px 20px; border-bottom:1px solid var(--n-border-hairline); gap:12px; flex-wrap:wrap;">
               <h3 style="margin:0; font-size:0.95rem; font-weight:700; color:var(--n-text-primary);">Kendaraan Dinas &amp; Pajak STNK</h3>
+              <div class="ctl-row">
+                <div class="ctl-search">
+                  <svg class="ctl-search-ico" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                  </svg>
+                  <input type="text" id="simanpoa-knd-search" placeholder="Cari plat nomor, merek, UPT..." oninput="_simanpoaFilterKendaraan()">
+                </div>
+                <select id="simanpoa-knd-filter-status" class="ctl-select" onchange="_simanpoaFilterKendaraan()">
+                  <option value="ALL">Semua Status STNK</option>
+                  <option value="LEWAT_JATUH_TEMPO">Lewat Tenggat</option>
+                  <option value="SEGERA_JATUH_TEMPO">Jatuh Tempo &le; 30 Hari</option>
+                  <option value="AMAN">Aman (&gt; 30 Hari)</option>
+                </select>
+              </div>
             </div>
 
             <div style="overflow-x:auto;">
@@ -2887,8 +2920,15 @@
               <h3 style="margin:0; font-size:0.95rem; font-weight:700; color:var(--n-text-primary);">Eksekusi Dokumen SK Penghapusan / BAST</h3>
             </div>
             <div class="ctl-row">
-              <button type="button" class="btn-outline ctl-sm" onclick="_bmnLoadPenghapusanList(true)">Muat Ulang</button>
-              <button type="button" class="btn-primary ctl-sm" onclick="_simanpoaOpenDocDisposalModal()" style="background:#D97706; border-color:#D97706; color:#FFFFFF;">Unggah SK / BAST</button>
+              <div class="ctl-search">
+                <svg class="ctl-search-ico" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                <input type="text" id="simanpoa-docdisposal-search" placeholder="Cari no. berkas, SK, keterangan..." oninput="_simanpoaFilterDocDisposal()">
+              </div>
+              <button type="button" class="btn-outline ctl-md" onclick="_bmnLoadPenghapusanList(true)">Muat Ulang</button>
+              <button type="button" class="btn-primary ctl-md" onclick="_simanpoaOpenDocDisposalModal()" style="background:#D97706; border-color:#D97706; color:#FFFFFF;">Unggah SK / BAST</button>
             </div>
           </div>
           <div style="overflow-x:auto;">
