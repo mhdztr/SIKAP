@@ -1,5 +1,8 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
+const vm = require('node:vm');
 
 const { sanitizeNamaPersonel, applyFormalSheetFormatting } = require('../data/SheetAccess.js');
 const { resolvePeriodeWindow } = require('../utils/DateUtil.js');
@@ -178,5 +181,45 @@ test('SIKAP SheetFormatter — applyFormalSheetFormatting Master_Pegawai_POA hea
   assert.equal(mockSheet.calls.numberFormats['UkuranSepatu'], '@');
   assert.equal(mockSheet.calls.numberFormats['TanggalMulai'], 'yyyy-mm-dd');
   assert.equal(mockSheet.calls.numberFormats['TanggalSelesai'], 'yyyy-mm-dd');
+});
+
+test('SIKAP SeedPegawai — 528 personel bersih, kanonik, tanpa duplikat NIP/data korup, dan 69 P3K akurat', () => {
+  const ctx = {};
+  vm.runInNewContext(fs.readFileSync(path.join(__dirname, '..', 'data', 'SeedPegawaiPelatihan.js'), 'utf8'), ctx);
+  const seed = ctx.SEED_PEGAWAI_POA_AWAK;
+  assert.equal(seed.length, 528);
+
+  let ditPoaCount = 0;
+  let akpCount = 0;
+  let p3kPoaCount = 0;
+  let p3kAkpCount = 0;
+  let pnsCount = 0;
+  const seenNips = new Set();
+
+  seed.forEach((p) => {
+    assert.match(p.nama, /^[A-Z ]+$/, `Nama harus kanonik A-Z spasi untuk ${p.pegawaiId}: ${p.nama}`);
+    assert.ok(!/^\d{10,}$/.test(p.jabatanLengkap), `JabatanLengkap korup angka NIP pada ${p.pegawaiId}`);
+    if (p.nip && p.nip !== '-') {
+      assert.match(p.nip, /^\d{18}$/, `NIP harus 18 digit untuk ${p.pegawaiId}: ${p.nip}`);
+      assert.ok(!seenNips.has(p.nip), `NIP duplikat ditemukan pada SeedPegawaiPelatihan: ${p.nip} (${p.pegawaiId})`);
+      seenNips.add(p.nip);
+    }
+    if (p.lingkup === 'DIT_POA') ditPoaCount++;
+    else if (p.lingkup === 'AWAK_KAPAL_ARMADA') akpCount++;
+
+    if (p.statusKepegawaian === 'P3K') {
+      if (p.lingkup === 'DIT_POA') p3kPoaCount++;
+      else if (p.lingkup === 'AWAK_KAPAL_ARMADA') p3kAkpCount++;
+    } else if (p.statusKepegawaian === 'PNS') {
+      pnsCount++;
+    }
+  });
+
+  assert.equal(ditPoaCount, 86);
+  assert.equal(akpCount, 442);
+  assert.equal(p3kAkpCount, 46);
+  assert.equal(p3kPoaCount, 23);
+  assert.equal(p3kAkpCount + p3kPoaCount, 69);
+  assert.equal(pnsCount, 459);
 });
 
