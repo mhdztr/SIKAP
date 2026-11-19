@@ -1143,6 +1143,9 @@
     btns.forEach(function (b) {
       if (b.id === 'mod-nav-' + target) {
         b.classList.add('active');
+        if (b.scrollIntoView) {
+          try { b.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' }); } catch (e) {}
+        }
       } else {
         b.classList.remove('active');
       }
@@ -1284,6 +1287,9 @@
     }
 
     _sikapHighlightModule(viewId === 'kelola-akun' ? 'admin' : (_TU.activeTab || 'anggaran'));
+    if (viewId === 'kelola-akun' && typeof _simanpoaExitToSikapSilent === 'function') {
+      _simanpoaExitToSikapSilent();
+    }
     _syncBusy();
     _syncUpdateIndicator(APP_SYNC.deferredReload ? 'deferred' : 'synced');
     _updateTelemetryTimestampUI();
@@ -1481,10 +1487,10 @@
       }).join('');
 
       wrap.innerHTML =
-        '<table class="n-table">' +
+        '<div class="n-table-wrap"><table class="n-table">' +
         '<thead><tr><th>Nama</th><th>Unit Kerja</th><th>Jabatan</th><th>Tgl Daftar</th><th>Tindakan</th></tr></thead>' +
         '<tbody>' + rows + '</tbody>' +
-        '</table>';
+        '</table></div>';
     }
   }
 
@@ -1689,7 +1695,7 @@
       return;
     }
 
-    var t = '<table class="n-table n-table-full"><thead><tr>' +
+    var t = '<div class="n-table-wrap"><table class="n-table n-table-full"><thead><tr>' +
       '<th>Nama</th><th>Unit Kerja</th><th>Jabatan</th><th>Status</th><th>Tgl Daftar</th><th>Aksi</th>' +
       '</tr></thead><tbody>';
 
@@ -1713,7 +1719,7 @@
         '</td></tr>';
     }
 
-    t += '</tbody></table>';
+    t += '</tbody></table></div>';
     wrap.innerHTML = t;
   }
 
@@ -1937,7 +1943,7 @@
       return;
     }
 
-    var t = '<table class="n-table n-table-full"><thead><tr>' +
+    var t = '<div class="n-table-wrap"><table class="n-table n-table-full"><thead><tr>' +
       '<th>Waktu</th><th>Pelaku</th><th>Aksi</th><th>Target</th><th>Keterangan</th>' +
       '</tr></thead><tbody>';
 
@@ -1954,7 +1960,7 @@
         '</tr>';
     }
 
-    t += '</tbody></table>';
+    t += '</tbody></table></div>';
     wrap.innerHTML = t;
   }
 
@@ -7196,13 +7202,13 @@
       '<span>Alur Tahapan Pengadaan</span>' +
       '<span class="tnum" style="color:var(--n-primary);">Fisik ' + pct + '%</span>' +
       '</div>' +
-      '<div style="display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px;margin-bottom:10px;">' +
+      '<div class="hd-stage-grid">' +
       stages.map(function (s, idx) {
         var done = curIdx >= idx;
         var current = curIdx === idx;
         var bg = current ? 'var(--n-primary)' : (done ? '#DEF7EC' : 'rgba(15,23,42,.05)');
         var fg = current ? '#ffffff' : (done ? '#065F46' : 'var(--n-text-muted)');
-        return '<div style="text-align:center;padding:6px 4px;border-radius:8px;background:' + bg + ';color:' + fg + ';font-size:.6875rem;font-weight:' + (current ? '700' : '600') + ';white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + s.label + '</div>';
+        return '<div class="hd-stage-pill" style="background:' + bg + ';color:' + fg + ';font-weight:' + (current ? '700' : '600') + ';">' + s.label + '</div>';
       }).join('') +
       '</div>' +
       '<div style="width:100%;height:7px;background:rgba(15,23,42,.07);border-radius:999px;overflow:hidden;">' +
@@ -8093,7 +8099,7 @@
     var umurStr = (a.umurTahun || 0) + ' thn ' + (a.umurBulan || 0) + ' bln' + (a.isExpired ? ' (Kadaluwarsa)' : '');
     var distStr = (typeof a.jarakKeUptKm === 'number' && !isNaN(a.jarakKeUptKm) && a.jarakKeUptKm >= 0) ? (a.jarakKeUptKm + ' km dari UPT') : '—';
 
-    var valCard = '<div class="hd-extra-card" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;">' +
+    var valCard = '<div class="hd-extra-card hd-metrics-3">' +
       '<div><div style="font-size:.7rem;color:var(--n-text-muted);text-transform:uppercase;">Nilai Perolehan</div><div class="tnum" style="font-size:.95rem;font-weight:700;">' + _rupiah(a.nilaiPerolehan || 0) + '</div></div>' +
       '<div><div style="font-size:.7rem;color:var(--n-text-muted);text-transform:uppercase;">Nilai Buku Saat Ini</div><div class="tnum" style="font-size:.95rem;font-weight:700;color:var(--n-primary);">' + _rupiah(a.nilaiBuku || 0) + '</div></div>' +
       '<div><div style="font-size:.7rem;color:var(--n-text-muted);text-transform:uppercase;">Usia Aset</div><div class="tnum" style="font-size:.875rem;font-weight:600;">' + _esc(umurStr) + '</div></div>' +
@@ -11957,9 +11963,9 @@
   function _simanpoaOpen11ColDetail(idx) {
     var r = (_SIMANPOA._last11ColItems || [])[idx];
     if (!r) return;
-    var kbEsc = _esc(r.kodeBarang).replace(/'/g, "\'");
-    var kaEsc = _esc(r.kodeAkun).replace(/'/g, "\'");
-    var extraHtml = '<div class="hd-extra-card" style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;">' +
+    var kbEsc = _esc(r.kodeBarang).replace(/'/g, "\\'");
+    var kaEsc = _esc(r.kodeAkun).replace(/'/g, "\\'");
+    var extraHtml = '<div class="hd-extra-card hd-metrics-4">' +
       '<div><div style="font-size:.6875rem;color:var(--n-text-muted);text-transform:uppercase;">Saldo Awal</div><div class="tnum" style="font-weight:700;">' + _formatNumber(r.kuantitasAwal || 0) + ' ' + _esc(r.satuan || 'Unit') + '</div><div class="tnum" style="font-size:.75rem;color:var(--n-text-secondary);">' + _formatRupiah(r.nilaiAwal || 0) + '</div></div>' +
       '<div><div style="font-size:.6875rem;color:#065F46;text-transform:uppercase;">Bertambah</div><div class="tnum" style="font-weight:700;color:#065F46;">+' + _formatNumber(r.kuantitasTambah || 0) + '</div><div class="tnum" style="font-size:.75rem;color:#065F46;">' + _formatRupiah(r.nilaiTambah || 0) + '</div></div>' +
       '<div><div style="font-size:.6875rem;color:#991B1B;text-transform:uppercase;">Berkurang</div><div class="tnum" style="font-weight:700;color:#991B1B;">-' + _formatNumber(r.kuantitasKurang || 0) + '</div><div class="tnum" style="font-size:.75rem;color:#991B1B;">' + _formatRupiah(r.nilaiKurang || 0) + '</div></div>' +
@@ -12079,13 +12085,13 @@
       statusText = st.milestoneLabel || ('Sisa ' + st.diffPajak + ' hari');
       tone = 'ditimpa';
     }
-    var asetEsc = _esc(v.asetId).replace(/'/g, "\'");
+    var asetEsc = _esc(v.asetId).replace(/'/g, "\\'");
     _hdShowRich({
       title: v.namaBarang || 'Detail Kendaraan Dinas',
       subtitle: (v.noPolisi ? ('No. Polisi ' + v.noPolisi) : 'Tanpa Plat Tercatat') + ' · NUP ' + (v.nup || '—') + ' · ' + (v.lokasiId || '—'),
       badgesHtml: '<span class="status-badge ' + tone + '">' + _esc(statusText) + '</span>' +
         (v.noPolisi ? '<span class="simanpoa-nopol-badge">' + _esc(v.noPolisi) + '</span>' : ''),
-      extraHtml: '<div class="hd-extra-card" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;">' +
+      extraHtml: '<div class="hd-extra-card hd-metrics-2">' +
         '<div><div style="font-size:.7rem;color:var(--n-text-muted);text-transform:uppercase;">Jatuh Tempo Pajak Tahunan</div><div class="tnum" style="font-size:.95rem;font-weight:700;">' + _esc(v.tglPajakTahunan || '—') + '</div></div>' +
         '<div><div style="font-size:.7rem;color:var(--n-text-muted);text-transform:uppercase;">Jatuh Tempo STNK 5 Tahunan</div><div class="tnum" style="font-size:.95rem;font-weight:700;">' + _esc(v.tglStnkLimaTahunan || '—') + '</div></div>' +
         '</div>',
