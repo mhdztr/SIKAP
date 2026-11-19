@@ -1354,6 +1354,7 @@
   // Reload otomatis seluruh isi halaman saat filter global berubah (keputusan
   // user Fase 12). Header/filter input TIDAK dibangun ulang — hanya konten.
   function _reloadOnFilterChange() {
+    if (typeof _tuInvalidateFresh === 'function') _tuInvalidateFresh();
     if (APP.currentView) {
       _renderViewContent(APP.currentView);
     }
@@ -2516,6 +2517,31 @@
   }
 
   // ── CHART REALISASI ANGGARAN (TATA USAHA) ─────────────────
+  function _tuRenderTrenCharts(d) {
+    if (!d || !Array.isArray(d.months)) return;
+    var labels = d.months.map(function (m) { return _chartMonthLabel(m); });
+    var fmtCompact = _chartCompact;
+    var tooltipCb = function (v) { return 'Rp ' + _chartCompact(v); };
+    _chartLine('tu-chart-tren', labels, [
+      { label: 'SP2D (YTD)', data: d.sp2dYtd, color: _CHART_COLORS.primary },
+      { label: 'Akrual (YTD)', data: d.akrualYtd, color: _CHART_COLORS.primarySoft }
+    ], {
+      fmt: tooltipCb,
+      yFmt: fmtCompact,
+      noEndLabel: true,
+      emptyMsg: 'Belum ada realisasi pada rentang terpilih.'
+    });
+    _chartBar('tu-chart-bulanan', labels, [
+      { label: 'SP2D', data: d.sp2dBulanan, color: _CHART_COLORS.primary },
+      { label: 'Akrual', data: d.akrualBulanan, color: _CHART_COLORS.primarySoft }
+    ], {
+      fmt: tooltipCb,
+      yFmt: fmtCompact,
+      noValueLabel: true,
+      emptyMsg: 'Belum ada realisasi bulanan pada rentang terpilih.'
+    });
+  }
+
   function _tuLoadCharts() {
     ['tu-chart-tren', 'tu-chart-bulanan'].forEach(function (cid) {
       var canvas = document.querySelector('#page-content #' + cid) || document.getElementById(cid);
@@ -2547,28 +2573,8 @@
           _chartEmpty('tu-chart-bulanan', (res && res.error) || 'Belum ada data realisasi bulanan.');
           return;
         }
-        var d = res.data;
-        var labels = d.months.map(function (m) { return _chartMonthLabel(m); });
-        var fmtCompact = _chartCompact;
-        var tooltipCb = function (v) { return 'Rp ' + _chartCompact(v); };
-        _chartLine('tu-chart-tren', labels, [
-          { label: 'SP2D (YTD)', data: d.sp2dYtd, color: _CHART_COLORS.primary },
-          { label: 'Akrual (YTD)', data: d.akrualYtd, color: _CHART_COLORS.primarySoft }
-        ], {
-          fmt: tooltipCb,
-          yFmt: fmtCompact,
-          noEndLabel: true,
-          emptyMsg: 'Belum ada realisasi pada rentang terpilih.'
-        });
-        _chartBar('tu-chart-bulanan', labels, [
-          { label: 'SP2D', data: d.sp2dBulanan, color: _CHART_COLORS.primary },
-          { label: 'Akrual', data: d.akrualBulanan, color: _CHART_COLORS.primarySoft }
-        ], {
-          fmt: tooltipCb,
-          yFmt: fmtCompact,
-          noValueLabel: true,
-          emptyMsg: 'Belum ada realisasi bulanan pada rentang terpilih.'
-        });
+        _TU.trenData = res.data;
+        _tuRenderTrenCharts(res.data);
       })
       .withFailureHandler(function (err) {
         _chartEmpty('tu-chart-tren', 'Koneksi gagal memuat tren anggaran.');
@@ -4208,8 +4214,37 @@
     pendingSertifikat: null,
     sertifikatUploadFile: null,
     paketData: null,
-    pendingPaketRowId: null
+    pendingPaketRowId: null,
+    _fresh: {},
+    _freshAt: {}
   };
+
+  function _tuFilterKey() {
+    try { return JSON.stringify(APP.filter || {}); } catch (e) { return 'default'; }
+  }
+
+  function _tuIsFresh(tab, ttlMs) {
+    var ttl = ttlMs || 45000;
+    var at = (_TU._freshAt && _TU._freshAt[tab]) || 0;
+    return (_TU._fresh && _TU._fresh[tab] === _tuFilterKey()) && ((Date.now() - at) < ttl);
+  }
+
+  function _tuMarkFresh(tab) {
+    if (!_TU._fresh) _TU._fresh = {};
+    if (!_TU._freshAt) _TU._freshAt = {};
+    _TU._fresh[tab] = _tuFilterKey();
+    _TU._freshAt[tab] = Date.now();
+  }
+
+  function _tuInvalidateFresh(tab) {
+    if (!tab) {
+      _TU._fresh = {};
+      _TU._freshAt = {};
+    } else {
+      if (_TU._fresh) delete _TU._fresh[tab];
+      if (_TU._freshAt) delete _TU._freshAt[tab];
+    }
+  }
 
   // ── RENDER ────────────────────────────────────────────────
 
@@ -4251,13 +4286,16 @@
       histWrap.innerHTML = _tableSkeleton(4, 5);
     }
 
+    // Paralelkan 3 RPC anggaran sekaligus (KPI + Riwayat + Tren Grafik) alih-alih serial
+    _tuLoadHistory(!!silent || !!(_TU.history && _TU.history.length));
+    _tuLoadCharts();
+
     google.script.run
       .withSuccessHandler(function (res) {
         if (!res.success) { _tuKPIError(res.error); return; }
         _TU.kpi = res.data;
+        _tuMarkFresh('anggaran');
         _tuRenderKPI(res.data);
-        _tuLoadHistory(true);
-        _tuLoadCharts();
       })
       .withFailureHandler(function (err) {
         _tuKPIError('Gagal memuat KPI: ' + ((err && err.message) || err || 'Kesalahan koneksi.'));
@@ -5129,12 +5167,13 @@
       }
     });
 
-    // Load data for selected tab
+    // Load data for selected tab (hindari refetch berulang jika cache masih segar < 45 detik)
     if (_TU.activeTab === 'anggaran') {
       if (_TU.kpi) {
         _tuRenderKPI(_TU.kpi);
-        if (_TU.history && _TU.history.length) _tuRenderHistory(_TU.history);
-        _tuLoadKPI(true);
+        if (_TU.history && _TU.history.length && typeof _tuFilterHistory === 'function') _tuFilterHistory();
+        if (_TU.trenData) _tuRenderTrenCharts(_TU.trenData);
+        if (!_tuIsFresh('anggaran')) _tuLoadKPI(true);
       } else {
         _tuLoadKPI();
       }
@@ -5142,7 +5181,7 @@
       if (_TU.paketData) {
         _tuRenderPaketKPI(_TU.paketData);
         if (typeof _tuFilterPaket === 'function') _tuFilterPaket();
-        _tuLoadPaket(true);
+        if (!_tuIsFresh('paket')) _tuLoadPaket(true);
       } else {
         _tuLoadPaket();
       }
@@ -5150,7 +5189,7 @@
       if (_TU.pegawaiData) {
         _tuRenderPegawaiKPI(_TU.pegawaiData);
         if (typeof _tuRenderPegawaiChart === 'function') _tuRenderPegawaiChart(_TU.pegawaiData);
-        _tuLoadPegawai(true);
+        if (!_tuIsFresh('pegawai')) _tuLoadPegawai(true);
       } else {
         _tuLoadPegawai();
       }
@@ -5185,6 +5224,7 @@
           return;
         }
         _TU.pegawaiData = res.data;
+        _tuMarkFresh('pegawai');
         _tuRenderPegawaiKPI(res.data);
         _tuRenderPegawaiChart(res.data);
       })
@@ -7036,6 +7076,7 @@
           return;
         }
         _TU.paketData = res.data;
+        _tuMarkFresh('paket');
         _tuRenderPaketKPI(res.data);
         _tuFilterPaket();
       })
@@ -7758,6 +7799,17 @@
   };
 
   function _tuLoadBMN(force) {
+    if (!force && _tuIsFresh('bmn') && _BMN.summary && _BMN.listData && _SIMANPOA.workspaceData) {
+      if (_BMN.masters) _bmnPopulateMasterSelects(_BMN.masters);
+      _bmnInitMap();
+      _bmnRenderSummary(_BMN.summary);
+      _bmnRenderTable(_BMN.listData);
+      if (_SIMANPOA.workspaceData.neraca) _simanpoaRenderNeraca(_SIMANPOA.workspaceData.neraca, _SIMANPOA.workspaceData.periodeLaporan);
+      if (_SIMANPOA.workspaceData.rekapSakti) _simanpoaRender11ColTable(_SIMANPOA.workspaceData.rekapSakti);
+      if (_SIMANPOA.workspaceData.kendaraan) _simanpoaRenderKendaraan(_SIMANPOA.workspaceData.kendaraan);
+      return;
+    }
+
     if (force || !_BMN.listData) {
       var wrap = document.getElementById('bmn-table-wrap');
       if (wrap) wrap.innerHTML = _tableSkeleton(6, 7);
@@ -7768,16 +7820,18 @@
         if (el) el.innerHTML = '<span class="sk-bar sk-bar-md sk-w-50" style="display:inline-block; vertical-align:middle;"></span>';
       });
     }
-    _bmnLoadMasters(function () {
-      _bmnInitMap();
-      _bmnLoadSummary(force);
-      _simanpoaLoadWorkspace(force);
-      if (_BMN.subTab === 'penghapusan') {
-        _bmnLoadPenghapusanList(force);
-      } else {
-        _bmnLoadAsetList(force);
-      }
-    });
+
+    // Paralelkan seluruh pemuatan BMN/SIMANPOA alih-alih waterfall di dalam _bmnLoadMasters
+    _bmnInitMap();
+    _bmnLoadMasters();
+    _bmnLoadSummary(force);
+    _simanpoaLoadWorkspace(force);
+    if (_BMN.subTab === 'penghapusan') {
+      _bmnLoadPenghapusanList(force);
+    } else {
+      _bmnLoadAsetList(force);
+    }
+    _tuMarkFresh('bmn');
   }
 
   function _bmnInitMap() {
@@ -7948,21 +8002,30 @@
       selFormKat.innerHTML = htmlKat;
     }
 
-    // 3. Kapal (opsional)
+    // 3. Kapal (opsional, cache per sesi)
     var selFormKapal = document.getElementById('bmn-form-kapal');
     if (selFormKapal && (!selFormKapal.options || selFormKapal.options.length <= 1)) {
-      google.script.run
-        .withSuccessHandler(function (res) {
-          if (res && res.success && Array.isArray(res.data)) {
-            var htmlKapal = '<option value="">Bukan Inventaris Kapal</option>';
-            res.data.forEach(function (kp) {
-              htmlKapal += '<option value="' + _esc(kp.KapalID || kp.id) + '">' + _esc(kp.NamaKapal || kp.nama) + '</option>';
-            });
-            selFormKapal.innerHTML = htmlKapal;
-          }
-        })
-        .withFailureHandler(function () { })
-        .master_getKapalList(APP.token);
+      if (_BMN.kapalList) {
+        var htmlKapalC = '<option value="">Bukan Inventaris Kapal</option>';
+        _BMN.kapalList.forEach(function (kp) {
+          htmlKapalC += '<option value="' + _esc(kp.KapalID || kp.id) + '">' + _esc(kp.NamaKapal || kp.nama) + '</option>';
+        });
+        selFormKapal.innerHTML = htmlKapalC;
+      } else {
+        google.script.run
+          .withSuccessHandler(function (res) {
+            if (res && res.success && Array.isArray(res.data)) {
+              _BMN.kapalList = res.data;
+              var htmlKapal = '<option value="">Bukan Inventaris Kapal</option>';
+              res.data.forEach(function (kp) {
+                htmlKapal += '<option value="' + _esc(kp.KapalID || kp.id) + '">' + _esc(kp.NamaKapal || kp.nama) + '</option>';
+              });
+              selFormKapal.innerHTML = htmlKapal;
+            }
+          })
+          .withFailureHandler(function () { })
+          .master_getKapalList(APP.token);
+      }
     }
   }
 

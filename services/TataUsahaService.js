@@ -1639,16 +1639,19 @@ function _buildSikapSeedRowObj(peg, nowStr) {
  * Helper internal (idempoten): self-healing kolom baru, perbaikan record korup,
  * rekonsiliasi seed SKP terbaru, nama kanonik HURUF BESAR, kategori P3K, dan append personel baru.
  */
+var _EXEC_HEAL_PEG_DONE = false;
 function _healMasterPegawaiNamaAndSchemaOnce(pSheet) {
   try {
-    if (!pSheet) return;
-    if (typeof ensurePegawaiMasterColumns === 'function') {
-      ensurePegawaiMasterColumns();
-    }
+    if (!pSheet || _EXEC_HEAL_PEG_DONE) return;
+    _EXEC_HEAL_PEG_DONE = true;
 
     var props = PropertiesService.getScriptProperties();
     var healFlag = props ? props.getProperty('SIKAP_MASTER_PEGAWAI_CANON_V2_SKP') : '';
     if (healFlag === 'DONE') return;
+
+    if (typeof ensurePegawaiMasterColumns === 'function') {
+      ensurePegawaiMasterColumns();
+    }
 
     var seedList = (typeof SEED_PEGAWAI_POA_AWAK !== 'undefined' && Array.isArray(SEED_PEGAWAI_POA_AWAK))
       ? SEED_PEGAWAI_POA_AWAK : [];

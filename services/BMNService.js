@@ -1919,9 +1919,14 @@ function _bmnComputeStnkStatus(tglPajakStr, tglStnkStr, noPolisi, namaBarang) {
 /**
  * Self-healing kolom tambahan pada TX_BMN_Aset agar kompatibel dengan spreadsheet lama.
  */
+var _EXEC_BMN_COLS_CHECKED = false;
 function _ensureBmnAsetColumns(sheet) {
-  if (!sheet) return;
+  if (!sheet || _EXEC_BMN_COLS_CHECKED) return;
+  _EXEC_BMN_COLS_CHECKED = true;
   try {
+    var cache = (typeof CacheService !== 'undefined') ? CacheService.getScriptCache() : null;
+    if (cache && cache.get('sikap_bmn_cols_ok_v1') === '1') return;
+
     var lastCol = sheet.getLastColumn();
     if (lastCol < 1) return;
     var headers = sheet.getRange(1, 1, 1, lastCol).getValues()[0];
@@ -1941,6 +1946,7 @@ function _ensureBmnAsetColumns(sheet) {
         .setFontWeight('bold')
         .setBackground('#E8EAF6');
     }
+    if (cache) { try { cache.put('sikap_bmn_cols_ok_v1', '1', 21600); } catch (eC) {} }
   } catch (e) {
     Logger.log('[_ensureBmnAsetColumns] ' + e.message);
   }

@@ -10359,8 +10359,13 @@ var SEED_PEGAWAI_POA_AWAK = [
  * @returns {{success:boolean, pegawaiCount:number, standarCount:number}}
  */
 function ensurePegawaiPelatihanSeeded(force) {
+  var cache = (typeof CacheService !== 'undefined') ? CacheService.getScriptCache() : null;
+  if (!force && cache && cache.get('sikap_peg_seeded_v3') === '1') {
+    return { success: true, cached: true };
+  }
+
   var tuId = ensureTuSpreadsheet();
-  var ss = SpreadsheetApp.openById(tuId);
+  var ss = (typeof _openSsCached === 'function') ? _openSsCached(tuId) : SpreadsheetApp.openById(tuId);
 
   var pSheet = ss.getSheetByName(SHEET_TU.PEGAWAI_MASTER) || _autoCreateTuSheet(ss, SHEET_TU.PEGAWAI_MASTER);
   var sSheet = ss.getSheetByName(SHEET_TU.STANDAR_PELATIHAN) || _autoCreateTuSheet(ss, SHEET_TU.STANDAR_PELATIHAN);
@@ -10371,6 +10376,7 @@ function ensurePegawaiPelatihanSeeded(force) {
 
   var seededPegawai = 0;
   var seededStandar = 0;
+  var mutated = !!force;
 
   // 1. Seed Master Standar Pelatihan (termasuk Juru Masak)
   if (sLast <= 1 || force) {
@@ -10398,6 +10404,7 @@ function ensurePegawaiPelatihanSeeded(force) {
     if (sRows.length > 0) {
       sSheet.getRange(2, 1, sRows.length, sRows[0].length).setValues(sRows);
       seededStandar = sRows.length;
+      mutated = true;
     }
   } else {
     // Self-heal kurikulum Juru Masak pada database yang sudah ter-seed sebelumnya
@@ -10419,6 +10426,7 @@ function ensurePegawaiPelatihanSeeded(force) {
       }
       if (missingJmk.length > 0) {
         sSheet.getRange(sLast + 1, 1, missingJmk.length, 7).setValues(missingJmk);
+        mutated = true;
       }
     } catch (eJmk) {}
   }
@@ -10478,13 +10486,17 @@ function ensurePegawaiPelatihanSeeded(force) {
     if (pRows.length > 0) {
       pSheet.getRange(2, 1, pRows.length, pRows[0].length).setValues(pRows);
       seededPegawai = pRows.length;
+      mutated = true;
     }
   }
 
-  if (typeof applyFormalSheetFormatting === 'function') {
+  if (mutated && typeof applyFormalSheetFormatting === 'function') {
     applyFormalSheetFormatting(sSheet, SHEET_TU.STANDAR_PELATIHAN);
     applyFormalSheetFormatting(pSheet, SHEET_TU.PEGAWAI_MASTER);
     applyFormalSheetFormatting(tSheet, SHEET_TU.PELATIHAN_PEGAWAI);
+  }
+  if (cache && (pLast > 1 || seededPegawai > 0)) {
+    try { cache.put('sikap_peg_seeded_v3', '1', 21600); } catch (eC3) {}
   }
 
   return {

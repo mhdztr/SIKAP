@@ -77,19 +77,30 @@ function hashPassword(plaintext) {
 // SHEET OPENERS
 // ===========================================================================
 
+var _EXEC_SS_CACHE = {};
+var _EXEC_TU_ID = null;
+
+function _openSsCached(ssId) {
+  if (!ssId) return null;
+  if (_EXEC_SS_CACHE[ssId]) return _EXEC_SS_CACHE[ssId];
+  var ss = SpreadsheetApp.openById(ssId);
+  if (ss) _EXEC_SS_CACHE[ssId] = ss;
+  return ss;
+}
+
 function openMasterSheet(sheetName) {
   var ids = getSpreadsheetIds();
   var ss = null;
   if (ids.masterId) {
     try {
-      ss = SpreadsheetApp.openById(ids.masterId);
+      ss = _openSsCached(ids.masterId);
     } catch (e) {
       Logger.log('[openMasterSheet] masterId ' + ids.masterId + ' tidak dapat dibuka: ' + e.message);
     }
   }
   if (!ss) {
     var tuId = ensureTuSpreadsheet();
-    ss = SpreadsheetApp.openById(tuId);
+    ss = _openSsCached(tuId);
   }
   var sheet = ss.getSheetByName(sheetName);
   if (!sheet) {
@@ -106,14 +117,14 @@ function openTransaksiSheet(sheetName) {
   var ss = null;
   if (ids.transaksiId) {
     try {
-      ss = SpreadsheetApp.openById(ids.transaksiId);
+      ss = _openSsCached(ids.transaksiId);
     } catch (e) {
       Logger.log('[openTransaksiSheet] transaksiId ' + ids.transaksiId + ' err: ' + e.message);
     }
   }
   if (!ss) {
     var tuId = ensureTuSpreadsheet();
-    ss = SpreadsheetApp.openById(tuId);
+    ss = _openSsCached(tuId);
   }
   return ss.getSheetByName(sheetName) || _autoCreateTuSheet(ss, sheetName);
 }
@@ -123,14 +134,14 @@ function openLogSheet(sheetName) {
   var ss = null;
   if (ids.logId) {
     try {
-      ss = SpreadsheetApp.openById(ids.logId);
+      ss = _openSsCached(ids.logId);
     } catch (e) {
       Logger.log('[openLogSheet] logId ' + ids.logId + ' err: ' + e.message);
     }
   }
   if (!ss) {
     var tuId = ensureTuSpreadsheet();
-    ss = SpreadsheetApp.openById(tuId);
+    ss = _openSsCached(tuId);
   }
   var sheet = ss.getSheetByName(sheetName);
   if (!sheet) {
@@ -147,20 +158,8 @@ function openLogSheet(sheetName) {
  * @returns {GoogleAppsScript.Spreadsheet.Sheet}
  */
 function openTuSheet(sheetName) {
-  var props = PropertiesService.getScriptProperties();
-  var tuId  = props.getProperty(PROP_KEY.TU_SS_ID);
-  var ss = null;
-  if (tuId) {
-    try {
-      ss = SpreadsheetApp.openById(tuId);
-    } catch (e) {
-      Logger.log('[openTuSheet] ID lama tidak valid: ' + e.message);
-    }
-  }
-  if (!ss) {
-    tuId = ensureTuSpreadsheet();
-    ss = SpreadsheetApp.openById(tuId);
-  }
+  var tuId = ensureTuSpreadsheet();
+  var ss = _openSsCached(tuId);
   var sheet = ss.getSheetByName(sheetName);
   if (!sheet) {
     sheet = _autoCreateTuSheet(ss, sheetName);
@@ -174,11 +173,13 @@ function openTuSheet(sheetName) {
  * @returns {string} ID spreadsheet SIKAP_TU
  */
 function ensureTuSpreadsheet() {
+  if (_EXEC_TU_ID && _EXEC_SS_CACHE[_EXEC_TU_ID]) return _EXEC_TU_ID;
   var props = PropertiesService.getScriptProperties();
   var tuId  = props.getProperty(PROP_KEY.TU_SS_ID);
   if (tuId) {
     try {
-      SpreadsheetApp.openById(tuId);
+      _openSsCached(tuId);
+      _EXEC_TU_ID = tuId;
       return tuId;
     } catch (e) {
       Logger.log('[ensureTuSpreadsheet] ID lama tidak valid/tidak ditemukan, membuat baru...');
@@ -188,6 +189,8 @@ function ensureTuSpreadsheet() {
   // Buat spreadsheet SIKAP_TU baru
   var ss = SpreadsheetApp.create(SS_NAME.TU);
   tuId = ss.getId();
+  _EXEC_SS_CACHE[tuId] = ss;
+  _EXEC_TU_ID = tuId;
   props.setProperty(PROP_KEY.TU_SS_ID, tuId);
   Logger.log('[ensureTuSpreadsheet] SIKAP_TU berhasil dibuat dengan ID: ' + tuId);
 
@@ -440,9 +443,13 @@ function _seedBmnKategori(ss) {
  * Memastikan akun Superadmin, Kadiv TU, dan Staf TU selalu tersedia.
  * Idempoten: jika belum ada akun berstatus APPROVED, akun default akan dibuat.
  */
+var _SA_CHECKED_EXEC = false;
 function _ensureSuperadminSeeded(usersSheet) {
   try {
-    if (!usersSheet) return;
+    if (!usersSheet || _SA_CHECKED_EXEC) return;
+    _SA_CHECKED_EXEC = true;
+    var cache = (typeof CacheService !== 'undefined') ? CacheService.getScriptCache() : null;
+    if (cache && cache.get('sikap_sa_ok_v1') === '1') return;
 
     var lastRow = usersSheet.getLastRow();
     var expectedHeaders = [
@@ -534,6 +541,7 @@ function _ensureSuperadminSeeded(usersSheet) {
       });
       Logger.log('[_ensureSuperadminSeeded] Akun-akun default berhasil di-seed.');
     }
+    if (cache) { try { cache.put('sikap_sa_ok_v1', '1', 3600); } catch (eC) {} }
   } catch (err) {
     Logger.log('[_ensureSuperadminSeeded] Error: ' + err.message);
   }
@@ -562,7 +570,14 @@ function ensureTuColumn(sheetName, colName) {
 /**
  * Pastikan seluruh kolom master pegawai ada di Master_Pegawai_POA (Self-Healing).
  */
-function ensurePegawaiMasterColumns() {
+var _PEG_COLS_CHECKED_EXEC = false;
+function ensurePegawaiMasterColumns(force) {
+  if (!force && _PEG_COLS_CHECKED_EXEC) return;
+  _PEG_COLS_CHECKED_EXEC = true;
+
+  var cache = (typeof CacheService !== 'undefined') ? CacheService.getScriptCache() : null;
+  if (!force && cache && cache.get('sikap_peg_cols_v2') === '1') return;
+
   var requiredCols = [
     'PegawaiID', 'NIP', 'Nama', 'UnitKerja', 'LingkupData', 'KelompokJabatan',
     'JabatanLengkap', 'TingkatKelas', 'KategoriRumpun', 'StatusKepegawaian', 'StatusAktif',
@@ -572,45 +587,58 @@ function ensurePegawaiMasterColumns() {
     'SumberSinkronisasi', 'StatusKelengkapanTU', 'CatatanDisparitas',
     'UpdatedAt', 'UpdatedBy'
   ];
-  for (var i = 0; i < requiredCols.length; i++) {
-    ensureTuColumn(SHEET_TU.PEGAWAI_MASTER, requiredCols[i]);
-  }
 
-  // Self-healing pergeseran kolom baris lama (jika status kepegawaian bergeser ke kolom StatusAktif)
+  // Self-healing skema dalam satu pembacaan header & batch write
   try {
     var sheet = openTuSheet(SHEET_TU.PEGAWAI_MASTER);
     if (!sheet) return;
     var lastRow = sheet.getLastRow();
     var lastCol = sheet.getLastColumn();
-    if (lastRow < 2 || lastCol < 1) return;
+    if (lastCol < 1) return;
 
-    var headers = sheet.getRange(1, 1, 1, lastCol).getValues()[0];
-    var colStatusAktif = headers.indexOf('StatusAktif') + 1;
-    var colStatusPeg   = headers.indexOf('StatusKepegawaian') + 1;
+    var headers = sheet.getRange(1, 1, 1, lastCol).getValues()[0] || [];
+    var missing = [];
+    for (var i = 0; i < requiredCols.length; i++) {
+      if (headers.indexOf(requiredCols[i]) === -1) missing.push(requiredCols[i]);
+    }
+    var schemaMutated = false;
+    if (missing.length > 0) {
+      sheet.getRange(1, lastCol + 1, 1, missing.length).setValues([missing]);
+      headers = headers.concat(missing);
+      lastCol = headers.length;
+      schemaMutated = true;
+    }
 
-    if (colStatusAktif > 0 && colStatusPeg > 0) {
-      var range = sheet.getRange(2, 1, lastRow - 1, lastCol);
-      var values = range.getValues();
-      var changed = false;
+    if (lastRow >= 2) {
+      var colStatusAktif = headers.indexOf('StatusAktif') + 1;
+      var colStatusPeg   = headers.indexOf('StatusKepegawaian') + 1;
+      if (colStatusAktif > 0 && colStatusPeg > 0) {
+        var range = sheet.getRange(2, 1, lastRow - 1, lastCol);
+        var values = range.getValues();
+        var changed = false;
 
-      for (var r = 0; r < values.length; r++) {
-        var row = values[r];
-        var saVal = String(row[colStatusAktif - 1] || '').trim().toUpperCase();
-        var spVal = String(row[colStatusPeg - 1] || '').trim().toUpperCase();
+        for (var r = 0; r < values.length; r++) {
+          var row = values[r];
+          var saVal = String(row[colStatusAktif - 1] || '').trim().toUpperCase();
+          if (saVal === 'MAGANG' || saVal === 'PJLP' || saVal === 'P3K' || saVal === 'P3K_PARUH_WAKTU') {
+            row[colStatusPeg - 1] = saVal;
+            row[colStatusAktif - 1] = 'AKTIF';
+            changed = true;
+          }
+        }
 
-        if (saVal === 'MAGANG' || saVal === 'PJLP' || saVal === 'P3K' || saVal === 'P3K_PARUH_WAKTU') {
-          row[colStatusPeg - 1] = saVal;
-          row[colStatusAktif - 1] = 'AKTIF';
-          changed = true;
+        if (changed) {
+          range.setValues(values);
+          schemaMutated = true;
+          Logger.log('[ensurePegawaiMasterColumns] Berhasil memperbaiki pergeseran kolom status pada Master_Pegawai_POA.');
         }
       }
+    }
 
-      if (changed) {
-        range.setValues(values);
-        Logger.log('[ensurePegawaiMasterColumns] Berhasil memperbaiki pergeseran kolom status pada Master_Pegawai_POA.');
-      }
+    if (schemaMutated) {
       applyFormalSheetFormatting(sheet, SHEET_TU.PEGAWAI_MASTER);
     }
+    if (cache) { try { cache.put('sikap_peg_cols_v2', '1', 21600); } catch (eC2) {} }
   } catch (errRepair) {
     Logger.log('[ensurePegawaiMasterColumns] Notice repair: ' + errRepair.message);
   }
