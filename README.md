@@ -1,8 +1,26 @@
 # SIKAP — Sistem Informasi Keuangan, Anggaran, dan Kepegawaian
+
+![Runtime: Google Apps Script](https://img.shields.io/badge/runtime-Google%20Apps%20Script-4285F4?logo=google&logoColor=white)
+![Status: internal use](https://img.shields.io/badge/status-internal%20use-orange)
+![Language: JavaScript](https://img.shields.io/badge/language-JavaScript-f7e03a?logo=javascript&logoColor=black)
+
 > **Aplikasi Satelit Mandiri Subbag Tata Usaha**  
 > *Direktorat Pemantauan dan Operasi Armada (Dit. POA)*  
 > *Direktorat Jenderal Pengawasan Sumber Daya Kelautan dan Perikanan (Ditjen PSDKP)*  
 > *Kementerian Kelautan dan Perikanan Republik Indonesia (KKP RI)*
+
+> **Status:** aplikasi internal KKP RI. Tidak ada lisensi open-source yang diberikan. Lihat [Penggunaan & Lisensi](#8-penggunaan--lisensi).
+
+## Daftar Isi
+
+- [1. Ikhtisar Sistem](#1-ikhtisar-sistem)
+- [2. 5 Sub-Modul Mandiri (Prinsip Anti-Gabruk)](#2-5-sub-modul-mandiri-prinsip-anti-gabruk)
+- [3. Desain Antarmuka & Skala Geometri 3-Tier](#3-desain-antarmuka--skala-geometri-3-tier)
+- [4. Struktur Direktori Repositori](#4-struktur-direktori-repositori)
+- [5. Panduan Instalasi & Deployment](#5-panduan-instalasi--deployment)
+- [6. Referensi Dokumen Wajib Proyek](#6-referensi-dokumen-wajib-proyek)
+- [7. Repositori Terkait](#7-repositori-terkait)
+- [8. Penggunaan & Lisensi](#8-penggunaan--lisensi)
 
 ---
 
@@ -80,7 +98,7 @@ SIKAP/
 ├── appsscript.json             # Manifest Apps Script (V8 runtime, scopes)
 ├── .clasp.json                 # Konfigurasi deploy Google Clasp
 ├── .claspignore                # Filter berkas agar dokumentasi/test tidak masuk GAS
-├── lint_ui.js                  # Engine linter audit kepatuhan desain & arsitektur
+├── lint_ui.js                  # Helper linter LOKAL (di-gitignore, tidak ada di clone baru)
 ├── services/                   # Service Layer (Business Logic Backend)
 │   ├── AuthService.js          # Autentikasi sesi, hashing SHA-256, verifikasi RBAC
 │   ├── TataUsahaService.js     # Realisasi Anggaran, Paket Pengadaan, Kepegawaian
@@ -101,14 +119,15 @@ SIKAP/
 │   └── views/                  # Partial Templates (di-include server-side)
 │       ├── TataUsaha.html      # Template 5 sub-modul mandiri TU & modal dialog
 │       └── Admin.html          # Panel antrean persetujuan & pengguna
-└── docs/
-    ├── PRD.md                  # Product Requirements Document (Sumber kebenaran tertinggi)
-    ├── ARCHITECTURE.md         # Arsitektur teknis, LockService, Haversine, state machine
-    ├── DATA_SCHEMA.md          # Skema basis data relasional & kamus kolom lengkap
-    ├── DESIGN.md               # Standar desain antarmuka, token visual, 3-tier scale
-    ├── PHASES.md               # Roadmap pengembangan & matriks verifikasi QA
-    ├── AGENTS.md               # Panduan kerja & batasan keras AI coding agent
-    └── CHANGELOG.md            # Catatan riwayat pembaruan sistem per versi
+├── PRD.md                      # Product Requirements Document (Sumber kebenaran tertinggi)
+├── ARCHITECTURE.md             # Arsitektur teknis, LockService, state machine, geotagging
+├── DATA_SCHEMA.md              # Skema basis data relasional & kamus kolom lengkap
+├── DESIGN.md                   # Standar desain antarmuka, token visual, 3-tier scale
+├── PHASES.md                   # Roadmap pengembangan & matriks verifikasi QA
+├── AGENTS.md                   # Panduan kerja & batasan keras AI coding agent
+├── CHANGELOG.md                # Catatan riwayat pembaruan sistem per versi
+├── tests/                      # Unit test & verifikasi Playwright
+└── skills/, .agent/            # Skill desain & rekayasa untuk coding agent
 ```
 
 ---
@@ -131,16 +150,22 @@ Sebelum menjalankan aplikasi, pastikan Script Properties berikut telah dikonfigu
 
 *(Catatan: Jika `TU_SS_ID` belum diisi saat pertama kali dijalankan, sistem secara mandiri akan membuat spreadsheet `RadarPOA_SIKAP_DB` baru via self-healing engine).*
 
-### 5.3 Menjalankan Audit Linter Desain Mandiri
-Sebelum melakukan deploy, jalankan linter antarmuka untuk memastikan kode mematuhi seluruh aturan [AGENTS.md](file:///home/pinefeast/Projects/SIKAP/AGENTS.md) dan [DESIGN.md](file:///home/pinefeast/Projects/SIKAP/DESIGN.md):
+### 5.3 Verifikasi Sebelum Deploy
+
+Perintah berikut tersedia dari clone repositori mana pun:
+
 ```bash
-node lint_ui.js
+# Verifikasi sintaks seluruh JavaScript proyek
+node -c Code.js services/*.js utils/*.js data/*.js
+
+# Unit test modul murni
+node --test tests/*.test.js
+
+# Verifikasi antarmuka via Playwright
+node tests/verify_playwright.js
 ```
-Output sukses:
-```text
-LINT UI AUDIT FINISHED: 10 checks passed, 0 error(s), 0 warning(s).
-CONGRATULATIONS: Seluruh audit konsistensi UI, 3-tier kontrol, dan arsitektur SIKAP lolos 100% tanpa pelanggaran!
-```
+
+> **Catatan:** `lint_ui.js` adalah helper linter desain yang sengaja **di-gitignore** agar tidak ter-push ke Apps Script (duplikat fungsi di editor GAS menyebabkan error). Script ini hanya tersedia di lingkungan kerja lokal. Bila tersedia, jalankan `node lint_ui.js`; output suksesnya: `LINT UI AUDIT FINISHED: 10 checks passed, 0 error(s), 0 warning(s).` Aturan yang diaudit berada di [AGENTS.md](AGENTS.md) dan [DESIGN.md](DESIGN.md).
 
 ### 5.4 Push Kode ke Google Apps Script via Clasp
 ```bash
@@ -155,10 +180,21 @@ clasp push
 
 ## 6. Referensi Dokumen Wajib Proyek
 
-1. [PRD.md](file:///home/pinefeast/Projects/SIKAP/PRD.md) — Kebutuhan fungsional dan aturan bisnis (Sumber kebenaran tertinggi).
-2. [ARCHITECTURE.md](file:///home/pinefeast/Projects/SIKAP/ARCHITECTURE.md) — Arsitektur teknis, LockService, state machine, dan algoritma geotagging.
-3. [DATA_SCHEMA.md](file:///home/pinefeast/Projects/SIKAP/DATA_SCHEMA.md) — Skema kolom tabel transaksi dan master.
-4. [DESIGN.md](file:///home/pinefeast/Projects/SIKAP/DESIGN.md) — Standar antarmuka 3-tier controls scale dan Apple HIG.
-5. [PHASES.md](file:///home/pinefeast/Projects/SIKAP/PHASES.md) — Roadmap dan rencana pengembangan bertahap.
-6. [AGENTS.md](file:///home/pinefeast/Projects/SIKAP/AGENTS.md) — Instruksi dan batasan kerja bagi coding agent.
-7. [CHANGELOG.md](file:///home/pinefeast/Projects/SIKAP/CHANGELOG.md) — Riwayat pembaruan berkala sistem.
+1. [PRD.md](PRD.md) — Kebutuhan fungsional dan aturan bisnis (Sumber kebenaran tertinggi).
+2. [ARCHITECTURE.md](ARCHITECTURE.md) — Arsitektur teknis, LockService, state machine, dan algoritma geotagging.
+3. [DATA_SCHEMA.md](DATA_SCHEMA.md) — Skema kolom tabel transaksi dan master.
+4. [DESIGN.md](DESIGN.md) — Standar antarmuka 3-tier controls scale dan Apple HIG.
+5. [PHASES.md](PHASES.md) — Roadmap dan rencana pengembangan bertahap.
+6. [AGENTS.md](AGENTS.md) — Instruksi dan batasan kerja bagi coding agent.
+7. [CHANGELOG.md](CHANGELOG.md) — Riwayat pembaruan berkala sistem.
+
+---
+
+## 7. Repositori Terkait
+
+- [Radar POA](https://github.com/mhdztr/Radar-POA) — pusat agregasi eksekutif yang membaca data SIKAP.
+- [Nakhoda](https://github.com/mhdztr/Nakhoda) — pengawakan awak kapal; perubahan profil mendorong status `DISPARITAS_NAKHODA` ke SIKAP untuk diverifikasi Subbag TU.
+
+## 8. Penggunaan & Lisensi
+
+Aplikasi internal Kementerian Kelautan dan Perikanan Republik Indonesia (Ditjen PSDKP / Direktorat POA). **Tidak ada lisensi open-source yang diberikan** atas kode, dokumentasi, atau aset dalam repositori ini. Penggunaan, reproduksi, dan distribusi hanya dengan izin pemilik sistem.
